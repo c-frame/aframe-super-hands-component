@@ -1,0 +1,53 @@
+{
+  "name": "super-hands",
+  "version": "0.1.0.9000",
+  "description": "All-in-one natural hand controller interaction component for A-Frame.",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify examples/main.js -o examples/build.js",
+    "dev": "budo examples/main.js:build.js --dir examples --port 8000 --live --open",
+    "dist": "webpack index.js dist/super-hands.js && webpack -p index.js dist/super-hands.min.js",
+    "lint": "semistandard -v | snazzy",
+    "prepublish": "npm run dist",
+    "preghpages": "npm run build && shx rm -rf gh-pages && shx mkdir gh-pages && shx cp -r examples/* gh-pages",
+    "ghpages": "npm run preghpages && ghpages -p gh-pages",
+    "start": "npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wmurphyrd/aframe-super-hands-component.git"
+  },
+  "keywords": [
+    "aframe",
+    "aframe-component",
+    "aframe-vr",
+    "vr",
+    "mozvr",
+    "webvr",
+    "super-hands"
+  ],
+  "author": "William Murphy william@datatitian.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wmurphyrd/aframe-super-hands-component/issues"
+  },
+  "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
+  "devDependencies": {
+    "aframe": "^0.3.2",
+    "browserify": "^13.0.0",
+    "budo": "^8.2.2",
+    "ghpages": "^0.0.8",
+    "randomcolor": "^0.4.4",
+    "semistandard": "^8.0.0",
+    "shelljs": "^0.7.0",
+    "shx": "^0.1.1",
+    "snazzy": "^4.0.0",
+    "webpack": "^1.13.0"
+  },
+  "semistandard": {
+    "ignore": [
+      "examples/build.js",
+      "dist/**"
+    ]
+  }
+}
