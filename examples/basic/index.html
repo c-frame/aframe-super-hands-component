@@ -1,12 +1,28 @@
 <html>
   <head>
-    <title>A-Frame Super Hands Component - Basic</title>
+    <title>A-Frame Super Hands Component - Without Physics</title>
     <script src="../build.js"></script>
   </head>
   <body>
     <a-scene>
-      <a-assets></a-assets>
-      <a-entity super-hands=""></a-entity>
+      <a-assets>
+        <a-mixin id="controller" super-hands 
+                 sphere-collider="objects: .cube"></a-mixin>
+        <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 event-set="_event: dragdropped; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
+        <a-mixin id="cube-collided" material="opacity: 0.7; transparent: true">
+        </a-mixin>
+        <a-mixin id="cube-hovered" material="wireframe: true;"></a-mixin>
+      </a-assets>
+      <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
+      <a-grid></a-grid>
     </a-scene>
 
     <!-- GitHub Corner. -->
