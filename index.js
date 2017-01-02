@@ -186,7 +186,6 @@ AFRAME.registerComponent('super-hands', {
     }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
-    //hoverEls.forEach(x => x.removeState(this.DRAGDROP_HOVERED_STATE)); unnecessary? only 1st target should ever be hovered
     this.carried = null;
     this.grabbing = false;
     this.stretching = false;
