@@ -182,9 +182,7 @@ AFRAME.registerComponent('super-hands', {
         dropTarget.removeState(this.DRAGDROP_HOVERED_STATE);
       }
       carried.removeState(this.GRABBED_STATE);
-      if(carried.is(this.STRETCHED_STATE)) { // TODO: remove .is checks before .removeState
-        carried.removeState(this.STRETCHED_STATE);
-      }
+      carried.removeState(this.STRETCHED_STATE);
     }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
@@ -244,9 +242,7 @@ AFRAME.registerComponent('super-hands', {
           is bubbled up from a child that is also a drop target? */
       hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unHover);
-      if (evt.target.is(this.DRAGDROP_HOVERED_STATE)) { // TODO: remove .is checks before .removeState
-          evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
-      }
+      evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
       if (hoverIndex > -1) { this.hoverEls.splice(hoverIndex, 1); } 
       // activate backup target if present
       this.hover();
