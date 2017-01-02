@@ -1,6 +1,6 @@
 {
   "name": "super-hands",
-  "version": "0.1.0.9000",
+  "version": "0.1.0",
   "description": "All-in-one natural hand controller interaction component for A-Frame.",
   "main": "index.js",
   "scripts": {
