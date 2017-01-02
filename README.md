@@ -12,6 +12,10 @@ Add the `super-hands` component to your tracked controller entities to enable th
 * Stretch: Resize entities by grabbing with two hands
 * Drag-drop: Notify entities when other entities are placed on them
 
+#### Examples
+
+[Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
+
 #### Dependencies
 
 A collider component must also be added to the controller entities, such as [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14).
