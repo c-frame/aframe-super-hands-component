@@ -16,12 +16,6 @@ Add the `super-hands` component to your tracked controller entities to enable th
 
 [Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
 
-#### Dependencies
-
-A collider component must also be added to the controller entities, such as [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14).
-
-Super Hands works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system) to manage grabbed entity movement, but it will fallback to manual `position` updates (without rotational translation) if physics is not available. 
-
 ### News
 
 * Super Hands basic functionality is now available: grab, stretch, and drag-drop
@@ -30,10 +24,19 @@ Super Hands works best with [aframe-physics-system](https://github.com/donmccurd
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| dropTargetClasses |  Array of HTML classes for which collidable entities accept drag-drop interactions |            [] (any entities accessible to the collider)   |
-| colliderState | Name of state added to entities your chosen collider | 'collided' (default for `sphere-collider` and `physics-collider`) |
-| colliderEvent | Event that your chosen collider emits when identifying a new collision | 'hit' (default for `sphere-collider` and `physics-collider`) |
+| dropTargetClasses |  Array of HTML classes for which collidable entities accept drag-drop interactions |            `[]` (any entities accessible to the collider)   |
+| colliderState | Name of state added to entities your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
+| colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
 | usePhysics | If available, use physics system to move grabbed components | true |
+
+#### Dependencies
+
+The `super-hands` component should be added to same entities as your controller
+component. A collider component must also be added to the controller entities, 
+such as [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
+or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14).
+
+Super Hands works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system) to manage grabbed entity movement, but it will fallback to manual `position` updates (without rotational translation) if physics is not available or is disabled with `usePhysics = false`. 
 
 ### Installation
 
