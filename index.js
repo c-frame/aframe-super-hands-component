@@ -28,8 +28,8 @@ AFRAME.registerComponent('super-hands', {
     // constants
     this.GRABBED_STATE = 'grabbed';
     this.STRETCHED_STATE = 'stretched';
-    this.DROP_EVENT = 'dropped';
-    this.DROP_HOVERED_STATE = 'hovered';
+    this.DRAGDROP_EVENT = 'dragdropped';
+    this.DRAGDROP_HOVERED_STATE = 'hovered';
     
     // links to other systems/components
     this.otherController = null;
@@ -82,10 +82,10 @@ AFRAME.registerComponent('super-hands', {
       scale, hitElGeom, position, delta;
     if (!hitEl) { return; }
     if(this.stretching) {
-      scale = new CANNON.Vec3().copy(hitEl.getAttribute('scale'));; // TODO convert to THREE.Vector3
+      scale = new THREE.Vector3().copy(hitEl.getAttribute('scale')); 
       hitElGeom = hitEl.getAttribute('geometry');
       delta = this.getStretchDelta();
-      scale.scale(this.deltaStretch, scale);
+      scale = scale.multiplyScalar(delta);
       hitEl.setAttribute('scale', scale);
       // force scale update for physics body
       if (hitEl.body) {
@@ -106,11 +106,12 @@ AFRAME.registerComponent('super-hands', {
       }
     } else if(!this.constraint) {
       // carried element needs manual update
-      delta = this.updatePositionDelta();
+      delta = this.getPositionDelta();
+      position = hitEl.getAttribute('position');
       hitEl.setAttribute('position', {
-        x: position.x + this.deltaPosition.x,
-        y: position.y + this.deltaPosition.y,
-        z: position.z + this.deltaPosition.z
+        x: position.x + delta.x,
+        y: position.y + delta.y,
+        z: position.z + delta.z
       });
     } 
   },
@@ -174,11 +175,11 @@ AFRAME.registerComponent('super-hands', {
     if(carried) {
       if(hoverEls.length !== 0) { // drag-drop occurs
         dropTarget = hoverEls[0]; 
-        dropTarget.emit(this.data.dropEvent, 
+        dropTarget.emit(this.DRAGDROP_EVENT, 
                    { drop: 'receive', dropped: carried, on: dropTarget });
-        carried.emit(this.data.dropEvent, 
+        carried.emit(this.DRAGDROP_EVENT, 
                      { drop: 'give', dropped: carried, on: dropTarget });
-        dropTarget.removeState(this.DROP_HOVERED_STATE);
+        dropTarget.removeState(this.DRAGDROP_HOVERED_STATE);
       }
       carried.removeState(this.GRABBED_STATE);
       if(carried.is(this.STRETCHED_STATE)) { // TODO: remove .is checks before .removeState
@@ -187,7 +188,7 @@ AFRAME.registerComponent('super-hands', {
     }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
-    //hoverEls.forEach(x => x.removeState(this.DROP_HOVERED_STATE)); unnecessary? only 1st target should ever be hovered
+    //hoverEls.forEach(x => x.removeState(this.DRAGDROP_HOVERED_STATE)); unnecessary? only 1st target should ever be hovered
     this.carried = null;
     this.grabbing = false;
     this.stretching = false;
@@ -199,7 +200,7 @@ AFRAME.registerComponent('super-hands', {
   onHit: function(evt) {
     var hitEl = evt.detail.el;
     // return if no valid interaction state
-    if(!hitEl || !this.grabbing || hitEl === this.carrried) { return; } 
+    if(!hitEl || !this.grabbing || hitEl === this.carried) { return; } 
     if (!this.carried) { // empty hand
       this.carried = hitEl;
       if (hitEl.is(this.GRABBED_STATE)) { // second hand grab (AKA stretch)
@@ -231,20 +232,20 @@ AFRAME.registerComponent('super-hands', {
   hover: function() {
     if(this.hoverEls.length) {
       // only add to first element in case of multiple overlapping targets
-      this.hoverEls[0].addState(this.DROP_HOVERED_STATE);
+      this.hoverEls[0].addState(this.DRAGDROP_HOVERED_STATE);
     }
   },
   /* tied to 'stateremoved' event for current hovered drop target */
   unHover: function (evt) {
     var hoverIndex;
     if (evt.detail.state == this.data.colliderState || 
-        evt.detail.state == this.DROP_HOVERED_STATE) {
+        evt.detail.state == this.DRAGDROP_HOVERED_STATE) {
       /* TODO?: need to check if (currentTarget === target) in case this
           is bubbled up from a child that is also a drop target? */
       hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unHover);
-      if (evt.target.is(this.DROP_HOVERED_STATE)) { // TODO: remove .is checks before .removeState
-          evt.target.removeState(this.DROP_HOVERED_STATE);
+      if (evt.target.is(this.DRAGDROP_HOVERED_STATE)) { // TODO: remove .is checks before .removeState
+          evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
       }
       if (hoverIndex > -1) { this.hoverEls.splice(hoverIndex, 1); } 
       // activate backup target if present
@@ -258,7 +259,7 @@ AFRAME.registerComponent('super-hands', {
       currentPosition = new THREE.Vector3()
         .copy(this.el.getAttribute('position')),
       currentStretch = currentPosition.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / this.previousStretch,
+      deltaStretch = currentStretch / (this.previousStretch || NaN); 
     this.previousStretch = currentStretch;
     return deltaStretch || 1;
   },
