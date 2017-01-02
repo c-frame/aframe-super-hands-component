@@ -202,7 +202,6 @@ AFRAME.registerComponent('super-hands', {
     if (!this.carried) { // empty hand
       this.carried = hitEl;
       if (hitEl.is(this.GRABBED_STATE)) { // second hand grab (AKA stretch)
-        // TODO: Do we need explicit check that this is grabbed by this.otherController?
         hitEl.addState(this.STRETCHED_STATE);
         this.stretching = true;
       } else { // basic grab
@@ -211,10 +210,7 @@ AFRAME.registerComponent('super-hands', {
           this.constraint = new window.CANNON
             .LockConstraint(this.el.body, hitEl.body);
           this.physics.world.addConstraint(this.constraint);
-        } else { // use manual updating
-          // TODO: initiate manual hitEl movement
-          // actually this may be implied
-        }
+        } 
       }
     } else if ((!this.data.dropTargetClasses.length || 
                 this.data.dropTargetClasses
