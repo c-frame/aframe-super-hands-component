@@ -29,6 +29,7 @@ Super Hands works best with [aframe-physics-system](https://github.com/donmccurd
 | dropTargetClasses |  Array of HTML classes for which collidable entities accept drag-drop interactions |            [] (any entities accessible to the collider)   |
 | colliderState | Name of state added to entities your chosen collider | 'collided' (default for `sphere-collider` and `physics-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | 'hit' (default for `sphere-collider` and `physics-collider`) |
+| usePhysics | If available, use physics system to move grabbed components | true |
 
 ### Installation
 
