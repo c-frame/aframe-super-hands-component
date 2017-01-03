@@ -3,9 +3,10 @@ require('aframe');
 require('../index.js');
 require('aframe-extras').registerAll();
 require('aframe-event-set-component');
+require('aframe-physics-system');
 //AFRAME.registerComponent('grid', extras.primitives.grid);
-//AFRAME.registerComponent('sphere-collider'. extras.misc['sphere-collider']);
-},{"../index.js":2,"aframe":50,"aframe-event-set-component":3,"aframe-extras":4}],2:[function(require,module,exports){
+//AFRAME.registerComponent('sphere-collider', extras.misc['sphere-collider']);
+},{"../index.js":2,"aframe":50,"aframe-event-set-component":3,"aframe-extras":4,"aframe-physics-system":39}],2:[function(require,module,exports){
 /* global AFRAME */
 
 if (typeof AFRAME === 'undefined') {
@@ -190,13 +191,10 @@ AFRAME.registerComponent('super-hands', {
         dropTarget.removeState(this.DRAGDROP_HOVERED_STATE);
       }
       carried.removeState(this.GRABBED_STATE);
-      if(carried.is(this.STRETCHED_STATE)) { // TODO: remove .is checks before .removeState
-        carried.removeState(this.STRETCHED_STATE);
-      }
+      carried.removeState(this.STRETCHED_STATE);
     }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
-    //hoverEls.forEach(x => x.removeState(this.DRAGDROP_HOVERED_STATE)); unnecessary? only 1st target should ever be hovered
     this.carried = null;
     this.grabbing = false;
     this.stretching = false;
@@ -212,7 +210,6 @@ AFRAME.registerComponent('super-hands', {
     if (!this.carried) { // empty hand
       this.carried = hitEl;
       if (hitEl.is(this.GRABBED_STATE)) { // second hand grab (AKA stretch)
-        // TODO: Do we need explicit check that this is grabbed by this.otherController?
         hitEl.addState(this.STRETCHED_STATE);
         this.stretching = true;
       } else { // basic grab
@@ -221,10 +218,7 @@ AFRAME.registerComponent('super-hands', {
           this.constraint = new window.CANNON
             .LockConstraint(this.el.body, hitEl.body);
           this.physics.world.addConstraint(this.constraint);
-        } else { // use manual updating
-          // TODO: initiate manual hitEl movement
-          // actually this may be implied
-        }
+        } 
       }
     } else if ((!this.data.dropTargetClasses.length || 
                 this.data.dropTargetClasses
@@ -252,9 +246,7 @@ AFRAME.registerComponent('super-hands', {
           is bubbled up from a child that is also a drop target? */
       hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unHover);
-      if (evt.target.is(this.DRAGDROP_HOVERED_STATE)) { // TODO: remove .is checks before .removeState
-          evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
-      }
+      evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
       if (hoverIndex > -1) { this.hoverEls.splice(hoverIndex, 1); } 
       // activate backup target if present
       this.hover();
@@ -77570,7 +77562,7 @@ module.exports={
     "/aframe-physics-system"
   ],
   "_resolved": "git://github.com/donmccurdy/cannon.js.git#022e8ba53fa83abf0ad8a0e4fd08623123838a17",
-  "_shasum": "50508d2b9b8876de9af8c6102d70d0f137350724",
+  "_shasum": "6c4f85808297c0a07dc516f4e6b5ec657adb5b67",
   "_shrinkwrap": null,
   "_spec": "cannon@github:donmccurdy/cannon.js#v0.6.2-dev1",
   "_where": "C:\\Users\\vrbox\\git\\aframe-super-hands-component\\node_modules\\aframe-physics-system",
