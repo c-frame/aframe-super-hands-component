@@ -2,34 +2,55 @@
   <head>
     <title>A-Frame Super Hands Component - Vive With Physics</title>
     <script src="../build.js"></script>
+    <script>
+      //color randomizer
+      AFRAME.registerComponent('color-randomizer', {
+        play: function() {
+          this.el.addEventListener('dragdropped', function(evt) {
+            console.log(evt.detail.dropped);
+            evt.detail.dropped.setAttribute('material', 'color', 
+              '#'+(Math.random()*0xFFFFFF<<0).toString(16));
+            // color randomizer credit: http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036
+          });
+        }
+      });
+      //delayed addition of physics body component to controllers due to AFRAME 0.4.0 changes
+      AFRAME.registerComponent('controller-loaded', {
+        init: function() {
+          this.el.addEventListener('model-loaded', function() {
+            this.addState('loaded');
+          });
+        }
+      });
+    </script>
   </head>
   <body>
     <a-scene physics>
       <a-assets>
-        <img id="spheretransform" src="./spheretransform.png" />
-        <a-mixin id="controller" super-hands="dropTargetClasses: transformer" 
-                 static-body="shape: sphere; sphereRadius: 0.02;"  
+        <img id="colortransform" src="./colortransform.png" />
+        <a-mixin id="controller" super-hands="dropTargetClasses: transformer"
+                 controller-loaded
                  sphere-collider="objects: .cube, .transformer"></a-mixin>
-        <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 event-set="_event: dragdropped; geometry.primitive: sphere; geometry.radius: 0.25"
+        <a-mixin id="controller-loaded" static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
+        <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  dynamic-body></a-mixin>
         <a-mixin id="cube-collided" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-hovered" material="wireframe: true;"></a-mixin>
-        <a-mixin id="transformer" 
-                 geometry="primitive: plane; width: 0.33; height: 0.33"></a-mixin>
+        <a-mixin id="transformer" color-randomizer
+                 geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
         <a-mixin id="transformer-hovered" material="wireframe: true;"></a-mixin>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 0.15 -1" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 0.15 -0.5" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 0.15 -1" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 0.15 -0.5" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 0.15 -1" material="color: green"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 0.15 -0.5" material="color: green"></a-entity>
       <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1" 
-                material="src:#spheretransform"></a-entity>
+                material="src:#colortransform"></a-entity>
       <a-grid static-body></a-grid>
     </a-scene>
 
