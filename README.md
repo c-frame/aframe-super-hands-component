@@ -18,7 +18,8 @@ Add the `super-hands` component to your tracked controller entities to enable th
 
 ### News
 
-* Super Hands basic functionality is now available: grab, stretch, and drag-drop
+* Super Hands basic functionality is now available: grab, stretch, and drag-drop, 
+with or without `aframe-physics-system`
 
 ### API
 

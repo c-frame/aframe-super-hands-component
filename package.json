@@ -42,6 +42,7 @@
     "aframe": "^0.4.0",
     "aframe-event-set-component": "^3.0.1",
     "aframe-extras": "^3.2.1",
+    "aframe-physics-system": "^1.2.0",
     "browserify": "^13.0.0",
     "budo": "^8.2.2",
     "ghpages": "^0.0.8",

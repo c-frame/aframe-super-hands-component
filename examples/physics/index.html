@@ -1,18 +1,24 @@
 <html>
   <head>
-    <title>A-Frame Super Hands Component - Vive Without Physics</title>
+    <title>A-Frame Super Hands Component - Vive With Physics</title>
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene>
+    <a-scene physics>
       <a-assets>
-        <a-mixin id="controller" super-hands 
-                 sphere-collider="objects: .cube"></a-mixin>
+        <img id="spheretransform" src="./spheretransform.png" />
+        <a-mixin id="controller" super-hands="dropTargetClasses: transformer" 
+                 static-body="shape: sphere; sphereRadius: 0.02;"  
+                 sphere-collider="objects: .cube, .transformer"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 event-set="_event: dragdropped; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
+                 event-set="_event: dragdropped; geometry.primitive: sphere; geometry.radius: 0.25"
+                 dynamic-body></a-mixin>
         <a-mixin id="cube-collided" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-hovered" material="wireframe: true;"></a-mixin>
+        <a-mixin id="transformer" 
+                 geometry="primitive: plane; width: 0.33; height: 0.33"></a-mixin>
+        <a-mixin id="transformer-hovered" material="wireframe: true;"></a-mixin>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
@@ -22,7 +28,9 @@
       <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
-      <a-grid></a-grid>
+      <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1" 
+                material="src:#spheretransform"></a-entity>
+      <a-grid static-body></a-grid>
     </a-scene>
 
     <!-- GitHub Corner. -->
