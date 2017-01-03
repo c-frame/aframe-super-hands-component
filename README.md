@@ -23,6 +23,15 @@ with or without `aframe-physics-system`
 
 ### API
 
+The `super-hands` component should be added to same entities as your controller
+component. A collider component must also be added to the controller entities, 
+such as [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
+or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14).
+
+Super Hands works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system) to manage grabbed entity movement, but it will fallback to manual `position` updates (without rotational translation) if physics is not available or is disabled with `usePhysics = false`. 
+
+#### Component Schema
+
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | dropTargetClasses |  Array of HTML classes for which collidable entities accept drag-drop interactions |            `[]` (any entities accessible to the collider)   |
@@ -30,14 +39,13 @@ with or without `aframe-physics-system`
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
 | usePhysics | If available, use physics system to move grabbed components | true |
 
-#### Dependencies
+#### Events
 
-The `super-hands` component should be added to same entities as your controller
-component. A collider component must also be added to the controller entities, 
-such as [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
-or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14).
+| Type | Description | details object |
+| --- | --- | --- |
+| dragdropped | Emitted by carried entity and drop target on successful drag-drop interection | drop: 'receive' or 'give', dropped: carried entity, on: drop target entity |
 
-Super Hands works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system) to manage grabbed entity movement, but it will fallback to manual `position` updates (without rotational translation) if physics is not available or is disabled with `usePhysics = false`. 
+
 
 ### Installation
 
