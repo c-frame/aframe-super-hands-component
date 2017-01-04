@@ -45,6 +45,14 @@ Super Hands works best with [aframe-physics-system](https://github.com/donmccurd
 | --- | --- | --- |
 | dragdropped | Emitted by carried entity and drop target on successful drag-drop interection | drop: 'receive' or 'give', dropped: carried entity, on: drop target entity |
 
+#### States
+
+| Name | Description |
+| --- | --- |
+| grabbed | Added to entity while it is being carried |
+| stretched | Added to entity while it is grabbed with two hands |
+| hovering | Added to carried entity while collided with a valid drag-drop target entity |
+| hovered | Added to drag-drop target entity while collided with a carried entity |
 
 
 ### Installation

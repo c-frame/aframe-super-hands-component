@@ -30,6 +30,7 @@ AFRAME.registerComponent('super-hands', {
     this.STRETCHED_STATE = 'stretched';
     this.DRAGDROP_EVENT = 'dragdropped';
     this.DRAGDROP_HOVERED_STATE = 'hovered';
+    this.DRAGDROP_HOVERING_STATE = 'hovering';
     
     // links to other systems/components
     this.otherController = null;
@@ -183,6 +184,7 @@ AFRAME.registerComponent('super-hands', {
       }
       carried.removeState(this.GRABBED_STATE);
       carried.removeState(this.STRETCHED_STATE);
+      carried.removeState(this.DRAGDROP_HOVERING_STATE);
     }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
@@ -226,6 +228,9 @@ AFRAME.registerComponent('super-hands', {
     if(this.hoverEls.length) {
       // only add to first element in case of multiple overlapping targets
       this.hoverEls[0].addState(this.DRAGDROP_HOVERED_STATE);
+      this.carried.addState(this.DRAGDROP_HOVERING_STATE);
+    } else {
+      this.carried.removeState(this.DRAGDROP_HOVERING_STATE);
     }
   },
   /* tied to 'stateremoved' event for current hovered drop target */
