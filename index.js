@@ -32,6 +32,9 @@ AFRAME.registerComponent('super-hands', {
     this.DRAGDROP_HOVERED_STATE = 'hovered';
     this.DRAGDROP_HOVERING_STATE = 'hovering';
     
+    this.GRAB_EVENT = 'super-hands-grab';
+    this.UNGRAB_EVENT = 'super-hands-release';
+    
     // links to other systems/components
     this.otherController = null;
     
@@ -58,15 +61,7 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-    if(this.data.usePhysics) {
-      this.physics = this.el.sceneEl.systems.physics;
-    } else {
-      if(this.constraint) {
-        this.physics.world.removeConstraint(this.constraint);
-        this.constraint = null;
-      }
-      this.physics = null;
-    }
+
   },
 
   /**
@@ -105,16 +100,7 @@ AFRAME.registerComponent('super-hands', {
         }
         hitEl.body.updateBoundingRadius();
       }
-    } else if(!this.constraint) {
-      // carried element needs manual update
-      delta = this.getPositionDelta();
-      position = hitEl.getAttribute('position');
-      hitEl.setAttribute('position', {
-        x: position.x + delta.x,
-        y: position.y + delta.y,
-        z: position.z + delta.z
-      });
-    } 
+    }  
   },
   /**
    * Called when entity pauses.
@@ -166,7 +152,6 @@ AFRAME.registerComponent('super-hands', {
   onGripClose: function (evt) {
     this.grabbing = true;
     this.previousStretch = null;
-    this.previousPosition = null;
   },
 
   onGripOpen: function (evt) {
@@ -182,7 +167,7 @@ AFRAME.registerComponent('super-hands', {
                      { drop: 'give', dropped: carried, on: dropTarget });
         dropTarget.removeState(this.DRAGDROP_HOVERED_STATE);
       }
-      carried.removeState(this.GRABBED_STATE);
+      carried.emit(this.UNGRAB_EVENT, { hand: this.el });
       carried.removeState(this.STRETCHED_STATE);
       carried.removeState(this.DRAGDROP_HOVERING_STATE);
     }
@@ -191,10 +176,6 @@ AFRAME.registerComponent('super-hands', {
     this.carried = null;
     this.grabbing = false;
     this.stretching = false;
-    if(this.physics && this.constraint) {
-      this.physics.world.removeConstraint(this.constraint);
-      this.constraint = null;
-    }
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el;
@@ -205,14 +186,9 @@ AFRAME.registerComponent('super-hands', {
       if (hitEl.is(this.GRABBED_STATE)) { // second hand grab (AKA stretch)
         hitEl.addState(this.STRETCHED_STATE);
         this.stretching = true;
-      } else { // basic grab
-        hitEl.addState(this.GRABBED_STATE);
-        if(this.physics && hitEl.body) { // use constraint to lock target to hand
-          this.constraint = new window.CANNON
-            .LockConstraint(this.el.body, hitEl.body);
-          this.physics.world.addConstraint(this.constraint);
-        } 
-      }
+      } else {
+        hitEl.emit(this.GRAB_EVENT, { hand: this.el });
+      } 
     } else if ((!this.data.dropTargetClasses.length || 
                 this.data.dropTargetClasses
                   .filter(x => hitEl.classList.contains(x)).length) &&
@@ -258,16 +234,5 @@ AFRAME.registerComponent('super-hands', {
       deltaStretch = currentStretch / (this.previousStretch || NaN); 
     this.previousStretch = currentStretch;
     return deltaStretch || 1;
-  },
-  getPositionDelta: function () {
-    var currentPosition = this.el.getAttribute('position'),
-      previousPosition = this.previousPosition || currentPosition,
-      deltaPosition = {
-      x: currentPosition.x - previousPosition.x,
-      y: currentPosition.y - previousPosition.y,
-      z: currentPosition.z - previousPosition.z
-    };
-    this.previousPosition = currentPosition;
-    return deltaPosition;
   }
 });
