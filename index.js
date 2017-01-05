@@ -1,3 +1,5 @@
+require('./reaction_components/grabbable.js');
+
 /* global AFRAME */
 
 if (typeof AFRAME === 'undefined') {

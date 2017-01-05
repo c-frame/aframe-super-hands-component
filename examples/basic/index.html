@@ -9,6 +9,7 @@
         <a-mixin id="controller" super-hands 
                  sphere-collider="objects: .cube"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 grabbable
                  event-set="_event: dragdropped; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-collided" material="opacity: 0.7; transparent: true">
         </a-mixin>
