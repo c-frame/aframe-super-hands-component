@@ -33,6 +33,7 @@
                  sphere-collider="objects: .cube, .transformer"></a-mixin>
         <a-mixin id="controller-loaded" static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
+                 grabbable stretchable drag-droppable
                  dynamic-body></a-mixin>
         <a-mixin id="cube-collided" material="opacity: 0.7; transparent: true">
         </a-mixin>
