@@ -9,8 +9,8 @@ All-in-one natural hand controller interaction component for [A-Frame](https://a
 Add the `super-hands` component to your tracked controller entities to enable these interactions:
 
 * Grab: Pick up and move entities by holding a controller button
-* Stretch: Resize entities by grabbing with two hands
-* Drag-drop: Notify entities when other entities are placed on them
+* Stretch: Resize entities by grabbing with two hands (in progress for new API)
+* Drag-drop: Notify entities when other entities are placed on them (in progress for new API)
 
 #### Examples
 
@@ -19,7 +19,7 @@ Add the `super-hands` component to your tracked controller entities to enable th
 ### News
 
 * New API structure
-* `grabbable` reaction component
+    * `grabbable` reaction component updated to new API
 
 ### API
 
@@ -49,12 +49,12 @@ and `dragdroppable`. Add these to the entities you want the controllers to inter
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| startGrabButtons | Array of button event types that can initiate grab | all button-down events |
-| endGrabButtons | Array of button event types that can terminate grab | all button-up events |
-| startStretchButtons | Array of button event types that can initiate stretch | all button-down events |
-| endStretchButtons | Array of button event types that can terminate stretch | all button-up events |
-| startDragDropButtons | Array of button event types that can initiate dragging/hovering | all button-down events |
-| endDragDropButtons | Array of button event types that can execute drag-drop | all button-up events |
+| grabStartButtons | Array of button event types that can initiate grab | all button-down events |
+| grabEndButtons | Array of button event types that can terminate grab | all button-up events |
+| stretchStartButtons | Array of button event types that can initiate stretch | all button-down events |
+| stretchEndButtons | Array of button event types that can terminate stretch | all button-up events |
+| dragDropStartButtons | Array of button event types that can initiate dragging/hovering | all button-down events |
+| dragDropEndButtons | Array of button event types that can execute drag-drop | all button-up events |
 
 
 ##### Events
@@ -64,17 +64,17 @@ The entity `super-hands` is attached to is sent in the event `details` as the pr
 
 | Type | Description | Target |  details object |
 | --- | --- | --- | --- |
-| start-grab | Button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
-| end-grab | Button released after start-grab | collided entity | hand: `super-hands` entity |
-| start-stretch | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity |
-| end-stretch | Release of one or both buttons after start-stretch | collided entity | hand: `super-hands` entity |
-| start-dragover | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
-| end-dragover | No longer collided with entity from start-dragover | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
+| grab-start | Button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
+| grab-end | Button released after grab-start | collided entity | hand: `super-hands` entity |
+| stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second contoller entity |
+| stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
+| dragover-start | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
+| dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | drag-drop | Button released while collided with and entity and holding with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
 
 Note: references to buttons being "released" and "pressed" are dependent on the schema settings. 
 For example, to make grab 'sticky', you could set startGrabButtons to 'triggerdown' and endGrabButtons to 'gripdown' (with `vive-controls`).
-This way the end-grab event would not fire until the grip button was *pressed*, even if the trigger was *released* earlier. 
+This way the grab-end event would not fire until the grip button was *pressed*, even if the trigger was *released* earlier. 
 
 #### grabbable
 

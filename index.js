@@ -11,10 +11,26 @@ if (typeof AFRAME === 'undefined') {
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    dropTargetClasses: { default: [] },
     colliderState: { default: 'collided'},
     colliderEvent: { default: 'hit' },
-    usePhysics: { default: true }
+    grabStartButtons: {
+      default: ['gripdown', 'trackpaddown', 'triggerdown']
+    },
+    grabEndButtons: {
+      default: ['gripup', 'trackpadup', 'triggerup']
+    },
+    stretchStartButtons: {
+      default: ['gripdown', 'trackpaddown', 'triggerdown']
+    },
+    stretchEndButtons: {
+      default: ['gripup', 'trackpadup', 'triggerup']
+    },
+    dragDropStartButtons: {
+      default: ['gripdown', 'trackpaddown', 'triggerdown']
+    },
+    dragDropEndButtons: {
+      default: ['gripup', 'trackpadup', 'triggerup']
+    }
     // TODO: make list of button events listened a schema item
   },
 
@@ -28,33 +44,40 @@ AFRAME.registerComponent('super-hands', {
    */
   init: function () {
     // constants
-    this.GRABBED_STATE = 'grabbed';
     this.STRETCHED_STATE = 'stretched';
-    this.DRAGDROP_EVENT = 'dragdropped';
+    
     this.DRAGDROP_HOVERED_STATE = 'hovered';
     this.DRAGDROP_HOVERING_STATE = 'hovering';
     
-    this.GRAB_EVENT = 'super-hands-grab';
-    this.UNGRAB_EVENT = 'super-hands-release';
+    this.GRAB_EVENT = 'grab-start';
+    this.UNGRAB_EVENT = 'grab-end';
+    this.STRETCH_EVENT = 'stretch-start';
+    this.UNSTRETCH_EVENT = 'stretch-end';
+    this.HOVER_EVENT = 'dragover-start';
+    this.UNHOVER_EVENT = 'dragover-end'
+    this.DRAGDROP_EVENT = 'drag-drop';
     
     // links to other systems/components
     this.otherController = null;
     
     // state tracking
     this.hoverEls = [];
-    this.constraint = null;
     this.grabbing = false;
     this.stretching = false;
-    this.previousStretch = null;
-    this.previousPosition = null;
+    this.dragging = false;
     this.carried = null;
+    this.stretched = null;
+    this.dragged = null;
     
     this.findOtherController = this.findOtherController.bind(this);
     this.unHover = this.unHover.bind(this);
     this.onHit = this.onHit.bind(this);
-    this.onGripOpen = this.onGripOpen.bind(this);
-    this.onGripClose = this.onGripClose.bind(this);
-    
+    this.onGrabStartButton = this.onGrabStartButton.bind(this);
+    this.onGrabEndbutton = this.onGrabEndbutton.bind(this);
+    this.onStretchStartButton = this.onStretchStartButton.bind(this);
+    this.onStretchEndButton = this.onStretchEndButton.bind(this);
+    this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
+    this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
     this.findOtherController();
   },
 
@@ -63,7 +86,7 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-
+    // TODO: update event listeners
   },
 
   /**
@@ -76,33 +99,7 @@ AFRAME.registerComponent('super-hands', {
    * Called on each scene tick.
    */
   tick: function (t) { 
-    var hitEl = this.carried, 
-      scale, hitElGeom, position, delta;
-    if (!hitEl) { return; }
-    if(this.stretching) {
-      scale = new THREE.Vector3().copy(hitEl.getAttribute('scale')); 
-      hitElGeom = hitEl.getAttribute('geometry');
-      delta = this.getStretchDelta();
-      scale = scale.multiplyScalar(delta);
-      hitEl.setAttribute('scale', scale);
-      // force scale update for physics body
-      if (hitEl.body) {
-        var physicsShape = hitEl.body.shapes[0];
-        if(physicsShape.halfExtents) {
-          physicsShape.halfExtents.set(hitElGeom.width / 2 * scale.x,
-                                       hitElGeom.height / 2 * scale.y,
-                                       hitElGeom.depth / 2 * scale.z);
-          physicsShape.updateConvexPolyhedronRepresentation();
-        } else { 
-          if(!this.shapeWarned) {
-            console.warn("Unable to stretch physics body: unsupported shape");
-            this.shapeWarned = true;
-          }
-          // todo: suport more shapes
-        }
-        hitEl.body.updateBoundingRadius();
-      }
-    }  
+ 
   },
   /**
    * Called when entity pauses.
@@ -112,11 +109,17 @@ AFRAME.registerComponent('super-hands', {
     this.el.sceneEl.removeEventListener('controllersupdated',  
                                         this.findOtherController);
     this.el.removeEventListener(this.data.colliderEvent, this.onHit);
+    
+    // TODO: bind based on schema
     this.el.removeEventListener('gripdown', this.onGripClose);
-    this.el.removeEventListener('gripup', this.onGripOpen);
+
     this.el.removeEventListener('trackpaddown', this.onGripClose);
-    this.el.removeEventListener('trackpadup', this.onGripOpen);
+    
     this.el.removeEventListener('triggerdown', this.onGripClose);
+    
+    
+    this.el.removeEventListener('gripup', this.onGripOpen);
+    this.el.removeEventListener('trackpadup', this.onGripOpen);
     this.el.removeEventListener('triggerup', this.onGripOpen);
   },
 
@@ -128,6 +131,8 @@ AFRAME.registerComponent('super-hands', {
     this.el.sceneEl.addEventListener('controllersupdated',  
                                      this.findOtherController);
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
+    
+    // TODO: bind based on schema
     this.el.addEventListener('gripdown', this.onGripClose);
     this.el.addEventListener('gripup', this.onGripOpen);
     this.el.addEventListener('trackpaddown', this.onGripClose);
@@ -151,43 +156,56 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onGripClose: function (evt) {
+  onGrabStartButton: function (evt) {
     this.grabbing = true;
-    this.previousStretch = null;
   },
 
-  onGripOpen: function (evt) {
-    var hoverEls = this.hoverEls.slice(),
-        carried = this.carried,
-        hitEl;
-    if(carried) {
-      if(hoverEls.length !== 0) { // drag-drop occurs
-        dropTarget = hoverEls[0]; 
-        dropTarget.emit(this.DRAGDROP_EVENT, 
-                   { drop: 'receive', dropped: carried, on: dropTarget });
-        carried.emit(this.DRAGDROP_EVENT, 
-                     { drop: 'give', dropped: carried, on: dropTarget });
-        dropTarget.removeState(this.DRAGDROP_HOVERED_STATE);
-      }
-      carried.emit(this.UNGRAB_EVENT, { hand: this.el });
-      carried.removeState(this.STRETCHED_STATE);
-      carried.removeState(this.DRAGDROP_HOVERING_STATE);
+  onGrabEndbutton: function (evt) {
+    if(this.carried) {
+      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+      this.carried = null;
     }
+    this.grabbing = false;
+  },
+  onStretchStartButton: function (evt) {
+    this.stretching = true;
+  },
+  onStretchEndButton: function (evt) {
+    if(this.stretched) {
+      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+      this.stretched = null;
+    }
+    this.stretching = false;
+  },
+  onDragDropStartButton: function (evt) {
+    this.dragging = true;
+  },
+  onDragDropEndButton: function (evt) {
+    var hoverEls = this.hoverEls.slice(),
+      carried = this.dragged, // TODO which is it?
+      hitEl, dropTarget, ddevt, uhevt;
+    if(carried && hoverEls.length !== 0) {
+      dropTarget = hoverEls[0]; 
+      ddevt = { hand: this.el, dropped: carried, on: dropTarget };
+      dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
+      carried.emit(this.DRAGDROP_EVENT, ddevt);
+      uhevt = { hand: this.el, hovered: dropTarget, carried: carried };
+      dropTarget.emit(this.UNHOVER_EVENT, uhevt);
+      carried.emit(this.UNHOVER_EVENT, uhevt);
+    },
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
-    this.carried = null;
-    this.grabbing = false;
-    this.stretching = false;
+    this.dragging = false;
+    this.dragged = null;
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el;
     // return if no valid interaction state
-    if(!hitEl || !this.grabbing || hitEl === this.carried) { return; } 
+    if(!hitEl || hitEl === this.carried) { return; } 
     if (!this.carried) { // empty hand
       this.carried = hitEl;
-      if (hitEl.is(this.GRABBED_STATE)) { // second hand grab (AKA stretch)
-        hitEl.addState(this.STRETCHED_STATE);
-        this.stretching = true;
+      if (hitEl.is(this.GRABBED_STATE) && this.stretching) { // second hand grab (AKA stretch)
+        hitEl.emit(this.STRETCH_EVENT, { hand: this.el, secondHand: this.otherController});
       } else {
         hitEl.emit(this.GRAB_EVENT, { hand: this.el });
       } 
@@ -225,16 +243,5 @@ AFRAME.registerComponent('super-hands', {
       // activate backup target if present
       this.hover();
     }
-  },
-  /* movement per tick for stretch and manual grab updates */ 
-  getStretchDelta: function () {
-    var otherHandPos = new THREE.Vector3()
-        .copy(this.otherController.getAttribute('position')),
-      currentPosition = new THREE.Vector3()
-        .copy(this.el.getAttribute('position')),
-      currentStretch = currentPosition.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / (this.previousStretch || NaN); 
-    this.previousStretch = currentStretch;
-    return deltaStretch || 1;
   }
 });
