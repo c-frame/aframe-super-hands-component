@@ -6,8 +6,7 @@
       //color randomizer
       AFRAME.registerComponent('color-randomizer', {
         play: function() {
-          this.el.addEventListener('dragdropped', function(evt) {
-            console.log(evt.detail.dropped);
+          this.el.addEventListener('drag-drop', function(evt) {
             evt.detail.dropped.setAttribute('material', 'color', 
               '#'+(Math.random()*0xFFFFFF<<0).toString(16));
             // color randomizer credit: http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036
@@ -28,7 +27,7 @@
     <a-scene physics>
       <a-assets>
         <img id="colortransform" src="./colortransform.png" />
-        <a-mixin id="controller" super-hands="dropTargetClasses: transformer"
+        <a-mixin id="controller" super-hands
                  controller-loaded
                  sphere-collider="objects: .cube, .transformer"></a-mixin>
         <a-mixin id="controller-loaded" static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
@@ -40,7 +39,6 @@
         <a-mixin id="cube-hovered" material="wireframe: true;"></a-mixin>
         <a-mixin id="transformer" color-randomizer
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
-        <a-mixin id="transformer-hovered" material="wireframe: true;"></a-mixin>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
