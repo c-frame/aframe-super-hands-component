@@ -1,10 +1,12 @@
-require('./reaction_components/grabbable.js');
-
 /* global AFRAME */
 
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
+
+require('./reaction_components/grabbable.js');
+require('./reaction_components/stretchable.js');
+require('./reaction_components/drag-droppable.js');
 
 /**
  * Super Hands component for A-Frame.
@@ -44,17 +46,12 @@ AFRAME.registerComponent('super-hands', {
    */
   init: function () {
     // constants
-    this.STRETCHED_STATE = 'stretched';
-    
-    this.DRAGDROP_HOVERED_STATE = 'hovered';
-    this.DRAGDROP_HOVERING_STATE = 'hovering';
-    
     this.GRAB_EVENT = 'grab-start';
     this.UNGRAB_EVENT = 'grab-end';
     this.STRETCH_EVENT = 'stretch-start';
     this.UNSTRETCH_EVENT = 'stretch-end';
     this.HOVER_EVENT = 'dragover-start';
-    this.UNHOVER_EVENT = 'dragover-end'
+    this.UNHOVER_EVENT = 'dragover-end';
     this.DRAGDROP_EVENT = 'drag-drop';
     
     // links to other systems/components
@@ -73,7 +70,7 @@ AFRAME.registerComponent('super-hands', {
     this.unHover = this.unHover.bind(this);
     this.onHit = this.onHit.bind(this);
     this.onGrabStartButton = this.onGrabStartButton.bind(this);
-    this.onGrabEndbutton = this.onGrabEndbutton.bind(this);
+    this.onGrabEndButton = this.onGrabEndButton.bind(this);
     this.onStretchStartButton = this.onStretchStartButton.bind(this);
     this.onStretchEndButton = this.onStretchEndButton.bind(this);
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
@@ -110,17 +107,24 @@ AFRAME.registerComponent('super-hands', {
                                         this.findOtherController);
     this.el.removeEventListener(this.data.colliderEvent, this.onHit);
     
-    // TODO: bind based on schema
-    this.el.removeEventListener('gripdown', this.onGripClose);
-
-    this.el.removeEventListener('trackpaddown', this.onGripClose);
-    
-    this.el.removeEventListener('triggerdown', this.onGripClose);
-    
-    
-    this.el.removeEventListener('gripup', this.onGripOpen);
-    this.el.removeEventListener('trackpadup', this.onGripOpen);
-    this.el.removeEventListener('triggerup', this.onGripOpen);
+    this.data.grabStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabStartButton);
+    });
+    this.data.grabEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabEndButton);
+    });
+    this.data.stretchStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchStartButton);
+    });
+    this.data.stretchEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchEndButton);
+    });
+    this.data.dragDropStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropStartButton);
+    });
+    this.data.dragDropEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropEndButton);
+    });
   },
 
   /**
@@ -132,13 +136,24 @@ AFRAME.registerComponent('super-hands', {
                                      this.findOtherController);
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     
-    // TODO: bind based on schema
-    this.el.addEventListener('gripdown', this.onGripClose);
-    this.el.addEventListener('gripup', this.onGripOpen);
-    this.el.addEventListener('trackpaddown', this.onGripClose);
-    this.el.addEventListener('trackpadup', this.onGripOpen);
-    this.el.addEventListener('triggerdown', this.onGripClose);
-    this.el.addEventListener('triggerup', this.onGripOpen);
+    this.data.grabStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabStartButton);
+    });
+    this.data.grabEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabEndButton);
+    });
+    this.data.stretchStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchStartButton);
+    });
+    this.data.stretchEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchEndButton);
+    });
+    this.data.dragDropStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropStartButton);
+    });
+    this.data.dragDropEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropEndButton);
+    });
   },
   
   /* link between controllers for two-handed interactions  */
@@ -160,7 +175,7 @@ AFRAME.registerComponent('super-hands', {
     this.grabbing = true;
   },
 
-  onGrabEndbutton: function (evt) {
+  onGrabEndButton: function (evt) {
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
       this.carried = null;
@@ -189,10 +204,12 @@ AFRAME.registerComponent('super-hands', {
       ddevt = { hand: this.el, dropped: carried, on: dropTarget };
       dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
       carried.emit(this.DRAGDROP_EVENT, ddevt);
+      //this.unHover({ target: dropTarget }, true);
+      this.unHover({ target: dropTarget, detail: { state: this.data.colliderState } });
       uhevt = { hand: this.el, hovered: dropTarget, carried: carried };
       dropTarget.emit(this.UNHOVER_EVENT, uhevt);
       carried.emit(this.UNHOVER_EVENT, uhevt);
-    },
+    }
     // clear list of backup targets to prevent triggering hover
     this.hoverEls = [];
     this.dragging = false;
@@ -200,20 +217,22 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el;
-    // return if no valid interaction state
-    if(!hitEl || hitEl === this.carried) { return; } 
-    if (!this.carried) { // empty hand
+    if(!hitEl) { return; } 
+    if (this.grabbing && !this.carried) { 
       this.carried = hitEl;
-      if (hitEl.is(this.GRABBED_STATE) && this.stretching) { // second hand grab (AKA stretch)
-        hitEl.emit(this.STRETCH_EVENT, { hand: this.el, secondHand: this.otherController});
-      } else {
-        hitEl.emit(this.GRAB_EVENT, { hand: this.el });
-      } 
-    } else if ((!this.data.dropTargetClasses.length || 
-                this.data.dropTargetClasses
-                  .filter(x => hitEl.classList.contains(x)).length) &&
-               this.hoverEls.indexOf(hitEl) === -1) { 
-      // hand full and hitEl is a valid, new drag-drop target
+      hitEl.emit(this.GRAB_EVENT, { hand: this.el });
+    } 
+    if (this.stretching && !this.stretched) {
+      this.stretched = hitEl;
+      if(hitEl === this.otherController.components['super-hands'].stretched) {
+        hitEl.emit(this.STRETCH_EVENT, { 
+          hand: this.otherController, 
+          secondHand: this.el 
+        });
+      }
+    }
+    // hovering can only start while grabbing/carrying 
+    if (this.carried && this.dragging && this.hoverEls.indexOf(hitEl) === -1) {
       this.hoverEls.push(hitEl); 
       hitEl.addEventListener('stateremoved', this.unHover);
       if (this.hoverEls.length === 1) { this.hover(); }
@@ -221,24 +240,29 @@ AFRAME.registerComponent('super-hands', {
   },
   /* notify drag-drop target that entity is held over it  */
   hover: function() {
+    var hvrevt;
     if(this.hoverEls.length) {
-      // only add to first element in case of multiple overlapping targets
-      this.hoverEls[0].addState(this.DRAGDROP_HOVERED_STATE);
-      this.carried.addState(this.DRAGDROP_HOVERING_STATE);
-    } else {
-      this.carried.removeState(this.DRAGDROP_HOVERING_STATE);
-    }
+      hvrevt = { 
+        hand: this.el, hovered: this.hoverEls[0], carried: this.carried
+      };
+      // only activate the first element in case of multiple overlapping targets
+      this.hoverEls[0].emit(this.HOVER_EVENT, hvrevt);
+      this.carried.emit(this.HOVER_EVENT, hvrevt);
+    } 
   },
   /* tied to 'stateremoved' event for current hovered drop target */
-  unHover: function (evt) {
-    var hoverIndex;
-    if (evt.detail.state == this.data.colliderState || 
-        evt.detail.state == this.DRAGDROP_HOVERED_STATE) {
+  unHover: function (evt, force) {
+    var hoverIndex, uhevt;
+    // TODO: try using force param
+    //if (force || evt.detail.state === this.data.colliderState) {
+    if (evt.detail.state === this.data.colliderState) {
       /* TODO?: need to check if (currentTarget === target) in case this
           is bubbled up from a child that is also a drop target? */
+      uhevt = { hand: this.el, hovered: evt.target, carried: this.carried };
       hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unHover);
-      evt.target.removeState(this.DRAGDROP_HOVERED_STATE);
+      evt.target.emit(this.UNHOVER_EVENT, uhevt);
+      this.carried.emit(this.UNHOVER_EVENT, uhevt);
       if (hoverIndex > -1) { this.hoverEls.splice(hoverIndex, 1); } 
       // activate backup target if present
       this.hover();

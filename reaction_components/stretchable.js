@@ -63,7 +63,7 @@ AFRAME.registerComponent('stretchable', {
   },
   end: function (evt) {
     if(this.stretchers.indexOf(evt.detail.hand) === -1) { return; }
-    this.stretchers = []
+    this.stretchers = [];
     this.stretched = false;
     this.el.removeState(this.STRETCHED_STATE);
   } 
