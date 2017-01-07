@@ -5,39 +5,74 @@
       html {
         background: #33425B;
         color: #FAFAFA;
-        font-family: monospace;
+        font-family: sans-serif;
         font-size: 20px;
         padding: 10px 20px;
       }
       h1 {
         font-weight: 300;
+        font-family: serif;
       }
       a {
         color: #FAFAFA;
+      }
+      a.example {
         display: block;
         padding: 15px 0;
+        font-size: 24px;
       }
-    </style>
+      code, pre {
+        font-family: monospace;
+        background-color: #3f506d;
+        color: #BBB;
+      }
+      .unemph {
+        font-size: smaller;
+      }
+     </style>
   </head>
   <body>
     <h1>A-Frame Super Hands Component</h1>
-    <a href="basic/">Vive controllers without physics</a>
-    <p>Example of super-hands interactivity with HTC Vive without using 
-    afame-physics-system.</p>
+    <a class="example" href="basic/">Vive controllers without physics</a>
+    <p>Example of super-hands interactivity with HTC Vive without using a 
+      physics system. The <code>super-hands</code> component is added to
+    the controller entities, and the <code>grabbable</code>, <code>stretchable</code>, and 
+        <code>drag-droppable</code> components are added to the interactable boxes.</p>
     <ul>
       <li>Grabbed entities track position only (use physics for rotation)</li>
       <li>Drag-drop targets with a hovering entity appear in wireframe</li>
-      <li>Entities change to spheres upon completing drag-drop interaction via the <code>event-set</code> component listening for the 'dragdropped' event</li>
+      <li>Entities change to spheres upon completing drag-drop interaction via the <code>event-set</code> component listening for the <code>drag-drop</code> event</li>
     </ul>
-    <a href="physics">Vive controllers with physics</a>
+    <a class="example" href="physics/">Vive controllers with physics and a custom reaction component</a>
     <p>Example of super-hands interactivity with HTC Vive with
-    afame-physics-system.</p>
+      <code>afame-physics-system.</code>. Also includes <code>color-randomizer</code>,
+      an example of a creating a component to customize the response to cues from <code>super-hands</code>:</p>
+    <pre>
+    AFRAME.registerComponent('color-randomizer', {
+      play: function() {
+        this.el.addEventListener('drag-drop', function(evt) {
+          evt.detail.dropped.setAttribute('material', 'color', 
+            '#'+(Math.random()*0xFFFFFF<<0).toString(16));
+        });
+      }
+    });
+    </pre>
+    <p class = "unemph">Credit for random color generator code: <a href="http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036">Mohsen via  StackOverflow</a></p>
     <ul>
       <li>Grabbed boxes lock position and rotation to controller</li>
-      <li>The color change box will appear in wireframe when 
-        it detects a box held over it</li>
-      <li>The color change box changes the color of any entity dropped in it by listening for the 'dragdropped' event</li>
+      <li>Physics collision bounds update to match new size when stretching</li>
+      <li>Grabbed boxes appear in wireframe when held inside the color changer</li>
+      <li><code>color-randomizer</code> changes the color of entities dropped inside of it</li>
     </ul>
+
+    <a class="example" href="sticky/">Sticky Grab via Custom Button Mapping</a>
+    <p>Example of customizing the button event schema options</p>
+    <ul>
+      <li>Press trigger to grab cylinder entity</li>
+      <li>Knock some balls around</li>
+      <li>Press grip to release</li>
+    </ul>
+    
     <!-- GitHub Corner. -->
     <a href="https://github.com/wmurphyrd/aframe-super-hands-component" class="github-corner">
       <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#222; color:#fff; position: absolute; top: 0; border: 0; right: 0;">
