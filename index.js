@@ -196,22 +196,18 @@ AFRAME.registerComponent('super-hands', {
     this.dragging = true;
   },
   onDragDropEndButton: function (evt) {
-    var hoverEls = this.hoverEls.slice(),
-      carried = this.dragged, // TODO which is it?
+    var carried = this.dragged, 
       hitEl, dropTarget, ddevt, uhevt;
-    if(carried && hoverEls.length !== 0) {
-      dropTarget = hoverEls[0]; 
+    if(carried && this.hoverEls.length !== 0) {
+      dropTarget = this.hoverEls[0]; 
       ddevt = { hand: this.el, dropped: carried, on: dropTarget };
       dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
       carried.emit(this.DRAGDROP_EVENT, ddevt);
+      // clear list of backup targets to prevent triggering hover
+      this.hoverEls = [];
       //this.unHover({ target: dropTarget }, true);
       this.unHover({ target: dropTarget, detail: { state: this.data.colliderState } });
-      uhevt = { hand: this.el, hovered: dropTarget, carried: carried };
-      dropTarget.emit(this.UNHOVER_EVENT, uhevt);
-      carried.emit(this.UNHOVER_EVENT, uhevt);
     }
-    // clear list of backup targets to prevent triggering hover
-    this.hoverEls = [];
     this.dragging = false;
     this.dragged = null;
   },
@@ -231,12 +227,20 @@ AFRAME.registerComponent('super-hands', {
         });
       }
     }
-    // hovering can only start while grabbing/carrying 
-    if (this.carried && this.dragging && this.hoverEls.indexOf(hitEl) === -1) {
-      this.hoverEls.push(hitEl); 
-      hitEl.addEventListener('stateremoved', this.unHover);
-      if (this.hoverEls.length === 1) { this.hover(); }
-    } 
+    if(this.dragging) {
+      if(!this.dragged) {
+        /* prefer this.carried so that a drag started after a grab will work
+           with carried element rather than a currently intersected drop target.
+           fall back to hitEl in case a drag is initiated independent 
+           of a grab */
+        this.dragged = this.carried || hitEl;
+      }
+      if (hitEl !== this.dragged && this.hoverEls.indexOf(hitEl) === -1) {
+        this.hoverEls.push(hitEl); 
+        hitEl.addEventListener('stateremoved', this.unHover);
+        if (this.hoverEls.length === 1) { this.hover(); }
+      } 
+    }
   },
   /* notify drag-drop target that entity is held over it  */
   hover: function() {
@@ -262,7 +266,7 @@ AFRAME.registerComponent('super-hands', {
       hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unHover);
       evt.target.emit(this.UNHOVER_EVENT, uhevt);
-      this.carried.emit(this.UNHOVER_EVENT, uhevt);
+      this.dragged.emit(this.UNHOVER_EVENT, uhevt);
       if (hoverIndex > -1) { this.hoverEls.splice(hoverIndex, 1); } 
       // activate backup target if present
       this.hover();
