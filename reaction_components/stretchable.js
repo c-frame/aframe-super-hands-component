@@ -24,17 +24,16 @@ AFRAME.registerComponent('stretchable', {
       otherHandPos = new THREE.Vector3()
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / (this.previousStretch || NaN); 
+      deltaStretch = currentStretch / (this.previousStretch || currentStretch); 
     this.previousStretch = currentStretch;
-    scale = scale.multiplyScalar(deltaStretch || 1);
+    scale = scale.multiplyScalar(deltaStretch);
     this.el.setAttribute('scale', scale);
     // force scale update for physics body
     if (this.el.body && this.data.usePhysics !== 'never') {
       var physicsShape = this.el.body.shapes[0];
       if(physicsShape.halfExtents) {
-        physicsShape.halfExtents.set(myGeom.width / 2 * scale.x,
-                                     myGeom.height / 2 * scale.y,
-                                     myGeom.depth / 2 * scale.z);
+       physicsShape.halfExtents.scale(deltaStretch, 
+                                      physicsShape.halfExtents);
         physicsShape.updateConvexPolyhedronRepresentation();
       } else { 
         if(!this.shapeWarned) {
