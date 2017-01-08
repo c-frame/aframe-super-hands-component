@@ -64,6 +64,8 @@ The entity `super-hands` is attached to is sent in the event `details` as the pr
 
 | Type | Description | Target |  details object |
 | --- | --- | --- | --- |
+| hover-start | Collided with entity | collided entity | hand: `super-hands` entity |
+| hover-end | No longer collided with entity | collided entity | hand: `super-hands` entity |
 | grab-start | Button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
 | grab-end | Button released after grab-start | collided entity | hand: `super-hands` entity |
 | stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second contoller entity |
@@ -75,6 +77,19 @@ The entity `super-hands` is attached to is sent in the event `details` as the pr
 Note: references to buttons being "released" and "pressed" are dependent on the schema settings. 
 For example, to make grab 'sticky', you could set startGrabButtons to 'triggerdown' and endGrabButtons to 'gripdown' (with `vive-controls`).
 This way the grab-end event would not fire until the grip button was *pressed*, even if the trigger was *released* earlier. 
+
+#### hoverable
+
+Used to indicate when the controller is within range to interact with an entity
+by adding the 'hovered' state. When using a mixin, including another mixin
+in the assets withe same id + '-hovered' will activate automatically, as in
+[the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/).
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| hovered | Added to entity while it is collided with the controller |
 
 #### grabbable
 
@@ -117,7 +132,7 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 #### drag-droppable
 
 `drag-droppable` is a shell component that only manages the 'hovered' state for the entity. 
-This can be combined with  with a '*-hovered' mixin to easily highlight when an entity is 
+This can be combined with  with a '-hovered' mixin to easily highlight when an entity is 
 hovering in a drag-drop location. 
 
 For more interactivity, consider using `event-set` from [kframe](http://github.com/ngokevin/kframe) 
@@ -127,7 +142,7 @@ with the `drag-dropped` event or creating your own component.
 
 | Name | Description |
 | --- | --- |
-| hovered | Added to while a carried entity is colliding with a a `drag-droppable` entity |
+| dragover | Added to while a carried entity is colliding with a a `drag-droppable` entity |
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to 
 receive the hovered state. 
