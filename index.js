@@ -4,6 +4,7 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
@@ -200,9 +201,15 @@ AFRAME.registerComponent('super-hands', {
     this.dragging = true;
   },
   onDragDropEndButton: function (evt) {
+    var ddevt, 
+        carried = this.dragged,
+        dropTarget = this.hoverEls[0];
     this.dragging = false; // keep _unHover() from activating another droptarget
-    if(this.dragged && this.hoverEls.length !== 0) {
-      this._unHover(this.hoverEls[0]);
+    if(carried && dropTarget) {
+      ddevt = { hand: this.el, dropped: carried, on: dropTarget };
+      dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
+      carried.emit(this.DRAGDROP_EVENT, ddevt);
+      this._unHover(dropTarget);
     }
     this.dragged = null;
   },
@@ -237,9 +244,11 @@ AFRAME.registerComponent('super-hands', {
          fall back to hitEl in case a drag is initiated independent 
          of a grab */
       this.dragged = this.carried || getTarget();
+      this.hover(); // refresh hover in case already over a target
     }
     // keep stack of currently intersected but not interacted entities 
-    if (!used && hitElIndex === -1) {
+    if (!used && hitElIndex === -1 && hitEl !== this.carried && 
+        hitEl !== this.stretched && hitEl !== this.dragged) {
       this.hoverEls.push(hitEl); 
       hitEl.addEventListener('stateremoved', this.unWatch);
       if(this.hoverEls.length === 1) { this.hover(); }
