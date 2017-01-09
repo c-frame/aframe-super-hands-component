@@ -17,22 +17,34 @@ AFRAME.registerComponent('super-hands', {
     colliderState: { default: 'collided'},
     colliderEvent: { default: 'hit' },
     grabStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 
+                'pointup', 'thumbup', 'pointingstart', 'pistolstart', 
+                'thumbstickdown']
     },
     grabEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 
+                'pointdown', 'thumbdown', 'pointingend', 'pistolend', 
+                'thumbstickup']
     },
     stretchStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 
+                'pointup', 'thumbup', 'pointingstart', 'pistolstart', 
+                'thumbstickdown']
     },
     stretchEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 
+                'pointdown', 'thumbdown', 'pointingend', 'pistolend', 
+                'thumbstickup']
     },
     dragDropStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 
+                'pointup', 'thumbup', 'pointingstart', 'pistolstart', 
+                'thumbstickdown']
     },
     dragDropEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 
+                'pointdown', 'thumbdown', 'pointingend', 'pistolend', 
+                'thumbstickup']
     }
     // TODO: make list of button events listened a schema item
   },

@@ -57,13 +57,21 @@ or the in-development, physics system-based [physics-collider](https://github.co
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| grabStartButtons | Array of button event types that can initiate grab | all button-down events |
-| grabEndButtons | Array of button event types that can terminate grab | all button-up events |
-| stretchStartButtons | Array of button event types that can initiate stretch | all button-down events |
-| stretchEndButtons | Array of button event types that can terminate stretch | all button-up events |
-| dragDropStartButtons | Array of button event types that can initiate dragging/hovering | all button-down events |
-| dragDropEndButtons | Array of button event types that can execute drag-drop | all button-up events |
+| grabStartButtons | Array of button event types that can initiate grab | Trigger, grip, thumb press events |
+| grabEndButtons | Array of button event types that can terminate grab | Trigger, grip, thumb release events |
+| stretchStartButtons | Array of button event types that can initiate stretch | Trigger, grip, thumb press events |
+| stretchEndButtons | Array of button event types that can terminate stretch | Trigger, grip, thumb release events |
+| dragDropStartButtons | Array of button event types that can initiate dragging/hovering | Trigger, grip, thumb press events |
+| dragDropEndButtons | Array of button event types that can execute drag-drop | Trigger, grip, thumb release events |
 
+Default button events include specific events for `vive-controls`, `hand-controls` and 
+`oculus-touch-controls`.
+
+Default start events: 'gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 
+'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown'
+
+Default end events: 'gripup', 'trackpadup', 'triggerup', 'gripopen', 
+'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup'
 
 ##### Events
 
