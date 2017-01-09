@@ -21,7 +21,7 @@ The currently implemented gestures are:
 For an entity to respond to the `super-hands` gestures, it needs to have 
 components attached to translate the gestures into actions. `super-hands` 
 includes components for typical reactions to the implemented gestures: 
-`hoverable`, `grabbable`, `stretchable`, and `dragdroppable`.
+`hoverable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
@@ -186,7 +186,7 @@ Install and use by directly including the [browser files](dist):
 
 <body>
   <a-scene>
-    <a-entity super-hands="foo: bar"></a-entity>
+    <a-entity super-hands></a-entity>
   </a-scene>
 </body>
 ```
