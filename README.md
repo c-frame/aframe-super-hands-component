@@ -10,9 +10,6 @@ The `super-hands` component interprets input from tracked controllers and
 collision detection components
 into natural, hand-interaction gestures and communicates those gestures to 
 target entities for them to respond.  
-`super-hands` should be added to same entities as your controller
-component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
-or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
 
 The currently implemented gestures are:
 
@@ -48,7 +45,11 @@ components to the entities in your scene, and `super-hands` can work with all of
 
 ### API
 
-#### super-hands
+#### super-hands component
+
+`super-hands` should be added to same entities as your controller
+component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
+or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
 
 ##### Component Schema
 
@@ -92,7 +93,7 @@ even if the trigger was *released* earlier.
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
 
-#### hoverable
+#### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity
 by adding the 'hovered' state. When using a mixin, including another mixin
@@ -105,7 +106,7 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
 
-#### grabbable
+#### grabbable component
 
 Makes and entity move along with the controller while it is grabbed.
 
@@ -125,7 +126,7 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
 
-#### stretchable
+#### stretchable component
 
 Makes and entity rescale while grabbed by both controllers as they are moved closer together or further apart.
 
@@ -143,7 +144,7 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 | --- | --- |
 | stretched | Added to entity while it is grabbed with two hands |
 
-#### drag-droppable
+#### drag-droppable component
 
 `drag-droppable` is a shell component that only manages the 'hovered' state for the entity. 
 This can be combined with  with a '-hovered' mixin to easily highlight when an entity is 
