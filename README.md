@@ -1,30 +1,30 @@
 ## Super Hands
 
-All-in-one natural hand controller interaction component for [A-Frame](https://aframe.io).
+Natural hand controller interaction for [A-Frame](https://aframe.io).
 
 ![Super Hans Can't Make a Fist](readme_files/peep-show-super-hans.gif)
 
 ### Description
 
-Add the `super-hands` component to your tracked controller entities to enable these interactions:
+The `super-hands` component interprets input from tracked controllers and 
+collision detection components
+into natural, hand-interaction gestures and communicates those gestures to 
+target entities for them to respond.  
+`super-hands` should be added to same entities as your controller
+component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
+or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
 
-* Grab: Pick up and move entities by holding a controller button
-* Stretch: Resize entities by grabbing with two hands (in progress for new API)
-* Drag-drop: Notify entities when other entities are placed on them (in progress for new API)
+The currently implemented gestures are:
 
-#### Examples
+* Hover: Holding a controller in the collision space of an entity
+* Grab: Pressing a button while hovering an entity, potentially also moving it
+* Stretch: Grabbing an entity with two hands and resizing 
+* Drag-drop: Dragging an entity onto another entity
 
-[Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
-
-### News
-
-* New API structure
-    * `grabbable` reaction component updated to new API
-
-### API
-
-The `super-hands` component interprets input from tracked controllers and collision detection components
-into natural, hand-interaction gestures and communicates those gestures to target entities for them to respond. 
+For an entity to respond to the `super-hands` gestures, it needs to have 
+components attached to translate the gestures into actions. `super-hands` 
+includes components for typical reactions to the implemented gestures: 
+`hoverable`, `grabbable`, `stretchable`, and `dragdroppable`.
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
@@ -34,12 +34,19 @@ others to rotate around a fixed point, and others still to spawn a new entity bu
 With this API schema, these options can be handled by adding or creating different reaction
 components to the entities in your scene, and `super-hands` can work with all of them. 
 
-The `super-hands` component must be added to same entities as your controller
-component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
-or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
+#### Examples
 
-This package also includes reaction components for common hand interactions: `grabbable`, `stretchable`, 
-and `dragdroppable`. Add these to the entities you want the controllers to interact with.  
+[Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
+
+### News
+
+* Initial launch
+
+#### Known Issues
+
+* Collision zones for stretched entities don't update to new scale (`sphere-collider` does not take entity scale into account)
+
+### API
 
 #### super-hands
 
@@ -60,7 +67,7 @@ and `dragdroppable`. Add these to the entities you want the controllers to inter
 ##### Events
 
 Events will be emitted by the entity being interacted with. 
-The entity `super-hands` is attached to is sent in the event `details` as the property `hand`.
+The entity that `super-hands` is attached to is sent in the event `details` as the property `hand`.
 
 | Type | Description | Target |  details object |
 | --- | --- | --- | --- |
@@ -74,9 +81,16 @@ The entity `super-hands` is attached to is sent in the event `details` as the pr
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | drag-drop | Button released while collided with and entity and holding with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
 
-Note: references to buttons being "released" and "pressed" are dependent on the schema settings. 
-For example, to make grab 'sticky', you could set startGrabButtons to 'triggerdown' and endGrabButtons to 'gripdown' (with `vive-controls`).
-This way the grab-end event would not fire until the grip button was *pressed*, even if the trigger was *released* earlier. 
+Notes: 
+
+* References to buttons being "released" and "pressed" are dependent on the schema settings. 
+For example, to make grab 'sticky', you could set startGrabButtons to 
+'triggerdown' and endGrabButtons to 'gripdown' (with `vive-controls`).
+This way the grab-end event would not fire until the grip button was *pressed*, 
+even if the trigger was *released* earlier. 
+* Only one entity at a time will be targeted for each event type, 
+even if multiple overlapping collision zones exist. `super-hands` tracks a 
+FIFO queue of collided entities to determine which will be affected.
 
 #### hoverable
 
