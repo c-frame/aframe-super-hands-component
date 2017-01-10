@@ -28,7 +28,7 @@ includes components for typical reactions to the implemented gestures:
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
-Separating the reaction to be the responsibilty of the entity affected allows for extensibility. 
+Separating the reaction to be the responsibility of the entity affected allows for extensibility. 
 In response to a grab, you may want some entities to lock to the controller and move, 
 others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged. 
 With this API schema, these options can be handled by adding or creating different reaction
@@ -45,6 +45,10 @@ components to the entities in your scene, and `super-hands` can work with all of
 #### Known Issues
 
 * Collision zones for stretched entities don't update to new scale (`sphere-collider` does not take entity scale into account)
+
+#### Compatibility
+
+Made for A-Frame v.0.4.0. 
 
 ### API
 
@@ -87,7 +91,7 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | hover-end | No longer collided with entity | collided entity | hand: `super-hands` entity |
 | grab-start | Button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
 | grab-end | Button released after grab-start | collided entity | hand: `super-hands` entity |
-| stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second contoller entity |
+| stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second controller entity |
 | stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
 | dragover-start | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
@@ -96,9 +100,9 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 Notes: 
 
 * References to buttons being "released" and "pressed" are dependent on the schema settings. 
-For example, to make grab 'sticky', you could set startGrabButtons to 
-'triggerdown' and endGrabButtons to 'gripdown' (as in the 
-[sticky example](examples/index.html#sticky)).
+For example, to make grab 'sticky', you could set grabStartButtons to 
+'triggerdown' and grabEndButtons to 'gripdown' (as in the 
+[sticky example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)).
 This way the grab-end event would not fire until the grip button was *pressed*, 
 even if the trigger was *released* earlier. 
 * Only one entity at a time will be targeted for each event type, 
@@ -130,7 +134,7 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| usePhysics | Whether to use physics system contstraints to handle movement, 'ifavailable', 'only', or 'never' | 'auto' |
+| usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'auto' |
 
 ##### States
 
@@ -195,7 +199,7 @@ Install and use by directly including the [browser files](dist):
 </body>
 ```
 
-#### npm (not yet avalable)
+#### npm 
 
 Install via npm:
 
