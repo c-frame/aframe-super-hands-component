@@ -1,6 +1,9 @@
 ## Super Hands
 
-Natural hand controller interaction for [A-Frame](https://aframe.io).
+Effortlessly add natural, intuitive hand controller interaction in
+[A-Frame](https://aframe.io).
+
+![Demo Gif](readme_files/super-hands-demo.gif) 
 
 ![Super Hans Can't Make a Fist](readme_files/peep-show-super-hans.gif)
 
@@ -8,7 +11,7 @@ Natural hand controller interaction for [A-Frame](https://aframe.io).
 
 The `super-hands` component interprets input from tracked controllers and 
 collision detection components
-into natural, hand-interaction gestures and communicates those gestures to 
+into interaction gestures and communicates those gestures to 
 target entities for them to respond.  
 
 The currently implemented gestures are:
@@ -88,13 +91,14 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
 | dragover-start | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
-| drag-drop | Button released while collided with and entity and holding with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
+| drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
 
 Notes: 
 
 * References to buttons being "released" and "pressed" are dependent on the schema settings. 
 For example, to make grab 'sticky', you could set startGrabButtons to 
-'triggerdown' and endGrabButtons to 'gripdown' (with `vive-controls`).
+'triggerdown' and endGrabButtons to 'gripdown' (as in the 
+[sticky example](examples/index.html#sticky)).
 This way the grab-end event would not fire until the grip button was *pressed*, 
 even if the trigger was *released* earlier. 
 * Only one entity at a time will be targeted for each event type, 
