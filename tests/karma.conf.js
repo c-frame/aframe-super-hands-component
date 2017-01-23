@@ -2,7 +2,10 @@
 var karma_conf = {
   basePath: '../',
   browserify: {
-    debug: true
+    debug: true,
+    transform: [
+      ['babelify', {presets: ['es2015']}]
+    ]
   },
   //browsers: ['Firefox', 'Chrome'],
   //browsers: ['Chromium'],

@@ -47,6 +47,8 @@
     "aframe-event-set-component": "^3.0.1",
     "aframe-extras": "^3.2.1",
     "aframe-physics-system": "^1.2.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babelify": "^7.3.0",
     "browserify": "^13.0.0",
     "budo": "^8.2.2",
     "chai": "^3.5.0",
