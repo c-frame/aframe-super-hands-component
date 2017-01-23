@@ -10,14 +10,18 @@ suite('super-hands', function () {
       done();
     });
   });
-  test('aframe available', function () {
-    assert.isOk(window.AFRAME);
-    console.log(Object.keys(AFRAME.components));
-  });
   test('component attaches without errors', function () {
-    
-    assert.isOk(this.el);
     assert.isOk(this.el.components['super-hands'].data);
+    assert.equal(this.el.components['super-hands'].data.colliderState, 
+                 'collided');
+  });
+  test('component removes without errors', function () {
+    var el = this.el;
+    el.removeComponent('super-hands');
+    process.nextTick(function () {
+      assert.notOk(el.components['super-hands']);
+      done();
+    });
   });
 /*
   test('defaults to 0 0 0', function () {
