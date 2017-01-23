@@ -63,6 +63,7 @@
     "karma-mocha-reporter": "^2.1.0",
     "karma-sinon-chai": "^1.2.4",
     "mocha": "^3.0.2",
+    "mozilla-download": "^1.1.1",
     "randomcolor": "^0.4.4",
     "semistandard": "^8.0.0",
     "shelljs": "^0.7.0",
