@@ -4,7 +4,14 @@ var karma_conf = {
   browserify: {
     debug: true,
     transform: [
-      ['babelify', {presets: ['es2015']}]
+      ['babelify', {presets: ['es2015']}],
+      [
+        'browserify-istanbul', {
+          instrumenterConfig: {
+            embedSource: true
+          }
+        }
+      ]
     ]
   },
   //browsers: ['Firefox', 'Chrome'],
@@ -37,19 +44,7 @@ var karma_conf = {
 
 // configuration for code coverage reporting
 if (process.env.TEST_ENV === 'ci') {
-  Object.assign(karma_conf.browserify, {
-    transform: [
-      [
-        'browserify-istanbul', {
-          instrumenterConfig: {
-            embedSource: true
-          },
-          defaultIgnore: true,
-          ignore: ['**/node_modules/**', '**/tests/**', '**/vendor/**', '**/*.css']
-        }
-      ]
-    ]
-  });
+
   karma_conf.coverageReporter = {
     dir: 'tests/coverage',
     includeAllSources: true,
@@ -59,7 +54,7 @@ if (process.env.TEST_ENV === 'ci') {
     ]
   };
   karma_conf.reporters.push('coverage');
-  karma_conf.preprocessors['src/**/*.js'] = ['coverage'];
+  karma_conf.preprocessors['index.js'].push(['coverage']);
 }
 
 // Apply configuration
