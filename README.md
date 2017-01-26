@@ -1,5 +1,9 @@
 ## Super Hands
 
+[![Build Status](https://travis-ci.org/wmurphyrd/aframe-super-hands-component.svg?branch=master)](https://travis-ci.org/wmurphyrd/aframe-super-hands-component)
+[![npm Dowloads](https://img.shields.io/npm/dt/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
+[![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
+
 Effortlessly add natural, intuitive hand controller interaction in
 [A-Frame](https://aframe.io).
 
@@ -39,6 +43,13 @@ components to the entities in your scene, and `super-hands` can work with all of
 [Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
 
 ### News
+
+v.0.2.2
+
+* Fix `usePhysics: only` not being honored by `grabbable`
+* Adding unit testing to prepare for updates
+
+v.0.2.1
 
 * Initial launch
 
@@ -134,7 +145,7 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'auto' |
+| usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'ifavailable' |
 
 ##### States
 

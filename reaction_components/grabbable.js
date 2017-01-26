@@ -19,7 +19,8 @@ AFRAME.registerComponent('grabbable', {
     }
   },
   tick: function() {
-    if(this.grabbed && !this.constraint) {
+    if(this.grabbed && !this.constraint && 
+       this.data.usePhysics !== 'only') {
       var handPosition = this.grabber.getAttribute('position'),
         previousPosition = this.previousPosition || handPosition,
         deltaPosition = {
