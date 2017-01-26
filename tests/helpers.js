@@ -56,3 +56,24 @@ module.exports.getSkipCISuite = function () {
     return suite;
   }
 };
+
+/**
+ * Creates and attaches a hand controller entity with a control component
+ *
+ * @param {object} comps - Map of component names to attribute values.
+ * @param {Element} scene - Indicate which scene to apply mixin to if necessary.
+ * @returns {bool} controllerOverride - Set true if comps already contains a controller component and does not need the default added.
+ */
+module.exports.controllerFactory = function (comps, scene, controllerOverride) {
+  var contrEl = document.createElement('a-entity');
+  comps = comps || {};
+  if (!controllerOverride) {
+    comps['vive-controls'] = 'hand: right';
+  }
+  Object.keys(comps).forEach(function (componentName) {
+    contrEl.setAttribute(componentName, comps[componentName]);
+  });
+  scene = scene || document.querySelector('a-scene');
+  scene.appendChild(contrEl);
+  return contrEl;
+}
