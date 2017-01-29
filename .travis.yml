@@ -26,6 +26,7 @@ env:
 branches:
   only:
     - master
+    - fftestingtweaks
 
 cache:
   directories:

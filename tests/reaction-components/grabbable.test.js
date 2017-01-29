@@ -27,12 +27,12 @@ suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
-    this.hand = helpers.controllerFactory();
-    el.sceneEl.addEventListener('loaded', function () {
+    this.hand = { getAttribute: function () {} };
+    el.parentNode.addEventListener('loaded', function () {
       done();
     });
   });
-  test('initiates grab on event when not grabbed', function (done) {
+  test.only('initiates grab on event when not grabbed', function (done) {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
         el = this.el;
