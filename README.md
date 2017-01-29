@@ -207,7 +207,7 @@ Install via npm:
 npm install super-hands
 ```
 
-Then require and use..
+Then require and use.
 
 ```js
 require('aframe');

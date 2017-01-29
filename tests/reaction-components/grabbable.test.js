@@ -1,6 +1,6 @@
 /* global assert, process, setup, suite, test */
 
-var entityFactory = require('../helpers').entityFactory;
+var entityFactory = require('../helpers').entityFactory; 
 
 suite('grabbable', function () {
   setup(function (done) {
