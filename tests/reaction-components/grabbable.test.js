@@ -2,7 +2,7 @@
 var helpers = require('../helpers'),
     entityFactory = helpers.entityFactory,
     coord = AFRAME.utils.coordinates.parse;
-suite.only('grabbable-lifecycle', function () {
+suite('grabbable-lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
@@ -23,7 +23,7 @@ suite.only('grabbable-lifecycle', function () {
   });
 });
 
-suite.only('grabbable-function without physics', function () {
+suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
@@ -57,9 +57,8 @@ suite.only('grabbable-function without physics', function () {
       .onSecondCall().returns(coord('1 1 1'));
     this.el.emit(myGrabbable.GRAB_EVENT, { hand: this.hand });
     process.nextTick( () => {
-      /* need two ticks to make an update happen, and I couldn't cause that with 
-         setTimeout or nested nextTick,
-         so just call the second tick directly */
+      /* with render loop stubbed out, need to force ticks */
+      myGrabbable.tick();
       myGrabbable.tick();
       assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'));
       done();
