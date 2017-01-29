@@ -27,45 +27,39 @@ suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
-    this.hand = helpers.controllerFactory();
-    el.sceneEl.addEventListener('loaded', function () {
+    this.hand = { getAttribute: function () {} };
+    el.parentNode.addEventListener('loaded', function () {
       done();
     });
   });
-  test('initiates grab on event when not grabbed', function (done) {
+  test('initiates grab on event when not grabbed', function () {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
         el = this.el;
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
-    this.el.emit(myGrabbable.GRAB_EVENT, { hand: hand });
-    process.nextTick(function () {
-      assert.isOk(myGrabbable.grabbed);
-      assert.isOk(myGrabbable.grabber);
-      assert.strictEqual(myGrabbable.grabber, hand);
-      assert.isOk(el.is(myGrabbable.GRABBED_STATE));
-      done();
-    });
+    myGrabbable.start({ detail: { hand: this.hand }});
+    assert.isOk(myGrabbable.grabbed);
+    assert.isOk(myGrabbable.grabber);
+    assert.strictEqual(myGrabbable.grabber, hand);
+    assert.isOk(el.is(myGrabbable.GRABBED_STATE));
   });
-  test('position updates during grab', function (done) {
+  test('position updates during grab', function () {
     var posStub = sinon.stub(this.hand, 'getAttribute'),
         myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
     posStub.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
-    this.el.emit(myGrabbable.GRAB_EVENT, { hand: this.hand });
-    process.nextTick( () => {
-      /* need two ticks to make an update happen, and I couldn't cause that with 
-         setTimeout or nested nextTick,
-         so just call the second tick directly */
-      myGrabbable.tick();
-      assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'));
-      done();
-    });
+    myGrabbable.start({ detail: { hand: this.hand }});
+    /* with render loop stubbed out, need to force ticks */
+    myGrabbable.tick();
+    myGrabbable.tick();
+    assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'));
   });
-    test('position does not update during grab when usePhysics set to "only"', function (done) {
+    test('position does not update during grab when usePhysics set to "only"', 
+         function () {
     var posStub = sinon.stub(this.hand, 'getAttribute'),
         myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
@@ -73,17 +67,11 @@ suite('grabbable-function without physics', function () {
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
     myGrabbable.data.usePhysics = 'only';
-    this.el.emit(myGrabbable.GRAB_EVENT, { hand: this.hand });
-    process.nextTick( () => {
-      /* need two ticks to make an update happen, and I couldn't cause that with 
-         setTimeout or nested nextTick,
-         so just call the second tick directly */
-      myGrabbable.tick();
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
-      done();
-    });
+    myGrabbable.start({ detail: { hand: this.hand }});
+    myGrabbable.tick();
+    assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
   });
-  test('updates cease on release event', function(done) {
+  test('updates cease on release event', function() {
     var posStub = sinon.stub(this.hand, 'getAttribute'),
         myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
@@ -93,30 +81,22 @@ suite('grabbable-function without physics', function () {
     myGrabbable.grabbed = true;
     myGrabbable.grabber = this.hand;
     this.el.addState(myGrabbable.GRABBED_STATE);
-    this.el.emit(myGrabbable.UNGRAB_EVENT, { hand: this.hand });
-    process.nextTick( () => {
-      /* need two ticks to make an update happen, and I couldn't cause that with 
-         setTimeout or nested nextTick,
-         so just call the second tick directly */
-      myGrabbable.tick();
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
-      assert.notOk(this.el.is(myGrabbable.GRABBED_STATE));
-      assert.notOk(myGrabbable.grabbed);
-      assert.notOk(myGrabbable.grabber);
-      done();
-    });
+    myGrabbable.tick();
+    myGrabbable.end({ detail: { hand: this.hand }});
+    myGrabbable.tick();
+    assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
+    assert.notOk(this.el.is(myGrabbable.GRABBED_STATE));
+    assert.notOk(myGrabbable.grabbed);
+    assert.notOk(myGrabbable.grabber);
   });
-  test('grabbing from a second hand is rejected', function(done) {
+  test('grabbing from a second hand is rejected', function() {
     var myGrabbable = this.el.components.grabbable,
         secondHand = {};
     myGrabbable.grabbed = true;
     myGrabbable.grabber = this.hand;
     this.el.addState(myGrabbable.GRABBED_STATE);
-    this.el.emit(myGrabbable.GRAB_EVENT, { hand: secondHand });
-    process.nextTick( () => {
-      assert.strictEqual(myGrabbable.grabber, this.hand);
-      done();
-    });
+    myGrabbable.start({ detail: { hand: secondHand }});
+    assert.strictEqual(myGrabbable.grabber, this.hand);
   });
   
 });
