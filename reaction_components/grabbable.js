@@ -9,8 +9,9 @@ AFRAME.registerComponent('grabbable', {
     this.constraint = null;
     this.grabbed = false;
     
-    this.start = this.start.bind(this);
-    this.end = this.end.bind(this);
+    // wrappers as event handlers so that the inner func can be spied on
+    this.startB = evt => this.start(evt);
+    this.endB = evt => this.end(evt);
   },
   update: function (oldDat) {
     if(this.data.usePhysics === 'never' && this.constraint) {
@@ -39,12 +40,12 @@ AFRAME.registerComponent('grabbable', {
     }
   },
   pause: function () {
-    this.el.removeEventListener(this.GRAB_EVENT, this.start);
-    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+    this.el.removeEventListener(this.GRAB_EVENT, this.startB);
+    this.el.removeEventListener(this.UNGRAB_EVENT, this.endB);
   },
   play: function () {
-    this.el.addEventListener(this.GRAB_EVENT, this.start);
-    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
+    this.el.addEventListener(this.GRAB_EVENT, this.startB);
+    this.el.addEventListener(this.UNGRAB_EVENT, this.endB);
   },
   start: function(evt) {
     if (this.grabbed) { return; } //already grabbed

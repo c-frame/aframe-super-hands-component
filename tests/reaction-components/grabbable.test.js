@@ -28,25 +28,32 @@ suite('grabbable-function without physics', function () {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
     this.hand = helpers.controllerFactory();
-    el.sceneEl.addEventListener('loaded', function () {
+    el.parentNode.addEventListener('loaded', function () {
       done();
     });
   });
-  test('initiates grab on event when not grabbed', function (done) {
+  test.only('initiates grab on event when not grabbed', function (done) {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
-        el = this.el;
+        el = this.el,
+        startSpy = sinon.spy(myGrabbable, 'start');
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
     this.el.emit(myGrabbable.GRAB_EVENT, { hand: hand });
-    process.nextTick(function () {
+    function cb() {
+      if(!startSpy.called) {
+        setTimeout(cb, 0);
+        return;
+      }
+      assert.isOk(startSpy.called, 'grabbable.start was called');
       assert.isOk(myGrabbable.grabbed);
       assert.isOk(myGrabbable.grabber);
       assert.strictEqual(myGrabbable.grabber, hand);
       assert.isOk(el.is(myGrabbable.GRABBED_STATE));
       done();
-    });
+    }
+    cb();
   });
   test('position updates during grab', function (done) {
     var posStub = sinon.stub(this.hand, 'getAttribute'),
