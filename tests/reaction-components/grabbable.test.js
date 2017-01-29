@@ -27,7 +27,7 @@ suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
-    this.hand = helpers.controllerFactory();
+    this.hand = { getAttribute: function () {} };
     el.parentNode.addEventListener('loaded', function () {
       done();
     });
@@ -36,14 +36,15 @@ suite('grabbable-function without physics', function () {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
         el = this.el,
-        startSpy = sinon.spy(myGrabbable, 'start');
+        startSpy = sinon.spy(myGrabbable, 'start'),
+        cbCount = 0;
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
     this.el.emit(myGrabbable.GRAB_EVENT, { hand: hand });
     function cb() {
-      if(!startSpy.called) {
-        setTimeout(cb, 0);
+      if(cbCount++ < 10 && !startSpy.called) {
+        process.nextTick(cb);
         return;
       }
       assert.isOk(startSpy.called, 'grabbable.start was called');
@@ -64,9 +65,8 @@ suite('grabbable-function without physics', function () {
       .onSecondCall().returns(coord('1 1 1'));
     this.el.emit(myGrabbable.GRAB_EVENT, { hand: this.hand });
     process.nextTick( () => {
-      /* need two ticks to make an update happen, and I couldn't cause that with 
-         setTimeout or nested nextTick,
-         so just call the second tick directly */
+      /* with render loop stubbed out, need to force ticks */
+      myGrabbable.tick();
       myGrabbable.tick();
       assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'));
       done();
