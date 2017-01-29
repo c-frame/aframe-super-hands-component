@@ -230,7 +230,7 @@ AFRAME.registerComponent('super-hands', {
     if(!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
-    getTarget = () => {
+    var getTarget = () => {
       if(!used) {
         used = true;
         hitEl = this.hoverEls.length ? this.useHoveredEl() : hitEl;
