@@ -2,7 +2,7 @@
 var helpers = require('../helpers'),
     entityFactory = helpers.entityFactory,
     coord = AFRAME.utils.coordinates.parse;
-suite('grabbable-lifecycle', function () {
+suite.only('grabbable-lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
@@ -32,7 +32,7 @@ suite('grabbable-function without physics', function () {
       done();
     });
   });
-  test.only('initiates grab on event when not grabbed', function (done) {
+  test('initiates grab on event when not grabbed', function (done) {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
         el = this.el;
