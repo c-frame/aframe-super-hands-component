@@ -44,10 +44,13 @@ AFRAME.registerComponent('grabbable', {
     this.el.removeEventListener(this.UNGRAB_EVENT, this.endB);
   },
   play: function () {
+    
     this.el.addEventListener(this.GRAB_EVENT, this.startB);
     this.el.addEventListener(this.UNGRAB_EVENT, this.endB);
+    console.log("from grabbable.play: grabbable event listeners registered");
   },
   start: function(evt) {
+    console.log("grabbable handler was called");
     if (this.grabbed) { return; } //already grabbed
     this.grabber = evt.detail.hand;
     this.grabbed = true;

@@ -36,25 +36,29 @@ suite('grabbable-function without physics', function () {
     var myGrabbable = this.el.components.grabbable,
         hand = this.hand, 
         el = this.el,
-        startSpy = sinon.spy(myGrabbable, 'start'),
+        startSpy = this.sinon.spy(myGrabbable, 'start'),
         cbCount = 0;
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
+    console.log('checks immediately before emit is called:');
+    console.log('el.sceneEl.hasLoaded', el.sceneEl.hasLoaded);
+    console.log('el.components.grabbable.initialized', el.components.grabbable.initialized);
     this.el.emit(myGrabbable.GRAB_EVENT, { hand: hand });
     function cb() {
       if(cbCount++ < 10 && !startSpy.called) {
         process.nextTick(cb);
         return;
       }
-      console.log('event handler was called? ', startSpy.called);
+      console.log('checks inside callback function:');
+      console.log('event handler spy.called? ', startSpy.called);
       assert.isOk(myGrabbable.grabbed);
       assert.isOk(myGrabbable.grabber);
       assert.strictEqual(myGrabbable.grabber, hand);
       assert.isOk(el.is(myGrabbable.GRABBED_STATE));
       done();
     }
-    cb();
+    window.setTimeout(cb, 20);
   });
   test('position updates during grab', function (done) {
     var posStub = sinon.stub(this.hand, 'getAttribute'),
