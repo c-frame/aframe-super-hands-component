@@ -23,10 +23,6 @@ env:
     - CI_ACTION="npm run test:ci"
     - CI_ACTION="npm run build"
 
-branches:
-  only:
-    - master
-
 cache:
   directories:
     - node_modules
