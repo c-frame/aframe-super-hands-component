@@ -3,28 +3,26 @@
 /**
  * __init.test.js is run before every test case.
  */
-
 window.debug = true;
+var AScene = require('aframe').AScene
 
 navigator.getVRDisplays = function () {
   var resolvePromise = Promise.resolve();
   var mockVRDisplay = {
     requestPresent: resolvePromise,
     exitPresent: resolvePromise,
-    getPose: function () { return { orientation: null, position: null }; },
+    getPose: function () { return {orientation: null, position: null}; },
     requestAnimationFrame: function () { return 1; }
   };
   return Promise.resolve([mockVRDisplay]);
 };
 
-//var AScene = require('core/scene/a-scene');
-
 setup(function () {
   this.sinon = sinon.sandbox.create();
   // Stubs to not create a WebGL context since Travis CI runs headless.
-  /*this.sinon.stub(AScene.prototype, 'render');
-  this.sinon.stub(AScene.prototype, 'resize');
-  this.sinon.stub(AScene.prototype, 'setupRenderer');*/
+  this.sinon.stub(AScene.prototype, 'render');
+  //this.sinon.stub(AScene.prototype, 'resize');
+  //this.sinon.stub(AScene.prototype, 'setupRenderer');
 });
 
 teardown(function () {
