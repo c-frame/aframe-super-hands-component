@@ -47,7 +47,7 @@ suite('grabbable-function without physics', function () {
         process.nextTick(cb);
         return;
       }
-      assert.isOk(startSpy.called, 'grabbable.start was called');
+      console.log('event handler was called? ', startSpy.called);
       assert.isOk(myGrabbable.grabbed);
       assert.isOk(myGrabbable.grabber);
       assert.strictEqual(myGrabbable.grabber, hand);
