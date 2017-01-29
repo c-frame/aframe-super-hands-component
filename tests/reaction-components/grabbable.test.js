@@ -23,7 +23,7 @@ suite.only('grabbable-lifecycle', function () {
   });
 });
 
-suite('grabbable-function without physics', function () {
+suite.only('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
