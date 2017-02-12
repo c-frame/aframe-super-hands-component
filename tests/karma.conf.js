@@ -9,9 +9,16 @@ var karma_conf = {
   },
   //browsers: ['Firefox', 'Chrome'],
   //browsers: ['Chromium'],
+  browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
     mocha: {'ui': 'tdd'}
+  },
+  customLaunchers: {
+    Chromium_WebVR: {
+      base: 'Chromium',
+      flags: ['--enable-webvr', '--enable-gamepad-extensions']
+    }
   },
   envPreprocessor: [
     'TEST_ENV'
