@@ -64,7 +64,7 @@ module.exports.getSkipCISuite = function () {
  * @param {Element} scene - Indicate which scene to apply mixin to if necessary.
  * @returns {bool} controllerOverride - Set true if comps already contains a controller component and does not need the default added.
  */
-module.exports.controllerFactory = function (comps, scene, controllerOverride) {
+module.exports.controllerFactory = function (comps, controllerOverride, scene) {
   var contrEl = document.createElement('a-entity');
   comps = comps || {};
   if (!controllerOverride) {
