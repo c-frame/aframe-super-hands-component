@@ -6,13 +6,13 @@
  *
  * @returns {object} An `<a-entity>` element.
  */
-module.exports.entityFactory = function (opts) {
+module.exports.entityFactory = function (opts, usePhysics) {
   var scene = document.createElement('a-scene');
   var assets = document.createElement('a-assets');
   var entity = document.createElement('a-entity');
   scene.appendChild(assets);
   scene.appendChild(entity);
-
+  if (usePhysics) { scene.setAttribute('physics', ''); }
   opts = opts || {};
 
   if (opts.assets) {
@@ -22,6 +22,8 @@ module.exports.entityFactory = function (opts) {
   }
 
   document.body.appendChild(scene);
+  // convenience link to scene because new entities in FF don't get .sceneEl until loaded
+  entity.sceneEl = scene;
   return entity;
 };
 
