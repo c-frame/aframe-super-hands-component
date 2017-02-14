@@ -19,6 +19,7 @@ script:
 env:
   global:
     - TEST_SUITE=unit
+    - CXX=g++-4.8
   matrix:
     - CI_ACTION="npm run test:ci"
     - CI_ACTION="npm run build"
@@ -26,3 +27,10 @@ env:
 cache:
   directories:
     - node_modules
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
