@@ -24,7 +24,10 @@ AFRAME.registerComponent('stretchable', {
       otherHandPos = new THREE.Vector3()
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / (this.previousStretch || currentStretch); 
+      deltaStretch = 1;
+    if (this.previousStretch != null && currentStretch !== 0) {
+      deltaStretch = currentStretch / this.previousStretch;
+    }
     this.previousStretch = currentStretch;
     scale = scale.multiplyScalar(deltaStretch);
     this.el.setAttribute('scale', scale);

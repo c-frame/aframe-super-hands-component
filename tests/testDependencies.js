@@ -1,2 +1,3 @@
 window.debug = true;
-require('aframe');
+var AFRAME = require('aframe');
+require('aframe-physics-system').registerAll(AFRAME);

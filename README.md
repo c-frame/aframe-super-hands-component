@@ -47,6 +47,7 @@ components to the entities in your scene, and `super-hands` can work with all of
 v.0.2.2
 
 * Fix `usePhysics: only` not being honored by `grabbable`
+* Fix handling of edge cases in `stretchable`
 * Adding unit testing to prepare for updates
 
 v.0.2.1
