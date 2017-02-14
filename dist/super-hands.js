@@ -297,7 +297,7 @@
 	    }
 	    hitElIndex = this.hoverEls.indexOf(hitEl);
 	    // interactions target the oldest entity in the stack, if present
-	    getTarget = function getTarget() {
+	    var getTarget = function getTarget() {
 	      if (!used) {
 	        used = true;
 	        hitEl = _this3.hoverEls.length ? _this3.useHoveredEl() : hitEl;
@@ -470,7 +470,7 @@
 	    }
 	  },
 	  tick: function tick() {
-	    if (this.grabbed && !this.constraint) {
+	    if (this.grabbed && !this.constraint && this.data.usePhysics !== 'only') {
 	      var handPosition = this.grabber.getAttribute('position'),
 	          previousPosition = this.previousPosition || handPosition,
 	          deltaPosition = {
@@ -554,7 +554,10 @@
 	        handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position')),
 	        otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position')),
 	        currentStretch = handPos.distanceTo(otherHandPos),
-	        deltaStretch = currentStretch / (this.previousStretch || currentStretch);
+	        deltaStretch = 1;
+	    if (this.previousStretch != null && currentStretch !== 0) {
+	      deltaStretch = currentStretch / this.previousStretch;
+	    }
 	    this.previousStretch = currentStretch;
 	    scale = scale.multiplyScalar(deltaStretch);
 	    this.el.setAttribute('scale', scale);
