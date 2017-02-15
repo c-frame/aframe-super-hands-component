@@ -465,7 +465,7 @@
 	  },
 	  update: function update(oldDat) {
 	    if (this.data.usePhysics === 'never' && this.constraint) {
-	      this.physics.world.removeConstraint(this.constraint);
+	      this.el.body.world.removeConstraint(this.constraint);
 	      this.constraint = null;
 	    }
 	  },

@@ -241,7 +241,7 @@ AFRAME.registerComponent('super-hands', {
     if(!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
-    getTarget = () => {
+    var getTarget = () => {
       if(!used) {
         used = true;
         hitEl = this.hoverEls.length ? this.useHoveredEl() : hitEl;
@@ -380,12 +380,13 @@ AFRAME.registerComponent('grabbable', {
   },
   update: function (oldDat) {
     if(this.data.usePhysics === 'never' && this.constraint) {
-      this.physics.world.removeConstraint(this.constraint);
+      this.el.body.world.removeConstraint(this.constraint);
       this.constraint = null;
     }
   },
   tick: function() {
-    if(this.grabbed && !this.constraint) {
+    if(this.grabbed && !this.constraint && 
+       this.data.usePhysics !== 'only') {
       var handPosition = this.grabber.getAttribute('position'),
         previousPosition = this.previousPosition || handPosition,
         deltaPosition = {
@@ -499,7 +500,10 @@ AFRAME.registerComponent('stretchable', {
       otherHandPos = new THREE.Vector3()
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / (this.previousStretch || currentStretch); 
+      deltaStretch = 1;
+    if (this.previousStretch != null && currentStretch !== 0) {
+      deltaStretch = currentStretch / this.previousStretch;
+    }
     this.previousStretch = currentStretch;
     scale = scale.multiplyScalar(deltaStretch);
     this.el.setAttribute('scale', scale);

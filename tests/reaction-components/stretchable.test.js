@@ -88,7 +88,6 @@ suite('stretchable-physics', function () {
       secondHand: this.hand2
     }});
     this.comp.tick();
-    console.log(this.el.body.shapes[0].halfExtents);
     assert.deepEqual(this.el.body.shapes[0].halfExtents, 
                      scale.set(0.5, 0.5, 0.5));
     this.comp.tick();
@@ -108,7 +107,6 @@ suite('stretchable-physics', function () {
       secondHand: this.hand2
     }});
     this.comp.tick();
-    console.log(this.el.body.shapes[0].halfExtents);
     assert.deepEqual(this.el.body.shapes[0].halfExtents, 
                      scale.set(0.5, 0.5, 0.5));
     this.comp.tick();
