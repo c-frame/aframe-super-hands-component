@@ -1,8 +1,9 @@
 /* global assert, process, setup, suite, test */
 
-var entityFactory = require('../helpers').entityFactory;
+var helpers = require('../helpers'), 
+    entityFactory = helpers.entityFactory;
 
-suite('super-hands', function () {
+suite('super-hands lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('super-hands', '');
@@ -15,7 +16,7 @@ suite('super-hands', function () {
     assert.equal(this.el.components['super-hands'].data.colliderState, 
                  'collided');
   });
-  test('component removes without errors', function () {
+  test('component removes without errors', function (done) {
     var el = this.el;
     el.removeComponent('super-hands');
     process.nextTick(function () {
@@ -23,45 +24,90 @@ suite('super-hands', function () {
       done();
     });
   });
-/*
-  test('defaults to 0 0 0', function () {
-    var el = this.el;
-    assert.equal(el.object3D.position.x, 0);
-    assert.equal(el.object3D.position.y, 0);
-    assert.equal(el.object3D.position.z, 0);
-  });
+});
 
-  suite('schema', function () {
-    test('can get position', function () {
-      assert.shallowDeepEqual(this.el.getAttribute('position'), {
-        x: 0, y: 0, z: 0
-      });
+suite('super-hands hit processing & event emission', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target2 = document.createElement('a-entity');
+    this.target1.parentNode.appendChild(this.target2);
+    this.hand1 = helpers.controllerFactory({
+      'super-hands': ''
     });
-
-    test('can get defined position', function () {
-      var el = this.el;
-      el.setAttribute('position', '1 2 3');
-      assert.shallowDeepEqual(el.getAttribute('position'), {
-        x: 1, y: 2, z: 3
-      });
+    this.hand2 = helpers.controllerFactory({
+      'vive-controls': 'hand: left',
+      'super-hands': ''
+    }, true);
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      this.sh2 = this.hand2.components['super-hands'];
+      done();
     });
   });
-
-  suite('update', function () {
-    test('can set position', function () {
-      var el = this.el;
-      el.setAttribute('position', '-1 0.5 3.0');
-      assert.equal(el.object3D.position.x, -1);
-      assert.equal(el.object3D.position.y, 0.5);
-      assert.equal(el.object3D.position.z, 3);
+  test('hover event', function (done) {
+    this.target1.addEventListener('hover-start', evt => {
+      assert.strictEqual(evt.detail.hand, this.hand1);
+      assert.includeMembers(this.sh1.hoverEls, [this.target1]);
+      done();
     });
-
-    test('can set position with object', function () {
-      var el = this.el;
-      el.setAttribute('position', {x: 1, y: 2, z: 3});
-      assert.equal(el.object3D.position.x, 1);
-      assert.equal(el.object3D.position.y, 2);
-      assert.equal(el.object3D.position.z, 3);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+  });
+  test('unhover event', function (done) {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.target1.addEventListener('hover-end', evt => {
+      assert.strictEqual(evt.detail.hand, this.hand1);
+      assert.strictEqual(this.sh1.hoverEls.indexOf(this.target1), -1);
+      done();
     });
-  });*/
+    this.sh1.useHoveredEl();
+  });
+  test('stacking hovered entities', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.equal(this.sh1.hoverEls.length, 2);
+    assert.strictEqual(this.sh1.useHoveredEl(), this.target1);
+    assert.equal(this.sh1.hoverEls.length, 1);
+    assert.strictEqual(this.sh1.useHoveredEl(), this.target2);
+    assert.equal(this.sh1.hoverEls.length, 0);
+  });
+  test('grab event', function (done) {
+    this.sh1.onGrabStartButton();
+    this.target1.addEventListener('grab-start', evt => {
+      assert.strictEqual(evt.detail.hand, this.hand1);
+      assert.strictEqual(this.sh1.carried, this.target1);
+      done();
+    });
+    this.sh1.onHit({ detail: { el: this.target1 } });
+  });
+  test('ungrab event', function (done) {
+    this.sh1.onGrabStartButton();
+    this.target1.addEventListener('grab-end', evt => {
+      assert.strictEqual(evt.detail.hand, this.hand1);
+      process.nextTick(() => {
+        assert.isNotOk(this.sh1.carried);
+        assert.isFalse(this.sh1.grabbing);
+        done();
+      });
+    });
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabEndButton({});
+  });
+  test('finds other controller', function() {
+    assert.isOk(this.sh1.otherController);
+    assert.isOk(this.sh2.otherController);
+    assert.strictEqual(this.sh1.otherController, this.hand2);
+    assert.strictEqual(this.sh2.otherController, this.hand1);
+  });
+  test('stretch event', function () {
+    var stretchSpy = sinon.spy(this.target1, 'emit').withArgs('stretch-start');
+    //var stretchSpy1 = this.sinon.spy(), stretchSpy2 = this.sinon.spy();
+    //this.target1.addEventListener('stretch-start', stretchSpy1);
+    //this.target2.addEventListener('stretch-start', stretchSpy2);
+    this.sh1.onStretchStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isFalse(stretchSpy.called);
+    this.sh2.onStretchStartButton();
+    this.sh2.onHit({ detail: { el: this.target1 } });
+    assert.isTrue(stretchSpy.called);
+  });
 });

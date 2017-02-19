@@ -213,12 +213,8 @@
 
 	  /* link between controllers for two-handed interactions  */
 	  findOtherController: function findOtherController() {
-	    if (!this.el.components['tracked-controls']) {
-	      return; //controllers not yet on
-	    }
-	    // this could be smoother if systems.controllers kept a link from the 
-	    // controller back to its node
-	    var controllers = document.querySelectorAll('[tracked-controls]');
+	    // this would be better with a system
+	    var controllers = document.querySelectorAll('[super-hands]');
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
 	    var _iteratorError = undefined;
