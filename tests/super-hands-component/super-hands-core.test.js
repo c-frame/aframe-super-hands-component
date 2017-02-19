@@ -155,4 +155,21 @@ suite('super-hands hit processing & event emission', function () {
     assert.isTrue(dragDropSpy1.called, 'drag-drop emitted from held');
     assert.isTrue(dragDropSpy2.called, 'drag-drop emitted form hovered');
   });
+  test('all gestures at once capture same entity', function () {
+    this.sh1.onGrabStartButton();
+    this.sh1.onDragDropStartButton();
+    this.sh1.onStretchStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.equal(this.sh1.hoverEls.length, 0);
+    assert.strictEqual(this.sh1.carried, this.sh1.dragged);
+    assert.strictEqual(this.sh1.dragged, this.sh1.stretched);
+  });
+  test('drag after grab uses carried entity', function () {
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.strictEqual(this.sh1.carried, this.sh1.dragged);
+    assert.sameMembers(this.sh1.hoverEls, [this.target2]);
+  });
 });
