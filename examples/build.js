@@ -15,6 +15,7 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
@@ -93,7 +94,6 @@ AFRAME.registerComponent('super-hands', {
     this.stretched = null;
     this.dragged = null;
     
-    this.findOtherController = this.findOtherController.bind(this);
     this.unHover = this.unHover.bind(this);
     this.unWatch = this.unWatch.bind(this);
     this.onHit = this.onHit.bind(this);
@@ -103,7 +103,7 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton = this.onStretchEndButton.bind(this);
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-    this.findOtherController();
+    this.system.registerMe(this.el);
   },
 
   /**
@@ -118,21 +118,14 @@ AFRAME.registerComponent('super-hands', {
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function () { },
-
-  /**
-   * Called on each scene tick.
-   */
-  tick: function (t) { 
- 
+  remove: function () {
+     this.system.unregisterMe(this.el);
   },
   /**
    * Called when entity pauses.
    * Use to stop or remove any dynamic or background behavior such as events.
    */
   pause: function () {
-    this.el.sceneEl.removeEventListener('controllersupdated',  
-                                        this.findOtherController);
     this.el.removeEventListener(this.data.colliderEvent, this.onHit);
     
     this.data.grabStartButtons.forEach( b => {
@@ -160,8 +153,6 @@ AFRAME.registerComponent('super-hands', {
    * Use to continue or add any dynamic or background behavior such as events.
    */
   play: function () {
-    this.el.sceneEl.addEventListener('controllersupdated',  
-                                     this.findOtherController);
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     
     this.data.grabStartButtons.forEach( b => {
@@ -182,18 +173,6 @@ AFRAME.registerComponent('super-hands', {
     this.data.dragDropEndButtons.forEach( b => {
       this.el.addEventListener(b, this.onDragDropEndButton);
     });
-  },
-  
-  /* link between controllers for two-handed interactions  */
-  findOtherController: function () {
-    // this would be better with a system
-    var controllers = document.querySelectorAll('[super-hands]');
-    for (var [id, node] of controllers.entries()) { 
-      if(node !== this.el) {
-        this.otherController = node;
-        break;
-      }
-    }
   },
   onGrabStartButton: function (evt) {
     this.grabbing = true;
@@ -337,7 +316,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./reaction_components/drag-droppable.js":3,"./reaction_components/grabbable.js":4,"./reaction_components/hoverable.js":5,"./reaction_components/stretchable.js":6}],3:[function(require,module,exports){
+},{"./reaction_components/drag-droppable.js":3,"./reaction_components/grabbable.js":4,"./reaction_components/hoverable.js":5,"./reaction_components/stretchable.js":6,"./systems/super-hands-system.js":7}],3:[function(require,module,exports){
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
@@ -545,4 +524,28 @@ AFRAME.registerComponent('stretchable', {
     this.el.removeState(this.STRETCHED_STATE);
   } 
 });
+},{}],7:[function(require,module,exports){
+AFRAME.registerSystem('super-hands', {
+  init: function () {
+    this.controllers = [];
+  },
+  registerMe: function (el) {
+    //when second controller registers, store links
+    if(this.controllers.length === 1) {
+      this.controllers[0].components['super-hands'].otherController = el;
+      el.components['super-hands'].otherController = this.controllers[0];
+    }
+    this.controllers.push(el);
+  },
+  unregisterMe: function (el) {
+    var index = this.controllers.indexOf(el);
+    if(index !== -1) {
+      this.controllers.splice(index, 1);
+    }
+    this.controllers.forEach(x => {
+      if(x.otherController === el) { x.otherControler = null; }
+    });
+  } 
+});
+
 },{}]},{},[1]);

@@ -4,6 +4,7 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
@@ -82,7 +83,6 @@ AFRAME.registerComponent('super-hands', {
     this.stretched = null;
     this.dragged = null;
     
-    this.findOtherController = this.findOtherController.bind(this);
     this.unHover = this.unHover.bind(this);
     this.unWatch = this.unWatch.bind(this);
     this.onHit = this.onHit.bind(this);
@@ -92,7 +92,7 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton = this.onStretchEndButton.bind(this);
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-    this.findOtherController();
+    this.system.registerMe(this.el);
   },
 
   /**
@@ -107,21 +107,14 @@ AFRAME.registerComponent('super-hands', {
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function () { },
-
-  /**
-   * Called on each scene tick.
-   */
-  tick: function (t) { 
- 
+  remove: function () {
+     this.system.unregisterMe(this.el);
   },
   /**
    * Called when entity pauses.
    * Use to stop or remove any dynamic or background behavior such as events.
    */
   pause: function () {
-    this.el.sceneEl.removeEventListener('controllersupdated',  
-                                        this.findOtherController);
     this.el.removeEventListener(this.data.colliderEvent, this.onHit);
     
     this.data.grabStartButtons.forEach( b => {
@@ -149,8 +142,6 @@ AFRAME.registerComponent('super-hands', {
    * Use to continue or add any dynamic or background behavior such as events.
    */
   play: function () {
-    this.el.sceneEl.addEventListener('controllersupdated',  
-                                     this.findOtherController);
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     
     this.data.grabStartButtons.forEach( b => {
@@ -171,18 +162,6 @@ AFRAME.registerComponent('super-hands', {
     this.data.dragDropEndButtons.forEach( b => {
       this.el.addEventListener(b, this.onDragDropEndButton);
     });
-  },
-  
-  /* link between controllers for two-handed interactions  */
-  findOtherController: function () {
-    // this would be better with a system
-    var controllers = document.querySelectorAll('[super-hands]');
-    for (var [id, node] of controllers.entries()) { 
-      if(node !== this.el) {
-        this.otherController = node;
-        break;
-      }
-    }
   },
   onGrabStartButton: function (evt) {
     this.grabbing = true;

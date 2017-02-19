@@ -46,8 +46,6 @@
 
 	'use strict';
 
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 	/* global AFRAME */
 
 	if (typeof AFRAME === 'undefined') {
@@ -58,6 +56,7 @@
 	__webpack_require__(2);
 	__webpack_require__(3);
 	__webpack_require__(4);
+	__webpack_require__(5);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -120,7 +119,6 @@
 	    this.stretched = null;
 	    this.dragged = null;
 
-	    this.findOtherController = this.findOtherController.bind(this);
 	    this.unHover = this.unHover.bind(this);
 	    this.unWatch = this.unWatch.bind(this);
 	    this.onHit = this.onHit.bind(this);
@@ -130,7 +128,7 @@
 	    this.onStretchEndButton = this.onStretchEndButton.bind(this);
 	    this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
 	    this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-	    this.findOtherController();
+	    this.system.registerMe(this.el);
 	  },
 
 	  /**
@@ -145,12 +143,9 @@
 	   * Called when a component is removed (e.g., via removeAttribute).
 	   * Generally undoes all modifications to the entity.
 	   */
-	  remove: function remove() {},
-
-	  /**
-	   * Called on each scene tick.
-	   */
-	  tick: function tick(t) {},
+	  remove: function remove() {
+	    this.system.unregisterMe(this.el);
+	  },
 	  /**
 	   * Called when entity pauses.
 	   * Use to stop or remove any dynamic or background behavior such as events.
@@ -158,7 +153,6 @@
 	  pause: function pause() {
 	    var _this = this;
 
-	    this.el.sceneEl.removeEventListener('controllersupdated', this.findOtherController);
 	    this.el.removeEventListener(this.data.colliderEvent, this.onHit);
 
 	    this.data.grabStartButtons.forEach(function (b) {
@@ -188,7 +182,6 @@
 	  play: function play() {
 	    var _this2 = this;
 
-	    this.el.sceneEl.addEventListener('controllersupdated', this.findOtherController);
 	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
 
 	    this.data.grabStartButtons.forEach(function (b) {
@@ -209,41 +202,6 @@
 	    this.data.dragDropEndButtons.forEach(function (b) {
 	      _this2.el.addEventListener(b, _this2.onDragDropEndButton);
 	    });
-	  },
-
-	  /* link between controllers for two-handed interactions  */
-	  findOtherController: function findOtherController() {
-	    // this would be better with a system
-	    var controllers = document.querySelectorAll('[super-hands]');
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-
-	    try {
-	      for (var _iterator = controllers.entries()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        var _step$value = _slicedToArray(_step.value, 2),
-	            id = _step$value[0],
-	            node = _step$value[1];
-
-	        if (node !== this.el) {
-	          this.otherController = node;
-	          break;
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
-	        }
-	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
-	        }
-	      }
-	    }
 	  },
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
@@ -406,6 +364,37 @@
 
 	'use strict';
 
+	AFRAME.registerSystem('super-hands', {
+	  init: function init() {
+	    this.controllers = [];
+	  },
+	  registerMe: function registerMe(el) {
+	    //when second controller registers, store links
+	    if (this.controllers.length === 1) {
+	      this.controllers[0].components['super-hands'].otherController = el;
+	      el.components['super-hands'].otherController = this.controllers[0];
+	    }
+	    this.controllers.push(el);
+	  },
+	  unregisterMe: function unregisterMe(el) {
+	    var index = this.controllers.indexOf(el);
+	    if (index !== -1) {
+	      this.controllers.splice(index, 1);
+	    }
+	    this.controllers.forEach(function (x) {
+	      if (x.otherController === el) {
+	        x.otherControler = null;
+	      }
+	    });
+	  }
+	});
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
 	AFRAME.registerComponent('hoverable', {
 	  init: function init() {
 	    this.HOVERED_STATE = 'hovered';
@@ -443,7 +432,7 @@
 	});
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -524,7 +513,7 @@
 	});
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -604,7 +593,7 @@
 	});
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
