@@ -176,24 +176,12 @@ suite('super-hands hit processing & event emission', function () {
 
 suite('custom button mapping', function () {
   setup(function (done) {
-    // Event firing never works in firefox, test these in chrome only
-    if(navigator.userAgent.includes('Firefox')) { 
-      this.sinon.restore(); 
-      this.skip(); 
-    }
     this.target1 = entityFactory();
-    //this.target2 = document.createElement('a-entity');
-    //this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
     });
-    /*this.hand2 = helpers.controllerFactory({
-      'vive-controls': 'hand: left',
-      'super-hands': ''
-    }, true); */
     this.hand1.parentNode.addEventListener('loaded', () => {
       this.sh1 = this.hand1.components['super-hands'];
-      //this.sh2 = this.hand2.components['super-hands'];
       done();
     });
   });
