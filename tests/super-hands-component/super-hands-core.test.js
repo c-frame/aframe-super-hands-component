@@ -114,13 +114,45 @@ suite('super-hands hit processing & event emission', function () {
     assert.isTrue(stretchSpy.called);
     assert.isFalse(unStretchSpy.called);
     this.sh1.onStretchEndButton();
-    console.log('unstretch count', unStretchSpy.callCount, unStretchSpy.called);
     assert.isTrue(unStretchSpy.called);
     assert.isNotOk(this.sh1.stretching);
     assert.strictEqual(this.sh2.stretched, this.target1);
     this.sh2.onStretchEndButton();
     assert.isTrue(unStretchSpy.calledOnce);
     assert.isNotOk(this.sh2.stretching);
-    
+  });
+  test('drag events', function () {
+    var emitSpy1 = sinon.spy(this.target1, 'emit'),
+        dragOverSpy1 = emitSpy1.withArgs('dragover-start'),
+        unDragOverSpy1 = emitSpy1.withArgs('dragover-end'),
+        dragDropSpy1 = emitSpy1.withArgs('drag-drop'),
+        emitSpy2 = sinon.spy(this.target2, 'emit'),
+        dragOverSpy2 = emitSpy2.withArgs('dragover-start'),
+        unDragOverSpy2 = emitSpy2.withArgs('dragover-end'),
+        dragDropSpy2 = emitSpy2.withArgs('drag-drop');
+    this.sh1.onDragDropStartButton();
+    assert.isTrue(this.sh1.dragging, 'dragging');
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.dragged, this.target1);
+    assert.isFalse(dragOverSpy1.called, 'dragover-start not emitted with no droptarget');
+    assert.isFalse(dragOverSpy2.called, 'dragover-start not emitted with no droptarget');
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.notEqual(this.sh1.hoverEls.indexOf(this.target2), -1, 'droptaret added to hoverEls');
+    assert.isTrue(dragOverSpy1.called, 'dragover-start emitted from held');
+    assert.isTrue(dragOverSpy2.called, 'dragover-start emitted from hovered');
+    this.sh1.unHover({ detail: { state: 'unrelated' }, target: this.target2 });
+    assert.isFalse(unDragOverSpy1.called, 'unhover ignores unrelated state changes: held');
+    assert.isFalse(unDragOverSpy2.called, 'unhover ignores unrelated state changes: hovered');
+    this.sh1.unHover({ detail: { state: 'collided' }, target: this.target2 });
+    assert.isTrue(unDragOverSpy1.called, 'drag-over ends with drag-drop: held');
+    assert.isTrue(unDragOverSpy2.called, 'drag-over ends with drag-drop: hovered');
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.isFalse(dragDropSpy1.called, 'drag-drop not yet emitted from held');
+    assert.isFalse(dragDropSpy2.called, 'drag-drop not yet emitted form hovered');
+    this.sh1.onDragDropEndButton();
+    assert.isTrue(unDragOverSpy1.calledTwice, 'drag-over ends with drag-drop: held');
+    assert.isTrue(unDragOverSpy2.calledTwice, 'drag-over ends with drag-drop: hovered');
+    assert.isTrue(dragDropSpy1.called, 'drag-drop emitted from held');
+    assert.isTrue(dragDropSpy2.called, 'drag-drop emitted form hovered');
   });
 });
