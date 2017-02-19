@@ -99,15 +99,28 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh2.otherController, this.hand1);
   });
   test('stretch event', function () {
-    var stretchSpy = sinon.spy(this.target1, 'emit').withArgs('stretch-start');
-    //var stretchSpy1 = this.sinon.spy(), stretchSpy2 = this.sinon.spy();
-    //this.target1.addEventListener('stretch-start', stretchSpy1);
-    //this.target2.addEventListener('stretch-start', stretchSpy2);
-    this.sh1.onStretchStartButton();
+    var emitSpy = sinon.spy(this.target1, 'emit'),
+        stretchSpy = emitSpy.withArgs('stretch-start'),
+        unStretchSpy = emitSpy.withArgs('stretch-end');
+    this.sh1.onStretchStartButton();  
     this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isTrue(this.sh1.stretching);
+    assert.strictEqual(this.sh1.stretched, this.target1);
     assert.isFalse(stretchSpy.called);
     this.sh2.onStretchStartButton();
     this.sh2.onHit({ detail: { el: this.target1 } });
+    assert.isTrue(this.sh2.stretching);
+    assert.strictEqual(this.sh2.stretched, this.target1);
     assert.isTrue(stretchSpy.called);
+    assert.isFalse(unStretchSpy.called);
+    this.sh1.onStretchEndButton();
+    console.log('unstretch count', unStretchSpy.callCount, unStretchSpy.called);
+    assert.isTrue(unStretchSpy.called);
+    assert.isNotOk(this.sh1.stretching);
+    assert.strictEqual(this.sh2.stretched, this.target1);
+    this.sh2.onStretchEndButton();
+    assert.isTrue(unStretchSpy.calledOnce);
+    assert.isNotOk(this.sh2.stretching);
+    
   });
 });

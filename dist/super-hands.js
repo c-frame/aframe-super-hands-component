@@ -261,7 +261,10 @@
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
-	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      // avoid firing event twice when both hands release
+	      if (this.otherController.components['super-hands'].stretched) {
+	        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      }
 	      this.stretched = null;
 	    }
 	    this.stretching = false;
