@@ -137,6 +137,8 @@
 	   */
 	  update: function update(oldData) {
 	    // TODO: update event listeners
+	    this.unRegisterListeners(oldData);
+	    this.registerListeners();
 	  },
 
 	  /**
@@ -145,64 +147,21 @@
 	   */
 	  remove: function remove() {
 	    this.system.unregisterMe(this.el);
+	    // move listener registration to init/remove
+	    // as described in according to AFRAME 0.5.0 component guide
+	    this.unRegisterListeners();
 	  },
 	  /**
 	   * Called when entity pauses.
 	   * Use to stop or remove any dynamic or background behavior such as events.
 	   */
-	  pause: function pause() {
-	    var _this = this;
-
-	    this.el.removeEventListener(this.data.colliderEvent, this.onHit);
-
-	    this.data.grabStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onGrabStartButton);
-	    });
-	    this.data.grabEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onGrabEndButton);
-	    });
-	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onStretchStartButton);
-	    });
-	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onStretchEndButton);
-	    });
-	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onDragDropStartButton);
-	    });
-	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onDragDropEndButton);
-	    });
-	  },
+	  pause: function pause() {},
 
 	  /**
 	   * Called when entity resumes.
 	   * Use to continue or add any dynamic or background behavior such as events.
 	   */
-	  play: function play() {
-	    var _this2 = this;
-
-	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
-
-	    this.data.grabStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onGrabStartButton);
-	    });
-	    this.data.grabEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onGrabEndButton);
-	    });
-	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onStretchStartButton);
-	    });
-	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onStretchEndButton);
-	    });
-	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onDragDropStartButton);
-	    });
-	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onDragDropEndButton);
-	    });
-	  },
+	  play: function play() {},
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
 	  },
@@ -244,7 +203,7 @@
 	    this.dragged = null;
 	  },
 	  onHit: function onHit(evt) {
-	    var _this3 = this;
+	    var _this = this;
 
 	    var hitEl = evt.detail.el,
 	        used = false,
@@ -257,7 +216,7 @@
 	    var getTarget = function getTarget() {
 	      if (!used) {
 	        used = true;
-	        hitEl = _this3.hoverEls.length ? _this3.useHoveredEl() : hitEl;
+	        hitEl = _this.hoverEls.length ? _this.useHoveredEl() : hitEl;
 	      }
 	      return hitEl;
 	    };
@@ -355,6 +314,59 @@
 	        this.hoverEls.splice(hoverIndex, 1);
 	      }
 	    }
+	  },
+	  registerListeners: function registerListeners() {
+	    var _this2 = this;
+
+	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
+
+	    this.data.grabStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onGrabStartButton);
+	    });
+	    this.data.grabEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onGrabEndButton);
+	    });
+	    this.data.stretchStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onStretchStartButton);
+	    });
+	    this.data.stretchEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onStretchEndButton);
+	    });
+	    this.data.dragDropStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onDragDropStartButton);
+	    });
+	    this.data.dragDropEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onDragDropEndButton);
+	    });
+	  },
+	  unRegisterListeners: function unRegisterListeners(data) {
+	    var _this3 = this;
+
+	    data = data || this.data;
+	    if (Object.keys(data).length === 0) {
+	      // Empty object passed on initalization
+	      return;
+	    }
+	    this.el.removeEventListener(data.colliderEvent, this.onHit);
+
+	    data.grabStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onGrabStartButton);
+	    });
+	    data.grabEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onGrabEndButton);
+	    });
+	    data.stretchStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onStretchStartButton);
+	    });
+	    data.stretchEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onStretchEndButton);
+	    });
+	    data.dragDropStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onDragDropStartButton);
+	    });
+	    data.dragDropEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onDragDropEndButton);
+	    });
 	  }
 	});
 

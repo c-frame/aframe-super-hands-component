@@ -101,6 +101,8 @@ AFRAME.registerComponent('super-hands', {
    */
   update: function (oldData) {
     // TODO: update event listeners
+    this.unRegisterListeners(oldData);
+    this.registerListeners();
   },
 
   /**
@@ -108,33 +110,17 @@ AFRAME.registerComponent('super-hands', {
    * Generally undoes all modifications to the entity.
    */
   remove: function () {
-     this.system.unregisterMe(this.el);
+    this.system.unregisterMe(this.el);
+    // move listener registration to init/remove
+    // as described in according to AFRAME 0.5.0 component guide
+    this.unRegisterListeners();
   },
   /**
    * Called when entity pauses.
    * Use to stop or remove any dynamic or background behavior such as events.
    */
   pause: function () {
-    this.el.removeEventListener(this.data.colliderEvent, this.onHit);
-    
-    this.data.grabStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onGrabStartButton);
-    });
-    this.data.grabEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onGrabEndButton);
-    });
-    this.data.stretchStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onStretchStartButton);
-    });
-    this.data.stretchEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onStretchEndButton);
-    });
-    this.data.dragDropStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onDragDropStartButton);
-    });
-    this.data.dragDropEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onDragDropEndButton);
-    });
+
   },
 
   /**
@@ -142,26 +128,7 @@ AFRAME.registerComponent('super-hands', {
    * Use to continue or add any dynamic or background behavior such as events.
    */
   play: function () {
-    this.el.addEventListener(this.data.colliderEvent, this.onHit);
-    
-    this.data.grabStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onGrabStartButton);
-    });
-    this.data.grabEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onGrabEndButton);
-    });
-    this.data.stretchStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onStretchStartButton);
-    });
-    this.data.stretchEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onStretchEndButton);
-    });
-    this.data.dragDropStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onDragDropStartButton);
-    });
-    this.data.dragDropEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onDragDropEndButton);
-    });
+
   },
   onGrabStartButton: function (evt) {
     this.grabbing = true;
@@ -302,5 +269,54 @@ AFRAME.registerComponent('super-hands', {
       evt.target.removeEventListener('stateremoved', this.unWatch);
       if(hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1); }
     }
+  },
+  registerListeners: function () {
+    this.el.addEventListener(this.data.colliderEvent, this.onHit);
+    
+    this.data.grabStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabStartButton);
+    });
+    this.data.grabEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabEndButton);
+    });
+    this.data.stretchStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchStartButton);
+    });
+    this.data.stretchEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchEndButton);
+    });
+    this.data.dragDropStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropStartButton);
+    });
+    this.data.dragDropEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropEndButton);
+    });    
+  },
+  unRegisterListeners: function (data) {
+    data = data || this.data;
+    if(Object.keys(data).length === 0) {
+      // Empty object passed on initalization
+      return;
+    }
+    this.el.removeEventListener(data.colliderEvent, this.onHit);
+    
+    data.grabStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabStartButton);
+    });
+    data.grabEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabEndButton);
+    });
+    data.stretchStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchStartButton);
+    });
+    data.stretchEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchEndButton);
+    });
+    data.dragDropStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropStartButton);
+    });
+    data.dragDropEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropEndButton);
+    });    
   }
 });
