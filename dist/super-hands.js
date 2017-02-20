@@ -107,7 +107,7 @@
 	    this.DRAGDROP_EVENT = 'drag-drop';
 
 	    // links to other systems/components
-	    this.otherController = null;
+	    this.otherSuperHand = null;
 
 	    // state tracking
 	    this.hoverEls = [];
@@ -128,7 +128,7 @@
 	    this.onStretchEndButton = this.onStretchEndButton.bind(this);
 	    this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
 	    this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-	    this.system.registerMe(this.el);
+	    this.system.registerMe(this);
 	  },
 
 	  /**
@@ -146,7 +146,7 @@
 	   * Generally undoes all modifications to the entity.
 	   */
 	  remove: function remove() {
-	    this.system.unregisterMe(this.el);
+	    this.system.unregisterMe(this);
 	    // move listener registration to init/remove
 	    // as described in according to AFRAME 0.5.0 component guide
 	    this.unRegisterListeners();
@@ -179,7 +179,7 @@
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
 	      // avoid firing event twice when both hands release
-	      if (this.otherController.components['super-hands'].stretched) {
+	      if (this.otherSuperHand.stretched) {
 	        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
 	      }
 	      this.stretched = null;
@@ -227,9 +227,9 @@
 	    }
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = getTarget();
-	      if (this.stretched === this.otherController.components['super-hands'].stretched) {
+	      if (this.stretched === this.otherSuperHand.stretched) {
 	        this.stretched.emit(this.STRETCH_EVENT, {
-	          hand: this.otherController, secondHand: this.el
+	          hand: this.otherSuperHand.el, secondHand: this.el
 	        });
 	      }
 	    }
@@ -378,24 +378,24 @@
 
 	AFRAME.registerSystem('super-hands', {
 	  init: function init() {
-	    this.controllers = [];
+	    this.superHands = [];
 	  },
-	  registerMe: function registerMe(el) {
-	    //when second controller registers, store links
-	    if (this.controllers.length === 1) {
-	      this.controllers[0].components['super-hands'].otherController = el;
-	      el.components['super-hands'].otherController = this.controllers[0];
+	  registerMe: function registerMe(comp) {
+	    //when second hand registers, store links
+	    if (this.superHands.length === 1) {
+	      this.superHands[0].otherSuperHand = comp;
+	      comp.otherSuperHand = this.superHands[0];
 	    }
-	    this.controllers.push(el);
+	    this.superHands.push(comp);
 	  },
-	  unregisterMe: function unregisterMe(el) {
-	    var index = this.controllers.indexOf(el);
+	  unregisterMe: function unregisterMe(comp) {
+	    var index = this.superHands.indexOf(comp);
 	    if (index !== -1) {
-	      this.controllers.splice(index, 1);
+	      this.superHands.splice(index, 1);
 	    }
-	    this.controllers.forEach(function (x) {
-	      if (x.otherController === el) {
-	        x.otherControler = null;
+	    this.superHands.forEach(function (x) {
+	      if (x.otherSuperHand === comp) {
+	        x.otherSuperHand = null;
 	      }
 	    });
 	  }

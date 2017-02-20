@@ -71,7 +71,7 @@ AFRAME.registerComponent('super-hands', {
     this.DRAGDROP_EVENT = 'drag-drop';
     
     // links to other systems/components
-    this.otherController = null;
+    this.otherSuperHand = null;
     
     // state tracking
     this.hoverEls = [];
@@ -92,7 +92,7 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton = this.onStretchEndButton.bind(this);
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-    this.system.registerMe(this.el);
+    this.system.registerMe(this);
   },
 
   /**
@@ -110,7 +110,7 @@ AFRAME.registerComponent('super-hands', {
    * Generally undoes all modifications to the entity.
    */
   remove: function () {
-    this.system.unregisterMe(this.el);
+    this.system.unregisterMe(this);
     // move listener registration to init/remove
     // as described in according to AFRAME 0.5.0 component guide
     this.unRegisterListeners();
@@ -147,7 +147,7 @@ AFRAME.registerComponent('super-hands', {
   onStretchEndButton: function (evt) {
     if(this.stretched) {
       // avoid firing event twice when both hands release
-      if(this.otherController.components['super-hands'].stretched) {
+      if(this.otherSuperHand.stretched) {
         this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
       }
       this.stretched = null;
@@ -189,9 +189,9 @@ AFRAME.registerComponent('super-hands', {
     } 
     if (this.stretching && !this.stretched) {
       this.stretched = getTarget();
-      if(this.stretched === this.otherController.components['super-hands'].stretched) {
+      if(this.stretched === this.otherSuperHand.stretched) {
         this.stretched.emit(this.STRETCH_EVENT, { 
-          hand: this.otherController, secondHand: this.el 
+          hand: this.otherSuperHand.el, secondHand: this.el 
         });
       }
     }

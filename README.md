@@ -85,7 +85,11 @@ require('super-hands');
 
 ### News
 
-v.0.2.3
+v0.2.4
+
+* Fix error with systm registration that broke most everything
+
+v0.2.3
 
 * Fix `usePhysics: only` not being honored by `grabbable`
 * Fix handling of edge cases in `stretchable`
