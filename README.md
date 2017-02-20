@@ -47,8 +47,8 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
-  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.2.2/dist/aframe-extras.min.js"></script>
+  <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.2.7/dist/aframe-extras.min.js"></script>
   <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
 </head>
 
@@ -85,6 +85,10 @@ require('super-hands');
 
 ### News
 
+v0.2.5
+
+* Confirmed compatibility with A-Frame v0.5.0 (no changes)
+
 v0.2.4
 
 * Fix error with systm registration that broke most everything
@@ -103,7 +107,10 @@ v0.2.3
 
 #### Compatibility
 
-Made for A-Frame v.0.4.0. Support for v.0.5.0 not yet tested (coming soon).
+| A-Frame Version | super-hands Version |
+| --- | --- |
+| v0.5.x | >=v0.2.4 |
+| v0.4.x | v0.2.3 |
 
 ### API
 
