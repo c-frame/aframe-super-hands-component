@@ -101,3 +101,52 @@ suite('grabbable-function without physics', function () {
   
 });
 
+suite('grabbable-function with physics', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({ 
+      'static-body': '',
+      geometry: 'primitive: sphere' 
+    });
+    el.setAttribute('grabbable', '');
+    el.setAttribute('geometry', 'primitive: box');
+    el.setAttribute('dynamic-body', '');
+    el.addEventListener('body-loaded', evt => {
+      this.comp = el.components.grabbable;
+      if(!this.hand.body) {
+        this.hand.addEventListener('body-loaded', evt => done());
+      } else {
+        done();
+      }
+    });
+  });
+  test('constraint registered on grab', function () {
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.isOk(this.comp.constraint);
+    assert.instanceOf(this.comp.constraint, window.CANNON.LockConstraint);
+    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1)
+  });
+  test('constraint not registered when usePhysics = never', function () {
+    this.el.setAttribute('grabbable', 'usePhysics', 'never');
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.notOk(this.comp.constraint);
+  });
+  test('constraint removed on release', function() {
+    var constraint;
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.isOk(this.comp.constraint);
+    constraint = this.comp.constraint;
+    this.comp.end({ detail: { hand: this.hand } });
+    assert.notOk(this.comp.constraint);
+    assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
+  });
+  test('changing usePhysics to never during grab removes constraint', function () {
+    var constraint;
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.isOk(this.comp.constraint);
+    constraint = this.comp.constraint;
+    this.el.setAttribute('grabbable', 'usePhysics', 'never');
+    assert.notOk(this.comp.constraint);
+    assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
+  });
+});

@@ -15,6 +15,7 @@ if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
@@ -93,7 +94,6 @@ AFRAME.registerComponent('super-hands', {
     this.stretched = null;
     this.dragged = null;
     
-    this.findOtherController = this.findOtherController.bind(this);
     this.unHover = this.unHover.bind(this);
     this.unWatch = this.unWatch.bind(this);
     this.onHit = this.onHit.bind(this);
@@ -103,7 +103,7 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton = this.onStretchEndButton.bind(this);
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-    this.findOtherController();
+    this.system.registerMe(this.el);
   },
 
   /**
@@ -112,47 +112,26 @@ AFRAME.registerComponent('super-hands', {
    */
   update: function (oldData) {
     // TODO: update event listeners
+    this.unRegisterListeners(oldData);
+    this.registerListeners();
   },
 
   /**
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function () { },
-
-  /**
-   * Called on each scene tick.
-   */
-  tick: function (t) { 
- 
+  remove: function () {
+    this.system.unregisterMe(this.el);
+    // move listener registration to init/remove
+    // as described in according to AFRAME 0.5.0 component guide
+    this.unRegisterListeners();
   },
   /**
    * Called when entity pauses.
    * Use to stop or remove any dynamic or background behavior such as events.
    */
   pause: function () {
-    this.el.sceneEl.removeEventListener('controllersupdated',  
-                                        this.findOtherController);
-    this.el.removeEventListener(this.data.colliderEvent, this.onHit);
-    
-    this.data.grabStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onGrabStartButton);
-    });
-    this.data.grabEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onGrabEndButton);
-    });
-    this.data.stretchStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onStretchStartButton);
-    });
-    this.data.stretchEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onStretchEndButton);
-    });
-    this.data.dragDropStartButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onDragDropStartButton);
-    });
-    this.data.dragDropEndButtons.forEach( b => {
-      this.el.removeEventListener(b, this.onDragDropEndButton);
-    });
+
   },
 
   /**
@@ -160,44 +139,7 @@ AFRAME.registerComponent('super-hands', {
    * Use to continue or add any dynamic or background behavior such as events.
    */
   play: function () {
-    this.el.sceneEl.addEventListener('controllersupdated',  
-                                     this.findOtherController);
-    this.el.addEventListener(this.data.colliderEvent, this.onHit);
-    
-    this.data.grabStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onGrabStartButton);
-    });
-    this.data.grabEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onGrabEndButton);
-    });
-    this.data.stretchStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onStretchStartButton);
-    });
-    this.data.stretchEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onStretchEndButton);
-    });
-    this.data.dragDropStartButtons.forEach( b => {
-      this.el.addEventListener(b, this.onDragDropStartButton);
-    });
-    this.data.dragDropEndButtons.forEach( b => {
-      this.el.addEventListener(b, this.onDragDropEndButton);
-    });
-  },
-  
-  /* link between controllers for two-handed interactions  */
-  findOtherController: function () {
-    if (!this.el.components['tracked-controls']) {
-      return; //controllers not yet on
-    }
-    // this could be smoother if systems.controllers kept a link from the 
-    // controller back to its node
-    var controllers = document.querySelectorAll('[tracked-controls]');
-    for (var [id, node] of controllers.entries()) { 
-      if(node !== this.el) {
-        this.otherController = node;
-        break;
-      }
-    }
+
   },
   onGrabStartButton: function (evt) {
     this.grabbing = true;
@@ -215,7 +157,10 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     if(this.stretched) {
-      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+      // avoid firing event twice when both hands release
+      if(this.otherController.components['super-hands'].stretched) {
+        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+      }
       this.stretched = null;
     }
     this.stretching = false;
@@ -241,7 +186,7 @@ AFRAME.registerComponent('super-hands', {
     if(!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
-    getTarget = () => {
+    var getTarget = () => {
       if(!used) {
         used = true;
         hitEl = this.hoverEls.length ? this.useHoveredEl() : hitEl;
@@ -335,10 +280,59 @@ AFRAME.registerComponent('super-hands', {
       evt.target.removeEventListener('stateremoved', this.unWatch);
       if(hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1); }
     }
+  },
+  registerListeners: function () {
+    this.el.addEventListener(this.data.colliderEvent, this.onHit);
+    
+    this.data.grabStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabStartButton);
+    });
+    this.data.grabEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onGrabEndButton);
+    });
+    this.data.stretchStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchStartButton);
+    });
+    this.data.stretchEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onStretchEndButton);
+    });
+    this.data.dragDropStartButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropStartButton);
+    });
+    this.data.dragDropEndButtons.forEach( b => {
+      this.el.addEventListener(b, this.onDragDropEndButton);
+    });    
+  },
+  unRegisterListeners: function (data) {
+    data = data || this.data;
+    if(Object.keys(data).length === 0) {
+      // Empty object passed on initalization
+      return;
+    }
+    this.el.removeEventListener(data.colliderEvent, this.onHit);
+    
+    data.grabStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabStartButton);
+    });
+    data.grabEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onGrabEndButton);
+    });
+    data.stretchStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchStartButton);
+    });
+    data.stretchEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onStretchEndButton);
+    });
+    data.dragDropStartButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropStartButton);
+    });
+    data.dragDropEndButtons.forEach( b => {
+      this.el.removeEventListener(b, this.onDragDropEndButton);
+    });    
   }
 });
 
-},{"./reaction_components/drag-droppable.js":3,"./reaction_components/grabbable.js":4,"./reaction_components/hoverable.js":5,"./reaction_components/stretchable.js":6}],3:[function(require,module,exports){
+},{"./reaction_components/drag-droppable.js":3,"./reaction_components/grabbable.js":4,"./reaction_components/hoverable.js":5,"./reaction_components/stretchable.js":6,"./systems/super-hands-system.js":7}],3:[function(require,module,exports){
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
@@ -380,12 +374,13 @@ AFRAME.registerComponent('grabbable', {
   },
   update: function (oldDat) {
     if(this.data.usePhysics === 'never' && this.constraint) {
-      this.physics.world.removeConstraint(this.constraint);
+      this.el.body.world.removeConstraint(this.constraint);
       this.constraint = null;
     }
   },
   tick: function() {
-    if(this.grabbed && !this.constraint) {
+    if(this.grabbed && !this.constraint && 
+       this.data.usePhysics !== 'only') {
       var handPosition = this.grabber.getAttribute('position'),
         previousPosition = this.previousPosition || handPosition,
         deltaPosition = {
@@ -499,7 +494,10 @@ AFRAME.registerComponent('stretchable', {
       otherHandPos = new THREE.Vector3()
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = currentStretch / (this.previousStretch || currentStretch); 
+      deltaStretch = 1;
+    if (this.previousStretch != null && currentStretch !== 0) {
+      deltaStretch = currentStretch / this.previousStretch;
+    }
     this.previousStretch = currentStretch;
     scale = scale.multiplyScalar(deltaStretch);
     this.el.setAttribute('scale', scale);
@@ -542,4 +540,28 @@ AFRAME.registerComponent('stretchable', {
     this.el.removeState(this.STRETCHED_STATE);
   } 
 });
+},{}],7:[function(require,module,exports){
+AFRAME.registerSystem('super-hands', {
+  init: function () {
+    this.controllers = [];
+  },
+  registerMe: function (el) {
+    //when second controller registers, store links
+    if(this.controllers.length === 1) {
+      this.controllers[0].components['super-hands'].otherController = el;
+      el.components['super-hands'].otherController = this.controllers[0];
+    }
+    this.controllers.push(el);
+  },
+  unregisterMe: function (el) {
+    var index = this.controllers.indexOf(el);
+    if(index !== -1) {
+      this.controllers.splice(index, 1);
+    }
+    this.controllers.forEach(x => {
+      if(x.otherController === el) { x.otherControler = null; }
+    });
+  } 
+});
+
 },{}]},{},[1]);

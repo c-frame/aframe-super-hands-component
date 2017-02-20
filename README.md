@@ -38,21 +38,60 @@ others to rotate around a fixed point, and others still to spawn a new entity bu
 With this API schema, these options can be handled by adding or creating different reaction
 components to the entities in your scene, and `super-hands` can work with all of them. 
 
+### Installation
+
+#### Browser  
+
+Install and use by directly including the [browser files](dist):
+
+```html
+<head>
+  <title>Most Basic Super-Hands Example</title>
+  <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.2.2/dist/aframe-extras.min.js"></script>
+  <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
+</head>
+
+<body>
+  <a-scene>
+    <!-- Make sure your super-hands entities also have controller and collider components -->
+    <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
+    <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
+    <!-- hover and drag-drop won't have any obvious effect without some additional entities or components. See the examples page for more -->
+    <a-box hoverable grabbable stretchable drag-droppable</a-box>
+  </a-scene>
+</body>
+```
+
+#### npm 
+
+Install via npm:
+
+```bash
+npm install super-hands
+```
+
+Then require and use.
+
+```js
+require('aframe');
+require('super-hands');
+```
+
+
 #### Examples
 
 [Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
 
 ### News
 
-v.0.2.2
+v.0.2.3
 
 * Fix `usePhysics: only` not being honored by `grabbable`
 * Fix handling of edge cases in `stretchable`
+* `super-hands` now respects with custom button mappings applied after initalization
+* Added `super-hands` system to better manage links between two controllers
 * Adding unit testing to prepare for updates
-
-v.0.2.1
-
-* Initial launch
 
 #### Known Issues
 
@@ -60,7 +99,7 @@ v.0.2.1
 
 #### Compatibility
 
-Made for A-Frame v.0.4.0. 
+Made for A-Frame v.0.4.0. Support for v.0.5.0 not yet tested (coming soon).
 
 ### API
 
@@ -189,39 +228,3 @@ with the `drag-dropped` event or creating your own component.
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to 
 receive the hovered state. 
-
-
-### Installation
-
-#### Browser  
-
-Install and use by directly including the [browser files](dist):
-
-```html
-<head>
-  <title>My A-Frame Scene</title>
-  <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
-  <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
-</head>
-
-<body>
-  <a-scene>
-    <a-entity super-hands></a-entity>
-  </a-scene>
-</body>
-```
-
-#### npm 
-
-Install via npm:
-
-```bash
-npm install super-hands
-```
-
-Then require and use.
-
-```js
-require('aframe');
-require('super-hands');
-```

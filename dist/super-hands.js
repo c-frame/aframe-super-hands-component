@@ -46,8 +46,6 @@
 
 	'use strict';
 
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 	/* global AFRAME */
 
 	if (typeof AFRAME === 'undefined') {
@@ -58,6 +56,7 @@
 	__webpack_require__(2);
 	__webpack_require__(3);
 	__webpack_require__(4);
+	__webpack_require__(5);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -120,7 +119,6 @@
 	    this.stretched = null;
 	    this.dragged = null;
 
-	    this.findOtherController = this.findOtherController.bind(this);
 	    this.unHover = this.unHover.bind(this);
 	    this.unWatch = this.unWatch.bind(this);
 	    this.onHit = this.onHit.bind(this);
@@ -130,7 +128,7 @@
 	    this.onStretchEndButton = this.onStretchEndButton.bind(this);
 	    this.onDragDropStartButton = this.onDragDropStartButton.bind(this);
 	    this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
-	    this.findOtherController();
+	    this.system.registerMe(this.el);
 	  },
 
 	  /**
@@ -139,116 +137,31 @@
 	   */
 	  update: function update(oldData) {
 	    // TODO: update event listeners
+	    this.unRegisterListeners(oldData);
+	    this.registerListeners();
 	  },
 
 	  /**
 	   * Called when a component is removed (e.g., via removeAttribute).
 	   * Generally undoes all modifications to the entity.
 	   */
-	  remove: function remove() {},
-
-	  /**
-	   * Called on each scene tick.
-	   */
-	  tick: function tick(t) {},
+	  remove: function remove() {
+	    this.system.unregisterMe(this.el);
+	    // move listener registration to init/remove
+	    // as described in according to AFRAME 0.5.0 component guide
+	    this.unRegisterListeners();
+	  },
 	  /**
 	   * Called when entity pauses.
 	   * Use to stop or remove any dynamic or background behavior such as events.
 	   */
-	  pause: function pause() {
-	    var _this = this;
-
-	    this.el.sceneEl.removeEventListener('controllersupdated', this.findOtherController);
-	    this.el.removeEventListener(this.data.colliderEvent, this.onHit);
-
-	    this.data.grabStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onGrabStartButton);
-	    });
-	    this.data.grabEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onGrabEndButton);
-	    });
-	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onStretchStartButton);
-	    });
-	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onStretchEndButton);
-	    });
-	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onDragDropStartButton);
-	    });
-	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this.el.removeEventListener(b, _this.onDragDropEndButton);
-	    });
-	  },
+	  pause: function pause() {},
 
 	  /**
 	   * Called when entity resumes.
 	   * Use to continue or add any dynamic or background behavior such as events.
 	   */
-	  play: function play() {
-	    var _this2 = this;
-
-	    this.el.sceneEl.addEventListener('controllersupdated', this.findOtherController);
-	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
-
-	    this.data.grabStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onGrabStartButton);
-	    });
-	    this.data.grabEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onGrabEndButton);
-	    });
-	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onStretchStartButton);
-	    });
-	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onStretchEndButton);
-	    });
-	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onDragDropStartButton);
-	    });
-	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this2.el.addEventListener(b, _this2.onDragDropEndButton);
-	    });
-	  },
-
-	  /* link between controllers for two-handed interactions  */
-	  findOtherController: function findOtherController() {
-	    if (!this.el.components['tracked-controls']) {
-	      return; //controllers not yet on
-	    }
-	    // this could be smoother if systems.controllers kept a link from the 
-	    // controller back to its node
-	    var controllers = document.querySelectorAll('[tracked-controls]');
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-
-	    try {
-	      for (var _iterator = controllers.entries()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        var _step$value = _slicedToArray(_step.value, 2),
-	            id = _step$value[0],
-	            node = _step$value[1];
-
-	        if (node !== this.el) {
-	          this.otherController = node;
-	          break;
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
-	        }
-	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
-	        }
-	      }
-	    }
-	  },
+	  play: function play() {},
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
 	  },
@@ -265,7 +178,10 @@
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
-	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      // avoid firing event twice when both hands release
+	      if (this.otherController.components['super-hands'].stretched) {
+	        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      }
 	      this.stretched = null;
 	    }
 	    this.stretching = false;
@@ -287,7 +203,7 @@
 	    this.dragged = null;
 	  },
 	  onHit: function onHit(evt) {
-	    var _this3 = this;
+	    var _this = this;
 
 	    var hitEl = evt.detail.el,
 	        used = false,
@@ -300,7 +216,7 @@
 	    var getTarget = function getTarget() {
 	      if (!used) {
 	        used = true;
-	        hitEl = _this3.hoverEls.length ? _this3.useHoveredEl() : hitEl;
+	        hitEl = _this.hoverEls.length ? _this.useHoveredEl() : hitEl;
 	      }
 	      return hitEl;
 	    };
@@ -398,11 +314,95 @@
 	        this.hoverEls.splice(hoverIndex, 1);
 	      }
 	    }
+	  },
+	  registerListeners: function registerListeners() {
+	    var _this2 = this;
+
+	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
+
+	    this.data.grabStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onGrabStartButton);
+	    });
+	    this.data.grabEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onGrabEndButton);
+	    });
+	    this.data.stretchStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onStretchStartButton);
+	    });
+	    this.data.stretchEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onStretchEndButton);
+	    });
+	    this.data.dragDropStartButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onDragDropStartButton);
+	    });
+	    this.data.dragDropEndButtons.forEach(function (b) {
+	      _this2.el.addEventListener(b, _this2.onDragDropEndButton);
+	    });
+	  },
+	  unRegisterListeners: function unRegisterListeners(data) {
+	    var _this3 = this;
+
+	    data = data || this.data;
+	    if (Object.keys(data).length === 0) {
+	      // Empty object passed on initalization
+	      return;
+	    }
+	    this.el.removeEventListener(data.colliderEvent, this.onHit);
+
+	    data.grabStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onGrabStartButton);
+	    });
+	    data.grabEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onGrabEndButton);
+	    });
+	    data.stretchStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onStretchStartButton);
+	    });
+	    data.stretchEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onStretchEndButton);
+	    });
+	    data.dragDropStartButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onDragDropStartButton);
+	    });
+	    data.dragDropEndButtons.forEach(function (b) {
+	      _this3.el.removeEventListener(b, _this3.onDragDropEndButton);
+	    });
 	  }
 	});
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	AFRAME.registerSystem('super-hands', {
+	  init: function init() {
+	    this.controllers = [];
+	  },
+	  registerMe: function registerMe(el) {
+	    //when second controller registers, store links
+	    if (this.controllers.length === 1) {
+	      this.controllers[0].components['super-hands'].otherController = el;
+	      el.components['super-hands'].otherController = this.controllers[0];
+	    }
+	    this.controllers.push(el);
+	  },
+	  unregisterMe: function unregisterMe(el) {
+	    var index = this.controllers.indexOf(el);
+	    if (index !== -1) {
+	      this.controllers.splice(index, 1);
+	    }
+	    this.controllers.forEach(function (x) {
+	      if (x.otherController === el) {
+	        x.otherControler = null;
+	      }
+	    });
+	  }
+	});
+
+/***/ },
+/* 2 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -444,7 +444,7 @@
 	});
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -465,7 +465,7 @@
 	  },
 	  update: function update(oldDat) {
 	    if (this.data.usePhysics === 'never' && this.constraint) {
-	      this.physics.world.removeConstraint(this.constraint);
+	      this.el.body.world.removeConstraint(this.constraint);
 	      this.constraint = null;
 	    }
 	  },
@@ -525,7 +525,7 @@
 	});
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -605,7 +605,7 @@
 	});
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
