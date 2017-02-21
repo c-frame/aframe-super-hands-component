@@ -93,10 +93,10 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onGrabEndButton({});
   });
   test('finds other controller', function() {
-    assert.isOk(this.sh1.otherController);
-    assert.isOk(this.sh2.otherController);
-    assert.strictEqual(this.sh1.otherController, this.hand2);
-    assert.strictEqual(this.sh2.otherController, this.hand1);
+    assert.isOk(this.sh1.otherSuperHand);
+    assert.isOk(this.sh2.otherSuperHand);
+    assert.strictEqual(this.sh1.otherSuperHand, this.sh2);
+    assert.strictEqual(this.sh2.otherSuperHand, this.sh1);
   });
   test('stretch event', function () {
     var emitSpy = sinon.spy(this.target1, 'emit'),

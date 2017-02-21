@@ -1,22 +1,22 @@
 AFRAME.registerSystem('super-hands', {
   init: function () {
-    this.controllers = [];
+    this.superHands = [];
   },
-  registerMe: function (el) {
-    //when second controller registers, store links
-    if(this.controllers.length === 1) {
-      this.controllers[0].components['super-hands'].otherController = el;
-      el.components['super-hands'].otherController = this.controllers[0];
+  registerMe: function (comp) {
+    //when second hand registers, store links
+    if(this.superHands.length === 1) {
+      this.superHands[0].otherSuperHand = comp;
+      comp.otherSuperHand = this.superHands[0];
     }
-    this.controllers.push(el);
+    this.superHands.push(comp);
   },
-  unregisterMe: function (el) {
-    var index = this.controllers.indexOf(el);
+  unregisterMe: function (comp) {
+    var index = this.superHands.indexOf(comp);
     if(index !== -1) {
-      this.controllers.splice(index, 1);
+      this.superHands.splice(index, 1);
     }
-    this.controllers.forEach(x => {
-      if(x.otherController === el) { x.otherControler = null; }
+    this.superHands.forEach(x => {
+      if(x.otherSuperHand === comp) { x.otherSuperHand = null; }
     });
   } 
 });
