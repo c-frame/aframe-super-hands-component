@@ -20,6 +20,7 @@ require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
+require('./reaction_components/clickable.js');
 
 /**
  * Super Hands component for A-Frame.
@@ -332,7 +333,43 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./reaction_components/drag-droppable.js":3,"./reaction_components/grabbable.js":4,"./reaction_components/hoverable.js":5,"./reaction_components/stretchable.js":6,"./systems/super-hands-system.js":7}],3:[function(require,module,exports){
+},{"./reaction_components/clickable.js":3,"./reaction_components/drag-droppable.js":4,"./reaction_components/grabbable.js":5,"./reaction_components/hoverable.js":6,"./reaction_components/stretchable.js":7,"./systems/super-hands-system.js":8}],3:[function(require,module,exports){
+AFRAME.registerComponent('clickable', {
+  schema: {
+    onclick: { type: 'string' }
+  },
+  init: function () {
+    this.CLICKED_STATE = 'clicked';
+    this.CLICK_EVENT = 'grab-start';
+    this.UNCLICK_EVENT = 'grab-end';
+    this.clickers = [];
+    
+    this.start = this.start.bind(this);
+    this.end = this.end.bind(this);
+    this.el.addEventListener(this.CLICK_EVENT, this.start);
+    this.el.addEventListener(this.UNCLICK_EVENT, this.end);
+  },
+  remove: function () {
+    this.el.removeEventListener(this.CLICK_EVENT, this.start);
+    this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
+  },
+  start: function(evt) {
+    this.el.addState(this.CLICKED_STATE);
+    if(this.clickers.indexOf(evt.detail.hand) === -1) {
+      this.clickers.push(evt.detail.hand);
+    }
+  },
+  end: function (evt) {
+    var handIndex = this.clickers.indexOf(evt.detail.hand);
+    if(handIndex !== -1) {
+      this.clickers.splice(handIndex, 1);
+    }
+    if(this.clickers.length < 1) {
+      this.el.removeState(this.CLICKED_STATE);
+    }
+  } 
+});
+},{}],4:[function(require,module,exports){
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
@@ -357,7 +394,7 @@ AFRAME.registerComponent('drag-droppable', {
     this.el.removeState(this.HOVERED_STATE);
   } 
 });
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 AFRAME.registerComponent('grabbable', {
   schema: { 
     usePhysics: { default: 'ifavailable' },
@@ -431,7 +468,7 @@ AFRAME.registerComponent('grabbable', {
     this.el.removeState(this.GRABBED_STATE);
   } 
 });
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 AFRAME.registerComponent('hoverable', {
   init: function () {
     this.HOVERED_STATE = 'hovered';
@@ -467,7 +504,7 @@ AFRAME.registerComponent('hoverable', {
     }
   } 
 });
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 AFRAME.registerComponent('stretchable', {
   schema: { 
     usePhysics: { default: 'ifavailable' },
@@ -540,7 +577,7 @@ AFRAME.registerComponent('stretchable', {
     this.el.removeState(this.STRETCHED_STATE);
   } 
 });
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 AFRAME.registerSystem('super-hands', {
   init: function () {
     this.superHands = [];
