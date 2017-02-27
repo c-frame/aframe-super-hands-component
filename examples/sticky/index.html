@@ -1,10 +1,12 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Sticky Grab</title>
-     <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.2.0/dist/aframe-physics-system.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.2.2/dist/aframe-extras.min.js"></script>
+    <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.3.0/dist/aframe-extras.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.3.0/dist/aframe-physics-system.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
+    <!-- Replace "../build.js" with the super-hands distribution to run locally:
+        "https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <script>
       //delayed addition of physics body component to controllers due to AFRAME 0.4.0 changes
@@ -43,10 +45,8 @@
       <a-entity class="ball" mixin="ball" position="-1 0.15 -0.5" material="color: blue"></a-entity>
       <a-entity class="ball" mixin="ball" position="1 0.15 -1" material="color: green"></a-entity>
       <a-entity class="ball" mixin="ball" position="1 0.15 -0.5" material="color: green"></a-entity>
-      <a-cone id="stick" mixin="bat" position = "0 1 0" height="1" 
-              dynamic-body="shape: box; mass: 10"
+      <a-cone id="stick" mixin="bat" position = "0 1 0" height="1" dynamic-body
               radius-top="0.03" radius-bottom="0.02" >
-        <a-torus color="brown" position = "0 -0.5 0" radius="0.02" radius-tubular="0.01" rotation="90 0 0"></a-torus>
       </a-cone>
       <a-plane mixin="floor" rotation="-90 0 0"></a-plane>
       <a-plane mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-plane>
