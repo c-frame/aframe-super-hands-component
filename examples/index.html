@@ -71,15 +71,17 @@
     <p>Another option for customizing reactions is by using the 
       <a href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers">
         Global Event Handlers Web API</a> (e.g., 'onclick'). 
-      super-hands will trigger standard mouse events that are analogous to the VR
-    interactions taking place, like mousedown, mouseup, and click. Just like in
-      standard HTML, setting the
-    related 'on' property for an entity will register the event listener, so 
-    simple reactions can be defined inline.</p>
+      super-hands will trigger standard events that are analogous to the VR
+      interactions taking place, like mousedown, click, dragenter, et c. 
+      Just like in standard HTML, setting the
+      related 'on' property for an entity will register the event listener, so 
+      simple reactions can be defined inline.
+    </p>
     <ul>
       <li>onmousedown the box turns to wireframe</li>
       <li>onmouseup the box returns to solid material</li>
       <li>onclick the box changes color</li>
+      <li>ondrop the torus knot takes on the current color of the box</li>
     </ul>
     <a id="sticky" class="example" href="sticky/">Sticky Grab via Custom Button Mapping</a>
     <p>Example of customizing the button event schema options</p>

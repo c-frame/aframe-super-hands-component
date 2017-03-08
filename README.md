@@ -201,6 +201,12 @@ so that element properties like `onclick` can be used to set event handlers.
 ##### Global Event Handler Integrations
 
 | onclick | onmousedown | onmouseup |
+| --- | --- | --- |
+
+Of the `MouseEvent` interface, only `relatedTarget` is used at present, 
+and it points to the interacting hand entity. If there is interest, I will
+work on adding the position properties to describe the location of the 
+hand relative to the clickable entity.
 
 #### grabbable component
 
@@ -257,3 +263,14 @@ with the `drag-dropped` event or creating your own component.
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to 
 receive the hovered state. 
+
+##### Global Event Handler Integrations
+
+| dragenter | dragleave | drop |
+| --- | --- | --- |
+
+Of the `DrageEvent` interface, only `relatedTarget` is used at present. 
+`event.target` will point to the entity processing the event 
+(i.e. the with the `on...` property set), and 
+`event.relatedTarget` will point to the other entity in the drag-drop 
+interaction. 
