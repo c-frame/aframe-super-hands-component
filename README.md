@@ -57,8 +57,9 @@ Install and use by directly including the [browser files](dist):
     <!-- Make sure your super-hands entities also have controller and collider components -->
     <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
     <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
-    <!-- hover and drag-drop won't have any obvious effect without some additional entities or components. See the examples page for more -->
-    <a-box hoverable grabbable stretchable drag-droppable</a-box>
+    <!-- hover, click, & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable clickable grabbable stretchable drag-droppable
+           color="red"></a-box>
   </a-scene>
 </body>
 ```
@@ -183,6 +184,23 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | Name | Description |
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
+
+#### clickable component
+
+Used to indicate when buttons are pressed while the controller is within range 
+to interact with an entity. Adds the 'clicked' state while the button is held
+and also triggers analogous mouse events from the GlobalEventHandlers Web API
+so that element properties like `onclick` can be used to set event handlers.
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| hovered | Added to entity while it is collided with the controller |
+
+##### Global Event Handler Integrations
+
+| onclick | onmousedown | onmouseup |
 
 #### grabbable component
 
