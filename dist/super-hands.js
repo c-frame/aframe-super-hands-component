@@ -616,23 +616,36 @@
 	    this.HOVERED_STATE = 'dragover';
 	    this.HOVER_EVENT = 'dragover-start';
 	    this.UNHOVER_EVENT = 'dragover-end';
+	    this.DRAGDROP_EVENT = 'drag-drop';
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
+	    this.dragDrop = this.dragDrop.bind(this);
+
+	    this.el.addEventListener(this.HOVER_EVENT, this.start);
+	    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+	    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDrop);
 	  },
-	  pause: function pause() {
+	  remove: function remove() {
 	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
 	    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
 	  },
-	  play: function play() {
-	    this.el.addEventListener(this.HOVER_EVENT, this.start);
-	    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
-	  },
 	  start: function start(evt) {
 	    this.el.addState(this.HOVERED_STATE);
+	    this.dispatchDragEvent('dragenter', evt);
 	  },
 	  end: function end(evt) {
 	    this.el.removeState(this.HOVERED_STATE);
+	    this.dispatchDragEvent('dragleave', evt);
+	  },
+	  dragDrop: function dragDrop(evt) {
+	    this.dispatchDragEvent('drop', evt);
+	  },
+	  dispatchDragEvent: function dispatchDragEvent(type, superHandsEvt) {
+	    var dEvt = new DragEvent(type, {
+	      relatedTarget: superHandsEvt.detail.carried || superHandsEvt.detail.dropped
+	    });
+	    this.el.dispatchEvent(dEvt);
 	  }
 	});
 

@@ -23,9 +23,61 @@ suite('drag-droppable', function () {
     });
   });
   test('el gains and loses dragover state', function () {
-    this.comp.start();
+    this.comp.start({ detail: { hand: this.hand } });
     assert.isTrue(this.el.is('dragover'));
     this.comp.end({ detail: { hand: this.hand } });
     assert.isFalse(this.el.is('dragover'));
   });  
+});
+
+suite('drag-droppable GlobalEventHandler integration', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.carried = document.createElement('a-entity');
+    this.el.parentNode.appendChild(this.carried);
+    el.setAttribute('drag-droppable', '');
+    el.addEventListener('loaded', evt => {
+      this.comp = el.components['drag-droppable'];
+      done();
+    });
+  });
+  test('integrates with GlobalEventHandler dragenter', function (done) {
+    this.el.ondragenter = e => {
+      assert.typeOf(e, 'DragEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.carried);
+      done();
+    }
+    this.comp.start({ detail: { 
+      hand: this.hand, 
+      carried: this.carried,
+      hovered: this.el
+    } });
+  });
+  test('integrates with GlobalEventHandler dragleave', function (done) {
+    this.el.ondragleave = e => {
+      assert.typeOf(e, 'DragEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.carried);
+      done();
+    }
+    this.comp.end({ detail: { 
+      hand: this.hand, 
+      carried: this.carried,
+      hovered: this.el
+    } });
+  });
+  test('integrates with GlobalEventHandler drop', function (done) {
+    this.el.ondrop = e => {
+      assert.typeOf(e, 'DragEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.carried);
+      done();
+    }
+    this.el.emit('drag-drop', { 
+      hand: this.hand, 
+      dropped: this.carried,
+      on: this.el
+    });
+  });
 });
