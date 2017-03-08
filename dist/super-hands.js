@@ -666,15 +666,24 @@
 	    if (this.clickers.indexOf(evt.detail.hand) === -1) {
 	      this.clickers.push(evt.detail.hand);
 	    }
+	    this.dispatchMouseEvent('mousedown', evt);
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.clickers.indexOf(evt.detail.hand);
+	    this.dispatchMouseEvent('mouseup', evt);
 	    if (handIndex !== -1) {
 	      this.clickers.splice(handIndex, 1);
+	      this.dispatchMouseEvent('click', evt);
 	    }
 	    if (this.clickers.length < 1) {
 	      this.el.removeState(this.CLICKED_STATE);
 	    }
+	  },
+	  dispatchMouseEvent: function dispatchMouseEvent(type, superHandsEvt) {
+	    var mEvt = new MouseEvent(type, {
+	      relatedTarget: superHandsEvt.detail.hand
+	    });
+	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 

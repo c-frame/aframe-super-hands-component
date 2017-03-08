@@ -45,8 +45,50 @@ suite('clickable function', function () {
   });
   test('handles multiple clickers', function () {
     
-  })
-})
+  });
+
+});
+
+suite('GlobelEventHandler integration', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    el.setAttribute('clickable', '');
+    this.hand = helpers.controllerFactory();
+    //this.hand2 = helpers.controllerFactory({ 'vive-controls': 'hand: left' }, true);
+    el.sceneEl.addEventListener('loaded', () => {
+      this.clicker = el.components.clickable;
+      done();
+    });
+  });
+  test('integrates with GlobalEventHandler onmousedown', function (done) {
+    this.el.onmousedown = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.hand);
+      done();
+    }
+    this.clicker.start({ detail: { hand: this.hand } });
+  });
+  test('integrates with GlobalEventHandler onmouseup', function (done) {
+    this.el.onmouseup = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.hand);
+      done();
+    }
+    this.clicker.end({ detail: { hand: this.hand } });
+  });
+  test('integrates with GlobalEventHandler onclick', function (done) {
+    this.el.onclick = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.hand);
+      done();
+    }
+    this.clicker.start({ detail: { hand: this.hand } });
+    this.clicker.end({ detail: { hand: this.hand } });
+  });
+});
 /*suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
