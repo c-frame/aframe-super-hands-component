@@ -29,10 +29,10 @@ AFRAME.registerComponent('drag-droppable', {
     this.dispatchDragEvent('drop', evt);
   },
   dispatchDragEvent: function (type, superHandsEvt) {
-    var dEvt = new DragEvent(type, { 
-      relatedTarget: superHandsEvt.detail.carried ||
-        superHandsEvt.detail.dropped
-    });
-    this.el.dispatchEvent(dEvt);
+    var rt = superHandsEvt.detail.carried || superHandsEvt.detail.dropped;
+    if(rt === this.el) {
+      rt = superHandsEvt.detail.hovered || superHandsEvt.detail.on;
+    }
+    this.el.dispatchEvent(new DragEvent(type, { relatedTarget: rt }));
   }
 });

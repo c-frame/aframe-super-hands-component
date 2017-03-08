@@ -80,4 +80,17 @@ suite('drag-droppable GlobalEventHandler integration', function () {
       on: this.el
     });
   });
+ test('integrates with GlobalEventHandler drop, when component is on the dragee', function (done) {
+    this.el.ondrop = e => {
+      assert.typeOf(e, 'DragEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.carried);
+      done();
+    }
+    this.el.emit('drag-drop', { 
+      hand: this.hand, 
+      dropped: this.el,
+      on: this.carried
+    });
+  });
 });
