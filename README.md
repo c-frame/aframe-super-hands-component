@@ -43,14 +43,15 @@ components to the entities in your scene, and `super-hands` can work with all of
 There are two pathways to adding additional interactivity.
 
 1. A-Frame style: Each component's API documentation describes the A-Frame 
-custom events it
-emits. These are best processed by creating new A-Frame compnents that register
+custom events and state it uses. 
+These are best processed by creating new A-Frame components that register
 event listeners and react accordingly. 
 1. HTML style: The `super-hands` reaction components also integrate with the
 Global Event Handlers Web API and trigger standard events that are analogous
 to the VR interaction. The `clickable` component, for example, will trigger 
 'click' type `MouseEvent`s, and you can register a listener by setting the 
-`onclick` HTML attribute. The specific standard events used by each reaction
+`onclick` HTML attribute on a `clickable` entity. 
+The specific standard events used by each reaction
 component are described in its API documentation below. 
 
 ### Installation
@@ -206,6 +207,16 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
 
+##### Global Event Handler Integrations
+
+| onmouseover | onmouseout | 
+| --- | --- | 
+
+Of the `MouseEvent` interface, only `target` (the clickable entity) and 
+`relatedTarget` (the super-hands entity) are implemented. If there is interest, I will
+work on adding the position properties to describe the location of the 
+hand relative to the clickable entity.
+
 #### clickable component
 
 Used to indicate when buttons are pressed while the controller is within range 
@@ -217,17 +228,15 @@ so that element properties like `onclick` can be used to set event handlers.
 
 | Name | Description |
 | --- | --- |
-| hovered | Added to entity while it is collided with the controller |
+| clicked | Added to entity while a button is held down |
 
 ##### Global Event Handler Integrations
 
 | onclick | onmousedown | onmouseup |
 | --- | --- | --- |
 
-Of the `MouseEvent` interface, only `relatedTarget` is used at present, 
-and it points to the interacting hand entity. If there is interest, I will
-work on adding the position properties to describe the location of the 
-hand relative to the clickable entity.
+Of the `MouseEvent` interface, only `target` (the clickable entity) and 
+`relatedTarget` (the interacting super-hands entity) are implemented at present. 
 
 #### grabbable component
 

@@ -22,11 +22,14 @@
       </a-assets>
       <a-entity hand-controls="left" mixin="controller"></a-entity>
       <a-entity hand-controls="right" mixin="controller"></a-entity>
-      <a-box position="0 1 -1" color="red" transparent="true" opacity="0.7"
+      <a-box position="0 1 -1" color="red" transparent="true"
              clickable 
              onmousedown="this.setAttribute('material', 'wireframe', true)"
              onmouseup="this.setAttribute('material', 'wireframe', false)"
-             onclick="randomizeColor(this)">
+             onclick="randomizeColor(this)"
+             hoverable
+             onmouseover="this.setAttribute('opacity', 0.5)"
+             onmouseout="this.setAttribute('opacity', 1)">
         <a-text position="0 0 0.5" 
                 value="click to change color\ndrop inside to paint"
                 width="1" wrap-count="15" anchor="center"></a-text>
