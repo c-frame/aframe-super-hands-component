@@ -150,3 +150,4 @@ suite('grabbable-function with physics', function () {
     assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
   });
 });
+// GlobalEventHandlers: dragstart, dragend

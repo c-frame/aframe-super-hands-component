@@ -38,6 +38,21 @@ others to rotate around a fixed point, and others still to spawn a new entity bu
 With this API schema, these options can be handled by adding or creating different reaction
 components to the entities in your scene, and `super-hands` can work with all of them. 
 
+#### Interactivity
+
+There are two pathways to adding additional interactivity.
+
+1. A-Frame style: Each component's API documentation describes the A-Frame 
+custom events it
+emits. These are best processed by creating new A-Frame compnents that register
+event listeners and react accordingly. 
+1. HTML style: The `super-hands` reaction components also integrate with the
+Global Event Handlers Web API and trigger standard events that are analogous
+to the VR interaction. The `clickable` component, for example, will trigger 
+'click' type `MouseEvent`s, and you can register a listener by setting the 
+`onclick` HTML attribute. The specific standard events used by each reaction
+component are described in its API documentation below. 
+
 ### Installation
 
 #### Browser  
@@ -86,6 +101,12 @@ require('super-hands');
 
 ### News
 
+v0.3.1 
+
+* Integration with GlobalEventHandlers for easy reactivity via element 
+  properties such as `onclick`
+  
+  
 v0.3.0
 
 * Confirmed compatibility with A-Frame v0.5.0 (no changes)
@@ -252,8 +273,9 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 This can be combined with  with a '-hovered' mixin to easily highlight when an entity is 
 hovering in a drag-drop location. 
 
-For more interactivity, consider using `event-set` from [kframe](http://github.com/ngokevin/kframe) 
-with the `drag-dropped` event or creating your own component.
+For interactivity, use the global event handler integration, 
+the `event-set` from [kframe](http://github.com/ngokevin/kframe) 
+with the `drag-dropped` event, or create your own component.
 
 ##### States
 
@@ -269,8 +291,10 @@ receive the hovered state.
 | dragenter | dragleave | drop |
 | --- | --- | --- |
 
-Of the `DrageEvent` interface, only `relatedTarget` is used at present. 
+Note: this uses the `MouseEvent` interface instead of `DrageEvent` because
+some browser versions don't allow syntheric `DragEvents`. Of the interface, 
+only `relatedTarget` is used at present. 
 `event.target` will point to the entity processing the event 
-(i.e. the with the `on...` property set), and 
+(i.e. the one with the `ondragenter`/`ondragleave`/`ondrop` property set), and 
 `event.relatedTarget` will point to the other entity in the drag-drop 
 interaction. 

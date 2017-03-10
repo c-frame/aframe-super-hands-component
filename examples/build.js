@@ -414,7 +414,7 @@ AFRAME.registerComponent('drag-droppable', {
     if(rt === this.el) {
       rt = superHandsEvt.detail.hovered || superHandsEvt.detail.on;
     }
-    this.el.dispatchEvent(new DragEvent(type, { relatedTarget: rt }));
+    this.el.dispatchEvent(new MouseEvent(type, { relatedTarget: rt }));
   }
 });
 },{}],5:[function(require,module,exports){

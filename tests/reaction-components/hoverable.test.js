@@ -42,3 +42,4 @@ suite('hoverable', function () {
     assert.notOk(this.el.is('hovered'));
   })
 });
+//GlobalEventHandlers: mouseover mouseout

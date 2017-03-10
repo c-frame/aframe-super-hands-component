@@ -114,3 +114,4 @@ suite('stretchable-physics', function () {
                         scale.set(0.5, 0.5, 0.5));
   });
 });
+// GlobalEventHandlers: onresize (do at stretch-end)

@@ -43,7 +43,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
   });
   test('integrates with GlobalEventHandler dragenter', function (done) {
     this.el.ondragenter = e => {
-      assert.typeOf(e, 'DragEvent');
+      assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
@@ -56,7 +56,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
   });
   test('integrates with GlobalEventHandler dragleave', function (done) {
     this.el.ondragleave = e => {
-      assert.typeOf(e, 'DragEvent');
+      assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
@@ -69,7 +69,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
   });
   test('integrates with GlobalEventHandler drop', function (done) {
     this.el.ondrop = e => {
-      assert.typeOf(e, 'DragEvent');
+      assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
@@ -82,7 +82,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
   });
  test('integrates with GlobalEventHandler drop, when component is on the dragee', function (done) {
     this.el.ondrop = e => {
-      assert.typeOf(e, 'DragEvent');
+      assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
