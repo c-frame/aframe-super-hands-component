@@ -47,7 +47,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
-    }
+    };
     this.comp.start({ detail: { 
       hand: this.hand, 
       carried: this.carried,
@@ -60,7 +60,7 @@ suite('drag-droppable GlobalEventHandler integration', function () {
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
-    }
+    };
     this.comp.end({ detail: { 
       hand: this.hand, 
       carried: this.carried,
@@ -73,20 +73,20 @@ suite('drag-droppable GlobalEventHandler integration', function () {
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
-    }
+    };
     this.el.emit('drag-drop', { 
       hand: this.hand, 
       dropped: this.carried,
       on: this.el
     });
   });
- test('integrates with GlobalEventHandler drop, when component is on the dragee', function (done) {
+  test('integrates with GlobalEventHandler drop, when component is on the dragee', function (done) {
     this.el.ondrop = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.carried);
       done();
-    }
+    };
     this.el.emit('drag-drop', { 
       hand: this.hand, 
       dropped: this.el,

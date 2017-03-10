@@ -27,7 +27,7 @@ suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
-    this.hand = { getAttribute: function () {} };
+    this.hand = helpers.controllerFactory();
     el.parentNode.addEventListener('loaded', function () {
       done();
     });
@@ -124,7 +124,7 @@ suite('grabbable-function with physics', function () {
     this.comp.start({ detail: { hand: this.hand } });
     assert.isOk(this.comp.constraint);
     assert.instanceOf(this.comp.constraint, window.CANNON.LockConstraint);
-    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1)
+    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1);
   });
   test('constraint not registered when usePhysics = never', function () {
     this.el.setAttribute('grabbable', 'usePhysics', 'never');
@@ -151,3 +151,33 @@ suite('grabbable-function with physics', function () {
   });
 });
 // GlobalEventHandlers: dragstart, dragend
+suite('grabbable GEH integration', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    el.setAttribute('grabbable', '');
+    this.hand = helpers.controllerFactory();
+    el.parentNode.addEventListener('loaded', evt => {
+      this.comp = this.el.components.grabbable;
+      done();
+    });
+  });
+  test('ondragstart triggered when grab begins', function (done) {
+    this.el.ondragstart = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.hand);
+      done();
+    };
+    this.comp.start({ detail: { hand: this.hand } });
+  });
+  test('ondragend triggered when grab end', function (done) {
+    this.comp.start({ detail: { hand: this.hand } });
+    this.el.ondragend = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.el);
+      assert.strictEqual(e.relatedTarget, this.hand);
+      done();
+    };
+    this.comp.end({ detail: { hand: this.hand } });
+  });
+});

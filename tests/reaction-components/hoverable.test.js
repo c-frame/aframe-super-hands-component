@@ -40,10 +40,10 @@ suite('hoverable', function () {
     assert.isOk(this.el.is('hovered'));
     this.comp.end({ detail: { hand: h2 } });
     assert.notOk(this.el.is('hovered'));
-  })
+  });
 });
 //GlobalEventHandlers: mouseover mouseout
-suite('GlobalEventHandler integrations', function () {
+suite('hoverable GlobalEventHandler integrations', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     this.hand = helpers.controllerFactory();
@@ -59,7 +59,7 @@ suite('GlobalEventHandler integrations', function () {
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.hand);
       done();
-    }
+    };
     this.comp.start({ detail: { hand: this.hand } });
   });
   test('integration with onmouseout', function (done) {
@@ -68,7 +68,7 @@ suite('GlobalEventHandler integrations', function () {
       assert.strictEqual(e.target, this.el);
       assert.strictEqual(e.relatedTarget, this.hand);
       done();
-    }
+    };
     this.comp.start({ detail: { hand: this.hand } });
     this.comp.end({ detail: { hand: this.hand } });
   });

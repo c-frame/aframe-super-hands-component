@@ -512,6 +512,7 @@
 	    this.grabber = evt.detail.hand;
 	    this.grabbed = true;
 	    this.el.addState(this.GRABBED_STATE);
+	    this.dispatchDragEvent('dragstart', evt);
 	    if (this.data.usePhysics !== 'never' && this.el.body && this.grabber.body) {
 	      this.constraint = new window.CANNON.LockConstraint(this.el.body, this.grabber.body);
 	      this.el.body.world.addConstraint(this.constraint);
@@ -530,6 +531,14 @@
 	    this.grabber = null;
 	    this.grabbed = false;
 	    this.el.removeState(this.GRABBED_STATE);
+	    this.dispatchDragEvent('dragend', evt);
+	  },
+	  dispatchDragEvent: function dispatchDragEvent(type, superHandsEvt) {
+	    // using MouseEvent because Travis FF rejects DragEvent constructor as illegal
+	    var mEvt = new MouseEvent(type, {
+	      relatedTarget: superHandsEvt.detail.hand
+	    });
+	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 
