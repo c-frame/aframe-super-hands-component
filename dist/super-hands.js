@@ -432,15 +432,23 @@
 	    if (this.hoverers.indexOf(evt.detail.hand) === -1) {
 	      this.hoverers.push(evt.detail.hand);
 	    }
+	    this.dispatchMouseEvent('mouseover', evt);
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.hoverers.indexOf(evt.detail.hand);
 	    if (handIndex !== -1) {
 	      this.hoverers.splice(handIndex, 1);
+	      this.dispatchMouseEvent('mouseout', evt);
 	    }
 	    if (this.hoverers.length < 1) {
 	      this.el.removeState(this.HOVERED_STATE);
 	    }
+	  },
+	  dispatchMouseEvent: function dispatchMouseEvent(type, superHandsEvt) {
+	    var mEvt = new MouseEvent(type, {
+	      relatedTarget: superHandsEvt.detail.hand
+	    });
+	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 
