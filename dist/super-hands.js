@@ -84,7 +84,6 @@
 	    dragDropEndButtons: {
 	      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup']
 	    }
-	    // TODO: make list of button events listened a schema item
 	  },
 
 	  /**
@@ -168,8 +167,13 @@
 	  },
 
 	  onGrabEndButton: function onGrabEndButton(evt) {
+	    var mEvt;
 	    if (this.carried) {
 	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mouseup', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
+	      mEvt = new MouseEvent('click', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
 	      this.carried = null;
 	    }
 	    this.grabbing = false;
@@ -192,14 +196,23 @@
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
 	    var ddevt,
+	        mEvt,
 	        carried = this.dragged,
 	        dropTarget = this.hoverEls[0];
 	    this.dragging = false; // keep _unHover() from activating another droptarget
-	    if (carried && dropTarget) {
-	      ddevt = { hand: this.el, dropped: carried, on: dropTarget };
-	      dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
-	      carried.emit(this.DRAGDROP_EVENT, ddevt);
-	      this._unHover(dropTarget);
+	    if (carried) {
+	      mEvt = new MouseEvent('dragend', { relatedTarget: this.el });
+	      carried.dispatchEvent(mEvt);
+	      if (dropTarget) {
+	        ddevt = { hand: this.el, dropped: carried, on: dropTarget };
+	        dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
+	        mEvt = new MouseEvent('drop', { relatedTarget: carried });
+	        dropTarget.dispatchEvent(mEvt);
+	        carried.emit(this.DRAGDROP_EVENT, ddevt);
+	        mEvt = new MouseEvent('drop', { relatedTarget: dropTarget });
+	        carried.dispatchEvent(mEvt);
+	        this._unHover(dropTarget);
+	      }
 	    }
 	    this.dragged = null;
 	  },
@@ -208,7 +221,8 @@
 
 	    var hitEl = evt.detail.el,
 	        used = false,
-	        hitElIndex;
+	        hitElIndex,
+	        mEvt;
 	    if (!hitEl) {
 	      return;
 	    }
@@ -225,6 +239,8 @@
 	    if (this.grabbing && !this.carried) {
 	      this.carried = getTarget();
 	      this.carried.emit(this.GRAB_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mousedown', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
 	    }
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = getTarget();
@@ -240,6 +256,8 @@
 	         fall back to hitEl in case a drag is initiated independent 
 	         of a grab */
 	      this.dragged = this.carried || getTarget();
+	      mEvt = new MouseEvent('dragstart', { relatedTarget: this.el });
+	      this.dragged.dispatchEvent(mEvt);
 	      this.hover(); // refresh hover in case already over a target
 	    }
 	    // keep stack of currently intersected but not interacted entities 
@@ -253,7 +271,7 @@
 	  },
 	  /* send the appropriate hovered gesture for the top entity in the stack */
 	  hover: function hover() {
-	    var hvrevt, hoverEl;
+	    var hvrevt, hoverEl, mEvt;
 	    if (this.hoverEls.length) {
 	      hoverEl = this.hoverEls[0];
 	      hoverEl.removeEventListener('stateremoved', this.unWatch);
@@ -263,10 +281,16 @@
 	          hand: this.el, hovered: hoverEl, carried: this.dragged
 	        };
 	        hoverEl.emit(this.DRAGOVER_EVENT, hvrevt);
+	        mEvt = new MouseEvent('dragenter', { relatedTarget: this.dragged });
+	        hoverEl.dispatchEvent(mEvt);
 	        this.dragged.emit(this.DRAGOVER_EVENT, hvrevt);
+	        mEvt = new MouseEvent('dragenter', { relatedTarget: hoverEl });
+	        this.dragged.dispatchEvent(mEvt);
 	        this.lastHover = this.DRAGOVER_EVENT;
 	      } else {
 	        hoverEl.emit(this.HOVER_EVENT, { hand: this.el });
+	        mEvt = new MouseEvent('mouseover', { relatedTarget: this.el });
+	        hoverEl.dispatchEvent(mEvt);
 	        this.lastHover = this.HOVER_EVENT;
 	      }
 	    } else {
@@ -293,16 +317,22 @@
 	  },
 	  /* inner unHover steps needed regardless of cause of unHover */
 	  _unHover: function _unHover(el) {
-	    var evt;
+	    var evt, mEvt;
 	    el.removeEventListener('stateremoved', this.unHover);
 	    if (this.lastHover === this.DRAGOVER_EVENT) {
 	      evt = { hand: this.el, hovered: el, carried: this.dragged };
 	      el.emit(this.UNDRAGOVER_EVENT, evt);
+	      mEvt = new MouseEvent('dragleave', { relatedTarget: this.dragged });
+	      el.dispatchEvent(mEvt);
 	      if (this.dragged) {
 	        this.dragged.emit(this.UNDRAGOVER_EVENT, evt);
+	        mEvt = new MouseEvent('dragleave', { relatedTarget: el });
+	        this.dragged.dispatchEvent(mEvt);
 	      }
 	    } else if (this.lastHover === this.HOVER_EVENT) {
 	      el.emit(this.UNHOVER_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mouseout', { relatedTarget: this.el });
+	      el.dispatchEvent(mEvt);
 	    }
 	    //activate next target, if present
 	    this.hover();
