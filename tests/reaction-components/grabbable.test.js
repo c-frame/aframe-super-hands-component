@@ -150,34 +150,3 @@ suite('grabbable-function with physics', function () {
     assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
   });
 });
-// GlobalEventHandlers: dragstart, dragend
-suite('grabbable GEH integration', function () {
-  setup(function (done) {
-    var el = this.el = entityFactory();
-    el.setAttribute('grabbable', '');
-    this.hand = helpers.controllerFactory();
-    el.parentNode.addEventListener('loaded', evt => {
-      this.comp = this.el.components.grabbable;
-      done();
-    });
-  });
-  test('ondragstart triggered when grab begins', function (done) {
-    this.el.ondragstart = e => {
-      assert.typeOf(e, 'MouseEvent');
-      assert.strictEqual(e.target, this.el);
-      assert.strictEqual(e.relatedTarget, this.hand);
-      done();
-    };
-    this.comp.start({ detail: { hand: this.hand } });
-  });
-  test('ondragend triggered when grab end', function (done) {
-    this.comp.start({ detail: { hand: this.hand } });
-    this.el.ondragend = e => {
-      assert.typeOf(e, 'MouseEvent');
-      assert.strictEqual(e.target, this.el);
-      assert.strictEqual(e.relatedTarget, this.hand);
-      done();
-    };
-    this.comp.end({ detail: { hand: this.hand } });
-  });
-});

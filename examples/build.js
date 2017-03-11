@@ -388,24 +388,15 @@ AFRAME.registerComponent('clickable', {
     if(this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
     }
-    this.dispatchMouseEvent('mousedown', evt);
   },
   end: function (evt) {
     var handIndex = this.clickers.indexOf(evt.detail.hand);
-    this.dispatchMouseEvent('mouseup', evt);
     if(handIndex !== -1) {
       this.clickers.splice(handIndex, 1);
-      this.dispatchMouseEvent('click', evt);
     }
     if(this.clickers.length < 1) {
       this.el.removeState(this.CLICKED_STATE);
     }
-  },
-  dispatchMouseEvent: function (type, superHandsEvt) {
-    var mEvt = new MouseEvent(type, { 
-      relatedTarget: superHandsEvt.detail.hand
-    });
-    this.el.dispatchEvent(mEvt);
   }
 });
 },{}],4:[function(require,module,exports){
@@ -418,11 +409,9 @@ AFRAME.registerComponent('drag-droppable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-    this.dragDrop = this.dragDrop.bind(this);
     
     this.el.addEventListener(this.HOVER_EVENT, this.start);
     this.el.addEventListener(this.UNHOVER_EVENT, this.end);
-    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDrop);
   },
   remove: function () {
     this.el.removeEventListener(this.HOVER_EVENT, this.start);
@@ -430,21 +419,9 @@ AFRAME.registerComponent('drag-droppable', {
   },
   start: function(evt) {
     this.el.addState(this.HOVERED_STATE);
-    this.dispatchDragEvent('dragenter', evt);
   },
   end: function (evt) {
     this.el.removeState(this.HOVERED_STATE);
-    this.dispatchDragEvent('dragleave', evt);
-  },
-  dragDrop: function (evt) {
-    this.dispatchDragEvent('drop', evt);
-  },
-  dispatchDragEvent: function (type, superHandsEvt) {
-    var rt = superHandsEvt.detail.carried || superHandsEvt.detail.dropped;
-    if(rt === this.el) {
-      rt = superHandsEvt.detail.hovered || superHandsEvt.detail.on;
-    }
-    this.el.dispatchEvent(new MouseEvent(type, { relatedTarget: rt }));
   }
 });
 },{}],5:[function(require,module,exports){
@@ -501,7 +478,6 @@ AFRAME.registerComponent('grabbable', {
     this.grabber = evt.detail.hand;
     this.grabbed = true;
     this.el.addState(this.GRABBED_STATE);
-    this.dispatchDragEvent('dragstart', evt);
     if(this.data.usePhysics !== 'never' && this.el.body && 
        this.grabber.body) {
       this.constraint = new window.CANNON
@@ -520,14 +496,6 @@ AFRAME.registerComponent('grabbable', {
     this.grabber = null;
     this.grabbed = false;
     this.el.removeState(this.GRABBED_STATE);
-    this.dispatchDragEvent('dragend', evt);
-  },
-  dispatchDragEvent: function (type, superHandsEvt) {
-    // using MouseEvent because Travis FF rejects DragEvent constructor as illegal
-    var mEvt = new MouseEvent(type, { 
-      relatedTarget: superHandsEvt.detail.hand
-    });
-    this.el.dispatchEvent(mEvt);
   }
 });
 },{}],6:[function(require,module,exports){
@@ -555,23 +523,15 @@ AFRAME.registerComponent('hoverable', {
     if(this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
     }
-    this.dispatchMouseEvent('mouseover', evt);
   },
   end: function (evt) {
     var handIndex = this.hoverers.indexOf(evt.detail.hand);
     if(handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
-      this.dispatchMouseEvent('mouseout', evt);
     }
     if(this.hoverers.length < 1) {
       this.el.removeState(this.HOVERED_STATE);
     }
-  },
-  dispatchMouseEvent: function (type, superHandsEvt) {
-    var mEvt = new MouseEvent(type, { 
-      relatedTarget: superHandsEvt.detail.hand
-    });
-    this.el.dispatchEvent(mEvt);
   }
 });
 },{}],7:[function(require,module,exports){
@@ -602,7 +562,7 @@ AFRAME.registerComponent('stretchable', {
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
       deltaStretch = 1;
-    if (this.previousStretch != null && currentStretch !== 0) {
+    if (this.previousStretch !== null && currentStretch !== 0) {
       deltaStretch = currentStretch / this.previousStretch;
     }
     this.previousStretch = currentStretch;

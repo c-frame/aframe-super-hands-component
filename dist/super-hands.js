@@ -462,23 +462,15 @@
 	    if (this.hoverers.indexOf(evt.detail.hand) === -1) {
 	      this.hoverers.push(evt.detail.hand);
 	    }
-	    this.dispatchMouseEvent('mouseover', evt);
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.hoverers.indexOf(evt.detail.hand);
 	    if (handIndex !== -1) {
 	      this.hoverers.splice(handIndex, 1);
-	      this.dispatchMouseEvent('mouseout', evt);
 	    }
 	    if (this.hoverers.length < 1) {
 	      this.el.removeState(this.HOVERED_STATE);
 	    }
-	  },
-	  dispatchMouseEvent: function dispatchMouseEvent(type, superHandsEvt) {
-	    var mEvt = new MouseEvent(type, {
-	      relatedTarget: superHandsEvt.detail.hand
-	    });
-	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 
@@ -542,7 +534,6 @@
 	    this.grabber = evt.detail.hand;
 	    this.grabbed = true;
 	    this.el.addState(this.GRABBED_STATE);
-	    this.dispatchDragEvent('dragstart', evt);
 	    if (this.data.usePhysics !== 'never' && this.el.body && this.grabber.body) {
 	      this.constraint = new window.CANNON.LockConstraint(this.el.body, this.grabber.body);
 	      this.el.body.world.addConstraint(this.constraint);
@@ -561,14 +552,6 @@
 	    this.grabber = null;
 	    this.grabbed = false;
 	    this.el.removeState(this.GRABBED_STATE);
-	    this.dispatchDragEvent('dragend', evt);
-	  },
-	  dispatchDragEvent: function dispatchDragEvent(type, superHandsEvt) {
-	    // using MouseEvent because Travis FF rejects DragEvent constructor as illegal
-	    var mEvt = new MouseEvent(type, {
-	      relatedTarget: superHandsEvt.detail.hand
-	    });
-	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 
@@ -603,7 +586,7 @@
 	        otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position')),
 	        currentStretch = handPos.distanceTo(otherHandPos),
 	        deltaStretch = 1;
-	    if (this.previousStretch != null && currentStretch !== 0) {
+	    if (this.previousStretch !== null && currentStretch !== 0) {
 	      deltaStretch = currentStretch / this.previousStretch;
 	    }
 	    this.previousStretch = currentStretch;
@@ -667,11 +650,9 @@
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
-	    this.dragDrop = this.dragDrop.bind(this);
 
 	    this.el.addEventListener(this.HOVER_EVENT, this.start);
 	    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
-	    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDrop);
 	  },
 	  remove: function remove() {
 	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
@@ -679,21 +660,9 @@
 	  },
 	  start: function start(evt) {
 	    this.el.addState(this.HOVERED_STATE);
-	    this.dispatchDragEvent('dragenter', evt);
 	  },
 	  end: function end(evt) {
 	    this.el.removeState(this.HOVERED_STATE);
-	    this.dispatchDragEvent('dragleave', evt);
-	  },
-	  dragDrop: function dragDrop(evt) {
-	    this.dispatchDragEvent('drop', evt);
-	  },
-	  dispatchDragEvent: function dispatchDragEvent(type, superHandsEvt) {
-	    var rt = superHandsEvt.detail.carried || superHandsEvt.detail.dropped;
-	    if (rt === this.el) {
-	      rt = superHandsEvt.detail.hovered || superHandsEvt.detail.on;
-	    }
-	    this.el.dispatchEvent(new MouseEvent(type, { relatedTarget: rt }));
 	  }
 	});
 
@@ -727,24 +696,15 @@
 	    if (this.clickers.indexOf(evt.detail.hand) === -1) {
 	      this.clickers.push(evt.detail.hand);
 	    }
-	    this.dispatchMouseEvent('mousedown', evt);
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.clickers.indexOf(evt.detail.hand);
-	    this.dispatchMouseEvent('mouseup', evt);
 	    if (handIndex !== -1) {
 	      this.clickers.splice(handIndex, 1);
-	      this.dispatchMouseEvent('click', evt);
 	    }
 	    if (this.clickers.length < 1) {
 	      this.el.removeState(this.CLICKED_STATE);
 	    }
-	  },
-	  dispatchMouseEvent: function dispatchMouseEvent(type, superHandsEvt) {
-	    var mEvt = new MouseEvent(type, {
-	      relatedTarget: superHandsEvt.detail.hand
-	    });
-	    this.el.dispatchEvent(mEvt);
 	  }
 	});
 
