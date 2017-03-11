@@ -69,8 +69,7 @@
     </ul>
     <a id="events" class="example" href="events/">Integration with Global Event Handlers</a>
     <p>Another option for customizing reactions is by using the 
-      <a href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers">
-        Global Event Handlers Web API</a> (e.g., 'onclick'). 
+      Global Event Handlers Web API (e.g., 'onclick'). 
       super-hands will trigger standard events that are analogous to the VR
       interactions taking place, like mousedown, click, dragenter, et c. 
       Just like in standard HTML, setting the
@@ -78,9 +77,9 @@
       simple reactions can be defined inline.
     </p>
     <ul>
-      <li>onmousedown the box turns to wireframe</li>
-      <li>onmouseup the box returns to solid material</li>
-      <li>onclick the box changes color</li>
+      <li>onmousedown changes the box color</li>
+      <li>ondragstart the controller gets a blob of the box's color</li>
+      <li>ondragenter the torus knot turns transparent</li>
       <li>ondrop the torus knot takes on the current color of the box</li>
     </ul>
     <a id="sticky" class="example" href="sticky/">Sticky Grab via Custom Button Mapping</a>

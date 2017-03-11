@@ -13,7 +13,6 @@
       }
       function paintBall (evt) {
         var col = evt.target.getAttribute('color');
-        console.log(evt.relatedTarget.children[0]);
         evt.relatedTarget.children[0].setAttribute('color', col);
         evt.relatedTarget.children[0].setAttribute('visible', true);
       }
@@ -27,36 +26,29 @@
       <a-assets>
         <img id="grid" src="grid.png"/>
         <a-mixin id="controller" super-hands 
-                 sphere-collider="objects: [clickable], [grabbable]"></a-mixin>
+                 sphere-collider="objects: a-box, a-torus-knot"></a-mixin>
       </a-assets>
       <a-entity hand-controls="left" mixin="controller">
-        <a-sphere radius="0.04" position="0 -0.03 -0.04" visible="false"></a-sphere>
+        <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"></a-sphere>
       </a-entity>
       <a-entity hand-controls="right" mixin="controller">
-        <a-sphere radius="0.04" position="0 -0.03 -0.04" visible="false"></a-sphere>
+        <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"></a-sphere>
       </a-entity>
       <a-box position="0 1 -1" color="red" 
-             clickable 
-             onclick="randomizeColor(this)"
-             onmousedown="paintBall(event)"
-             onmouseup="unPaintBall(event)"
-             drag-droppable
-             ondragenter="this.setAttribute('opacity', 0.5)"
-             ondragleave="this.setAttribute('opacity', 1)">
+             onmousedown="randomizeColor(this)"
+             ondragstart="paintBall(event)"
+             ondragend="unPaintBall(event)"
+             ondrop="event.relatedTarget.setAttribute('color', this.getAttribute('color'))">
         <a-text position="0 0 0.5" 
-                value="click to change color\ndrop inside to paint"
+                value="click to change color\ndrag-drop to paint the knot"
                 width="1" wrap-count="15" anchor="center"></a-text>
       </a-box>
       <a-torus-knot position="0 0.25 -0.15" radius="0.15" radius-tubular="0.04"
-                    transparent="true"
-                    hoverable
-                    onmouseover="this.setAttribute('opacity', 0.5)"
-                    onmouseout="this.setAttribute('opacity', 1)"
-                    grabbable 
-                    ondragstart="this.setAttribute('wireframe', true)"
-                    ondragend="this.setAttribute('wireframe', false)"
-                    drag-droppable
-                    ondrop="this.setAttribute('color', event.relatedTarget.getAttribute('color'))">
+                    transparent="true" grabbable 
+                    ondragenter="this.setAttribute('opacity', 0.5)"
+                    ondragleave="this.setAttribute('opacity', 1)"
+                    onmousedown="this.setAttribute('wireframe', true)"
+                    onmouseup="this.setAttribute('wireframe', false)">
       </a-torus-knot>
                     
                     

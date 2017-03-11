@@ -43,16 +43,13 @@ components to the entities in your scene, and `super-hands` can work with all of
 There are two pathways to adding additional interactivity.
 
 1. A-Frame style: Each component's API documentation describes the A-Frame 
-custom events and state it uses. 
+custom events and states it uses. 
 These are best processed by creating new A-Frame components that register
 event listeners and react accordingly. 
-1. HTML style: The `super-hands` reaction components also integrate with the
-Global Event Handlers Web API and trigger standard events that are analogous
-to the VR interaction. The `clickable` component, for example, will trigger 
-'click' type `MouseEvent`s, and you can register a listener by setting the 
-`onclick` HTML attribute on a `clickable` entity. 
-The specific standard events used by each reaction
-component are described in its API documentation below. 
+1. HTML style: The `super-hands` component also integrates with the
+Global Event Handlers Web API to trigger standard events analogous
+to the VR interactions that can easily be handled through 
+properties like `onclick`.
 
 ### Installation
 
@@ -194,6 +191,24 @@ even if the trigger was *released* earlier.
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
 
+##### Global Event Handler Integration
+
+| entity HTML attribute | conditions | event.relatedTarget |
+| --- | --- | --- |
+| onmouseover | hovering in an entity's collision zone | `super-hands` entity |
+| onmouseout | leaving an entity's collision zone | `super-hands` entity |
+| onmousedown | grab started while collided with entity | `super-hands` entity |
+| onmouseup, onclick | grab ended after onmousedown | controller entity |
+| ondragstart | drag-drop started while collided with entity | controller entity |
+| ondragend | drag-drop started while collided with entity | controller entity |
+| ondragenter | hovering in an entity's collision zone while drag-dropping another entity | the other entity\* |
+| ondragleave | leaving an entity's collision zone while drag-dropping another entity | the other entity\* |
+| ondrop | drag-drop ended while holding an entity over a target | the other entity\* |
+
+The event passed to the handler will be a `MouseEvent`. At present the only property implemented
+is `relatedTarget`, which is set as
+listed in the table. Drag-dropping events will be dispatched on both the entity being dragged and the drop target, and the `relatedTarget` property for each will point to the other entity in the interaction.
+
 #### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity
@@ -207,34 +222,16 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
 
-##### Global Event Handler Integrations
-
-| onmouseover | onmouseout | 
-| --- | --- | 
-
-Of the `MouseEvent` interface, only `target` (the clickable entity) and 
-`relatedTarget` (the super-hands entity) are implemented. 
-
 #### clickable component
 
 Used to indicate when buttons are pressed while the controller is within range 
-to interact with an entity. Adds the 'clicked' state while the button is held
-and also triggers analogous mouse events from the GlobalEventHandlers Web API
-so that element properties like `onclick` can be used to set event handlers.
+to interact with an entity. Adds the 'clicked' state while the grab button is held.
 
 ##### States
 
 | Name | Description |
 | --- | --- |
 | clicked | Added to entity while a button is held down |
-
-##### Global Event Handler Integrations
-
-| onclick | onmousedown | onmouseup |
-| --- | --- | --- |
-
-Of the `MouseEvent` interface, only `target` (the clickable entity) and 
-`relatedTarget` (the interacting super-hands entity) are implemented at present. 
 
 #### grabbable component
 
@@ -255,16 +252,6 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 | Name | Description |
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
-
-##### Global Event Handler Integrations
-
-| ondragstart | ondragend | 
-| --- | --- | 
-
-Note: this uses the `MouseEvent` interface instead of `DrageEvent` because
-some browser versions don't allow syntheric `DragEvents`. 
-Of the `MouseEvent` interface, only `target` (the clickable entity) and 
-`relatedTarget` (the super-hands entity) are implemented. 
 
 #### stretchable component
 
@@ -302,16 +289,3 @@ with the `drag-dropped` event, or create your own component.
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to 
 receive the hovered state. 
-
-##### Global Event Handler Integrations
-
-| dragenter | dragleave | drop |
-| --- | --- | --- |
-
-Note: this uses the `MouseEvent` interface instead of `DrageEvent` because
-some browser versions don't allow syntheric `DragEvents`. Of the interface, 
-only `relatedTarget` is used at present. 
-`event.target` will point to the entity processing the event 
-(i.e. the one with the `ondragenter`/`ondragleave`/`ondrop` property set), and 
-`event.relatedTarget` will point to the other entity in the drag-drop 
-interaction. 

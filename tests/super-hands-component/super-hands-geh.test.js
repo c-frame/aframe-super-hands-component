@@ -89,7 +89,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     };
     this.sh1.onDragDropEndButton();
   });
-  test('dragstart - drag', function (done) {
+  test('dragstart', function (done) {
     this.target1.ondragstart = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.target1);
@@ -99,7 +99,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
-  test('dragend - drag', function (done) {
+  test('dragend', function (done) {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.ondragend = e => {
@@ -177,4 +177,3 @@ suite('super-hands GlobalEventHandler integration', function () {
     assert.isFalse(clickSpy.called);
   });
 });
-//  | | | onclick |  |  |
