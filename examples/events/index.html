@@ -11,6 +11,15 @@
         target.setAttribute('color','#'+Math.random().toString(16).substr(-6));
         // color randomizer credit: http://stackoverflow.com/a/7638362
       }
+      function paintBall (evt) {
+        var col = evt.target.getAttribute('color');
+        console.log(evt.relatedTarget.children[0]);
+        evt.relatedTarget.children[0].setAttribute('color', col);
+        evt.relatedTarget.children[0].setAttribute('visible', true);
+      }
+      function unPaintBall (evt) {
+        evt.relatedTarget.children[0].setAttribute('visible', false);
+      }
     </script>
   </head>
   <body>
@@ -20,22 +29,33 @@
         <a-mixin id="controller" super-hands 
                  sphere-collider="objects: [clickable], [grabbable]"></a-mixin>
       </a-assets>
-      <a-entity hand-controls="left" mixin="controller"></a-entity>
-      <a-entity hand-controls="right" mixin="controller"></a-entity>
-      <a-box position="0 1 -1" color="red" transparent="true"
+      <a-entity hand-controls="left" mixin="controller">
+        <a-sphere radius="0.04" position="0 -0.03 -0.04" visible="false"></a-sphere>
+      </a-entity>
+      <a-entity hand-controls="right" mixin="controller">
+        <a-sphere radius="0.04" position="0 -0.03 -0.04" visible="false"></a-sphere>
+      </a-entity>
+      <a-box position="0 1 -1" color="red" 
              clickable 
-             onmousedown="this.setAttribute('material', 'wireframe', true)"
-             onmouseup="this.setAttribute('material', 'wireframe', false)"
              onclick="randomizeColor(this)"
-             hoverable
-             onmouseover="this.setAttribute('opacity', 0.5)"
-             onmouseout="this.setAttribute('opacity', 1)">
+             onmousedown="paintBall(event)"
+             onmouseup="unPaintBall(event)"
+             drag-droppable
+             ondragenter="this.setAttribute('opacity', 0.5)"
+             ondragleave="this.setAttribute('opacity', 1)">
         <a-text position="0 0 0.5" 
                 value="click to change color\ndrop inside to paint"
                 width="1" wrap-count="15" anchor="center"></a-text>
       </a-box>
-      <a-torus-knot position="0 0.25 -0.15" radius="0.15" radius-tubular="0.04" 
-                    grabbable drag-droppable
+      <a-torus-knot position="0 0.25 -0.15" radius="0.15" radius-tubular="0.04"
+                    transparent="true"
+                    hoverable
+                    onmouseover="this.setAttribute('opacity', 0.5)"
+                    onmouseout="this.setAttribute('opacity', 1)"
+                    grabbable 
+                    ondragstart="this.setAttribute('wireframe', true)"
+                    ondragend="this.setAttribute('wireframe', false)"
+                    drag-droppable
                     ondrop="this.setAttribute('color', event.relatedTarget.getAttribute('color'))">
       </a-torus-knot>
                     

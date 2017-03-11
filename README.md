@@ -213,9 +213,7 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- | 
 
 Of the `MouseEvent` interface, only `target` (the clickable entity) and 
-`relatedTarget` (the super-hands entity) are implemented. If there is interest, I will
-work on adding the position properties to describe the location of the 
-hand relative to the clickable entity.
+`relatedTarget` (the super-hands entity) are implemented. 
 
 #### clickable component
 
@@ -257,6 +255,16 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 | Name | Description |
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
+
+##### Global Event Handler Integrations
+
+| ondragstart | ondragend | 
+| --- | --- | 
+
+Note: this uses the `MouseEvent` interface instead of `DrageEvent` because
+some browser versions don't allow syntheric `DragEvents`. 
+Of the `MouseEvent` interface, only `target` (the clickable entity) and 
+`relatedTarget` (the super-hands entity) are implemented. 
 
 #### stretchable component
 
