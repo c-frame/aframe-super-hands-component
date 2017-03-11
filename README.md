@@ -99,10 +99,12 @@ require('super-hands');
 
 ### News
 
-v0.3.1 
+v0.3.1
 
-* Integration with GlobalEventHandlers for easy reactivity via element 
+* New: integration with GlobalEventHandlers for easy reactivity via element 
   properties such as `onclick`
+* New: `clickable` reaction component for interacting with an entity
+  without moving it
   
   
 v0.3.0
