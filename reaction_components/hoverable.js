@@ -31,5 +31,5 @@ AFRAME.registerComponent('hoverable', {
     if(this.hoverers.length < 1) {
       this.el.removeState(this.HOVERED_STATE);
     }
-  } 
+  }
 });

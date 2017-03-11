@@ -25,7 +25,7 @@ AFRAME.registerComponent('stretchable', {
         .copy(this.stretchers[1].getAttribute('position')),
       currentStretch = handPos.distanceTo(otherHandPos),
       deltaStretch = 1;
-    if (this.previousStretch != null && currentStretch !== 0) {
+    if (this.previousStretch !== null && currentStretch !== 0) {
       deltaStretch = currentStretch / this.previousStretch;
     }
     this.previousStretch = currentStretch;

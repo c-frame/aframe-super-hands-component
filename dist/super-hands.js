@@ -57,6 +57,7 @@
 	__webpack_require__(3);
 	__webpack_require__(4);
 	__webpack_require__(5);
+	__webpack_require__(6);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -83,7 +84,6 @@
 	    dragDropEndButtons: {
 	      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup']
 	    }
-	    // TODO: make list of button events listened a schema item
 	  },
 
 	  /**
@@ -167,8 +167,13 @@
 	  },
 
 	  onGrabEndButton: function onGrabEndButton(evt) {
+	    var mEvt;
 	    if (this.carried) {
 	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mouseup', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
+	      mEvt = new MouseEvent('click', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
 	      this.carried = null;
 	    }
 	    this.grabbing = false;
@@ -191,14 +196,23 @@
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
 	    var ddevt,
+	        mEvt,
 	        carried = this.dragged,
 	        dropTarget = this.hoverEls[0];
 	    this.dragging = false; // keep _unHover() from activating another droptarget
-	    if (carried && dropTarget) {
-	      ddevt = { hand: this.el, dropped: carried, on: dropTarget };
-	      dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
-	      carried.emit(this.DRAGDROP_EVENT, ddevt);
-	      this._unHover(dropTarget);
+	    if (carried) {
+	      mEvt = new MouseEvent('dragend', { relatedTarget: this.el });
+	      carried.dispatchEvent(mEvt);
+	      if (dropTarget) {
+	        ddevt = { hand: this.el, dropped: carried, on: dropTarget };
+	        dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
+	        mEvt = new MouseEvent('drop', { relatedTarget: carried });
+	        dropTarget.dispatchEvent(mEvt);
+	        carried.emit(this.DRAGDROP_EVENT, ddevt);
+	        mEvt = new MouseEvent('drop', { relatedTarget: dropTarget });
+	        carried.dispatchEvent(mEvt);
+	        this._unHover(dropTarget);
+	      }
 	    }
 	    this.dragged = null;
 	  },
@@ -207,7 +221,8 @@
 
 	    var hitEl = evt.detail.el,
 	        used = false,
-	        hitElIndex;
+	        hitElIndex,
+	        mEvt;
 	    if (!hitEl) {
 	      return;
 	    }
@@ -224,6 +239,8 @@
 	    if (this.grabbing && !this.carried) {
 	      this.carried = getTarget();
 	      this.carried.emit(this.GRAB_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mousedown', { relatedTarget: this.el });
+	      this.carried.dispatchEvent(mEvt);
 	    }
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = getTarget();
@@ -239,6 +256,8 @@
 	         fall back to hitEl in case a drag is initiated independent 
 	         of a grab */
 	      this.dragged = this.carried || getTarget();
+	      mEvt = new MouseEvent('dragstart', { relatedTarget: this.el });
+	      this.dragged.dispatchEvent(mEvt);
 	      this.hover(); // refresh hover in case already over a target
 	    }
 	    // keep stack of currently intersected but not interacted entities 
@@ -252,7 +271,7 @@
 	  },
 	  /* send the appropriate hovered gesture for the top entity in the stack */
 	  hover: function hover() {
-	    var hvrevt, hoverEl;
+	    var hvrevt, hoverEl, mEvt;
 	    if (this.hoverEls.length) {
 	      hoverEl = this.hoverEls[0];
 	      hoverEl.removeEventListener('stateremoved', this.unWatch);
@@ -262,10 +281,16 @@
 	          hand: this.el, hovered: hoverEl, carried: this.dragged
 	        };
 	        hoverEl.emit(this.DRAGOVER_EVENT, hvrevt);
+	        mEvt = new MouseEvent('dragenter', { relatedTarget: this.dragged });
+	        hoverEl.dispatchEvent(mEvt);
 	        this.dragged.emit(this.DRAGOVER_EVENT, hvrevt);
+	        mEvt = new MouseEvent('dragenter', { relatedTarget: hoverEl });
+	        this.dragged.dispatchEvent(mEvt);
 	        this.lastHover = this.DRAGOVER_EVENT;
 	      } else {
 	        hoverEl.emit(this.HOVER_EVENT, { hand: this.el });
+	        mEvt = new MouseEvent('mouseover', { relatedTarget: this.el });
+	        hoverEl.dispatchEvent(mEvt);
 	        this.lastHover = this.HOVER_EVENT;
 	      }
 	    } else {
@@ -292,16 +317,22 @@
 	  },
 	  /* inner unHover steps needed regardless of cause of unHover */
 	  _unHover: function _unHover(el) {
-	    var evt;
+	    var evt, mEvt;
 	    el.removeEventListener('stateremoved', this.unHover);
 	    if (this.lastHover === this.DRAGOVER_EVENT) {
 	      evt = { hand: this.el, hovered: el, carried: this.dragged };
 	      el.emit(this.UNDRAGOVER_EVENT, evt);
+	      mEvt = new MouseEvent('dragleave', { relatedTarget: this.dragged });
+	      el.dispatchEvent(mEvt);
 	      if (this.dragged) {
 	        this.dragged.emit(this.UNDRAGOVER_EVENT, evt);
+	        mEvt = new MouseEvent('dragleave', { relatedTarget: el });
+	        this.dragged.dispatchEvent(mEvt);
 	      }
 	    } else if (this.lastHover === this.HOVER_EVENT) {
 	      el.emit(this.UNHOVER_EVENT, { hand: this.el });
+	      mEvt = new MouseEvent('mouseout', { relatedTarget: this.el });
+	      el.dispatchEvent(mEvt);
 	    }
 	    //activate next target, if present
 	    this.hover();
@@ -555,7 +586,7 @@
 	        otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position')),
 	        currentStretch = handPos.distanceTo(otherHandPos),
 	        deltaStretch = 1;
-	    if (this.previousStretch != null && currentStretch !== 0) {
+	    if (this.previousStretch !== null && currentStretch !== 0) {
 	      deltaStretch = currentStretch / this.previousStretch;
 	    }
 	    this.previousStretch = currentStretch;
@@ -615,23 +646,65 @@
 	    this.HOVERED_STATE = 'dragover';
 	    this.HOVER_EVENT = 'dragover-start';
 	    this.UNHOVER_EVENT = 'dragover-end';
+	    this.DRAGDROP_EVENT = 'drag-drop';
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
-	  },
-	  pause: function pause() {
-	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
-	    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
-	  },
-	  play: function play() {
+
 	    this.el.addEventListener(this.HOVER_EVENT, this.start);
 	    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+	  },
+	  remove: function remove() {
+	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
+	    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
 	  },
 	  start: function start(evt) {
 	    this.el.addState(this.HOVERED_STATE);
 	  },
 	  end: function end(evt) {
 	    this.el.removeState(this.HOVERED_STATE);
+	  }
+	});
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	AFRAME.registerComponent('clickable', {
+	  schema: {
+	    onclick: { type: 'string' }
+	  },
+	  init: function init() {
+	    this.CLICKED_STATE = 'clicked';
+	    this.CLICK_EVENT = 'grab-start';
+	    this.UNCLICK_EVENT = 'grab-end';
+	    this.clickers = [];
+
+	    this.start = this.start.bind(this);
+	    this.end = this.end.bind(this);
+	    this.el.addEventListener(this.CLICK_EVENT, this.start);
+	    this.el.addEventListener(this.UNCLICK_EVENT, this.end);
+	  },
+	  remove: function remove() {
+	    this.el.removeEventListener(this.CLICK_EVENT, this.start);
+	    this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
+	  },
+	  start: function start(evt) {
+	    this.el.addState(this.CLICKED_STATE);
+	    if (this.clickers.indexOf(evt.detail.hand) === -1) {
+	      this.clickers.push(evt.detail.hand);
+	    }
+	  },
+	  end: function end(evt) {
+	    var handIndex = this.clickers.indexOf(evt.detail.hand);
+	    if (handIndex !== -1) {
+	      this.clickers.splice(handIndex, 1);
+	    }
+	    if (this.clickers.length < 1) {
+	      this.el.removeState(this.CLICKED_STATE);
+	    }
 	  }
 	});
 

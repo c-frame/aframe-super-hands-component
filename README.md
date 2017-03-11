@@ -38,6 +38,19 @@ others to rotate around a fixed point, and others still to spawn a new entity bu
 With this API schema, these options can be handled by adding or creating different reaction
 components to the entities in your scene, and `super-hands` can work with all of them. 
 
+#### Interactivity
+
+There are two pathways to adding additional interactivity.
+
+1. A-Frame style: Each component's API documentation describes the A-Frame 
+custom events and states it uses. 
+These are best processed by creating new A-Frame components that register
+event listeners and react accordingly. 
+1. HTML style: The `super-hands` component also integrates with the
+Global Event Handlers Web API to trigger standard events analogous
+to the VR interactions that can easily be handled through 
+properties like `onclick`.
+
 ### Installation
 
 #### Browser  
@@ -57,8 +70,9 @@ Install and use by directly including the [browser files](dist):
     <!-- Make sure your super-hands entities also have controller and collider components -->
     <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
     <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
-    <!-- hover and drag-drop won't have any obvious effect without some additional entities or components. See the examples page for more -->
-    <a-box hoverable grabbable stretchable drag-droppable</a-box>
+    <!-- hover, click, & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable clickable grabbable stretchable drag-droppable
+           color="red"></a-box>
   </a-scene>
 </body>
 ```
@@ -85,6 +99,12 @@ require('super-hands');
 
 ### News
 
+v0.3.1 
+
+* Integration with GlobalEventHandlers for easy reactivity via element 
+  properties such as `onclick`
+  
+  
 v0.3.0
 
 * Confirmed compatibility with A-Frame v0.5.0 (no changes)
@@ -171,6 +191,24 @@ even if the trigger was *released* earlier.
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
 
+##### Global Event Handler Integration
+
+| entity HTML attribute | conditions | event.relatedTarget |
+| --- | --- | --- |
+| onmouseover | hovering in an entity's collision zone | `super-hands` entity |
+| onmouseout | leaving an entity's collision zone | `super-hands` entity |
+| onmousedown | grab started while collided with entity | `super-hands` entity |
+| onmouseup, onclick | grab ended after onmousedown | controller entity |
+| ondragstart | drag-drop started while collided with entity | controller entity |
+| ondragend | drag-drop started while collided with entity | controller entity |
+| ondragenter | hovering in an entity's collision zone while drag-dropping another entity | the other entity\* |
+| ondragleave | leaving an entity's collision zone while drag-dropping another entity | the other entity\* |
+| ondrop | drag-drop ended while holding an entity over a target | the other entity\* |
+
+The event passed to the handler will be a `MouseEvent`. At present the only property implemented
+is `relatedTarget`, which is set as
+listed in the table. Drag-dropping events will be dispatched on both the entity being dragged and the drop target, and the `relatedTarget` property for each will point to the other entity in the interaction.
+
 #### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity
@@ -183,6 +221,17 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | Name | Description |
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
+
+#### clickable component
+
+Used to indicate when buttons are pressed while the controller is within range 
+to interact with an entity. Adds the 'clicked' state while the grab button is held.
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| clicked | Added to entity while a button is held down |
 
 #### grabbable component
 
@@ -228,8 +277,9 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 This can be combined with  with a '-hovered' mixin to easily highlight when an entity is 
 hovering in a drag-drop location. 
 
-For more interactivity, consider using `event-set` from [kframe](http://github.com/ngokevin/kframe) 
-with the `drag-dropped` event or creating your own component.
+For interactivity, use the global event handler integration, 
+the `event-set` from [kframe](http://github.com/ngokevin/kframe) 
+with the `drag-dropped` event, or create your own component.
 
 ##### States
 

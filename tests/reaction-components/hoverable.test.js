@@ -40,5 +40,5 @@ suite('hoverable', function () {
     assert.isOk(this.el.is('hovered'));
     this.comp.end({ detail: { hand: h2 } });
     assert.notOk(this.el.is('hovered'));
-  })
+  });
 });

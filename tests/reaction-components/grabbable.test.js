@@ -27,7 +27,7 @@ suite('grabbable-function without physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     el.setAttribute('grabbable', '');
-    this.hand = { getAttribute: function () {} };
+    this.hand = helpers.controllerFactory();
     el.parentNode.addEventListener('loaded', function () {
       done();
     });
@@ -124,7 +124,7 @@ suite('grabbable-function with physics', function () {
     this.comp.start({ detail: { hand: this.hand } });
     assert.isOk(this.comp.constraint);
     assert.instanceOf(this.comp.constraint, window.CANNON.LockConstraint);
-    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1)
+    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1);
   });
   test('constraint not registered when usePhysics = never', function () {
     this.el.setAttribute('grabbable', 'usePhysics', 'never');

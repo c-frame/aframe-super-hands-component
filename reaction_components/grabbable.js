@@ -69,5 +69,5 @@ AFRAME.registerComponent('grabbable', {
     this.grabber = null;
     this.grabbed = false;
     this.el.removeState(this.GRABBED_STATE);
-  } 
+  }
 });

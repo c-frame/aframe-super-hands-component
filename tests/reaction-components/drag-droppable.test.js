@@ -23,7 +23,7 @@ suite('drag-droppable', function () {
     });
   });
   test('el gains and loses dragover state', function () {
-    this.comp.start();
+    this.comp.start({ detail: { hand: this.hand } });
     assert.isTrue(this.el.is('dragover'));
     this.comp.end({ detail: { hand: this.hand } });
     assert.isFalse(this.el.is('dragover'));
