@@ -146,6 +146,7 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('mouseup', function (done) {
     this.sh1.onGrabStartButton();
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.onmouseup = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -157,6 +158,7 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('click', function (done) {
     this.sh1.onGrabStartButton();
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.onclick = e => {
       assert.typeOf(e, 'MouseEvent');

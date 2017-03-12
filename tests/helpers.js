@@ -78,4 +78,5 @@ module.exports.controllerFactory = function (comps, controllerOverride, scene) {
   scene = scene || document.querySelector('a-scene');
   scene.appendChild(contrEl);
   return contrEl;
-}
+};
+

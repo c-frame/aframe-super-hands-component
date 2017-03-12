@@ -212,7 +212,7 @@ AFRAME.registerComponent('super-hands', {
 
     } 
     if (this.stretching && !this.stretched) {
-      this.stretched = getTarget();
+      this.stretched = useTarget();
       if(this.stretched === this.otherSuperHand.stretched) {
         this.stretched.emit(this.STRETCH_EVENT, { 
           hand: this.otherSuperHand.el, secondHand: this.el 
@@ -224,7 +224,7 @@ AFRAME.registerComponent('super-hands', {
          with carried element rather than a currently intersected drop target.
          fall back to hitEl in case a drag is initiated independent 
          of a grab */
-      this.dragged = this.carried || getTarget();
+      this.dragged = this.carried || useTarget();
       mEvt = new MouseEvent('dragstart', { relatedTarget: this.el });
       this.dragged.dispatchEvent(mEvt);
       this.hover(); // refresh hover in case already over a target

@@ -252,7 +252,7 @@
 	      }
 	    }
 	    if (this.stretching && !this.stretched) {
-	      this.stretched = getTarget();
+	      this.stretched = useTarget();
 	      if (this.stretched === this.otherSuperHand.stretched) {
 	        this.stretched.emit(this.STRETCH_EVENT, {
 	          hand: this.otherSuperHand.el, secondHand: this.el
@@ -264,7 +264,7 @@
 	         with carried element rather than a currently intersected drop target.
 	         fall back to hitEl in case a drag is initiated independent 
 	         of a grab */
-	      this.dragged = this.carried || getTarget();
+	      this.dragged = this.carried || useTarget();
 	      mEvt = new MouseEvent('dragstart', { relatedTarget: this.el });
 	      this.dragged.dispatchEvent(mEvt);
 	      this.hover(); // refresh hover in case already over a target
@@ -517,6 +517,9 @@
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
+
+	    this.el.addEventListener(this.GRAB_EVENT, this.start);
+	    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
 	  },
 	  update: function update(oldDat) {
 	    if (this.data.usePhysics === 'never' && this.constraint) {
@@ -543,13 +546,9 @@
 	      });
 	    }
 	  },
-	  pause: function pause() {
+	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
-	  },
-	  play: function play() {
-	    this.el.addEventListener(this.GRAB_EVENT, this.start);
-	    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
 	  },
 	  start: function start(evt) {
 	    if (this.grabbed) {
@@ -558,6 +557,10 @@
 	    this.grabber = evt.detail.hand;
 	    this.grabbed = true;
 	    this.el.addState(this.GRABBED_STATE);
+	    // notify super-hands that the gesture was accepted
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    }
 	    if (this.data.usePhysics !== 'never' && this.el.body && this.grabber.body) {
 	      this.constraint = new window.CANNON.LockConstraint(this.el.body, this.grabber.body);
 	      this.el.body.world.addConstraint(this.constraint);

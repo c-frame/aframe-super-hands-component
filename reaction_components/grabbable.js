@@ -11,6 +11,9 @@ AFRAME.registerComponent('grabbable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
+    
+    this.el.addEventListener(this.GRAB_EVENT, this.start);
+    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
   },
   update: function (oldDat) {
     if(this.data.usePhysics === 'never' && this.constraint) {
@@ -38,19 +41,17 @@ AFRAME.registerComponent('grabbable', {
       });
     }
   },
-  pause: function () {
+  remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
-  },
-  play: function () {
-    this.el.addEventListener(this.GRAB_EVENT, this.start);
-    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
   },
   start: function(evt) {
     if (this.grabbed) { return; } //already grabbed
     this.grabber = evt.detail.hand;
     this.grabbed = true;
     this.el.addState(this.GRABBED_STATE);
+    // notify super-hands that the gesture was accepted
+    if (evt.preventDefault) { evt.preventDefault(); }
     if(this.data.usePhysics !== 'never' && this.el.body && 
        this.grabber.body) {
       this.constraint = new window.CANNON

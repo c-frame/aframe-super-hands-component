@@ -52,7 +52,18 @@ suite('super-hands hit processing & event emission', function () {
     });
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
-  test('unhover event', function (done) {
+  test('hover accepted', function () {
+    this.target1.addEventListener('hover-start', evt => {
+      evt.preventDefault();
+    });
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.hoverEls[0], this.target1);
+  });
+  test.skip('hover rejected', function (done) {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.equal(this.sha.hoverEls.length, 0);
+  });
+  test.skip('unhover event', function (done) {
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.addEventListener('hover-end', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
@@ -94,6 +105,8 @@ suite('super-hands hit processing & event emission', function () {
   });
   test('ungrab event', function (done) {
     this.sh1.onGrabStartButton();
+    this.target1
+      .addEventListener('grab-start', evt => evt.preventDefault());
     this.target1.addEventListener('grab-end', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
       process.nextTick(() => {
@@ -172,12 +185,14 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onGrabStartButton();
     this.sh1.onDragDropStartButton();
     this.sh1.onStretchStartButton();
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.equal(this.sh1.hoverEls.length, 0);
     assert.strictEqual(this.sh1.carried, this.sh1.dragged);
     assert.strictEqual(this.sh1.dragged, this.sh1.stretched);
   });
   test('drag after grab uses carried entity', function () {
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();
