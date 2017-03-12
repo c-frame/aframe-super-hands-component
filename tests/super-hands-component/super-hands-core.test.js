@@ -74,10 +74,23 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onGrabStartButton();
     this.target1.addEventListener('grab-start', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
-      assert.strictEqual(this.sh1.carried, this.target1);
+      assert.strictEqual(evt.detail.target, this.target1);
       done();
     });
     this.sh1.onHit({ detail: { el: this.target1 } });
+  });
+  test('grab accepted', function () {
+    this.sh1.onGrabStartButton();
+    this.target1.addEventListener('grab-start', evt => {
+      evt.preventDefault();
+    });
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.carried, this.target1);
+  });
+  test('grab rejected', function () {
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.notOk(this.sh1.carried);
   });
   test('ungrab event', function (done) {
     this.sh1.onGrabStartButton();

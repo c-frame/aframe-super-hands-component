@@ -195,23 +195,32 @@ AFRAME.registerComponent('super-hands', {
     this.dragged = null;
   },
   onHit: function(evt) {
-    var hitEl = evt.detail.el, used = false, hitElIndex, mEvt;
-    if(!hitEl) { return; } 
+    var hitEl = evt.detail.el, used = false, hitElIndex, mEvt,
+        peekTarget, useTarget, gestureAccepted;
+    if (!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
-    var getTarget = () => {
-      if(!used) {
+    useTarget = () => {
+      if (!used) {
         used = true;
         hitEl = this.hoverEls.length ? this.useHoveredEl() : hitEl;
       }
       return hitEl;
     };
+    peekTarget = () => {
+      return used ? hitEl : this.peekHoveredEl() || hitEl;
+    };
 
-    if (this.grabbing && !this.carried) { 
-      this.carried = getTarget();
-      this.carried.emit(this.GRAB_EVENT, { hand: this.el });
-      mEvt = new MouseEvent('mousedown', { relatedTarget: this.el });
-      this.carried.dispatchEvent(mEvt);
+    if (this.grabbing && !this.carried) {
+      // Global Event Handler style
+      this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
+      // A-Frame style
+      gestureAccepted = !this
+        .emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
+      if (gestureAccepted) {
+        this.carried = useTarget();
+      }
+
     } 
     if (this.stretching && !this.stretched) {
       this.stretched = getTarget();
@@ -266,6 +275,9 @@ AFRAME.registerComponent('super-hands', {
     } else {
       this.lastHover = null;
     } 
+  },
+  peekHoveredEl: function () {
+    return this.hoverEls[0];
   },
   /* called when the current target entity is used by another gesture */
   useHoveredEl: function () {
@@ -360,6 +372,18 @@ AFRAME.registerComponent('super-hands', {
     data.dragDropEndButtons.forEach( b => {
       this.el.removeEventListener(b, this.onDragDropEndButton);
     });    
+  },
+  emitCancelable: function (target, name, detail) {
+    var data, evt;
+    detail = detail || {};
+    data = { bubbles: true, cancelable: true, detail: detail };
+    data.detail.target = data.detail.target || target;
+    evt = new CustomEvent(name, data);
+    return target.dispatchEvent(evt);
+  },
+  dispatchMouseEvent: function (target, name, relatedTarget) {
+    var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
+    target.dispatchEvent(mEvt);
   }
 });
 
