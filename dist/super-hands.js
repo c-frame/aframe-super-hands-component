@@ -225,7 +225,7 @@
 	        mEvt,
 	        peekTarget,
 	        useTarget,
-	        gestureAccepted;
+	        gestureRejected;
 	    if (!hitEl) {
 	      return;
 	    }
@@ -246,17 +246,22 @@
 	      // Global Event Handler style
 	      this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
 	      // A-Frame style
-	      gestureAccepted = !this.emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
-	      if (gestureAccepted) {
+	      gestureRejected = this.emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
+	      if (!gestureRejected) {
 	        this.carried = useTarget();
 	      }
 	    }
 	    if (this.stretching && !this.stretched) {
-	      this.stretched = useTarget();
+	      this.stretched = peekTarget();
 	      if (this.stretched === this.otherSuperHand.stretched) {
-	        this.stretched.emit(this.STRETCH_EVENT, {
+	        gestureRejected = this.emitCancelable(this.stretched, this.STRETCH_EVENT, {
 	          hand: this.otherSuperHand.el, secondHand: this.el
 	        });
+	        if (!gestureRejected) {
+	          useTarget();
+	        } else {
+	          this.stretched = null;
+	        }
 	      }
 	    }
 	    if (this.dragging && !this.dragged) {
@@ -282,7 +287,7 @@
 	  hover: function hover() {
 	    var hvrevt, hoverEl, mEvt;
 	    if (this.hoverEls.length) {
-	      hoverEl = this.hoverEls[0];
+	      hoverEl = this.peekHoveredEl();
 	      hoverEl.removeEventListener('stateremoved', this.unWatch);
 	      hoverEl.addEventListener('stateremoved', this.unHover);
 	      if (this.dragging && this.dragged) {
@@ -472,14 +477,13 @@
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
-	  },
-	  pause: function pause() {
-	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
-	    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
-	  },
-	  play: function play() {
+
 	    this.el.addEventListener(this.HOVER_EVENT, this.start);
 	    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+	  },
+	  remove: function remove() {
+	    this.el.removeEventListener(this.HOVER_EVENT, this.start);
+	    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
 	  },
 	  start: function start(evt) {
 	    this.el.addState(this.HOVERED_STATE);
@@ -601,6 +605,9 @@
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
+
+	    this.el.addEventListener(this.STRETCH_EVENT, this.start);
+	    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
 	  },
 	  update: function update(oldDat) {},
 	  tick: function tick() {
@@ -635,13 +642,9 @@
 	      this.el.body.updateBoundingRadius();
 	    }
 	  },
-	  pause: function pause() {
+	  remove: function remove() {
 	    this.el.removeEventListener(this.STRETCH_EVENT, this.start);
 	    this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
-	  },
-	  play: function play() {
-	    this.el.addEventListener(this.STRETCH_EVENT, this.start);
-	    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
 	  },
 	  start: function start(evt) {
 	    if (this.stretched) {
@@ -651,6 +654,9 @@
 	    this.stretched = true;
 	    this.previousStretch = null;
 	    this.el.addState(this.STRETCHED_STATE);
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    } // gesture accepted
 	  },
 	  end: function end(evt) {
 	    if (this.stretchers.indexOf(evt.detail.hand) === -1) {

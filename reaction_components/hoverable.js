@@ -8,14 +8,13 @@ AFRAME.registerComponent('hoverable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-  },
-  pause: function () {
-    this.el.removeEventListener(this.HOVER_EVENT, this.start);
-    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
-  },
-  play: function () {
+    
     this.el.addEventListener(this.HOVER_EVENT, this.start);
     this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+  },
+  remove: function () {
+    this.el.removeEventListener(this.HOVER_EVENT, this.start);
+    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
   },
   start: function(evt) {
     this.el.addState(this.HOVERED_STATE);

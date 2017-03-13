@@ -196,7 +196,7 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el, used = false, hitElIndex, mEvt,
-        peekTarget, useTarget, gestureAccepted;
+        peekTarget, useTarget, gestureRejected;
     if (!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
@@ -215,19 +215,18 @@ AFRAME.registerComponent('super-hands', {
       // Global Event Handler style
       this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
       // A-Frame style
-      gestureAccepted = !this
+      gestureRejected = this
         .emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
-      if (gestureAccepted) {
-        this.carried = useTarget();
-      }
+      if (!gestureRejected) { this.carried = useTarget(); }
 
     } 
     if (this.stretching && !this.stretched) {
-      this.stretched = useTarget();
-      if(this.stretched === this.otherSuperHand.stretched) {
-        this.stretched.emit(this.STRETCH_EVENT, { 
+      this.stretched = peekTarget();
+      if (this.stretched === this.otherSuperHand.stretched) {
+        gestureRejected = this.emitCancelable(this.stretched, this.STRETCH_EVENT, { 
           hand: this.otherSuperHand.el, secondHand: this.el 
         });
+        if (!gestureRejected) { useTarget(); } else { this.stretched = null; }
       }
     }
     if (this.dragging && !this.dragged) {
@@ -252,7 +251,7 @@ AFRAME.registerComponent('super-hands', {
   hover: function() {
     var hvrevt, hoverEl, mEvt;
     if(this.hoverEls.length) {
-      hoverEl = this.hoverEls[0];
+      hoverEl = this.peekHoveredEl();
       hoverEl.removeEventListener('stateremoved', this.unWatch);
       hoverEl.addEventListener('stateremoved', this.unHover);
       if(this.dragging && this.dragged) {
@@ -534,14 +533,13 @@ AFRAME.registerComponent('hoverable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-  },
-  pause: function () {
-    this.el.removeEventListener(this.HOVER_EVENT, this.start);
-    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
-  },
-  play: function () {
+    
     this.el.addEventListener(this.HOVER_EVENT, this.start);
     this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+  },
+  remove: function () {
+    this.el.removeEventListener(this.HOVER_EVENT, this.start);
+    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
   },
   start: function(evt) {
     this.el.addState(this.HOVERED_STATE);
@@ -573,6 +571,9 @@ AFRAME.registerComponent('stretchable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
+    
+    this.el.addEventListener(this.STRETCH_EVENT, this.start);
+    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   update: function (oldDat) {
 
@@ -610,13 +611,9 @@ AFRAME.registerComponent('stretchable', {
       this.el.body.updateBoundingRadius();
     }
   },
-  pause: function () {
+  remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
-  },
-  play: function () {
-    this.el.addEventListener(this.STRETCH_EVENT, this.start);
-    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function(evt) {
     if (this.stretched) { return; } //already stretching
@@ -624,6 +621,7 @@ AFRAME.registerComponent('stretchable', {
     this.stretched = true;
     this.previousStretch = null;
     this.el.addState(this.STRETCHED_STATE);
+    if (evt.preventDefault) { evt.preventDefault(); } // gesture accepted
   },
   end: function (evt) {
     if(this.stretchers.indexOf(evt.detail.hand) === -1) { return; }

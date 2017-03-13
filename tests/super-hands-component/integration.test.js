@@ -30,7 +30,7 @@ suite('super-hands & reaction component integration', function () {
     assert.strictEqual(this.target1.components.grabbable.grabber, this.hand1);
     assert.ok(this.target1.is('grabbed'));
   });
-  test.skip('hoverable', function () {
+  test('hoverable', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
     assert.strictEqual(this.target1.components.hoverable.hoverers[0], this.hand1);
