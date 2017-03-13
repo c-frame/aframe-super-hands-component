@@ -267,11 +267,6 @@
 	      this.dispatchMouseEvent(this.dragged, 'dragstart', this.el);
 	      this.hover(); // refresh hover in case already over a target
 	    }
-	    // activate hover if new and unused
-	    /*if (hitElIndex === -1 && hitEl !== this.carried && 
-	        hitEl !== this.stretched && hitEl !== this.dragged) {
-	      if(this.hoverEls.length === 1) { this.hover(); }
-	    }*/
 	    //activate hover if interactions available
 	    if (!(this.carried && this.stretched) || this.dragged) {
 	      this.hover();
@@ -297,10 +292,13 @@
 	          this.lastHover = this.DRAGOVER_EVENT;
 	        }
 	      } else {
-	        hoverEl.emit(this.HOVER_EVENT, { hand: this.el });
-	        mEvt = new MouseEvent('mouseover', { relatedTarget: this.el });
-	        hoverEl.dispatchEvent(mEvt);
-	        this.lastHover = this.HOVER_EVENT;
+	        this.dispatchMouseEvent(hoverEl, 'mouseover', this.el);
+	        hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
+	        if (hoverEl) {
+	          hoverEl.removeEventListener('stateremoved', this.unWatch);
+	          hoverEl.addEventListener('stateremoved', this.unHover);
+	          this.lastHover = this.HOVER_EVENT;
+	        }
 	      }
 	    }
 	  },

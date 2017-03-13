@@ -207,3 +207,41 @@ suite('super-hands GlobalEventHandler integration', function () {
     assert.isFalse(clickSpy.called);
   });
 });
+
+suite.skip('super-hands GlobalEventHandler multiple targets', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target1.id = 'target1';
+    this.target2 = document.createElement('a-entity');
+    this.target2.id = 'target2';
+    this.target1.parentNode.appendChild(this.target2);
+    this.target3 = document.createElement('a-entity');
+    this.target3.id = 'target3';
+    this.target1.parentNode.appendChild(this.target3);
+    this.hand1 = helpers.controllerFactory({
+      'super-hands': ''
+    });
+    this.hand2 = helpers.controllerFactory({
+      'vive-controls': 'hand: left',
+      'super-hands': ''
+    }, true);
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      this.sh2 = this.hand2.components['super-hands'];
+      done();
+    });
+  });
+  test('mouseover all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.target1.addEventListener('mouseover', t1Spy);
+    this.target2.addEventListener('mouseover', t2Spy);
+    this.target3.addEventListener('mouseover', t3Spy);
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    assert.isTrue(t1Spy.called, 'target 1');
+    assert.isTrue(t2Spy.called, 'target 2');
+    assert.isTrue(t3Spy.called, 'target 3');
+  });
+});

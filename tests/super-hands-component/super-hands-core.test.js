@@ -53,17 +53,24 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
   test('hover accepted', function () {
+    this.target1.addEventListener('hover-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
-    assert.strictEqual(this.sh1.hoverEls[0], this.target1);
+    assert.equal(this.sh1.lastHover, 'hover-start');
+  });
+  test('hover rejected', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.notOk(this.sh1.lastHover);
   });
   test('unhover event', function (done) {
+    this.target1.addEventListener('hover-start', e => e.preventDefault());
+    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.addEventListener('hover-end', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
       assert.strictEqual(this.sh1.hoverEls.indexOf(this.target1), -1);
       done();
     });
-    this.sh1.useHoveredEl();
+    this.target1.removeState('collided');
   });
   test('stacking hovered entities', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
