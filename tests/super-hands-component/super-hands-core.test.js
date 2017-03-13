@@ -187,6 +187,7 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onDragDropStartButton();
     this.sh1.onStretchStartButton();
     this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.target1.addEventListener('stretch-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.equal(this.sh1.hoverEls.length, 0);
     assert.strictEqual(this.sh1.carried, this.sh1.dragged);

@@ -57,15 +57,18 @@ AFRAME.registerComponent('stretchable', {
   },
   start: function(evt) {
     if (this.stretched) { return; } //already stretching
-    this.stretchers.push(evt.detail.hand, evt.detail.secondHand);
-    this.stretched = true;
-    this.previousStretch = null;
-    this.el.addState(this.STRETCHED_STATE);
+    this.stretchers.push(evt.detail.hand);
+    if(this.stretchers.length === 2) {
+      this.stretched = true;
+      this.previousStretch = null;
+      this.el.addState(this.STRETCHED_STATE);
+    }
     if (evt.preventDefault) { evt.preventDefault(); } // gesture accepted
   },
   end: function (evt) {
-    if(this.stretchers.indexOf(evt.detail.hand) === -1) { return; }
-    this.stretchers = [];
+    var stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
+    if (stretcherIndex === -1) { return; }
+    this.stretchers.splice(stretcherIndex, 1);
     this.stretched = false;
     this.el.removeState(this.STRETCHED_STATE);
   } 

@@ -210,13 +210,9 @@ AFRAME.registerComponent('super-hands', {
 
     } 
     if (this.stretching && !this.stretched) {
-      this.stretched = peekTarget();
-      if (this.stretched === this.otherSuperHand.stretched) {
-        gestureRejected = this.emitCancelable(this.stretched, this.STRETCH_EVENT, { 
-          hand: this.otherSuperHand.el, secondHand: this.el 
-        });
-        if (!gestureRejected) { useTarget(); } else { this.stretched = null; }
-      }
+      gestureRejected = this
+        .emitCancelable(peekTarget(), this.STRETCH_EVENT, { hand: this.el });
+      if (!gestureRejected) { this.stretched = useTarget(); }
     }
     if (this.dragging && !this.dragged) {
       /* prefer this.carried so that a drag started after a grab will work
