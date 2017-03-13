@@ -185,7 +185,7 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el, used = false, hitElIndex, mEvt,
-        peekTarget, useTarget, gestureAccepted;
+        peekTarget, useTarget, gestureRejected;
     if (!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     // interactions target the oldest entity in the stack, if present
@@ -204,19 +204,18 @@ AFRAME.registerComponent('super-hands', {
       // Global Event Handler style
       this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
       // A-Frame style
-      gestureAccepted = !this
+      gestureRejected = this
         .emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
-      if (gestureAccepted) {
-        this.carried = useTarget();
-      }
+      if (!gestureRejected) { this.carried = useTarget(); }
 
     } 
     if (this.stretching && !this.stretched) {
-      this.stretched = useTarget();
-      if(this.stretched === this.otherSuperHand.stretched) {
-        this.stretched.emit(this.STRETCH_EVENT, { 
+      this.stretched = peekTarget();
+      if (this.stretched === this.otherSuperHand.stretched) {
+        gestureRejected = this.emitCancelable(this.stretched, this.STRETCH_EVENT, { 
           hand: this.otherSuperHand.el, secondHand: this.el 
         });
+        if (!gestureRejected) { useTarget(); } else { this.stretched = null; }
       }
     }
     if (this.dragging && !this.dragged) {
@@ -241,7 +240,7 @@ AFRAME.registerComponent('super-hands', {
   hover: function() {
     var hvrevt, hoverEl, mEvt;
     if(this.hoverEls.length) {
-      hoverEl = this.hoverEls[0];
+      hoverEl = this.peekHoveredEl();
       hoverEl.removeEventListener('stateremoved', this.unWatch);
       hoverEl.addEventListener('stateremoved', this.unHover);
       if(this.dragging && this.dragged) {

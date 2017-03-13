@@ -11,6 +11,9 @@ AFRAME.registerComponent('stretchable', {
     
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
+    
+    this.el.addEventListener(this.STRETCH_EVENT, this.start);
+    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   update: function (oldDat) {
 
@@ -48,13 +51,9 @@ AFRAME.registerComponent('stretchable', {
       this.el.body.updateBoundingRadius();
     }
   },
-  pause: function () {
+  remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
-  },
-  play: function () {
-    this.el.addEventListener(this.STRETCH_EVENT, this.start);
-    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function(evt) {
     if (this.stretched) { return; } //already stretching
@@ -62,6 +61,7 @@ AFRAME.registerComponent('stretchable', {
     this.stretched = true;
     this.previousStretch = null;
     this.el.addState(this.STRETCHED_STATE);
+    if (evt.preventDefault) { evt.preventDefault(); } // gesture accepted
   },
   end: function (evt) {
     if(this.stretchers.indexOf(evt.detail.hand) === -1) { return; }

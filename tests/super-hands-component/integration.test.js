@@ -8,6 +8,7 @@ suite('super-hands & reaction component integration', function () {
     this.target1 = entityFactory();
     this.target1.setAttribute('grabbable', '');
     this.target1.setAttribute('hoverable', '');
+    this.target1.setAttribute('stretchable', '');
     this.target2 = document.createElement('a-entity');
     this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
@@ -34,5 +35,16 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
     assert.strictEqual(this.target1.components.hoverable.hoverers[0], this.hand1);
+  });
+  test('stretchable', function () {
+    this.sh1.onStretchStartButton();
+    this.sh2.onStretchStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh2.onHit({ detail: { el: this.target1 } });
+    assert.ok(this.target1.is('stretched'));
+    assert.includeMembers(this.target1.components.stretchable.stretchers,
+                         [this.hand1, this.hand2]);
+    assert.strictEqual(this.sh1.stretched, this.target1);
+    assert.strictEqual(this.sh2.stretched, this.target1);
   });
 });

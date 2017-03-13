@@ -118,9 +118,10 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh2.otherSuperHand, this.sh1);
   });
   test('stretch event', function () {
-    var emitSpy = sinon.spy(this.target1, 'emit'),
-        stretchSpy = emitSpy.withArgs('stretch-start'),
+    var emitSpy = sinon.spy(this.target1, 'emit'), // no this.sinon because cleanup causes error
+        stretchSpy = this.sinon.spy(this.sh2, 'emitCancelable').withArgs(this.target1, 'stretch-start'),
         unStretchSpy = emitSpy.withArgs('stretch-end');
+    this.target1.addEventListener('stretch-start', e => e.preventDefault());
     this.sh1.onStretchStartButton();  
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.isTrue(this.sh1.stretching);
@@ -139,6 +140,13 @@ suite('super-hands hit processing & event emission', function () {
     this.sh2.onStretchEndButton();
     assert.isTrue(unStretchSpy.calledOnce);
     assert.isNotOk(this.sh2.stretching);
+  });
+  test('stretch rejected', function () {
+    this.sh1.onStretchStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh2.onStretchStartButton();
+    this.sh2.onHit({ detail: { el: this.target1 } });
+    assert.notOk(this.sh2.stretched);
   });
   test('drag events', function () {
     var emitSpy1 = sinon.spy(this.target1, 'emit'),
