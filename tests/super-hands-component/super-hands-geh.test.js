@@ -6,7 +6,9 @@ var helpers = require('../helpers'),
 suite('super-hands GlobalEventHandler integration', function () {
   setup(function (done) {
     this.target1 = entityFactory();
+    this.target1.id = 'target1';
     this.target2 = document.createElement('a-entity');
+    this.target2.id = 'target2';
     this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
@@ -65,7 +67,33 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
   });
-  test('dragleave - carried', function (done) {
+  test('dragleave by move - carried', function (done) {
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.target1.ondragleave = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.target1);
+      assert.strictEqual(e.relatedTarget, this.target2);
+      done();
+    };
+    this.target2.addState('collided');
+    this.target2.removeState('collided');
+  });
+  test('dragleave by move- hovered', function (done) {
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.target2.ondragleave = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.target2);
+      assert.strictEqual(e.relatedTarget, this.target1);
+      done();
+    };
+    this.target2.addState('collided');
+    this.target2.removeState('collided');
+  });
+  test('dragleave by drop - carried', function (done) {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
@@ -77,7 +105,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     };
     this.sh1.onDragDropEndButton();
   });
-  test('dragleave - hovered', function (done) {
+  test('dragleave by drop - hovered', function (done) {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });

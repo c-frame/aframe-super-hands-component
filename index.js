@@ -66,6 +66,8 @@ AFRAME.registerComponent('super-hands', {
     this.UNGRAB_EVENT = 'grab-end';
     this.STRETCH_EVENT = 'stretch-start';
     this.UNSTRETCH_EVENT = 'stretch-end';
+    //this.DRAG_EVENT = 'drag-start';
+    //this.UNDRAG_EVENT = 'drag-end';
     this.DRAGOVER_EVENT = 'dragover-start';
     this.UNDRAGOVER_EVENT = 'dragover-end';
     this.DRAGDROP_EVENT = 'drag-drop';
@@ -165,20 +167,21 @@ AFRAME.registerComponent('super-hands', {
   onDragDropEndButton: function (evt) {
     var ddevt, mEvt,
         carried = this.dragged,
-        dropTarget = this.hoverEls[0];
+        dropTarget = this.peekHoveredEl();
     this.dragging = false; // keep _unHover() from activating another droptarget
     if(carried) {
-      mEvt = new MouseEvent('dragend', { relatedTarget: this.el });
-      carried.dispatchEvent(mEvt);
+      this.dispatchMouseEvent(carried, 'dragend', this.el);
       if(dropTarget) {
         ddevt = { hand: this.el, dropped: carried, on: dropTarget };
-        dropTarget.emit(this.DRAGDROP_EVENT, ddevt);
-        mEvt = new MouseEvent('drop', { relatedTarget: carried });
-        dropTarget.dispatchEvent(mEvt);
-        carried.emit(this.DRAGDROP_EVENT, ddevt);
-        mEvt = new MouseEvent('drop', { relatedTarget: dropTarget });
-        carried.dispatchEvent(mEvt);
-        this._unHover(dropTarget);
+        this.dispatchMouseEvent(carried, 'dragleave', dropTarget);
+        this.dispatchMouseEvent(dropTarget, 'dragleave', carried);
+        this.dispatchMouseEvent(dropTarget, 'drop', carried);
+        this.dispatchMouseEvent(carried, 'drop', dropTarget);
+        dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
+        if(dropTarget) {
+          this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
+          this._unHover(dropTarget);
+        }
       }
     }
     this.dragged = null;
@@ -188,11 +191,15 @@ AFRAME.registerComponent('super-hands', {
         peekTarget, useTarget, gestureRejected;
     if (!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
+    if(hitElIndex === -1) {
+      this.hoverEls.push(hitEl);
+      hitEl.addEventListener('stateremoved', this.unWatch);
+    }
     // interactions target the oldest entity in the stack, if present
     useTarget = () => {
       if (!used) {
         used = true;
-        hitEl = this.hoverEls.length ? this.useHoveredEl() : hitEl;
+        hitEl = this.hoverEls.length ? this.peekHoveredEl() : hitEl;
       }
       return hitEl;
     };
@@ -204,64 +211,60 @@ AFRAME.registerComponent('super-hands', {
       // Global Event Handler style
       this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
       // A-Frame style
-      gestureRejected = this
-        .emitCancelable(peekTarget(), this.GRAB_EVENT, { hand: this.el });
-      if (!gestureRejected) { this.carried = useTarget(); }
-
+      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
     } 
     if (this.stretching && !this.stretched) {
-      gestureRejected = this
-        .emitCancelable(peekTarget(), this.STRETCH_EVENT, { hand: this.el });
-      if (!gestureRejected) { this.stretched = useTarget(); }
+      this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
     }
     if (this.dragging && !this.dragged) {
       /* prefer this.carried so that a drag started after a grab will work
          with carried element rather than a currently intersected drop target.
          fall back to hitEl in case a drag is initiated independent 
          of a grab */
-      this.dragged = this.carried || useTarget();
-      mEvt = new MouseEvent('dragstart', { relatedTarget: this.el });
-      this.dragged.dispatchEvent(mEvt);
+      this.dragged = this.carried || peekTarget();
+      this.dispatchMouseEvent(this.dragged, 'dragstart', this.el);
       this.hover(); // refresh hover in case already over a target
     }
-    // keep stack of currently intersected but not interacted entities 
-    if (!used && hitElIndex === -1 && hitEl !== this.carried && 
+    // activate hover if new and unused
+    /*if (hitElIndex === -1 && hitEl !== this.carried && 
         hitEl !== this.stretched && hitEl !== this.dragged) {
-      this.hoverEls.push(hitEl); 
-      hitEl.addEventListener('stateremoved', this.unWatch);
       if(this.hoverEls.length === 1) { this.hover(); }
+    }*/
+    //activate hover if interactions available
+    if (!(this.carried && this.stretched) || this.dragged) {
+      this.hover();
     }
   },
   /* send the appropriate hovered gesture for the top entity in the stack */
   hover: function() {
     var hvrevt, hoverEl, mEvt;
-    if(this.hoverEls.length) {
-      hoverEl = this.peekHoveredEl();
-      hoverEl.removeEventListener('stateremoved', this.unWatch);
-      hoverEl.addEventListener('stateremoved', this.unHover);
+    this.lastHover = null;
+    hoverEl = this.peekHoveredEl();
+    if(hoverEl) {
       if(this.dragging && this.dragged) {
+        this.dispatchMouseEvent(this.peekHoveredEl(), 'dragenter', this.dragged);
+        this.dispatchMouseEvent(this.dragged, 'dragenter', this.peekHoveredEl());
         hvrevt = { 
           hand: this.el, hovered: hoverEl, carried: this.dragged
         };
-        hoverEl.emit(this.DRAGOVER_EVENT, hvrevt);
-        mEvt = new MouseEvent('dragenter', { relatedTarget: this.dragged });
-        hoverEl.dispatchEvent(mEvt);
-        this.dragged.emit(this.DRAGOVER_EVENT, hvrevt);
-        mEvt = new MouseEvent('dragenter', { relatedTarget: hoverEl });
-        this.dragged.dispatchEvent(mEvt);
-        this.lastHover = this.DRAGOVER_EVENT;
+        hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
+        if(hoverEl) {
+          hoverEl.removeEventListener('stateremoved', this.unWatch);
+          hoverEl.addEventListener('stateremoved', this.unHover);
+          this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
+          this.lastHover = this.DRAGOVER_EVENT;
+        }
       } else {
         hoverEl.emit(this.HOVER_EVENT, { hand: this.el });
         mEvt = new MouseEvent('mouseover', { relatedTarget: this.el });
         hoverEl.dispatchEvent(mEvt);
         this.lastHover = this.HOVER_EVENT;
       }
-    } else {
-      this.lastHover = null;
     } 
   },
+  // temporary target finding function
   peekHoveredEl: function () {
-    return this.hoverEls[0];
+    return this.hoverEls.filter(e => e !== this.carried && e !== this.dragged && e !== this.stretched)[0];
   },
   /* called when the current target entity is used by another gesture */
   useHoveredEl: function () {
@@ -274,8 +277,7 @@ AFRAME.registerComponent('super-hands', {
   unHover: function (evt) {
     var hoverIndex;
     if(evt.detail.state === this.data.colliderState) {
-      hoverIndex = this.hoverEls.indexOf(evt.target);
-      if(hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1); }
+      this._unWatch(evt.target);
       this._unHover(evt.target);
     }
   },
@@ -285,27 +287,30 @@ AFRAME.registerComponent('super-hands', {
     el.removeEventListener('stateremoved', this.unHover);
     if(this.lastHover === this.DRAGOVER_EVENT) {
       evt = { hand: this.el, hovered: el, carried: this.dragged };
-      el.emit(this.UNDRAGOVER_EVENT, evt);
-      mEvt = new MouseEvent('dragleave', { relatedTarget: this.dragged });
-      el.dispatchEvent(mEvt);
+      this.emitCancelable(el, this.UNDRAGOVER_EVENT, evt);
       if(this.dragged) { 
-        this.dragged.emit(this.UNDRAGOVER_EVENT, evt); 
-        mEvt = new MouseEvent('dragleave', { relatedTarget: el });
-        this.dragged.dispatchEvent(mEvt);
+        this.emitCancelable(this.dragged, this.UNDRAGOVER_EVENT, evt); 
       }
     } else if (this.lastHover === this.HOVER_EVENT) {
-      el.emit(this.UNHOVER_EVENT, { hand: this.el });
-      mEvt = new MouseEvent('mouseout', { relatedTarget: this.el });
-      el.dispatchEvent(mEvt);
+      this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
     }
     //activate next target, if present
     this.hover();
   },
   unWatch: function (evt) {
     if(evt.detail.state === this.data.colliderState) {
-      var hoverIndex = this.hoverEls.indexOf(evt.target);
       evt.target.removeEventListener('stateremoved', this.unWatch);
-      if(hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1); }
+      this._unWatch(evt.target);
+    }
+  },
+  _unWatch: function (target) {
+    var hoverIndex = this.hoverEls.indexOf(target);
+    if (hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1); }
+    if (this.dragging && this.dragged) {
+      this.dispatchMouseEvent(target, 'dragleave', this.dragged);
+      this.dispatchMouseEvent(this.dragged, 'dragleave', target);
+    } else {
+      this.dispatchMouseEvent(target, 'mouseout', this.el);
     }
   },
   registerListeners: function () {
@@ -368,5 +373,18 @@ AFRAME.registerComponent('super-hands', {
   dispatchMouseEvent: function (target, name, relatedTarget) {
     var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
+  },
+  findTarget: function (evType, detail, filterUsed) {
+    var elIndex, eligibleEls = this.hoverEls;
+    if(filterUsed) {
+      eligibleEls = eligibleEls
+        .filter(el => el !== this.carried && el !== this.dragged && el !== this.stretched);
+    }
+    for(elIndex = 0; elIndex < eligibleEls.length; elIndex++) {
+      if(!this.emitCancelable(eligibleEls[elIndex], evType, detail)) {
+        return eligibleEls[elIndex];
+      }
+    }
+    return null;
   }
 });
