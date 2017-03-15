@@ -215,24 +215,23 @@ AFRAME.registerComponent('super-hands', {
     if (this.stretching && !this.stretched) {
       this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
     }
-    if (this.dragging && !this.dragged) {
-      /* prefer this.carried so that a drag started after a grab will work
+    if (this.dragging) {
+      this.dispatchMouseEvent(peekTarget(), 'dragstart', this.el);
+      if (!this.dragged) {
+        /* prefer this.carried so that a drag started after a grab will work
          with carried element rather than a currently intersected drop target.
          fall back to queue in case a drag is initiated independent 
          of a grab */
-      if (this.carried) {
-        this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
+        if (this.carried) {
+          this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
+        }
+        if (!this.dragged) {
+          this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
+        }
       }
-      if (!this.dragged) {
-        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
-      }
-      this.dispatchMouseEvent(peekTarget(), 'dragstart', this.el);
-      //this.hover(); // refresh hover in case already over a target
     }
     //activate hover if interactions available
-    //if (!(this.carried && this.stretched) || this.dragged) {
-      this.hover();
-    //}
+    this.hover();
   },
   /* send the appropriate hovered gesture for the top entity in the stack */
   hover: function() {
