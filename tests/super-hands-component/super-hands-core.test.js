@@ -168,6 +168,34 @@ suite('super-hands hit processing & event emission', function () {
     this.sh2.onHit({ detail: { el: this.target1 } });
     assert.notOk(this.sh2.stretched);
   });
+  test('drag accepted', function () {
+    this.sh1.onDragDropStartButton();
+    this.target1.addEventListener('drag-start', evt => {
+      evt.preventDefault();
+    });
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.dragged, this.target1);
+  });
+  test('drag rejected', function () {
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.notOk(this.sh1.dragged);
+  });
+  test('undrag event -- no drop target', function () {
+    var dropSpy = this.sinon.spy();
+    this.sh1.onDragDropStartButton();
+    this.target1
+      .addEventListener('drag-start', evt => evt.preventDefault());
+    this.target1.addEventListener('drag-drop', dropSpy);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropEndButton({});
+    assert.isTrue(dropSpy.calledWithMatch({ detail: { 
+      on: null, dropped: this.target1, hand: this.hand1 
+    }}));
+    assert.isNotOk(this.sh1.dragged);
+    assert.isFalse(this.sh1.dragging);
+  });
+
   test('drag events', function () {
     var emitSpy1 = this.sinon.spy(this.sh1, 'emitCancelable'),
         dragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-start'),
@@ -178,6 +206,7 @@ suite('super-hands hit processing & event emission', function () {
         unDragOverSpy2 = emitSpy1.withArgs(this.target2, 'dragover-end'),
         dragDropSpy2 = emitSpy1.withArgs(this.target2, 'drag-drop');
     this.sh1.onDragDropStartButton();
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
     this.target1.addEventListener('dragover-start', e => e.preventDefault());
     this.target2.addEventListener('dragover-start', e => e.preventDefault());
     this.target2.addEventListener('drag-drop', e => e.preventDefault());
@@ -205,11 +234,6 @@ suite('super-hands hit processing & event emission', function () {
     assert.isTrue(dragDropSpy1.called, 'drag-drop emitted from held');
     assert.isTrue(dragDropSpy2.called, 'drag-drop emitted form hovered');
   });
-  test.skip('drag rejected', function () { //no event for start of drag at present
-    this.sh1.onDragDropStartButton();
-    this.sh1.onHit({ detail: { el: this.target1 } });
-    assert.notOk(this.sh1.dragged);
-  });
   test('dragover rejected', function () {
     var dragoverSpy = this.sinon.spy(this.sh1, 'emitCancelable');
     this.sh1.onDragDropStartButton();
@@ -231,6 +255,7 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onStretchStartButton();
     this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.target1.addEventListener('stretch-start', e => e.preventDefault());
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.equal(this.sh1.hoverEls.length, 1);
     assert.notOk(this.sh1.lastHover);
@@ -239,6 +264,7 @@ suite('super-hands hit processing & event emission', function () {
   });
   test('drag after grab uses carried entity', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();

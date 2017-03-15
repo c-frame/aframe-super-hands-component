@@ -192,6 +192,8 @@ even if the trigger was *released* earlier.
 * Only one entity at a time will be targeted for each event type, 
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
+* **drag-drop**: For the receiving entity, `on` entry in the details is `null`. 
+If needed, use `event.target` instead. 
 
 ##### Global Event Handler Integration
 

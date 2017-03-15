@@ -9,7 +9,9 @@ suite('super-hands & reaction component integration', function () {
     this.target1.setAttribute('grabbable', '');
     this.target1.setAttribute('hoverable', '');
     this.target1.setAttribute('stretchable', '');
+    this.target1.setAttribute('drag-droppable', '');
     this.target2 = document.createElement('a-entity');
+    this.target2.setAttribute('drag-droppable', '');
     this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
@@ -46,5 +48,20 @@ suite('super-hands & reaction component integration', function () {
                          [this.hand1, this.hand2]);
     assert.strictEqual(this.sh1.stretched, this.target1);
     assert.strictEqual(this.sh2.stretched, this.target1);
+  });
+  test('drag-droppable', function () {
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.ok(this.target1.is('dragged'), 'carried dragged');
+    assert.ok(this.target2.is('dragover'), 'drop target hovered');
+    this.target2.emit('stateremoved', { state: 'collided' });
+    assert.ok(this.target1.is('dragged'), 'carried still dragged after target lost');
+    assert.isFalse(this.target2.is('dragover'), 'lost target unhovered');
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.ok(this.target2.is('dragover'), 'drop target re-acquired');
+    this.sh1.onDragDropEndButton();
+    assert.isFalse(this.target1.is('dragged'), 'carried released');
+    assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
   });
 });

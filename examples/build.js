@@ -77,8 +77,7 @@ AFRAME.registerComponent('super-hands', {
     this.UNGRAB_EVENT = 'grab-end';
     this.STRETCH_EVENT = 'stretch-start';
     this.UNSTRETCH_EVENT = 'stretch-end';
-    //this.DRAG_EVENT = 'drag-start';
-    //this.UNDRAG_EVENT = 'drag-end';
+    this.DRAG_EVENT = 'drag-start';
     this.DRAGOVER_EVENT = 'dragover-start';
     this.UNDRAGOVER_EVENT = 'dragover-end';
     this.DRAGDROP_EVENT = 'drag-drop';
@@ -173,24 +172,24 @@ AFRAME.registerComponent('super-hands', {
     this.dragging = true;
   },
   onDragDropEndButton: function (evt) {
-    var ddevt,
-        carried = this.dragged,
-        dropTarget = this.peekHoveredEl();
+    var ddevt, dropTarget,
+        carried = this.dragged;
     this.dragging = false; // keep _unHover() from activating another droptarget
     if(carried) {
       this.dispatchMouseEvent(carried, 'dragend', this.el);
+      ddevt = { hand: this.el, dropped: carried, on: null };
+      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
+      ddevt.on = dropTarget;
+      this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
       if(dropTarget) {
-        ddevt = { hand: this.el, dropped: carried, on: dropTarget };
-        this.dispatchMouseEvent(carried, 'dragleave', dropTarget);
-        this.dispatchMouseEvent(dropTarget, 'dragleave', carried);
-        this.dispatchMouseEvent(dropTarget, 'drop', carried);
-        this.dispatchMouseEvent(carried, 'drop', dropTarget);
-        dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
-        if(dropTarget) {
-          this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
-          this._unHover(dropTarget);
-        }
+        this._unHover(dropTarget);
       }
+    }
+    if(this.dragged && this.peekHoveredEl()) {
+      this.dispatchMouseEvent(carried, 'dragleave', dropTarget);
+      this.dispatchMouseEvent(dropTarget, 'dragleave', carried);
+      this.dispatchMouseEvent(dropTarget, 'drop', carried);
+      this.dispatchMouseEvent(carried, 'drop', dropTarget);
     }
     this.dragged = null;
   },
@@ -230,16 +229,21 @@ AFRAME.registerComponent('super-hands', {
     if (this.dragging && !this.dragged) {
       /* prefer this.carried so that a drag started after a grab will work
          with carried element rather than a currently intersected drop target.
-         fall back to hitEl in case a drag is initiated independent 
+         fall back to queue in case a drag is initiated independent 
          of a grab */
-      this.dragged = this.carried || peekTarget();
-      this.dispatchMouseEvent(this.dragged, 'dragstart', this.el);
-      this.hover(); // refresh hover in case already over a target
+      if (this.carried) {
+        this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
+      }
+      if (!this.dragged) {
+        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
+      }
+      this.dispatchMouseEvent(peekTarget(), 'dragstart', this.el);
+      //this.hover(); // refresh hover in case already over a target
     }
     //activate hover if interactions available
-    if (!(this.carried && this.stretched) || this.dragged) {
+    //if (!(this.carried && this.stretched) || this.dragged) {
       this.hover();
-    }
+    //}
   },
   /* send the appropriate hovered gesture for the top entity in the stack */
   hover: function() {
@@ -447,25 +451,42 @@ AFRAME.registerComponent('clickable', {
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
+    this.DRAGGED_STATE = 'dragged';
     this.HOVER_EVENT = 'dragover-start';
     this.UNHOVER_EVENT = 'dragover-end';
-    this.DRAGDROP_EVENT = 'drag-drop';
+    this.DRAG_EVENT = 'drag-start';
+    this.DRAGDROP_EVENT = 'drag-drop';  
     
-    this.start = this.start.bind(this);
-    this.end = this.end.bind(this);
+    this.hoverStart = this.hoverStart.bind(this);
+    this.dragStart = this.dragStart.bind(this);
+    this.hoverEnd = this.hoverEnd.bind(this);
+    this.dragEnd = this.dragEnd.bind(this);
     
-    this.el.addEventListener(this.HOVER_EVENT, this.start);
-    this.el.addEventListener(this.UNHOVER_EVENT, this.end);
+    this.el.addEventListener(this.HOVER_EVENT, this.hoverStart);
+    this.el.addEventListener(this.DRAG_EVENT, this.dragStart);
+    this.el.addEventListener(this.UNHOVER_EVENT, this.hoverEnd);    
+    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragEnd);  
   },
   remove: function () {
-    this.el.removeEventListener(this.HOVER_EVENT, this.start);
-    this.el.removeEventListener(this.UNHOVER_EVENT, this.end);    
+    this.el.removeEventListener(this.HOVER_EVENT, this.hoverStart);
+    this.el.removeEventListener(this.DRAG_EVENT, this.dragStart);
+    this.el.removeEventListener(this.UNHOVER_EVENT, this.hoverEnd);    
+    this.el.removeEventListener(this.DRAGDROP_EVENT, this.dragEnd);    
   },
-  start: function(evt) {
+  hoverStart: function(evt) {
     this.el.addState(this.HOVERED_STATE);
+    evt.preventDefault();
   },
-  end: function (evt) {
+  dragStart: function(evt) {
+    this.el.addState(this.DRAGGED_STATE);
+    evt.preventDefault();
+  },
+  hoverEnd: function (evt) {
     this.el.removeState(this.HOVERED_STATE);
+  },
+  dragEnd: function (evt) {
+    this.el.removeState(this.DRAGGED_STATE);
+    evt.preventDefault();
   }
 });
 },{}],5:[function(require,module,exports){
