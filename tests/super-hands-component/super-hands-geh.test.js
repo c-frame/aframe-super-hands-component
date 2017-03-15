@@ -172,9 +172,19 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
+  test('mousedown indepentent of reaction comp', function (done) {
+    this.target1.onmousedown = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.target1);
+      assert.strictEqual(e.relatedTarget, this.hand1);
+      done();
+    };
+    this.sh1.onGrabStartButton();
+    this.sh1.carried = this.target2;
+    this.sh1.onHit({ detail: { el: this.target1 } });
+  });
   test('mouseup', function (done) {
     this.sh1.onGrabStartButton();
-    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.onmouseup = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -186,7 +196,6 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('click', function (done) {
     this.sh1.onGrabStartButton();
-    this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.onclick = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -196,19 +205,19 @@ suite('super-hands GlobalEventHandler integration', function () {
     };
     this.sh1.onGrabEndButton();
   });
-  //not sure how to implement this, or if it's worth it
-  test.skip('click does not fire if target is lost', function () {
+  test('click does not fire if target is lost', function () {
     var clickSpy = this.sinon.spy();
     this.sh1.onGrabStartButton();
+    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.onclick = clickSpy;
-    this.target1.emit('stateremoved', { detail: 'collided' });
+    this.target1.removeState('collided');
     this.sh1.onGrabEndButton();
     assert.isFalse(clickSpy.called);
   });
 });
 
-suite.skip('super-hands GlobalEventHandler multiple targets', function () {
+suite('super-hands GlobalEventHandler multiple targets', function () {
   setup(function (done) {
     this.target1 = entityFactory();
     this.target1.id = 'target1';
@@ -234,11 +243,25 @@ suite.skip('super-hands GlobalEventHandler multiple targets', function () {
   test('mouseover all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
         t3Spy = this.sinon.spy();
-    this.sh1.onHit({ detail: { el: this.target1 } });
-    this.sh1.onHit({ detail: { el: this.target2 } });
     this.target1.addEventListener('mouseover', t1Spy);
     this.target2.addEventListener('mouseover', t2Spy);
     this.target3.addEventListener('mouseover', t3Spy);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    assert.isTrue(t1Spy.called, 'target 1');
+    assert.isTrue(t2Spy.called, 'target 2');
+    assert.isTrue(t3Spy.called, 'target 3');
+  });
+  test('mousedown all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.addEventListener('mousedown', t1Spy);
+    this.target2.addEventListener('mousedown', t2Spy);
+    this.target3.addEventListener('mousedown', t3Spy);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target3 } });
     assert.isTrue(t1Spy.called, 'target 1');
     assert.isTrue(t2Spy.called, 'target 2');

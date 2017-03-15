@@ -148,13 +148,10 @@ AFRAME.registerComponent('super-hands', {
   },
 
   onGrabEndButton: function (evt) {
-    var mEvt;
+    this.dispatchMouseEventAll('mouseup', this.el, true);
+    this.dispatchMouseEventAll('click', this.el, true);
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
-      mEvt = new MouseEvent('mouseup', { relatedTarget: this.el });
-      this.carried.dispatchEvent(mEvt);
-      mEvt = new MouseEvent('click', { relatedTarget: this.el });
-      this.carried.dispatchEvent(mEvt);
       this.carried = null;
     }
     this.grabbing = false;
@@ -176,7 +173,7 @@ AFRAME.registerComponent('super-hands', {
     this.dragging = true;
   },
   onDragDropEndButton: function (evt) {
-    var ddevt, mEvt,
+    var ddevt,
         carried = this.dragged,
         dropTarget = this.peekHoveredEl();
     this.dragging = false; // keep _unHover() from activating another droptarget
@@ -198,13 +195,14 @@ AFRAME.registerComponent('super-hands', {
     this.dragged = null;
   },
   onHit: function(evt) {
-    var hitEl = evt.detail.el, used = false, hitElIndex, mEvt,
-        peekTarget, useTarget, gestureRejected;
+    var hitEl = evt.detail.el, used = false, hitElIndex,
+        peekTarget, useTarget;
     if (!hitEl) { return; } 
     hitElIndex = this.hoverEls.indexOf(hitEl);
     if(hitElIndex === -1) {
       this.hoverEls.push(hitEl);
       hitEl.addEventListener('stateremoved', this.unWatch);
+      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
     }
     // interactions target the oldest entity in the stack, if present
     useTarget = () => {
@@ -218,11 +216,13 @@ AFRAME.registerComponent('super-hands', {
       return used ? hitEl : this.peekHoveredEl() || hitEl;
     };
 
-    if (this.grabbing && !this.carried) {
+    if (this.grabbing) {
       // Global Event Handler style
-      this.dispatchMouseEvent(peekTarget(), 'mousedown', this.el);
-      // A-Frame style
-      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
+      this.dispatchMouseEventAll('mousedown', this.el);
+      if (!this.carried) {
+        // A-Frame style
+        this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
+      }
     } 
     if (this.stretching && !this.stretched) {
       this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
@@ -243,7 +243,7 @@ AFRAME.registerComponent('super-hands', {
   },
   /* send the appropriate hovered gesture for the top entity in the stack */
   hover: function() {
-    var hvrevt, hoverEl, mEvt;
+    var hvrevt, hoverEl;
     this.lastHover = null;
     hoverEl = this.peekHoveredEl();
     if(hoverEl) {
@@ -261,7 +261,7 @@ AFRAME.registerComponent('super-hands', {
           this.lastHover = this.DRAGOVER_EVENT;
         }
       } else {
-        this.dispatchMouseEvent(hoverEl, 'mouseover', this.el);
+        
         hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
         if (hoverEl) {
           hoverEl.removeEventListener('stateremoved', this.unWatch);
@@ -284,7 +284,6 @@ AFRAME.registerComponent('super-hands', {
   /* tied to 'stateremoved' event for hovered entities,
      called when controller moves out of collision range of entity */
   unHover: function (evt) {
-    var hoverIndex;
     if(evt.detail.state === this.data.colliderState) {
       this._unWatch(evt.target);
       this._unHover(evt.target);
@@ -292,7 +291,7 @@ AFRAME.registerComponent('super-hands', {
   },
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function(el) {
-    var evt, mEvt;
+    var evt;
     el.removeEventListener('stateremoved', this.unHover);
     if(this.lastHover === this.DRAGOVER_EVENT) {
       evt = { hand: this.el, hovered: el, carried: this.dragged };
@@ -383,9 +382,19 @@ AFRAME.registerComponent('super-hands', {
     var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
   },
+  dispatchMouseEventAll: function (name, relatedTarget, filterUsed) {
+    var els = this.hoverEls, i;
+    if (filterUsed) { 
+      els = els
+        .filter(el => el !== this.carried && el !== this.dragged && el !== this.stretched);
+    }
+    for(i = 0; i < els.length; i++) {
+      this.dispatchMouseEvent(els[i], name, relatedTarget);
+    }
+  },
   findTarget: function (evType, detail, filterUsed) {
     var elIndex, eligibleEls = this.hoverEls;
-    if(filterUsed) {
+    if (filterUsed) {
       eligibleEls = eligibleEls
         .filter(el => el !== this.carried && el !== this.dragged && el !== this.stretched);
     }
