@@ -127,6 +127,18 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
+  test('dragstart finds same target as drag-droppable', function (done) {
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
+    this.target1.ondragstart = e => {
+      assert.typeOf(e, 'MouseEvent');
+      assert.strictEqual(e.target, this.target1);
+      assert.strictEqual(e.relatedTarget, this.hand1);
+      assert.strictEqual(this.sh1.dragged, this.sh1.gehDragged);
+      done();
+    };
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+  });
   test('dragend', function (done) {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -172,7 +184,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
-  test('mousedown indepentent of reaction comp', function (done) {
+  test('mousedown independent of reaction comp', function (done) {
     this.target1.onmousedown = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.target1);
@@ -180,7 +192,7 @@ suite('super-hands GlobalEventHandler integration', function () {
       done();
     };
     this.sh1.onGrabStartButton();
-    this.sh1.carried = this.target2;
+    this.sh1.carried = null;
     this.sh1.onHit({ detail: { el: this.target1 } });
   });
   test('mouseup', function (done) {
@@ -266,5 +278,20 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t1Spy.called, 'target 1');
     assert.isTrue(t2Spy.called, 'target 2');
     assert.isTrue(t3Spy.called, 'target 3');
+  });
+  test('dragenter all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.addEventListener('dragenter', t1Spy);
+    this.target2.addEventListener('dragenter', t2Spy);
+    this.target3.addEventListener('dragenter', t3Spy);
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'target 1');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 1');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3');
   });
 });
