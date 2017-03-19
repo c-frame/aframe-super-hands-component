@@ -259,10 +259,9 @@
 	       with carried element rather than a currently intersected drop target.
 	       fall back to queue in case a drag is initiated independent 
 	       of a grab */
-	      if (this.carried) {
-	        this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
-	      }
-	      if (!this.dragged) {
+	      if (this.carried && !this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el })) {
+	        this.dragged = this.carried;
+	      } else {
 	        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	      }
 	    }

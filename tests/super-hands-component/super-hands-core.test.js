@@ -263,14 +263,18 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh1.dragged, this.sh1.stretched);
   });
   test('drag after grab uses carried entity', function () {
+    this.target3 = document.createElement('a-entity');
+    this.target1.sceneEl.appendChild(this.target3);
     this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.target1.addEventListener('drag-start', e => e.preventDefault());
+    this.target3.addEventListener('drag-start', e => e.preventDefault());
     this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target3 } });
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.strictEqual(this.sh1.carried, this.sh1.dragged);
-    assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target1]);
+    assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target1, this.target3]);
   });
 });
 
