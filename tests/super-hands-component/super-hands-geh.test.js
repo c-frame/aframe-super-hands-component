@@ -52,8 +52,8 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target2);
       done();
     };
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
   });
   test('dragenter - hovered', function (done) {
@@ -63,13 +63,13 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target1);
       done();
     };
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
   });
   test('dragleave by move - carried', function (done) {
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.target1.ondragleave = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -81,8 +81,8 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.target2.removeState('collided');
   });
   test('dragleave by move- hovered', function (done) {
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.target2.ondragleave = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -94,8 +94,8 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.target2.removeState('collided');
   });
   test('dragleave by drop - carried', function (done) {
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.target1.ondragleave = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -106,8 +106,8 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onDragDropEndButton();
   });
   test('dragleave by drop - hovered', function (done) {
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.target2.ondragleave = e => {
       assert.typeOf(e, 'MouseEvent');
@@ -124,24 +124,12 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.hand1);
       done();
     };
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
-  });
-  test('dragstart finds same target as drag-droppable', function (done) {
-    this.target1.addEventListener('drag-start', e => e.preventDefault());
-    this.target1.ondragstart = e => {
-      assert.typeOf(e, 'MouseEvent');
-      assert.strictEqual(e.target, this.target1);
-      assert.strictEqual(e.relatedTarget, this.hand1);
-      assert.strictEqual(this.sh1.dragged, this.sh1.gehDragged);
-      done();
-    };
     this.sh1.onDragDropStartButton();
-    this.sh1.onHit({ detail: { el: this.target1 } });
   });
   test('dragend', function (done) {
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.target1.ondragend = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.target1);
@@ -157,8 +145,8 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target1);
       done();
     };
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onDragDropEndButton();
   });
@@ -169,8 +157,8 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target2);
       done();
     };
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onDragDropEndButton();
   });
@@ -181,23 +169,12 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.hand1);
       done();
     };
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
-  });
-  test('mousedown independent of reaction comp', function (done) {
-    this.target1.onmousedown = e => {
-      assert.typeOf(e, 'MouseEvent');
-      assert.strictEqual(e.target, this.target1);
-      assert.strictEqual(e.relatedTarget, this.hand1);
-      done();
-    };
     this.sh1.onGrabStartButton();
-    this.sh1.carried = null;
-    this.sh1.onHit({ detail: { el: this.target1 } });
   });
   test('mouseup', function (done) {
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     this.target1.onmouseup = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.target1);
@@ -208,8 +185,8 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('mouseup different target than mousedown', function () {
     var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.unWatch({ target: this.target1, detail: { state: 'collided' } });
     this.target1.onmouseup = spy1;
@@ -264,6 +241,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     this.target3 = document.createElement('a-entity');
     this.target3.id = 'target3';
     this.target1.parentNode.appendChild(this.target3);
+    this.target4 = document.createElement('a-entity');
+    this.target4.id = 'target4';
+    this.target1.parentNode.appendChild(this.target4);
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
     });
@@ -302,7 +282,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     this.sh1.onHit({ detail: { el: this.target3 } });
     assert.isTrue(t1Spy.called, 'target 1');
     assert.isTrue(t2Spy.called, 'target 2');
-    assert.isTrue(t3Spy.called, 'target 3');
+    assert.isFalse(t3Spy.called, 'target 3 - after grab');
   });
   test('mouseup all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
@@ -335,71 +315,92 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t3Spy.called, 'target 3');
   });
   // consider making multiple entities draggable
-  test.skip('dragstart all', function () {
+  test('dragstart all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
         t3Spy = this.sinon.spy();
     this.target1.ondragstart = t1Spy;
     this.target2.ondragstart = t2Spy;
     this.target3.ondragstart = t3Spy;
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onDragDropStartButton();
     assert.isTrue(t1Spy.called, 'target 1');
     assert.isTrue(t2Spy.called, 'target 2');
     assert.isTrue(t3Spy.called, 'target 3');
   });
   test('dragenter all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.addEventListener('dragenter', t1Spy);
     this.target2.addEventListener('dragenter', t2Spy);
     this.target3.addEventListener('dragenter', t3Spy);
-    this.sh1.onDragDropStartButton();
+    this.target4.addEventListener('dragenter', t4Spy);
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target4 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
-    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'target 2');
-    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'target 3');
-    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 1 not on self');
-    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2');
-    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'carried 1 - target 2');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'carried 1 - target 3');
+    assert.isTrue(t4Spy.calledWithMatch({ relatedTarget: this.target2 }), 'carried 4 - target 2');
+    assert.isTrue(t4Spy.calledWithMatch({ relatedTarget: this.target3 }), 'carried 4 - target 3');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'carried 1 not on self');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target4 }), 'carried 1 not on carried 4');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2 - carried 1');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3 - carried 1');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target4 }), 'target 2 - carried 4');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target4 }), 'target 3 - carried 4');
   });
   test('drop all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.ondrop = t1Spy;
     this.target2.ondrop = t2Spy;
     this.target3.ondrop = t3Spy;
-    this.sh1.onDragDropStartButton();
+    this.target4.ondrop = t4Spy;
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target4 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
     this.sh1.onDragDropEndButton();
     assert.isTrue(t1Spy.called, 'target 1 drop');
     assert.isTrue(t2Spy.called, 'target 2 drop');
     assert.isTrue(t3Spy.called, 'target 3 drop');
-    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'dropper t2');
-    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee t1');
-    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee t1');
-    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropper self');
-    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'dropper t3');
+    assert.isTrue(t4Spy.called, 'target 4 drop');
+    assert.isTrue(t4Spy.called, 'target 4 drop');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'dropper1 t2');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'dropper1 t3');
+    assert.isTrue(t4Spy.calledWithMatch({ relatedTarget: this.target2 }), 'dropper4 t2');
+    assert.isTrue(t4Spy.calledWithMatch({ relatedTarget: this.target3 }), 'dropper4 t3');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee2 t1');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee3 t1');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target4 }), 'dropee2 t4');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target4 }), 'dropee3 t4');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropper1 self');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target4 }), 'dropper1 other dropper');
   });
   test('dragleave all on drop', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.ondragleave = t1Spy;
     this.target2.ondragleave = t2Spy;
     this.target3.ondragleave = t3Spy;
-    this.sh1.onDragDropStartButton();
+    this.target4.ondragleave = t3Spy;
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target4 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
     this.sh1.onDragDropEndButton();
     assert.isTrue(t2Spy.called, 'target 2 left');
     assert.isTrue(t3Spy.called, 'target 3 left');
-    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2 w/ related');
-    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3 w/ related');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2 w/ related1');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3 w/ related1');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target4 }), 'target 2 w/ related4');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target4 }), 'target 3 w/ related4');
     assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'carried not triggered');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target4 }), 'carried not w/ other carried');
   });
 });
