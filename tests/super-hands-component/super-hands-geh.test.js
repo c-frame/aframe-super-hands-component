@@ -206,6 +206,19 @@ suite('super-hands GlobalEventHandler integration', function () {
     };
     this.sh1.onGrabEndButton();
   });
+  test('mouseup different target than mousedown', function () {
+    var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.unWatch({ target: this.target1, detail: { state: 'collided' } });
+    this.target1.onmouseup = spy1;
+    this.target2.onmouseup = spy2;
+    this.sh1.onGrabEndButton();
+    assert.isFalse(spy1.called, 'no event on old target');
+    assert.isTrue(spy2.called, 'event on new target');
+    assert.isTrue(spy2.calledWithMatch({ relatedTarget: this.hand1 }), 'event object');
+  });
   test('click', function (done) {
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -226,6 +239,18 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.target1.removeState('collided');
     this.sh1.onGrabEndButton();
     assert.isFalse(clickSpy.called);
+  });
+  // need to add state tracking for mousedown-ed element
+  test.skip('click only on target previously mousedown-ed', function () {
+    var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.target1.onclick = spy1;
+    this.target2.onclick = spy2;
+    this.sh1.onGrabEndButton();
+    assert.isTrue(spy1.called, 'original target');
+    assert.isFalse(spy2.called, 'new target');
   });
 });
 
@@ -279,6 +304,51 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t2Spy.called, 'target 2');
     assert.isTrue(t3Spy.called, 'target 3');
   });
+  test('mouseup all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.onmouseup = t1Spy;
+    this.target2.onmouseup = t2Spy;
+    this.target3.onmouseup = t3Spy;
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabEndButton();
+    assert.isTrue(t1Spy.called, 'target 1');
+    assert.isTrue(t2Spy.called, 'target 2');
+    assert.isTrue(t3Spy.called, 'target 3');
+  });
+  test('click all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.onclick = t1Spy;
+    this.target2.onclick = t2Spy;
+    this.target3.onclick = t3Spy;
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabEndButton();
+    assert.isTrue(t1Spy.called, 'target 1');
+    assert.isTrue(t2Spy.called, 'target 2');
+    assert.isTrue(t3Spy.called, 'target 3');
+  });
+  // consider making multiple entities draggable
+  test.skip('dragstart all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.ondragstart = t1Spy;
+    this.target2.ondragstart = t2Spy;
+    this.target3.ondragstart = t3Spy;
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    assert.isTrue(t1Spy.called, 'target 1');
+    assert.isTrue(t2Spy.called, 'target 2');
+    assert.isTrue(t3Spy.called, 'target 3');
+  });
   test('dragenter all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
         t3Spy = this.sinon.spy();
@@ -293,5 +363,42 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 1');
     assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2');
     assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3');
+  });
+  test('drop all', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.ondrop = t1Spy;
+    this.target2.ondrop = t2Spy;
+    this.target3.ondrop = t3Spy;
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onDragDropEndButton();
+    assert.isTrue(t1Spy.called, 'target 1 drop');
+    assert.isTrue(t2Spy.called, 'target 2 drop');
+    assert.isTrue(t3Spy.called, 'target 3 drop');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'dropper t2');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee t1');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropee t1');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'dropper self');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'dropper t3');
+  });
+  test('dragleave all on drop', function () {
+    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
+        t3Spy = this.sinon.spy();
+    this.target1.ondragleave = t1Spy;
+    this.target2.ondragleave = t2Spy;
+    this.target3.ondragleave = t3Spy;
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onDragDropEndButton();
+    assert.isTrue(t2Spy.called, 'target 2 left');
+    assert.isTrue(t3Spy.called, 'target 3 left');
+    assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2 w/ related');
+    assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3 w/ related');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'carried not triggered');
   });
 });

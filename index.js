@@ -179,14 +179,10 @@ AFRAME.registerComponent('super-hands', {
     }
     carried = this.gehDragged;
     if (carried) {
-      dropTarget = this.peekHoveredEl();
       this.dispatchMouseEvent(carried, 'dragend', this.el);
-      if (dropTarget) {
-        this.dispatchMouseEvent(carried, 'dragleave', dropTarget);
-        this.dispatchMouseEvent(dropTarget, 'dragleave', carried);
-        this.dispatchMouseEvent(dropTarget, 'drop', carried);
-        this.dispatchMouseEvent(carried, 'drop', dropTarget);
-      }
+      // fire event both ways for all intersected targets 
+      this.dispatchMouseEventAll('drop', carried, true, true);
+      this.dispatchMouseEventAll('dragleave', carried, true, true);
     }
     this.dragged = null;
     this.gehDragged = null;
@@ -385,15 +381,22 @@ AFRAME.registerComponent('super-hands', {
     var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
   },
-  dispatchMouseEventAll: function (name, relatedTarget, filterUsed) {
+  dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
     var els = this.hoverEls, i;
     if (filterUsed) { 
       els = els
         .filter(el => el !== this.gehDragged && el !== this.carried && 
                 el !== this.dragged && el !== this.stretched);
     }
-    for(i = 0; i < els.length; i++) {
-      this.dispatchMouseEvent(els[i], name, relatedTarget);
+    if(alsoReverse) {
+      for(i = 0; i < els.length; i++) {
+        this.dispatchMouseEvent(els[i], name, relatedTarget);
+        this.dispatchMouseEvent(relatedTarget, name, els[i]);
+      }
+    } else {
+      for(i = 0; i < els.length; i++) {
+        this.dispatchMouseEvent(els[i], name, relatedTarget);
+      }
     }
   },
   findTarget: function (evType, detail, filterUsed) {
