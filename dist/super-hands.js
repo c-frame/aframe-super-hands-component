@@ -111,7 +111,7 @@
 	    this.otherSuperHand = null;
 
 	    // state tracking - global event handlers (GEH)
-	    this.gehDragged = [];
+	    this.gehDragged = new Set();
 	    this.gehClicking = new Set();
 
 	    // state tracking - reaction components
@@ -208,7 +208,7 @@
 	  onDragDropStartButton: function onDragDropStartButton(evt) {
 	    this.dragging = true;
 	    if (this.hoverEls.length) {
-	      this.gehDragged = this.hoverEls.slice();
+	      this.gehDragged = new Set(this.hoverEls);
 	      this.dispatchMouseEventAll('dragstart', this.el);
 	    }
 	    this.updateDragged();
@@ -237,7 +237,7 @@
 	      _this2.dispatchMouseEventAll('dragleave', carried, true, true);
 	    });
 	    this.dragged = null;
-	    this.gehDragged = [];
+	    this.gehDragged.clear();
 	  },
 	  onHit: function onHit(evt) {
 	    var _this3 = this;
@@ -253,7 +253,7 @@
 	      this.hoverEls.push(hitEl);
 	      hitEl.addEventListener('stateremoved', this.unWatch);
 	      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-	      if (this.dragging && this.gehDragged.length) {
+	      if (this.dragging && this.gehDragged.size) {
 	        // events on targets and on dragged
 	        this.gehDragged.forEach(function (dragged) {
 	          _this3.dispatchMouseEventAll('dragenter', dragged, true, true);
@@ -427,7 +427,7 @@
 	        i;
 	    if (filterUsed) {
 	      els = els.filter(function (el) {
-	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched && !_this7.gehDragged.includes(el);
+	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched && !_this7.gehDragged.has(el);
 	      });
 	    }
 	    if (alsoReverse) {

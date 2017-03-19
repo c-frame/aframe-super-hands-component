@@ -75,7 +75,7 @@ AFRAME.registerComponent('super-hands', {
     this.otherSuperHand = null;
     
     // state tracking - global event handlers (GEH)
-    this.gehDragged = [];
+    this.gehDragged = new Set();
     this.gehClicking = new Set();
     
     // state tracking - reaction components
@@ -171,7 +171,7 @@ AFRAME.registerComponent('super-hands', {
   onDragDropStartButton: function (evt) {
     this.dragging = true;
     if(this.hoverEls.length) {
-      this.gehDragged = this.hoverEls.slice();
+      this.gehDragged = new Set(this.hoverEls);
       this.dispatchMouseEventAll('dragstart', this.el);
     }
     this.updateDragged();
@@ -197,7 +197,7 @@ AFRAME.registerComponent('super-hands', {
       this.dispatchMouseEventAll('dragleave', carried, true, true);
     });
     this.dragged = null;
-    this.gehDragged = [];
+    this.gehDragged.clear();
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el, used = false, hitElIndex;
@@ -207,7 +207,7 @@ AFRAME.registerComponent('super-hands', {
       this.hoverEls.push(hitEl);
       hitEl.addEventListener('stateremoved', this.unWatch);
       this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-      if(this.dragging && this.gehDragged.length) {
+      if(this.dragging && this.gehDragged.size) {
         // events on targets and on dragged
         this.gehDragged.forEach(dragged => {
           this.dispatchMouseEventAll('dragenter', dragged, true, true);
@@ -371,7 +371,7 @@ AFRAME.registerComponent('super-hands', {
     if (filterUsed) { 
       els = els
         .filter(el => el !== this.carried && el !== this.dragged &&
-                el !== this.stretched && !this.gehDragged.includes(el));
+                el !== this.stretched && !this.gehDragged.has(el));
     }
     if(alsoReverse) {
       for(i = 0; i < els.length; i++) {
