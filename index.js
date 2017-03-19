@@ -245,10 +245,8 @@ AFRAME.registerComponent('super-hands', {
     var hvrevt, hoverEl;
     this.lastHover = null;
     if(this.dragging) {
-      this.dispatchMouseEventAll('dragenter', this.gehDragged, true);
-      if (this.peekHoveredEl()) {
-        this.dispatchMouseEvent(this.gehDragged, 'dragenter', this.peekHoveredEl());
-      }
+      // events on targets and on dragged
+      this.dispatchMouseEventAll('dragenter', this.gehDragged, true, true);
       if(this.dragged) {
         hvrevt = { 
           hand: this.el, hovered: hoverEl, carried: this.dragged

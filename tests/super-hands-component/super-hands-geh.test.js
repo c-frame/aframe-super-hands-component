@@ -359,8 +359,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
-    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'target 1');
-    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 1');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target2 }), 'target 2');
+    assert.isTrue(t1Spy.calledWithMatch({ relatedTarget: this.target3 }), 'target 3');
+    assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 1 not on self');
     assert.isTrue(t2Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 2');
     assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target1 }), 'target 3');
   });
