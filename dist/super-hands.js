@@ -111,7 +111,7 @@
 	    this.otherSuperHand = null;
 
 	    // state tracking - global event handlers (GEH)
-	    this.gehDragged = null;
+	    this.gehDragged = [];
 
 	    // state tracking - reaction components
 	    this.hoverEls = [];
@@ -168,6 +168,7 @@
 	  play: function play() {},
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
+	    this.dispatchMouseEventAll('mousedown', this.el);
 	  },
 
 	  onGrabEndButton: function onGrabEndButton(evt) {
@@ -194,8 +195,14 @@
 	  },
 	  onDragDropStartButton: function onDragDropStartButton(evt) {
 	    this.dragging = true;
+	    if (this.hoverEls.length) {
+	      this.gehDragged = this.hoverEls.slice();
+	      this.dispatchMouseEventAll('dragstart', this.el);
+	    }
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
+	    var _this = this;
+
 	    var ddevt,
 	        dropTarget,
 	        carried = this.dragged;
@@ -210,24 +217,21 @@
 	        this._unHover(dropTarget);
 	      }
 	    }
-	    carried = this.gehDragged;
-	    if (carried) {
-	      this.dispatchMouseEvent(carried, 'dragend', this.el);
+	    this.gehDragged.forEach(function (carried) {
+	      _this.dispatchMouseEvent(carried, 'dragend', _this.el);
 	      // fire event both ways for all intersected targets 
-	      this.dispatchMouseEventAll('drop', carried, true, true);
-	      this.dispatchMouseEventAll('dragleave', carried, true, true);
-	    }
+	      _this.dispatchMouseEventAll('drop', carried, true, true);
+	      _this.dispatchMouseEventAll('dragleave', carried, true, true);
+	    });
 	    this.dragged = null;
-	    this.gehDragged = null;
+	    this.gehDragged = [];
 	  },
 	  onHit: function onHit(evt) {
-	    var _this = this;
+	    var _this2 = this;
 
 	    var hitEl = evt.detail.el,
 	        used = false,
-	        hitElIndex,
-	        peekTarget,
-	        useTarget;
+	        hitElIndex;
 	    if (!hitEl) {
 	      return;
 	    }
@@ -236,22 +240,15 @@
 	      this.hoverEls.push(hitEl);
 	      hitEl.addEventListener('stateremoved', this.unWatch);
 	      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-	    }
-	    // interactions target the oldest entity in the stack, if present
-	    useTarget = function useTarget() {
-	      if (!used) {
-	        used = true;
-	        hitEl = _this.hoverEls.length ? _this.peekHoveredEl() : hitEl;
+	      if (this.dragging && this.gehDragged.length) {
+	        // events on targets and on dragged
+	        this.gehDragged.forEach(function (dragged) {
+	          _this2.dispatchMouseEventAll('dragenter', dragged, true, true);
+	        });
 	      }
-	      return hitEl;
-	    };
-	    peekTarget = function peekTarget() {
-	      return used ? hitEl : _this.peekHoveredEl() || hitEl;
-	    };
-
+	    }
 	    if (this.grabbing) {
-	      // Global Event Handler style
-	      this.dispatchMouseEventAll('mousedown', this.el);
+
 	      if (!this.carried) {
 	        // A-Frame style
 	        this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
@@ -273,10 +270,6 @@
 	          this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	        }
 	      }
-	      if (!this.gehDragged) {
-	        this.gehDragged = this.dragged || this.peekHoveredEl();
-	        this.dispatchMouseEvent(this.gehDragged, 'dragstart', this.el);
-	      }
 	    }
 	    this.hover();
 	  },
@@ -285,8 +278,7 @@
 	    var hvrevt, hoverEl;
 	    this.lastHover = null;
 	    if (this.dragging) {
-	      // events on targets and on dragged
-	      this.dispatchMouseEventAll('dragenter', this.gehDragged, true, true);
+
 	      if (this.dragged) {
 	        hvrevt = {
 	          hand: this.el, hovered: hoverEl, carried: this.dragged
@@ -307,14 +299,6 @@
 	        this.lastHover = this.HOVER_EVENT;
 	      }
 	    }
-	  },
-	  // temporary target finding function
-	  peekHoveredEl: function peekHoveredEl() {
-	    var _this2 = this;
-
-	    return this.hoverEls.filter(function (e) {
-	      return e !== _this2.gehDragged && e !== _this2.carried && e !== _this2.dragged && e !== _this2.stretched;
-	    })[0];
 	  },
 	  /* called when the current target entity is used by another gesture */
 	  useHoveredEl: function useHoveredEl() {
@@ -353,43 +337,44 @@
 	    }
 	  },
 	  _unWatch: function _unWatch(target) {
+	    var _this3 = this;
+
 	    var hoverIndex = this.hoverEls.indexOf(target);
 	    if (hoverIndex !== -1) {
 	      this.hoverEls.splice(hoverIndex, 1);
 	    }
-	    if (this.gehDragged) {
-	      this.dispatchMouseEvent(target, 'dragleave', this.gehDragged);
-	      this.dispatchMouseEvent(this.gehDragged, 'dragleave', target);
-	    } else {
-	      this.dispatchMouseEvent(target, 'mouseout', this.el);
-	    }
+	    this.gehDragged.forEach(function (dragged) {
+	      _this3.dispatchMouseEvent(target, 'dragleave', dragged);
+	      _this3.dispatchMouseEvent(dragged, 'dragleave', target);
+	    });
+	    this.dispatchMouseEvent(target, 'mouseout', this.el);
 	  },
 	  registerListeners: function registerListeners() {
-	    var _this3 = this;
+	    var _this4 = this;
 
 	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
 
 	    this.data.grabStartButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onGrabStartButton);
+	      _this4.el.addEventListener(b, _this4.onGrabStartButton);
 	    });
 	    this.data.grabEndButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onGrabEndButton);
+	      _this4.el.addEventListener(b, _this4.onGrabEndButton);
 	    });
 	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onStretchStartButton);
+	      _this4.el.addEventListener(b, _this4.onStretchStartButton);
 	    });
 	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onStretchEndButton);
+	      _this4.el.addEventListener(b, _this4.onStretchEndButton);
 	    });
 	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onDragDropStartButton);
+	      _this4.el.addEventListener(b, _this4.onDragDropStartButton);
 	    });
 	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this3.el.addEventListener(b, _this3.onDragDropEndButton);
+	      _this4.el.addEventListener(b, _this4.onDragDropEndButton);
 	    });
 	  },
 	  unRegisterListeners: function unRegisterListeners(data) {
-	    var _this4 = this;
+	    var _this5 = this;
 
 	    data = data || this.data;
 	    if (Object.keys(data).length === 0) {
@@ -399,22 +384,22 @@
 	    this.el.removeEventListener(data.colliderEvent, this.onHit);
 
 	    data.grabStartButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onGrabStartButton);
+	      _this5.el.removeEventListener(b, _this5.onGrabStartButton);
 	    });
 	    data.grabEndButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onGrabEndButton);
+	      _this5.el.removeEventListener(b, _this5.onGrabEndButton);
 	    });
 	    data.stretchStartButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onStretchStartButton);
+	      _this5.el.removeEventListener(b, _this5.onStretchStartButton);
 	    });
 	    data.stretchEndButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onStretchEndButton);
+	      _this5.el.removeEventListener(b, _this5.onStretchEndButton);
 	    });
 	    data.dragDropStartButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onDragDropStartButton);
+	      _this5.el.removeEventListener(b, _this5.onDragDropStartButton);
 	    });
 	    data.dragDropEndButtons.forEach(function (b) {
-	      _this4.el.removeEventListener(b, _this4.onDragDropEndButton);
+	      _this5.el.removeEventListener(b, _this5.onDragDropEndButton);
 	    });
 	  },
 	  emitCancelable: function emitCancelable(target, name, detail) {
@@ -430,13 +415,13 @@
 	    target.dispatchEvent(mEvt);
 	  },
 	  dispatchMouseEventAll: function dispatchMouseEventAll(name, relatedTarget, filterUsed, alsoReverse) {
-	    var _this5 = this;
+	    var _this6 = this;
 
 	    var els = this.hoverEls,
 	        i;
 	    if (filterUsed) {
 	      els = els.filter(function (el) {
-	        return el !== _this5.gehDragged && el !== _this5.carried && el !== _this5.dragged && el !== _this5.stretched;
+	        return !_this6.gehDragged.includes(el) && el !== _this6.carried && el !== _this6.dragged && el !== _this6.stretched;
 	      });
 	    }
 	    if (alsoReverse) {
@@ -451,13 +436,13 @@
 	    }
 	  },
 	  findTarget: function findTarget(evType, detail, filterUsed) {
-	    var _this6 = this;
+	    var _this7 = this;
 
 	    var elIndex,
 	        eligibleEls = this.hoverEls;
 	    if (filterUsed) {
 	      eligibleEls = eligibleEls.filter(function (el) {
-	        return el !== _this6.carried && el !== _this6.dragged && el !== _this6.stretched;
+	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched;
 	      });
 	    }
 	    for (elIndex = 0; elIndex < eligibleEls.length; elIndex++) {

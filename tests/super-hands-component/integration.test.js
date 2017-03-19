@@ -65,3 +65,49 @@ suite('super-hands & reaction component integration', function () {
     assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
   });
 });
+suite('super-hands collider integration', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target1.id = 'target1';
+    this.target1.setAttribute('geometry', 'primitive: sphere');
+    this.target2 = document.createElement('a-entity');
+    this.target2.id = 'target2';
+    this.target2.setAttribute('geometry', 'primitive: sphere');
+    this.target1.parentNode.appendChild(this.target2);
+    this.hand1 = helpers.controllerFactory({
+      'vive-controls': 'hand: right; model: false',
+      geometry: 'primitive: sphere',
+      'super-hands': '', 'sphere-collider': 'objects: #target1, #target2'
+    }, true);
+    this.hand2 = helpers.controllerFactory({
+      'vive-controls': 'hand: left; model: false',
+      geometry: 'primitive: sphere',
+      'super-hands': '',
+      'sphere-collider': 'objects: #target1, #target2'
+    }, true);
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      this.col1 = this.hand1.components['sphere-collider'];
+      this.sh2 = this.hand2.components['super-hands'];
+      this.col2 = this.hand2.components['sphere-collider'];
+      done();
+    });
+  });
+  test('avoid excessive event dispatch', function () {
+    var dragenterSpy = this.sinon.spy();
+    this.target2.ondragenter = dragenterSpy;
+    this.target2.setAttribute('position', '10 10 10');
+    // sphere collider not respecting position attribute changes
+    this.target2.getObject3D('mesh').position.set(10, 10, 10);
+    this.col1.tick();
+    this.sh1.onDragDropStartButton();
+    assert.isFalse(dragenterSpy.called, 'not yet collided');
+    this.target2.setAttribute('position', '0 0 0');
+    // sphere collider not respecting position attribute changes
+    this.target2.getObject3D('mesh').position.set(0, 0, 0);
+    this.col1.tick();
+    assert.equal(dragenterSpy.callCount, 1, 'initial dragover');
+    this.col1.tick();
+    assert.equal(dragenterSpy.callCount, 1, 'no duplicate dragover');
+  });
+});

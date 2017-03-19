@@ -199,6 +199,12 @@ AFRAME.registerComponent('super-hands', {
       this.hoverEls.push(hitEl);
       hitEl.addEventListener('stateremoved', this.unWatch);
       this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
+      if(this.dragging && this.gehDragged.length) {
+        // events on targets and on dragged
+        this.gehDragged.forEach(dragged => {
+          this.dispatchMouseEventAll('dragenter', dragged, true, true);
+        });
+      }
     }
     if (this.grabbing) {
 
@@ -231,10 +237,7 @@ AFRAME.registerComponent('super-hands', {
     var hvrevt, hoverEl;
     this.lastHover = null;
     if(this.dragging) {
-      // events on targets and on dragged
-      this.gehDragged.forEach(dragged => {
-        this.dispatchMouseEventAll('dragenter', dragged, true, true);
-      });
+
       if(this.dragged) {
         hvrevt = { 
           hand: this.el, hovered: hoverEl, carried: this.dragged
