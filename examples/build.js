@@ -148,6 +148,7 @@ AFRAME.registerComponent('super-hands', {
   onGrabStartButton: function (evt) {
     this.grabbing = true;
     this.dispatchMouseEventAll('mousedown', this.el);
+    this.updateGrabbed();
   },
 
   onGrabEndButton: function (evt) {
@@ -161,6 +162,7 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchStartButton: function (evt) {
     this.stretching = true;
+    this.updateStretched();
   },
   onStretchEndButton: function (evt) {
     if(this.stretched) {
@@ -178,6 +180,7 @@ AFRAME.registerComponent('super-hands', {
       this.gehDragged = this.hoverEls.slice();
       this.dispatchMouseEventAll('dragstart', this.el);
     }
+    this.updateDragged();
   },
   onDragDropEndButton: function (evt) {
     var ddevt, dropTarget,
@@ -216,14 +219,23 @@ AFRAME.registerComponent('super-hands', {
           this.dispatchMouseEventAll('dragenter', dragged, true, true);
         });
       }
+      this.updateGrabbed();
+      this.updateStretched();
+      this.updateDragged();
+      this.hover();
     }
+  },
+  updateGrabbed: function () {
     if (this.grabbing && !this.carried) {
-      // A-Frame style
       this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
     } 
+  },
+  updateStretched: function () {
     if (this.stretching && !this.stretched) {
       this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
     }
+  },
+  updateDragged: function () {
     if (this.dragging && !this.dragged) {
       /* prefer this.carried so that a drag started after a grab will work
        with carried element rather than a currently intersected drop target.
@@ -235,7 +247,6 @@ AFRAME.registerComponent('super-hands', {
         this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
       }
     }
-    this.hover();
   },
   /* search collided entities for target to hover/dragover */
   hover: function() {

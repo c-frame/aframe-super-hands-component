@@ -169,6 +169,7 @@
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
 	    this.dispatchMouseEventAll('mousedown', this.el);
+	    this.updateGrabbed();
 	  },
 
 	  onGrabEndButton: function onGrabEndButton(evt) {
@@ -182,6 +183,7 @@
 	  },
 	  onStretchStartButton: function onStretchStartButton(evt) {
 	    this.stretching = true;
+	    this.updateStretched();
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
@@ -199,6 +201,7 @@
 	      this.gehDragged = this.hoverEls.slice();
 	      this.dispatchMouseEventAll('dragstart', this.el);
 	    }
+	    this.updateDragged();
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
 	    var _this = this;
@@ -246,14 +249,23 @@
 	          _this2.dispatchMouseEventAll('dragenter', dragged, true, true);
 	        });
 	      }
+	      this.updateGrabbed();
+	      this.updateStretched();
+	      this.updateDragged();
+	      this.hover();
 	    }
+	  },
+	  updateGrabbed: function updateGrabbed() {
 	    if (this.grabbing && !this.carried) {
-	      // A-Frame style
 	      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
 	    }
+	  },
+	  updateStretched: function updateStretched() {
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
 	    }
+	  },
+	  updateDragged: function updateDragged() {
 	    if (this.dragging && !this.dragged) {
 	      /* prefer this.carried so that a drag started after a grab will work
 	       with carried element rather than a currently intersected drop target.
@@ -265,7 +277,6 @@
 	        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	      }
 	    }
-	    this.hover();
 	  },
 	  /* search collided entities for target to hover/dragover */
 	  hover: function hover() {

@@ -276,6 +276,24 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh1.carried, this.sh1.dragged);
     assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target1, this.target3]);
   });
+  test('pressing button after collision', function () {
+    var grabSpy = sinon.spy(),
+        stretchSpy = sinon.spy(),
+        dragSpy = sinon.spy();
+    this.target1.addEventListener('grab-start', grabSpy);
+    this.target1.addEventListener('stretch-start', stretchSpy);
+    this.target1.addEventListener('drag-start', dragSpy);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isFalse(grabSpy.called, 'before grab button');
+    this.sh1.onGrabStartButton();
+    assert.isTrue(grabSpy.called, 'after grab button');
+    assert.isFalse(stretchSpy.called, 'before stretch button');
+    this.sh1.onStretchStartButton();
+    assert.isTrue(stretchSpy.called, 'after stretch button');
+    assert.isFalse(dragSpy.called, 'before drag button');
+    this.sh1.onDragDropStartButton();
+    assert.isTrue(dragSpy.called, 'after drag button');
+  });
 });
 
 suite('custom button mapping', function () {

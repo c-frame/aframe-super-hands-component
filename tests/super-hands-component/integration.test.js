@@ -93,21 +93,63 @@ suite('super-hands collider integration', function () {
       done();
     });
   });
-  test('avoid excessive event dispatch', function () {
-    var dragenterSpy = this.sinon.spy();
+  test('avoid excessive drag event dispatch', function () {
+    var dragenterSpy = this.sinon.spy(),
+        aFrameDragoverSpy = this.sinon.spy();
     this.target2.ondragenter = dragenterSpy;
+    this.target2.addEventListener('dragover-start', aFrameDragoverSpy);
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
     this.target2.setAttribute('position', '10 10 10');
     // sphere collider not respecting position attribute changes
     this.target2.getObject3D('mesh').position.set(10, 10, 10);
     this.col1.tick();
     this.sh1.onDragDropStartButton();
     assert.isFalse(dragenterSpy.called, 'not yet collided');
+    assert.isFalse(aFrameDragoverSpy.called, 'AF not yet collided');
     this.target2.setAttribute('position', '0 0 0');
     // sphere collider not respecting position attribute changes
     this.target2.getObject3D('mesh').position.set(0, 0, 0);
     this.col1.tick();
     assert.equal(dragenterSpy.callCount, 1, 'initial dragover');
+    assert.equal(aFrameDragoverSpy.callCount, 1, 'AF initial dragover');
     this.col1.tick();
     assert.equal(dragenterSpy.callCount, 1, 'no duplicate dragover');
+    assert.equal(aFrameDragoverSpy.callCount, 1, ' AF no duplicate dragover');
+  });
+  test('avoid excessive hover event dispatch', function () {
+    var mouseoverSpy = this.sinon.spy(),
+        aFrameHoverSpy = this.sinon.spy();
+    // multiple targets cause justifiable event repetition, so limit to one
+    this.col1.els = [this.target1]; 
+    this.target1.onmouseover = mouseoverSpy;
+    this.target1.addEventListener('hover-start', aFrameHoverSpy);
+    this.target1.addEventListener('hover-start', e => e.preventDefault());
+    this.col1.tick();
+    assert.equal(mouseoverSpy.callCount, 1, 'mouseovered');
+    assert.equal(aFrameHoverSpy.callCount, 1, 'hovered');
+    this.col1.tick();
+    assert.equal(mouseoverSpy.callCount, 1, 'no duplicate mouseover');
+    assert.equal(aFrameHoverSpy.callCount, 1, ' AF no duplicate hover');
+  });
+  test('avoid excessive rejected event dispatch', function () {
+    var grabSpy = this.sinon.spy(),
+        stretchSpy = this.sinon.spy(),
+        dragSpy = this.sinon.spy();
+    // multiple targets cause justifiable event repetition, so limit to one
+    this.col1.els = [this.target1]; 
+    this.target1.addEventListener('grab-start', grabSpy);
+    this.target1.addEventListener('stretch-start', stretchSpy);
+    this.target1.addEventListener('drag-start', dragSpy);
+    this.sh1.onGrabStartButton();
+    this.sh1.onStretchStartButton();
+    this.sh1.onDragDropStartButton();
+    this.col1.tick();
+    assert.equal(grabSpy.callCount, 1, 'grab once');
+    assert.equal(stretchSpy.callCount, 1, 'stretch once');
+    assert.equal(dragSpy.callCount, 1, 'drag once');
+    this.col1.tick();
+    assert.equal(grabSpy.callCount, 1, 'grab not repeated');
+    assert.equal(stretchSpy.callCount, 1, 'stretch not repeated');
+    assert.equal(dragSpy.callCount, 1, 'drag not repeated');
   });
 });
