@@ -247,49 +247,41 @@
 	        });
 	      }
 	    }
-	    if (this.grabbing) {
-
-	      if (!this.carried) {
-	        // A-Frame style
-	        this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
-	      }
+	    if (this.grabbing && !this.carried) {
+	      // A-Frame style
+	      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
 	    }
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
 	    }
-	    if (this.dragging) {
+	    if (this.dragging && !this.dragged) {
+	      /* prefer this.carried so that a drag started after a grab will work
+	       with carried element rather than a currently intersected drop target.
+	       fall back to queue in case a drag is initiated independent 
+	       of a grab */
+	      if (this.carried) {
+	        this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
+	      }
 	      if (!this.dragged) {
-	        /* prefer this.carried so that a drag started after a grab will work
-	         with carried element rather than a currently intersected drop target.
-	         fall back to queue in case a drag is initiated independent 
-	         of a grab */
-	        if (this.carried) {
-	          this.dragged = this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el });
-	        }
-	        if (!this.dragged) {
-	          this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
-	        }
+	        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	      }
 	    }
 	    this.hover();
 	  },
-	  /* send the appropriate hovered gesture for the top entity in the stack */
+	  /* search collided entities for target to hover/dragover */
 	  hover: function hover() {
 	    var hvrevt, hoverEl;
 	    this.lastHover = null;
-	    if (this.dragging) {
-
-	      if (this.dragged) {
-	        hvrevt = {
-	          hand: this.el, hovered: hoverEl, carried: this.dragged
-	        };
-	        hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
-	        if (hoverEl) {
-	          hoverEl.removeEventListener('stateremoved', this.unWatch);
-	          hoverEl.addEventListener('stateremoved', this.unHover);
-	          this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
-	          this.lastHover = this.DRAGOVER_EVENT;
-	        }
+	    if (this.dragging && this.dragged) {
+	      hvrevt = {
+	        hand: this.el, hovered: hoverEl, carried: this.dragged
+	      };
+	      hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
+	      if (hoverEl) {
+	        hoverEl.removeEventListener('stateremoved', this.unWatch);
+	        hoverEl.addEventListener('stateremoved', this.unHover);
+	        this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
+	        this.lastHover = this.DRAGOVER_EVENT;
 	      }
 	    } else {
 	      hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
@@ -299,12 +291,6 @@
 	        this.lastHover = this.HOVER_EVENT;
 	      }
 	    }
-	  },
-	  /* called when the current target entity is used by another gesture */
-	  useHoveredEl: function useHoveredEl() {
-	    var el = this.hoverEls.shift();
-	    this._unHover(el);
-	    return el;
 	  },
 	  /* tied to 'stateremoved' event for hovered entities,
 	     called when controller moves out of collision range of entity */

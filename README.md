@@ -177,7 +177,8 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | grab-end | Button released after grab-start | collided entity | hand: `super-hands` entity |
 | stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second controller entity |
 | stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
-| dragover-start | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
+| drag-start | Drag-drop button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
+| dragover-start | Collision with entity while dragging another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
 
