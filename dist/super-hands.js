@@ -112,6 +112,7 @@
 
 	    // state tracking - global event handlers (GEH)
 	    this.gehDragged = [];
+	    this.gehClicking = new Set();
 
 	    // state tracking - reaction components
 	    this.hoverEls = [];
@@ -169,12 +170,21 @@
 	  onGrabStartButton: function onGrabStartButton(evt) {
 	    this.grabbing = true;
 	    this.dispatchMouseEventAll('mousedown', this.el);
+	    this.gehClicking = new Set(this.hoverEls);
 	    this.updateGrabbed();
 	  },
 
 	  onGrabEndButton: function onGrabEndButton(evt) {
+	    var _this = this;
+
+	    var clickables = this.hoverEls.filter(function (h) {
+	      return _this.gehClicking.has(h);
+	    }),
+	        i;
 	    this.dispatchMouseEventAll('mouseup', this.el, true);
-	    this.dispatchMouseEventAll('click', this.el, true);
+	    for (i = 0; i < clickables.length; i++) {
+	      this.dispatchMouseEvent(clickables[i], 'click', this.el);
+	    }
 	    if (this.carried) {
 	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
 	      this.carried = null;
@@ -204,7 +214,7 @@
 	    this.updateDragged();
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
-	    var _this = this;
+	    var _this2 = this;
 
 	    var ddevt,
 	        dropTarget,
@@ -221,16 +231,16 @@
 	      }
 	    }
 	    this.gehDragged.forEach(function (carried) {
-	      _this.dispatchMouseEvent(carried, 'dragend', _this.el);
+	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
 	      // fire event both ways for all intersected targets 
-	      _this.dispatchMouseEventAll('drop', carried, true, true);
-	      _this.dispatchMouseEventAll('dragleave', carried, true, true);
+	      _this2.dispatchMouseEventAll('drop', carried, true, true);
+	      _this2.dispatchMouseEventAll('dragleave', carried, true, true);
 	    });
 	    this.dragged = null;
 	    this.gehDragged = [];
 	  },
 	  onHit: function onHit(evt) {
-	    var _this2 = this;
+	    var _this3 = this;
 
 	    var hitEl = evt.detail.el,
 	        used = false,
@@ -246,7 +256,7 @@
 	      if (this.dragging && this.gehDragged.length) {
 	        // events on targets and on dragged
 	        this.gehDragged.forEach(function (dragged) {
-	          _this2.dispatchMouseEventAll('dragenter', dragged, true, true);
+	          _this3.dispatchMouseEventAll('dragenter', dragged, true, true);
 	        });
 	      }
 	      this.updateGrabbed();
@@ -333,44 +343,44 @@
 	    }
 	  },
 	  _unWatch: function _unWatch(target) {
-	    var _this3 = this;
+	    var _this4 = this;
 
 	    var hoverIndex = this.hoverEls.indexOf(target);
 	    if (hoverIndex !== -1) {
 	      this.hoverEls.splice(hoverIndex, 1);
 	    }
 	    this.gehDragged.forEach(function (dragged) {
-	      _this3.dispatchMouseEvent(target, 'dragleave', dragged);
-	      _this3.dispatchMouseEvent(dragged, 'dragleave', target);
+	      _this4.dispatchMouseEvent(target, 'dragleave', dragged);
+	      _this4.dispatchMouseEvent(dragged, 'dragleave', target);
 	    });
 	    this.dispatchMouseEvent(target, 'mouseout', this.el);
 	  },
 	  registerListeners: function registerListeners() {
-	    var _this4 = this;
+	    var _this5 = this;
 
 	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
 
 	    this.data.grabStartButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onGrabStartButton);
+	      _this5.el.addEventListener(b, _this5.onGrabStartButton);
 	    });
 	    this.data.grabEndButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onGrabEndButton);
+	      _this5.el.addEventListener(b, _this5.onGrabEndButton);
 	    });
 	    this.data.stretchStartButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onStretchStartButton);
+	      _this5.el.addEventListener(b, _this5.onStretchStartButton);
 	    });
 	    this.data.stretchEndButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onStretchEndButton);
+	      _this5.el.addEventListener(b, _this5.onStretchEndButton);
 	    });
 	    this.data.dragDropStartButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onDragDropStartButton);
+	      _this5.el.addEventListener(b, _this5.onDragDropStartButton);
 	    });
 	    this.data.dragDropEndButtons.forEach(function (b) {
-	      _this4.el.addEventListener(b, _this4.onDragDropEndButton);
+	      _this5.el.addEventListener(b, _this5.onDragDropEndButton);
 	    });
 	  },
 	  unRegisterListeners: function unRegisterListeners(data) {
-	    var _this5 = this;
+	    var _this6 = this;
 
 	    data = data || this.data;
 	    if (Object.keys(data).length === 0) {
@@ -380,22 +390,22 @@
 	    this.el.removeEventListener(data.colliderEvent, this.onHit);
 
 	    data.grabStartButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onGrabStartButton);
+	      _this6.el.removeEventListener(b, _this6.onGrabStartButton);
 	    });
 	    data.grabEndButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onGrabEndButton);
+	      _this6.el.removeEventListener(b, _this6.onGrabEndButton);
 	    });
 	    data.stretchStartButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onStretchStartButton);
+	      _this6.el.removeEventListener(b, _this6.onStretchStartButton);
 	    });
 	    data.stretchEndButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onStretchEndButton);
+	      _this6.el.removeEventListener(b, _this6.onStretchEndButton);
 	    });
 	    data.dragDropStartButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onDragDropStartButton);
+	      _this6.el.removeEventListener(b, _this6.onDragDropStartButton);
 	    });
 	    data.dragDropEndButtons.forEach(function (b) {
-	      _this5.el.removeEventListener(b, _this5.onDragDropEndButton);
+	      _this6.el.removeEventListener(b, _this6.onDragDropEndButton);
 	    });
 	  },
 	  emitCancelable: function emitCancelable(target, name, detail) {
@@ -411,13 +421,13 @@
 	    target.dispatchEvent(mEvt);
 	  },
 	  dispatchMouseEventAll: function dispatchMouseEventAll(name, relatedTarget, filterUsed, alsoReverse) {
-	    var _this6 = this;
+	    var _this7 = this;
 
 	    var els = this.hoverEls,
 	        i;
 	    if (filterUsed) {
 	      els = els.filter(function (el) {
-	        return !_this6.gehDragged.includes(el) && el !== _this6.carried && el !== _this6.dragged && el !== _this6.stretched;
+	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched && !_this7.gehDragged.includes(el);
 	      });
 	    }
 	    if (alsoReverse) {
@@ -432,13 +442,13 @@
 	    }
 	  },
 	  findTarget: function findTarget(evType, detail, filterUsed) {
-	    var _this7 = this;
+	    var _this8 = this;
 
 	    var elIndex,
 	        eligibleEls = this.hoverEls;
 	    if (filterUsed) {
 	      eligibleEls = eligibleEls.filter(function (el) {
-	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched;
+	        return el !== _this8.carried && el !== _this8.dragged && el !== _this8.stretched;
 	      });
 	    }
 	    for (elIndex = 0; elIndex < eligibleEls.length; elIndex++) {

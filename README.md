@@ -203,7 +203,8 @@ If needed, use `event.target` instead.
 | onmouseover | hovering in an entity's collision zone | `super-hands` entity |
 | onmouseout | leaving an entity's collision zone | `super-hands` entity |
 | onmousedown | grab started while collided with entity | `super-hands` entity |
-| onmouseup, onclick | grab ended after onmousedown | controller entity |
+| onmouseup | grab ended while collided with entity | controller entity |
+| onclick | grab started and then ended while collided with entity | controller entity |
 | ondragstart | drag-drop started while collided with entity | controller entity |
 | ondragend | drag-drop started while collided with entity | controller entity |
 | ondragenter | hovering in an entity's collision zone while drag-dropping another entity | the other entity\* |

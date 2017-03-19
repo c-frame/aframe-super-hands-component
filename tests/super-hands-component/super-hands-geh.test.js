@@ -197,8 +197,8 @@ suite('super-hands GlobalEventHandler integration', function () {
     assert.isTrue(spy2.calledWithMatch({ relatedTarget: this.hand1 }), 'event object');
   });
   test('click', function (done) {
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     this.target1.onclick = e => {
       assert.typeOf(e, 'MouseEvent');
       assert.strictEqual(e.target, this.target1);
@@ -209,19 +209,19 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('click does not fire if target is lost', function () {
     var clickSpy = this.sinon.spy();
-    this.sh1.onGrabStartButton();
     this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     this.target1.onclick = clickSpy;
     this.target1.removeState('collided');
     this.sh1.onGrabEndButton();
     assert.isFalse(clickSpy.called);
   });
   // need to add state tracking for mousedown-ed element
-  test.skip('click only on target previously mousedown-ed', function () {
+  test('click only on target previously mousedown-ed', function () {
     var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.target1.onclick = spy1;
     this.target2.onclick = spy2;
@@ -305,10 +305,10 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     this.target1.onclick = t1Spy;
     this.target2.onclick = t2Spy;
     this.target3.onclick = t3Spy;
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabStartButton();
     this.sh1.onGrabEndButton();
     assert.isTrue(t1Spy.called, 'target 1');
     assert.isTrue(t2Spy.called, 'target 2');

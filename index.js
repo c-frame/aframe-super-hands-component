@@ -76,6 +76,7 @@ AFRAME.registerComponent('super-hands', {
     
     // state tracking - global event handlers (GEH)
     this.gehDragged = [];
+    this.gehClicking = new Set();
     
     // state tracking - reaction components
     this.hoverEls = [];
@@ -137,12 +138,16 @@ AFRAME.registerComponent('super-hands', {
   onGrabStartButton: function (evt) {
     this.grabbing = true;
     this.dispatchMouseEventAll('mousedown', this.el);
+    this.gehClicking = new Set(this.hoverEls);
     this.updateGrabbed();
   },
 
   onGrabEndButton: function (evt) {
+    var clickables = this.hoverEls.filter(h => this.gehClicking.has(h)), i;
     this.dispatchMouseEventAll('mouseup', this.el, true);
-    this.dispatchMouseEventAll('click', this.el, true);
+    for(i = 0; i < clickables.length; i++) {
+      this.dispatchMouseEvent(clickables[i], 'click', this.el);
+    }
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
       this.carried = null;
@@ -365,8 +370,8 @@ AFRAME.registerComponent('super-hands', {
     var els = this.hoverEls, i;
     if (filterUsed) { 
       els = els
-        .filter(el => !this.gehDragged.includes(el) && el !== this.carried && 
-                el !== this.dragged && el !== this.stretched);
+        .filter(el => el !== this.carried && el !== this.dragged &&
+                el !== this.stretched && !this.gehDragged.includes(el));
     }
     if(alsoReverse) {
       for(i = 0; i < els.length; i++) {
