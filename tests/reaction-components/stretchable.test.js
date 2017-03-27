@@ -36,6 +36,12 @@ suite('stretchable', function () {
     this.comp.end({ detail: { hand: this.hand1 }});
     assert.notOk(this.el.is('stretched'));
   });
+  test('reject duplicate stretchers', function () {
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.equal(this.comp.stretchers.length, 1);
+    assert.isFalse(this.el.is('stretched'));
+  });
   test('scale updates during stretch', function () {
     var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
         lastScale;

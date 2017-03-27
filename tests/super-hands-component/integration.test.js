@@ -48,9 +48,10 @@ suite('super-hands & reaction component integration', function () {
   });
   test('stretchable', function () {
     this.sh1.onStretchStartButton();
-    this.sh2.onStretchStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isFalse(this.target1.is('stretched'));
     this.sh2.onHit({ detail: { el: this.target1 } });
+    this.sh2.onStretchStartButton();
     assert.ok(this.target1.is('stretched'));
     assert.includeMembers(this.target1.components.stretchable.stretchers,
                          [this.hand1, this.hand2]);
@@ -63,6 +64,7 @@ suite('super-hands & reaction component integration', function () {
     this.sh2.onStretchEndButton(); 
     assert.isFalse(this.target1.is('stretched'), 'hand 2 release');
     this.sh1.onStretchEndButton();
+    assert.equal(this.target1.components.stretchable.stretchers.length, 0);
   });
   test('drag-droppable', function () {
     var dropSpy = this.sinon.spy(),

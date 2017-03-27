@@ -158,7 +158,7 @@ suite('super-hands hit processing & event emission', function () {
     assert.isNotOk(this.sh1.stretching);
     assert.strictEqual(this.sh2.stretched, this.target1);
     this.sh2.onStretchEndButton();
-    assert.isTrue(unStretchSpy.calledOnce);
+    assert.isTrue(unStretchSpy.calledTwice);
     assert.isNotOk(this.sh2.stretching);
   });
   test('stretch rejected', function () {

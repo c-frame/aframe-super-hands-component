@@ -161,10 +161,7 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     if(this.stretched) {
-      // avoid firing event twice when both hands release
-      if(this.otherSuperHand.stretched) {
-        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
-      }
+      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
       this.stretched = null;
     }
     this.stretching = false;

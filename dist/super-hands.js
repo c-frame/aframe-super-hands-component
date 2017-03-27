@@ -198,10 +198,7 @@
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
-	      // avoid firing event twice when both hands release
-	      if (this.otherSuperHand.stretched) {
-	        this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
-	      }
+	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
 	      this.stretched = null;
 	    }
 	    this.stretching = false;
@@ -681,9 +678,9 @@
 	    this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
 	  },
 	  start: function start(evt) {
-	    if (this.stretched) {
+	    if (this.stretched || this.stretchers.includes(evt.detail.hand)) {
 	      return;
-	    } //already stretching
+	    } // already stretched or already captured this hand
 	    this.stretchers.push(evt.detail.hand);
 	    if (this.stretchers.length === 2) {
 	      this.stretched = true;
