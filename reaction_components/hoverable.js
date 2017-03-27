@@ -21,6 +21,7 @@ AFRAME.registerComponent('hoverable', {
     if(this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
     }
+    if(evt.preventDefault) { evt.preventDefault(); }
   },
   end: function (evt) {
     var handIndex = this.hoverers.indexOf(evt.detail.hand);

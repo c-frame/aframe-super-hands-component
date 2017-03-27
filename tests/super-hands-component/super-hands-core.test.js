@@ -182,15 +182,15 @@ suite('super-hands hit processing & event emission', function () {
     assert.notOk(this.sh1.dragged);
   });
   test('undrag event -- no drop target', function () {
-    var dropSpy = this.sinon.spy();
+    var dragEndSpy = this.sinon.spy();
     this.sh1.onDragDropStartButton();
     this.target1
       .addEventListener('drag-start', evt => evt.preventDefault());
-    this.target1.addEventListener('drag-drop', dropSpy);
+    this.target1.addEventListener('drag-end', dragEndSpy);
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropEndButton({});
-    assert.isTrue(dropSpy.calledWithMatch({ detail: { 
-      on: null, dropped: this.target1, hand: this.hand1 
+    assert.isTrue(dragEndSpy.calledWithMatch({ detail: { 
+      hand: this.hand1 
     }}));
     assert.isNotOk(this.sh1.dragged);
     assert.isFalse(this.sh1.dragging);

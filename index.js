@@ -67,6 +67,7 @@ AFRAME.registerComponent('super-hands', {
     this.STRETCH_EVENT = 'stretch-start';
     this.UNSTRETCH_EVENT = 'stretch-end';
     this.DRAG_EVENT = 'drag-start';
+    this.UNDRAG_EVENT = 'drag-end';
     this.DRAGOVER_EVENT = 'dragover-start';
     this.UNDRAGOVER_EVENT = 'dragover-end';
     this.DRAGDROP_EVENT = 'drag-drop';
@@ -181,14 +182,14 @@ AFRAME.registerComponent('super-hands', {
         carried = this.dragged;
     this.dragging = false; // keep _unHover() from activating another droptarget
     if(carried) {
-      this.dispatchMouseEvent(carried, 'dragend', this.el);
       ddevt = { hand: this.el, dropped: carried, on: null };
       dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
-      ddevt.on = dropTarget;
-      this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
       if(dropTarget) {
+        ddevt.on = dropTarget;
+        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
         this._unHover(dropTarget);
       }
+      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
     }
     this.gehDragged.forEach(carried => {
       this.dispatchMouseEvent(carried, 'dragend', this.el);

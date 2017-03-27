@@ -178,9 +178,10 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second controller entity |
 | stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
 | drag-start | Drag-drop button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
+| drag-end | Drag-drop button released while dragging an entity | dragged entity | hand: `super-hands` entity |
 | dragover-start | Collision with entity while dragging another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
-| drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
+| drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on (carried entity only): receiving entity |
 
 Notes: 
 
@@ -193,7 +194,7 @@ even if the trigger was *released* earlier.
 * Only one entity at a time will be targeted for each event type, 
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
-* **drag-drop**: For the receiving entity, `on` entry in the details is `null`. 
+* drag-drop: For the receiving entity, `on` entry in the details is `null`. 
 If needed, use `event.target` instead. 
 
 ##### Global Event Handler Integration

@@ -103,6 +103,7 @@
 	    this.STRETCH_EVENT = 'stretch-start';
 	    this.UNSTRETCH_EVENT = 'stretch-end';
 	    this.DRAG_EVENT = 'drag-start';
+	    this.UNDRAG_EVENT = 'drag-end';
 	    this.DRAGOVER_EVENT = 'dragover-start';
 	    this.UNDRAGOVER_EVENT = 'dragover-end';
 	    this.DRAGDROP_EVENT = 'drag-drop';
@@ -221,14 +222,14 @@
 	        carried = this.dragged;
 	    this.dragging = false; // keep _unHover() from activating another droptarget
 	    if (carried) {
-	      this.dispatchMouseEvent(carried, 'dragend', this.el);
 	      ddevt = { hand: this.el, dropped: carried, on: null };
 	      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
-	      ddevt.on = dropTarget;
-	      this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
 	      if (dropTarget) {
+	        ddevt.on = dropTarget;
+	        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
 	        this._unHover(dropTarget);
 	      }
+	      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
 	    }
 	    this.gehDragged.forEach(function (carried) {
 	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
@@ -520,6 +521,9 @@
 	    if (this.hoverers.indexOf(evt.detail.hand) === -1) {
 	      this.hoverers.push(evt.detail.hand);
 	    }
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    }
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.hoverers.indexOf(evt.detail.hand);
@@ -714,38 +718,50 @@
 	    this.HOVER_EVENT = 'dragover-start';
 	    this.UNHOVER_EVENT = 'dragover-end';
 	    this.DRAG_EVENT = 'drag-start';
+	    this.UNDRAG_EVENT = 'drag-end';
 	    this.DRAGDROP_EVENT = 'drag-drop';
 
 	    this.hoverStart = this.hoverStart.bind(this);
 	    this.dragStart = this.dragStart.bind(this);
 	    this.hoverEnd = this.hoverEnd.bind(this);
 	    this.dragEnd = this.dragEnd.bind(this);
+	    this.dragDrop = this.dragDrop.bind(this);
 
 	    this.el.addEventListener(this.HOVER_EVENT, this.hoverStart);
 	    this.el.addEventListener(this.DRAG_EVENT, this.dragStart);
 	    this.el.addEventListener(this.UNHOVER_EVENT, this.hoverEnd);
-	    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragEnd);
+	    this.el.addEventListener(this.UNDRAG_EVENT, this.dragEnd);
+	    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDrop);
 	  },
 	  remove: function remove() {
 	    this.el.removeEventListener(this.HOVER_EVENT, this.hoverStart);
 	    this.el.removeEventListener(this.DRAG_EVENT, this.dragStart);
 	    this.el.removeEventListener(this.UNHOVER_EVENT, this.hoverEnd);
-	    this.el.removeEventListener(this.DRAGDROP_EVENT, this.dragEnd);
+	    this.el.removeEventListener(this.UNDRAG_EVENT, this.dragEnd);
+	    this.el.removeEventListener(this.DRAGDROP_EVENT, this.dragDrop);
 	  },
 	  hoverStart: function hoverStart(evt) {
 	    this.el.addState(this.HOVERED_STATE);
-	    evt.preventDefault();
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    }
 	  },
 	  dragStart: function dragStart(evt) {
 	    this.el.addState(this.DRAGGED_STATE);
-	    evt.preventDefault();
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    }
 	  },
 	  hoverEnd: function hoverEnd(evt) {
 	    this.el.removeState(this.HOVERED_STATE);
 	  },
 	  dragEnd: function dragEnd(evt) {
 	    this.el.removeState(this.DRAGGED_STATE);
-	    evt.preventDefault();
+	  },
+	  dragDrop: function dragDrop(evt) {
+	    if (evt.preventDefault) {
+	      evt.preventDefault();
+	    }
 	  }
 	});
 

@@ -31,12 +31,20 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.carried, this.target1);
     assert.strictEqual(this.target1.components.grabbable.grabber, this.hand1);
-    assert.ok(this.target1.is('grabbed'));
+    assert.ok(this.target1.is('grabbed'), 'grabbed');
+    this.sh1.onGrabEndButton();
+    assert.isFalse(this.target1.is('grabbed'), 'released');
+    assert.notEqual(this.sh1.hoverEls.indexOf(this.target1), -1, 'still watched');
   });
   test('hoverable', function () {
+    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
     assert.strictEqual(this.target1.components.hoverable.hoverers[0], this.hand1);
+    assert.isTrue(this.target1.is('hovered'));
+    this.target1.removeState('collided');
+    assert.isFalse(this.target1.is('hovered'));
+    assert.equal(this.sh1.hoverEls.indexOf(this.target1), -1);
   });
   test('stretchable', function () {
     this.sh1.onStretchStartButton();
@@ -48,8 +56,19 @@ suite('super-hands & reaction component integration', function () {
                          [this.hand1, this.hand2]);
     assert.strictEqual(this.sh1.stretched, this.target1);
     assert.strictEqual(this.sh2.stretched, this.target1);
+    this.sh1.onStretchEndButton();
+    assert.isFalse(this.target1.is('stretched'), 'hand 1 release');
+    this.sh1.onStretchStartButton();
+    assert.isTrue(this.target1.is('stretched'), 'resume stretch');
+    this.sh2.onStretchEndButton(); 
+    assert.isFalse(this.target1.is('stretched'), 'hand 2 release');
+    this.sh1.onStretchEndButton();
   });
   test('drag-droppable', function () {
+    var dropSpy = this.sinon.spy(),
+        targetDropSpy = this.sinon.spy();
+    this.target1.addEventListener('drag-drop', dropSpy);
+    this.target2.addEventListener('drag-drop', targetDropSpy);
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
@@ -58,9 +77,17 @@ suite('super-hands & reaction component integration', function () {
     this.target2.emit('stateremoved', { state: 'collided' });
     assert.ok(this.target1.is('dragged'), 'carried still dragged after target lost');
     assert.isFalse(this.target2.is('dragover'), 'lost target unhovered');
+    assert.isFalse(dropSpy.called, 'no drop before button release');
+    this.sh1.onDragDropEndButton();
+    assert.isFalse(dropSpy.called, 'no drop w/o target');
+    assert.isFalse(this.target1.is('dragged'), 'drop w/o target: no longer dragged');
+    this.sh1.onDragDropStartButton();
+    assert.ok(this.target1.is('dragged'), 'dragged re-acquired');
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.ok(this.target2.is('dragover'), 'drop target re-acquired');
     this.sh1.onDragDropEndButton();
+    assert.isTrue(targetDropSpy.called, 'drag-drop success: target');
+    assert.isTrue(dropSpy.called, 'drag-drop success: hand');
     assert.isFalse(this.target1.is('dragged'), 'carried released');
     assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
   });

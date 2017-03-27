@@ -31,7 +31,7 @@ suite('drag-droppable', function () {
   test('el gains and loses dragged state', function () {
     this.el.emit('drag-start', { hand: this.hand });
     assert.isTrue(this.el.is('dragged'));
-    this.el.emit('drag-drop', { hand: this.hand });
+    this.el.emit('drag-end', { hand: this.hand });
     assert.isFalse(this.el.is('dragged'));
   });  
 });
