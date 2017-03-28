@@ -12,6 +12,7 @@ suite('super-hands & reaction component integration', function () {
     this.target1.setAttribute('drag-droppable', '');
     this.target2 = document.createElement('a-entity');
     this.target2.setAttribute('drag-droppable', '');
+    this.target2.setAttribute('hoverable', '');
     this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
@@ -92,6 +93,13 @@ suite('super-hands & reaction component integration', function () {
     assert.isTrue(dropSpy.called, 'drag-drop success: hand');
     assert.isFalse(this.target1.is('dragged'), 'carried released');
     assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
+  });
+  test('lastHover not confused by rejected dragover', function () {
+    this.target2.removeComponent('drag-droppable');
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.equal(this.sh1.lastHover, 'hover-start');
   });
 });
 suite('super-hands collider integration', function () {

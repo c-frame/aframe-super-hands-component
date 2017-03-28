@@ -255,7 +255,9 @@ AFRAME.registerComponent('super-hands', {
         this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
         this.lastHover = this.DRAGOVER_EVENT;
       }
-    } else {
+    }
+    // fallback to hover if not draggning or dragover wasn't successful 
+    if (!hoverEl) {
       hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
       if (hoverEl) {
         hoverEl.removeEventListener('stateremoved', this.unWatch);
