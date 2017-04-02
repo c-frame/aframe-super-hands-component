@@ -189,6 +189,7 @@
 	    if (this.carried) {
 	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
 	      this.carried = null;
+	      this.hover();
 	    }
 	    this.grabbing = false;
 	  },
@@ -200,6 +201,7 @@
 	    if (this.stretched) {
 	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
 	      this.stretched = null;
+	      this.hover();
 	    }
 	    this.stretching = false;
 	  },
@@ -218,6 +220,13 @@
 	        dropTarget,
 	        carried = this.dragged;
 	    this.dragging = false; // keep _unHover() from activating another droptarget
+	    this.gehDragged.forEach(function (carried) {
+	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
+	      // fire event both ways for all intersected targets 
+	      _this2.dispatchMouseEventAll('drop', carried, true, true);
+	      _this2.dispatchMouseEventAll('dragleave', carried, true, true);
+	    });
+	    this.gehDragged.clear();
 	    if (carried) {
 	      ddevt = { hand: this.el, dropped: carried, on: null };
 	      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
@@ -227,15 +236,9 @@
 	        this._unHover(dropTarget);
 	      }
 	      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
+	      this.dragged = null;
+	      this.hover();
 	    }
-	    this.gehDragged.forEach(function (carried) {
-	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
-	      // fire event both ways for all intersected targets 
-	      _this2.dispatchMouseEventAll('drop', carried, true, true);
-	      _this2.dispatchMouseEventAll('dragleave', carried, true, true);
-	    });
-	    this.dragged = null;
-	    this.gehDragged.clear();
 	  },
 	  onHit: function onHit(evt) {
 	    var _this3 = this;
@@ -266,11 +269,17 @@
 	  updateGrabbed: function updateGrabbed() {
 	    if (this.grabbing && !this.carried) {
 	      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
+	      if (this.carried) {
+	        this._unHover(this.carried);
+	      }
 	    }
 	  },
 	  updateStretched: function updateStretched() {
 	    if (this.stretching && !this.stretched) {
 	      this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
+	      if (this.stretched) {
+	        this._unHover(this.stretched);
+	      }
 	    }
 	  },
 	  updateDragged: function updateDragged() {
@@ -283,6 +292,9 @@
 	        this.dragged = this.carried;
 	      } else {
 	        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
+	      }
+	      if (this.dragged) {
+	        this._unHover(this.dragged);
 	      }
 	    }
 	  },

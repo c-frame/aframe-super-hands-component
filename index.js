@@ -152,6 +152,7 @@ AFRAME.registerComponent('super-hands', {
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
       this.carried = null;
+      this.hover();
     }
     this.grabbing = false;
   },
@@ -163,6 +164,7 @@ AFRAME.registerComponent('super-hands', {
     if(this.stretched) {
       this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
       this.stretched = null;
+      this.hover();
     }
     this.stretching = false;
   },
@@ -178,6 +180,13 @@ AFRAME.registerComponent('super-hands', {
     var ddevt, dropTarget,
         carried = this.dragged;
     this.dragging = false; // keep _unHover() from activating another droptarget
+    this.gehDragged.forEach(carried => {
+      this.dispatchMouseEvent(carried, 'dragend', this.el);
+      // fire event both ways for all intersected targets 
+      this.dispatchMouseEventAll('drop', carried, true, true);
+      this.dispatchMouseEventAll('dragleave', carried, true, true);
+    });
+    this.gehDragged.clear();
     if(carried) {
       ddevt = { hand: this.el, dropped: carried, on: null };
       dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
@@ -187,15 +196,9 @@ AFRAME.registerComponent('super-hands', {
         this._unHover(dropTarget);
       }
       carried.emit(this.UNDRAG_EVENT, { hand: this.el });
+      this.dragged = null;
+      this.hover();
     }
-    this.gehDragged.forEach(carried => {
-      this.dispatchMouseEvent(carried, 'dragend', this.el);
-      // fire event both ways for all intersected targets 
-      this.dispatchMouseEventAll('drop', carried, true, true);
-      this.dispatchMouseEventAll('dragleave', carried, true, true);
-    });
-    this.dragged = null;
-    this.gehDragged.clear();
   },
   onHit: function(evt) {
     var hitEl = evt.detail.el, used = false, hitElIndex;
@@ -220,11 +223,17 @@ AFRAME.registerComponent('super-hands', {
   updateGrabbed: function () {
     if (this.grabbing && !this.carried) {
       this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
+      if (this.carried) {
+        this._unHover(this.carried);
+      }
     } 
   },
   updateStretched: function () {
     if (this.stretching && !this.stretched) {
       this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
+      if (this.stretched) {
+        this._unHover(this.stretched);
+      }
     }
   },
   updateDragged: function () {
@@ -237,6 +246,9 @@ AFRAME.registerComponent('super-hands', {
         this.dragged = this.carried;
       } else {
         this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
+      }
+      if (this.dragged) {
+        this._unHover(this.dragged);
       }
     }
   },

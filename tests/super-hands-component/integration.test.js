@@ -101,6 +101,34 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.equal(this.sh1.lastHover, 'hover-start');
   });
+  test('hover ends when target grabbed', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.ok(this.target1.is('hovered'), 'hover starts');
+    this.sh1.onGrabStartButton();
+    assert.ok(this.target1.is('grabbed'), 'grab starts');
+    assert.notOk(this.target1.is('hovered'), 'hover ended');
+    this.sh1.onGrabEndButton();
+    assert.notOk(this.target1.is('grabbed'), 'grab ended');
+    assert.ok(this.target1.is('hovered'), 'hover resumed');
+  });
+  test('hover ends when target dragged', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.ok(this.target1.is('hovered'), 'hover starts');
+    this.sh1.onDragDropStartButton();
+    assert.ok(this.target1.is('dragged'), 'drag starts');
+    assert.notOk(this.target1.is('hovered'), 'hover ended');
+    this.sh1.onDragDropEndButton();
+    assert.notOk(this.target1.is('dragged'), 'drag ended');
+    assert.ok(this.target1.is('hovered'), 'hover resumed');
+  });
+  test('hover ends when target stretched', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.ok(this.target1.is('hovered'), 'hover starts');
+    this.sh1.onStretchStartButton();
+    assert.notOk(this.target1.is('hovered'), 'hover ended');
+    this.sh1.onStretchEndButton();
+    assert.ok(this.target1.is('hovered'), 'hover resumed');
+  });
 });
 suite('super-hands collider integration', function () {
   setup(function (done) {
