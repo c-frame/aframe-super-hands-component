@@ -152,7 +152,7 @@ AFRAME.registerComponent('super-hands', {
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
       this.carried = null;
-      this.hover();
+      if (!this.lastHover) { this.hover(); }
     }
     this.grabbing = false;
   },
@@ -164,7 +164,7 @@ AFRAME.registerComponent('super-hands', {
     if(this.stretched) {
       this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
       this.stretched = null;
-      this.hover();
+      if (!this.lastHover) { this.hover(); }
     }
     this.stretching = false;
   },
@@ -197,7 +197,7 @@ AFRAME.registerComponent('super-hands', {
       }
       carried.emit(this.UNDRAG_EVENT, { hand: this.el });
       this.dragged = null;
-      this.hover();
+      if (!this.lastHover) { this.hover(); }
     }
   },
   onHit: function(evt) {

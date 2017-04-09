@@ -129,6 +129,15 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onStretchEndButton();
     assert.ok(this.target1.is('hovered'), 'hover resumed');
   });
+  test('end of interaction does not cause double hover', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.ok(this.target2.is('hovered'));
+    this.sh1.onGrabEndButton();
+    assert.notOk(this.target1.is('hovered') && this.target2.is('hovered'),
+                'two targets hovered');
+  });
 });
 suite('super-hands collider integration', function () {
   setup(function (done) {
