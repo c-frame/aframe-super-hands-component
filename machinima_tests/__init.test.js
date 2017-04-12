@@ -4,7 +4,7 @@
  * __init.test.js is run before every test case.
  */
 window.debug = true;
-var AScene = require('aframe').AScene;
+/*var AScene = require('aframe').AScene;
 
 navigator.getVRDisplays = function () {
   var resolvePromise = Promise.resolve();
@@ -15,7 +15,7 @@ navigator.getVRDisplays = function () {
     requestAnimationFrame: function () { return 1; }
   };
   return Promise.resolve([mockVRDisplay]);
-};
+};*/
 
 setup(function () {
   this.sinon = sinon.sandbox.create();
@@ -26,7 +26,7 @@ teardown(function () {
   var attachedEls = ['canvas', 'a-assets', 'a-scene'];
   var els = document.querySelectorAll(attachedEls.join(','));
   for (var i = 0; i < els.length; i++) {
-    els[i].parentNode.removeChild(els[i]);
-  }
+   // els[i].parentNode.removeChild(els[i]); temp disable
+  } 
   this.sinon.restore();
 });
