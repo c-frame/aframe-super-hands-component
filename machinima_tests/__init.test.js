@@ -23,10 +23,16 @@ setup(function () {
 
 teardown(function () {
   // Clean up any attached elements.
-  var attachedEls = ['canvas', 'a-assets', 'a-scene'];
+  var attachedEls = ['canvas', 'a-assets', 'a-scene'],
+      replayer;
+  replayer = document.querySelector('a-scene') &&
+    document.querySelector('a-scene').components &&
+    document.querySelector('a-scene').components['avatar-replayer'];
+  if (replayer) { replayer.isReplaying = false; }
   var els = document.querySelectorAll(attachedEls.join(','));
+ 
   for (var i = 0; i < els.length; i++) {
-   // els[i].parentNode.removeChild(els[i]); temp disable
+    els[i].parentNode.removeChild(els[i]);
   } 
   this.sinon.restore();
 });

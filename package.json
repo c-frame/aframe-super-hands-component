@@ -6,7 +6,7 @@
   "scripts": {
     "build": "browserify examples/main.js -o examples/build.js",
     "dev": "budo examples/main.js:build.js --dir examples --port 8000 --live --open",
-    "record": "budo machinima_tests/main.js:build.js --dir machinima_tests --port 8000 --live --open",
+    "record": "budo machinima_tests/main.js:build.js --dir machinima_tests/scenes --port 8000 --live --open",
     "dist": "webpack index.js dist/super-hands.js && webpack -p index.js dist/super-hands.min.js",
     "lint": "semistandard -v | snazzy",
     "prepublish": "npm run dist",

@@ -2,7 +2,7 @@
 
 var helpers = require('../helpers'), 
     entityFactory = helpers.entityFactory,
-    recordingPath = "base/machinima_tests/recordings/handsRecording.json";
+    recordingPath = "base/recordings/handsRecording.json";
 
 suite('basic hands scene', function () {
   this.timeout(0);
@@ -21,17 +21,23 @@ suite('basic hands scene', function () {
       done();
     });
   });
-  test('boxes turn into spheres', function (done) {
-    assert.equal(document.getElementById('greenLow') 
-                 .getAttribute('geometry').primitive, 'box');
-    assert.equal(document.getElementById('greenHigh')
-                 .getAttribute('geometry').primitive, 'box');
-    this.rhand.addEventListener('replayingstopped',e => {
+  test('green boxes turn into spheres', function (done) {
+    this.scene.addEventListener('replayingstopped', e => {
       assert.equal(document.getElementById('greenLow')
                    .getAttribute('geometry').primitive, 'sphere');
       assert.equal(document.getElementById('greenHigh')
                    .getAttribute('geometry').primitive, 'sphere');
       done();
-    });
+    }, { once: true }); // once flag because this event emitted multiple times
+  });
+  test('red box is stretched & moved', function (done) {
+    var rbox = document.getElementById('redHigh'),
+        startPos = rbox.getAttribute('position'),
+        startScale = rbox.getAttribute('scale')
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.notDeepEqual(rbox.getAttribute('position'), startPos, 'box moved');
+      assert.isTrue(rbox.getAttribute('scale').x > startScale.x, 'box grew');
+      done();
+    }, { once: true });
   });
 });
