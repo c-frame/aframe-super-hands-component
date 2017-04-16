@@ -224,7 +224,9 @@ AFRAME.registerComponent('super-hands', {
     if (this.grabbing && !this.carried) {
       this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
       if (this.carried) {
+        // end hover and put back on watch list
         this._unHover(this.carried);
+        this.carried.addEventListener('stateremoved', this.unWatch);
       }
     } 
   },
@@ -232,7 +234,9 @@ AFRAME.registerComponent('super-hands', {
     if (this.stretching && !this.stretched) {
       this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
       if (this.stretched) {
+        // end hover and put back on watch list
         this._unHover(this.stretched);
+        this.stretched.addEventListener('stateremoved', this.unWatch);
       }
     }
   },
@@ -248,7 +252,9 @@ AFRAME.registerComponent('super-hands', {
         this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
       }
       if (this.dragged) {
+        // end hover and put back on watch list
         this._unHover(this.dragged);
+        this.dragged.addEventListener('stateremoved', this.unWatch);
       }
     }
   },
