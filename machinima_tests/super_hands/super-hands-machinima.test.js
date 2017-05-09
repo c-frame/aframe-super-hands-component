@@ -52,13 +52,39 @@ suite('example machinima test', function () {
       done();
     }, { once: true });
   });
-  test('carried entities unhovers properly after drag-drop', function(done) {
+  test('carried entities unhovers properly after drag-drop', function (done) {
     this.scene.setAttribute('avatar-replayer', { 
       src: 'base/recordings/leftoverHover.json' 
     });
     this.scene.addEventListener('replayingstopped', e => {
       assert.isFalse(this.boxGrnUp.is('hovered'));
       assert.isFalse(this.boxGrnDn.is('hovered'));
+      done();
+    }, { once: true });
+  });
+  /* the two super-hands both trigger unHover when one collider detects
+     its collision has ended, and there is no way to distinguish which
+     collider is the cause, so hover will be lost for one tick when either
+     hand exits
+  */
+  test.skip('hover persist when hands overlap', function (done) {
+    var unHoverSpy = sinon.spy(this.boxGrnUp, 'removeState'); //no sinon cleanup
+    unHoverSpy.withArgs('hovered');
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/multihover.json'
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.equal(unHoverSpy.withArgs('hovered').callCount, 1);
+      done();
+    }, { once: true });
+  });
+  test('regrabbing after release does not leave abandoned hover', function (done) {
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/regrab.json'
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.isFalse(this.boxGrnUp.is('hovered'), 'upper box');
+      assert.isFalse(this.boxGrnDn.is('hovered'), 'lower box');
       done();
     }, { once: true });
   });
