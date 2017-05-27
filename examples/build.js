@@ -419,7 +419,7 @@ AFRAME.registerComponent('super-hands', {
       eligibleEls = eligibleEls
         .filter(el => el !== this.carried && el !== this.dragged && el !== this.stretched);
     }
-    for(elIndex = 0; elIndex < eligibleEls.length; elIndex++) {
+    for(elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
       if(!this.emitCancelable(eligibleEls[elIndex], evType, detail)) {
         return eligibleEls[elIndex];
       }

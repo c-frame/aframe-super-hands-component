@@ -475,7 +475,7 @@
 	        return el !== _this8.carried && el !== _this8.dragged && el !== _this8.stretched;
 	      });
 	    }
-	    for (elIndex = 0; elIndex < eligibleEls.length; elIndex++) {
+	    for (elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
 	      if (!this.emitCancelable(eligibleEls[elIndex], evType, detail)) {
 	        return eligibleEls[elIndex];
 	      }
