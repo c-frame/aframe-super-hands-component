@@ -328,3 +328,65 @@ suite('custom button mapping', function () {
     });
   });
 });
+
+suite('state tracking', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target2 = entityFactory();
+    this.target3 = entityFactory();
+    this.hand1 = helpers.controllerFactory({
+      'super-hands': ''
+    });
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      done();
+    });
+  });
+  test('hover els collected',function () {
+    var targets = [this.target1, this.target2, this.target3];
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } }); 
+    assert.sameMembers(this.sh1.hoverEls, targets);
+    for(var i = 0; i < targets.length; i++) {
+      assert.strictEqual(this.sh1.hoverEls[i], targets[i], 'member ' + i);
+    }
+  });
+  test('hover els lifo for actions', function () {
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.target2.addEventListener('grab-start', e => e.preventDefault());
+    this.target3.addEventListener('grab-start', e => e.preventDefault());
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabStartButton();
+    assert.strictEqual(this.sh1.carried, this.target3);
+  });
+  test('released el placed back at top of stack', function () {
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.target2.addEventListener('grab-start', e => e.preventDefault());
+    //this.target3.addEventListener('grab-start', e => e.preventDefault());
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabStartButton();
+    this.sh1.onGrabEndButton();
+    var targets = [this.target1, this.target3, this.target2];
+    assert.sameMembers(this.sh1.hoverEls, targets);
+    for(var i = 0; i < targets.length; i++) {
+      assert.strictEqual(this.sh1.hoverEls[i], targets[i], 'member ' + i);
+    }
+    this.sh1.onGrabStartButton();
+    assert.strictEqual(this.sh1.carried, this.target2);
+  });
+  test('used el removed from hover stack', function () {
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onHit({ detail: { el: this.target3 } });
+    this.sh1.onGrabStartButton();
+    assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target3]);
+  });
+  
+  
+});
