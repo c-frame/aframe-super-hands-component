@@ -30,7 +30,7 @@ suite('super-hands & reaction component integration', function () {
   test('grabbable', function () {
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
-    assert.strictEqual(this.sh1.carried, this.target1);
+    assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target1);
     assert.strictEqual(this.target1.components.grabbable.grabber, this.hand1);
     assert.ok(this.target1.is('grabbed'), 'grabbed');
     this.sh1.onGrabEndButton();
@@ -56,8 +56,8 @@ suite('super-hands & reaction component integration', function () {
     assert.ok(this.target1.is('stretched'));
     assert.includeMembers(this.target1.components.stretchable.stretchers,
                          [this.hand1, this.hand2]);
-    assert.strictEqual(this.sh1.stretched, this.target1);
-    assert.strictEqual(this.sh2.stretched, this.target1);
+    assert.strictEqual(this.sh1.state.get(this.sh1.STRETCH_EVENT), this.target1);
+    assert.strictEqual(this.sh2.state.get(this.sh2.STRETCH_EVENT), this.target1);
     this.sh1.onStretchEndButton();
     assert.isFalse(this.target1.is('stretched'), 'hand 1 release');
     this.sh1.onStretchStartButton();

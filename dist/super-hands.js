@@ -121,9 +121,6 @@
 	    this.grabbing = false;
 	    this.stretching = false;
 	    this.dragging = false;
-	    this.carried = null;
-	    this.stretched = null;
-	    this.dragged = null;
 
 	    this.unHover = this.unHover.bind(this);
 	    this.unWatch = this.unWatch.bind(this);
@@ -185,12 +182,12 @@
 	    for (i = 0; i < clickables.length; i++) {
 	      this.dispatchMouseEvent(clickables[i], 'click', this.el);
 	    }
-	    if (this.carried) {
-	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+	    if (this.state.has(this.GRAB_EVENT)) {
+	      this.state.get(this.GRAB_EVENT).emit(this.UNGRAB_EVENT, { hand: this.el });
 	      /* push to top of stack so a drop followed by re-grab gets the same
 	         target */
-	      this.promoteHoveredEl(this.carried);
-	      this.carried = null;
+	      this.promoteHoveredEl(this.state.get(this.GRAB_EVENT));
+	      this.state.delete(this.GRAB_EVENT);
 	      this.hover();
 	    }
 	    this.grabbing = false;
@@ -200,10 +197,11 @@
 	    this.updateStretched();
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
-	    if (this.stretched) {
-	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
-	      this.promoteHoveredEl(this.stretched);
-	      this.stretched = null;
+	    var stretched = this.state.get(this.STRETCH_EVENT);
+	    if (stretched) {
+	      stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      this.promoteHoveredEl(stretched);
+	      this.state.delete(this.STRETCH_EVENT);
 	      this.hover();
 	    }
 	    this.stretching = false;
@@ -221,7 +219,7 @@
 
 	    var ddevt,
 	        dropTarget,
-	        carried = this.dragged;
+	        carried = this.state.get(this.DRAG_EVENT);
 	    this.dragging = false; // keep _unHover() from activating another droptarget
 	    this.gehDragged.forEach(function (carried) {
 	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
@@ -239,8 +237,8 @@
 	        this._unHover(dropTarget);
 	      }
 	      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
-	      this.promoteHoveredEl(this.dragged);
-	      this.dragged = null;
+	      this.promoteHoveredEl(carried);
+	      this.state.delete(this.DRAG_EVENT);
 	      this.hover();
 	    }
 	  },
@@ -271,40 +269,46 @@
 	    }
 	  },
 	  updateGrabbed: function updateGrabbed() {
-	    if (this.grabbing && !this.carried) {
-	      this.carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
-	      if (this.carried) {
-	        // end hover and put back on watch list
-	        this._unHover(this.carried);
-	        this.carried.addEventListener('stateremoved', this.unWatch);
+	    var carried = this.state.get(this.DRAG_EVENT);
+	    if (this.grabbing && !carried) {
+	      carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
+	      if (carried) {
+	        // save in state, end hover, and put back on watch list
+	        this.state.set(this.GRAB_EVENT, carried);
+	        this._unHover(carried);
+	        carried.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
 	  updateStretched: function updateStretched() {
-	    if (this.stretching && !this.stretched) {
-	      this.stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
-	      if (this.stretched) {
-	        // end hover and put back on watch list
-	        this._unHover(this.stretched);
-	        this.stretched.addEventListener('stateremoved', this.unWatch);
+	    var stretched = this.state.get(this.STRETCH_EVENT);
+	    if (this.stretching && !stretched) {
+	      stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
+	      if (stretched) {
+	        // save in state, end hover, and put back on watch list
+	        this.state.set(this.STRETCH_EVENT, stretched);
+	        this._unHover(stretched);
+	        stretched.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
 	  updateDragged: function updateDragged() {
-	    if (this.dragging && !this.dragged) {
-	      /* prefer this.carried so that a drag started after a grab will work
+	    var dragged = this.state.get(this.DRAG_EVENT);
+	    if (this.dragging && !dragged) {
+	      /* prefer carried so that a drag started after a grab will work
 	       with carried element rather than a currently intersected drop target.
 	       fall back to queue in case a drag is initiated independent 
 	       of a grab */
-	      if (this.carried && !this.emitCancelable(this.carried, this.DRAG_EVENT, { hand: this.el })) {
-	        this.dragged = this.carried;
+	      if (this.state.get(this.GRAB_EVENT) && !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT, { hand: this.el })) {
+	        dragged = this.state.get(this.GRAB_EVENT);
 	      } else {
-	        this.dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
+	        dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	      }
-	      if (this.dragged) {
+	      if (dragged) {
 	        // end hover and put back on watch list
-	        this._unHover(this.dragged);
-	        this.dragged.addEventListener('stateremoved', this.unWatch);
+	        this.state.set(this.DRAG_EVENT, dragged);
+	        this._unHover(dragged);
+	        dragged.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
@@ -321,19 +325,21 @@
 	      this.state.get(this.DRAGOVER_EVENT).addEventListener('stateremoved', this.unWatch);
 	      this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
 	    }
-	    if (this.dragging && this.dragged) {
+	    if (this.dragging && this.state.get(this.DRAG_EVENT)) {
 	      hvrevt = {
-	        hand: this.el, hovered: hoverEl, carried: this.dragged
+	        hand: this.el,
+	        hovered: hoverEl,
+	        carried: this.state.get(this.DRAG_EVENT)
 	      };
 	      hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
 	      if (hoverEl) {
 	        hoverEl.removeEventListener('stateremoved', this.unWatch);
 	        hoverEl.addEventListener('stateremoved', this.unHover);
-	        this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
+	        this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt);
 	        this.state.set(this.DRAGOVER_EVENT, hoverEl);
 	      }
 	    }
-	    // fallback to hover if not draggning or dragover wasn't successful 
+	    // fallback to hover if not dragging or dragover wasn't successful 
 	    if (!this.state.has(this.DRAGOVER_EVENT)) {
 	      hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
 	      if (hoverEl) {
@@ -357,12 +363,17 @@
 	    el.removeEventListener('stateremoved', this.unHover);
 	    if (el === this.state.get(this.DRAGOVER_EVENT)) {
 	      this.state.delete(this.DRAGOVER_EVENT);
-	      evt = { hand: this.el, hovered: el, carried: this.dragged };
+	      evt = {
+	        hand: this.el,
+	        hovered: el,
+	        carried: this.state.get(this.DRAG_EVENT)
+	      };
 	      this.emitCancelable(el, this.UNDRAGOVER_EVENT, evt);
-	      if (this.dragged) {
-	        this.emitCancelable(this.dragged, this.UNDRAGOVER_EVENT, evt);
+	      if (this.state.has(this.DRAG_EVENT)) {
+	        this.emitCancelable(this.state.get(this.DRAG_EVENT), this.UNDRAGOVER_EVENT, evt);
 	      }
-	    } else if (el === this.state.get(this.HOVER_EVENT)) {
+	    }
+	    if (el === this.state.get(this.HOVER_EVENT)) {
 	      this.state.delete(this.HOVER_EVENT);
 	      this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
 	    }
@@ -462,7 +473,7 @@
 	        i;
 	    if (filterUsed) {
 	      els = els.filter(function (el) {
-	        return el !== _this7.carried && el !== _this7.dragged && el !== _this7.stretched && !_this7.gehDragged.has(el);
+	        return el !== _this7.state.get(_this7.GRAB_EVENT) && el !== _this7.state.get(_this7.DRAG_EVENT) && el !== _this7.state.get(_this7.STRETCH_EVENT) && !_this7.gehDragged.has(el);
 	      });
 	    }
 	    if (alsoReverse) {
@@ -483,7 +494,7 @@
 	        eligibleEls = this.hoverEls;
 	    if (filterUsed) {
 	      eligibleEls = eligibleEls.filter(function (el) {
-	        return el !== _this8.carried && el !== _this8.dragged && el !== _this8.stretched;
+	        return el !== _this8.state.get(_this8.GRAB_EVENT) && el !== _this8.state.get(_this8.DRAG_EVENT) && el !== _this8.state.get(_this8.STRETCH_EVENT);
 	      });
 	    }
 	    for (elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
