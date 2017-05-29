@@ -267,9 +267,14 @@ AFRAME.registerComponent('super-hands', {
     var hvrevt, hoverEl;
     // end previous hover
     if (this.state.has(this.HOVER_EVENT)) {
+      // put back on watch list
+      this.state.get(this.HOVER_EVENT)
+        .addEventListener('stateremoved', this.unWatch);
       this._unHover(this.state.get(this.HOVER_EVENT), true);
     }
     if (this.state.has(this.DRAGOVER_EVENT)) {
+      this.state.get(this.DRAGOVER_EVENT)
+        .addEventListener('stateremoved', this.unWatch);
       this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
     }
     if(this.dragging && this.dragged) {

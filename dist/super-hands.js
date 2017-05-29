@@ -117,7 +117,7 @@
 
 	    // state tracking - reaction components
 	    this.hoverEls = [];
-	    this.lastHover = null;
+	    this.state = new Map();
 	    this.grabbing = false;
 	    this.stretching = false;
 	    this.dragging = false;
@@ -174,7 +174,6 @@
 	    this.gehClicking = new Set(this.hoverEls);
 	    this.updateGrabbed();
 	  },
-
 	  onGrabEndButton: function onGrabEndButton(evt) {
 	    var _this = this;
 
@@ -188,10 +187,11 @@
 	    }
 	    if (this.carried) {
 	      this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+	      /* push to top of stack so a drop followed by re-grab gets the same
+	         target */
+	      this.promoteHoveredEl(this.carried);
 	      this.carried = null;
-	      if (!this.lastHover) {
-	        this.hover();
-	      }
+	      this.hover();
 	    }
 	    this.grabbing = false;
 	  },
@@ -202,10 +202,9 @@
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    if (this.stretched) {
 	      this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      this.promoteHoveredEl(this.stretched);
 	      this.stretched = null;
-	      if (!this.lastHover) {
-	        this.hover();
-	      }
+	      this.hover();
 	    }
 	    this.stretching = false;
 	  },
@@ -240,10 +239,9 @@
 	        this._unHover(dropTarget);
 	      }
 	      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
+	      this.promoteHoveredEl(this.dragged);
 	      this.dragged = null;
-	      if (!this.lastHover) {
-	        this.hover();
-	      }
+	      this.hover();
 	    }
 	  },
 	  onHit: function onHit(evt) {
@@ -313,7 +311,16 @@
 	  /* search collided entities for target to hover/dragover */
 	  hover: function hover() {
 	    var hvrevt, hoverEl;
-	    this.lastHover = null;
+	    // end previous hover
+	    if (this.state.has(this.HOVER_EVENT)) {
+	      // put back on watch list
+	      this.state.get(this.HOVER_EVENT).addEventListener('stateremoved', this.unWatch);
+	      this._unHover(this.state.get(this.HOVER_EVENT), true);
+	    }
+	    if (this.state.has(this.DRAGOVER_EVENT)) {
+	      this.state.get(this.DRAGOVER_EVENT).addEventListener('stateremoved', this.unWatch);
+	      this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
+	    }
 	    if (this.dragging && this.dragged) {
 	      hvrevt = {
 	        hand: this.el, hovered: hoverEl, carried: this.dragged
@@ -323,16 +330,16 @@
 	        hoverEl.removeEventListener('stateremoved', this.unWatch);
 	        hoverEl.addEventListener('stateremoved', this.unHover);
 	        this.emitCancelable(this.dragged, this.DRAGOVER_EVENT, hvrevt);
-	        this.lastHover = this.DRAGOVER_EVENT;
+	        this.state.set(this.DRAGOVER_EVENT, hoverEl);
 	      }
 	    }
 	    // fallback to hover if not draggning or dragover wasn't successful 
-	    if (!hoverEl) {
+	    if (!this.state.has(this.DRAGOVER_EVENT)) {
 	      hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
 	      if (hoverEl) {
 	        hoverEl.removeEventListener('stateremoved', this.unWatch);
 	        hoverEl.addEventListener('stateremoved', this.unHover);
-	        this.lastHover = this.HOVER_EVENT;
+	        this.state.set(this.HOVER_EVENT, hoverEl);
 	      }
 	    }
 	  },
@@ -345,20 +352,24 @@
 	    }
 	  },
 	  /* inner unHover steps needed regardless of cause of unHover */
-	  _unHover: function _unHover(el) {
+	  _unHover: function _unHover(el, skipNextHover) {
 	    var evt;
 	    el.removeEventListener('stateremoved', this.unHover);
-	    if (this.lastHover === this.DRAGOVER_EVENT) {
+	    if (el === this.state.get(this.DRAGOVER_EVENT)) {
+	      this.state.delete(this.DRAGOVER_EVENT);
 	      evt = { hand: this.el, hovered: el, carried: this.dragged };
 	      this.emitCancelable(el, this.UNDRAGOVER_EVENT, evt);
 	      if (this.dragged) {
 	        this.emitCancelable(this.dragged, this.UNDRAGOVER_EVENT, evt);
 	      }
-	    } else if (this.lastHover === this.HOVER_EVENT) {
+	    } else if (el === this.state.get(this.HOVER_EVENT)) {
+	      this.state.delete(this.HOVER_EVENT);
 	      this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
 	    }
 	    //activate next target, if present
-	    this.hover();
+	    if (!skipNextHover) {
+	      this.hover();
+	    }
 	  },
 	  unWatch: function unWatch(evt) {
 	    if (evt.detail.state === this.data.colliderState) {
@@ -481,6 +492,13 @@
 	      }
 	    }
 	    return null;
+	  },
+	  promoteHoveredEl: function promoteHoveredEl(el) {
+	    var hoverIndex = this.hoverEls.indexOf(el);
+	    if (hoverIndex !== -1) {
+	      this.hoverEls.splice(hoverIndex, 1);
+	      this.hoverEls.push(el);
+	    }
 	  }
 	});
 
