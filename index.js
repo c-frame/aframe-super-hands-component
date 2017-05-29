@@ -261,9 +261,13 @@ AFRAME.registerComponent('super-hands', {
   /* search collided entities for target to hover/dragover */
   hover: function() {
     var hvrevt, hoverEl;
-    //// TODO end previous hover
-    this.state.delete(this.HOVER_EVENT);
-    this.state.delete(this.DRAGOVER_EVENT);
+    // end previous hover
+    if (this.state.has(this.HOVER_EVENT)) {
+      this._unHover(this.state.get(this.HOVER_EVENT), true);
+    }
+    if (this.state.has(this.DRAGOVER_EVENT)) {
+      this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
+    }
     if(this.dragging && this.dragged) {
       hvrevt = { 
         hand: this.el, hovered: hoverEl, carried: this.dragged
@@ -295,20 +299,24 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
-  _unHover: function(el) {
+  _unHover: function(el, skipNextHover) {
     var evt;
     el.removeEventListener('stateremoved', this.unHover);
     if(el === this.state.get(this.DRAGOVER_EVENT)) {
+      this.state.delete(this.DRAGOVER_EVENT);
       evt = { hand: this.el, hovered: el, carried: this.dragged };
       this.emitCancelable(el, this.UNDRAGOVER_EVENT, evt);
       if(this.dragged) { 
         this.emitCancelable(this.dragged, this.UNDRAGOVER_EVENT, evt); 
       }
     } else if (el === this.state.get(this.HOVER_EVENT)) {
+      this.state.delete(this.HOVER_EVENT);
       this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
     }
     //activate next target, if present
-    this.hover();
+    if (!skipNextHover) {
+      this.hover();
+    }
   },
   unWatch: function (evt) {
     if(evt.detail.state === this.data.colliderState) {

@@ -88,4 +88,14 @@ suite('example machinima test', function () {
       done();
     }, { once: true });
   });
+  test('regrabbing after release grabs same entity', function (done) {
+    var dnStartPos = this.boxGrnDn.getAttribute('position');
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/regrab.json'
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.deepEqual(this.boxGrnDn.getAttribute('position'), dnStartPos);
+      done();
+    }, { once: true });
+  });
 });

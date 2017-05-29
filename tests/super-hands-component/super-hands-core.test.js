@@ -392,7 +392,7 @@ suite('state tracking', function () {
     var hoverEndSpy1 = this.sinon.spy();
     var hoverSpy2 = this.sinon.spy(e => e.preventDefault());
     this.target1.addEventListener('hover-start', hoverSpy1);
-    this.target1.addEventListener('hover-end', hoverSpy1);
+    this.target1.addEventListener('hover-end', hoverEndSpy1);
     this.target2.addEventListener('hover-start', hoverSpy2);
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.isTrue(hoverSpy1.called, '1st hover start');
