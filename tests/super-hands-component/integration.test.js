@@ -99,7 +99,8 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
-    assert.equal(this.sh1.lastHover, 'hover-start');
+    assert.isTrue(this.sh1.state.has(this.sh1.HOVER_EVENT));
+    assert.isFalse(this.sh1.state.has(this.sh1.DRAGOVER_EVENT));
   });
   test('hover ends when target grabbed', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });

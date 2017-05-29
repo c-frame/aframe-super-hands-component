@@ -55,7 +55,7 @@ suite('super-hands hit processing & event emission', function () {
   test('hover accepted', function () {
     this.target1.addEventListener('hover-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
-    assert.equal(this.sh1.lastHover, 'hover-start');
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT), this.target1);
   });
   test('hover rejected', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -386,6 +386,21 @@ suite('state tracking', function () {
     this.sh1.onHit({ detail: { el: this.target3 } });
     this.sh1.onGrabStartButton();
     assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target3]);
+  });
+  test('hover switches to new target', function () {
+    var hoverSpy1 = this.sinon.spy(e => e.preventDefault());
+    var hoverEndSpy1 = this.sinon.spy();
+    var hoverSpy2 = this.sinon.spy(e => e.preventDefault());
+    this.target1.addEventListener('hover-start', hoverSpy1);
+    this.target1.addEventListener('hover-end', hoverSpy1);
+    this.target2.addEventListener('hover-start', hoverSpy2);
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isTrue(hoverSpy1.called, '1st hover start');
+    assert.isFalse(hoverEndSpy1.called);
+    assert.isFalse(hoverSpy2.called);
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    assert.isTrue(hoverSpy2.called, '2nd hover start');
+    assert.isTrue(hoverEndSpy1.called, '1st hover end');
   });
   
   
