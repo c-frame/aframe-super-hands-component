@@ -142,7 +142,6 @@ AFRAME.registerComponent('super-hands', {
     this.gehClicking = new Set(this.hoverEls);
     this.updateGrabbed();
   },
-
   onGrabEndButton: function (evt) {
     var clickables = this.hoverEls.filter(h => this.gehClicking.has(h)), i;
     this.dispatchMouseEventAll('mouseup', this.el, true);
@@ -151,6 +150,9 @@ AFRAME.registerComponent('super-hands', {
     }
     if(this.carried) {
       this.carried.emit(this.UNGRAB_EVENT, { hand: this.el });
+      /* push to top of stack so a drop followed by re-grab gets the same
+         target */
+      this.promoteHoveredEl(this.carried);
       this.carried = null;
       this.hover();
     }
@@ -163,6 +165,7 @@ AFRAME.registerComponent('super-hands', {
   onStretchEndButton: function (evt) {
     if(this.stretched) {
       this.stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+      this.promoteHoveredEl(this.stretched);
       this.stretched = null;
       this.hover();
     }
@@ -196,6 +199,7 @@ AFRAME.registerComponent('super-hands', {
         this._unHover(dropTarget);
       }
       carried.emit(this.UNDRAG_EVENT, { hand: this.el });
+      this.promoteHoveredEl(this.dragged);
       this.dragged = null;
       this.hover();
     }
@@ -424,5 +428,12 @@ AFRAME.registerComponent('super-hands', {
       }
     }
     return null;
+  },
+  promoteHoveredEl: function (el) {
+    var hoverIndex = this.hoverEls.indexOf(el);
+    if (hoverIndex !== -1) { 
+      this.hoverEls.splice(hoverIndex, 1); 
+      this.hoverEls.push(el);
+    } 
   }
 });

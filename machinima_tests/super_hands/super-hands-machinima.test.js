@@ -98,4 +98,13 @@ suite('example machinima test', function () {
       done();
     }, { once: true });
   });
+  test('No stray hover after drag-drop', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/handsRecording.json' 
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.isFalse(this.boxGrnDn.is('hovered'));
+      done();
+    }, { once: true });
+  });
 });

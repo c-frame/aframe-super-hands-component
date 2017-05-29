@@ -379,14 +379,6 @@ suite('state tracking', function () {
     this.sh1.onGrabStartButton();
     assert.strictEqual(this.sh1.carried, this.target2);
   });
-  test('used el removed from hover stack', function () {
-    this.target1.addEventListener('grab-start', e => e.preventDefault());
-    this.sh1.onHit({ detail: { el: this.target1 } });
-    this.sh1.onHit({ detail: { el: this.target2 } });
-    this.sh1.onHit({ detail: { el: this.target3 } });
-    this.sh1.onGrabStartButton();
-    assert.sameMembers(this.sh1.hoverEls, [this.target2, this.target3]);
-  });
   test('hover switches to new target', function () {
     var hoverSpy1 = this.sinon.spy(e => e.preventDefault());
     var hoverEndSpy1 = this.sinon.spy();
