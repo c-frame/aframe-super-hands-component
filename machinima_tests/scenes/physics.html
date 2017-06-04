@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script src="build.js"></script>
+        <script>
+      //delayed addition of physics body component to controllers due to AFRAME 0.4.0 changes
+      AFRAME.registerComponent('controller-loaded', {
+        init: function() {
+          this.el.addEventListener('model-loaded', function() {
+            this.addState('loaded');
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2" physics>
+      <a-assets>
+        <!-- <img id="grid" src="grid.png"/> -->
+  
+        <a-mixin id="controller" super-hands controller-loaded
+                 sphere-collider="objects: .dynamic"></a-mixin>
+        <a-mixin id="controller-loaded" static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
+        <a-mixin id="sp-hovered" material="wireframe: false;"></a-mixin>
+      </a-assets>
+      <a-entity id="lhand" hand-controls="left" mixin="controller"></a-entity>
+      <a-entity id="rhand" hand-controls="right" mixin="controller"></a-entity>
+      <a-entity id="target" class="dynamic" position="0 0.051 -0.25" 
+                geometry="primitive:box; width: 1.25; height: 0.1; depth: 0.1;" 
+                material="color: red" 
+                dynamic-body grabbable></a-entity>
+
+      <a-plane rotation="-90 0 0" color="#888" static-body
+                 width="50" height="50"></a-plane>
+    </a-scene>
+  </body>
+</html>
