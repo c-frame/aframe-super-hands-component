@@ -224,7 +224,7 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   updateGrabbed: function () {
-    var carried = this.state.get(this.DRAG_EVENT);
+    var carried = this.state.get(this.GRAB_EVENT);
     if (this.grabbing && !carried) {
       carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
       if (carried) {

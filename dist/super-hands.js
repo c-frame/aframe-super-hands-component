@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -269,7 +269,7 @@
 	    }
 	  },
 	  updateGrabbed: function updateGrabbed() {
-	    var carried = this.state.get(this.DRAG_EVENT);
+	    var carried = this.state.get(this.GRAB_EVENT);
 	    if (this.grabbing && !carried) {
 	      carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
 	      if (carried) {
@@ -513,9 +513,9 @@
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -544,9 +544,9 @@
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -588,9 +588,9 @@
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -602,8 +602,9 @@
 	    this.GRABBED_STATE = 'grabbed';
 	    this.GRAB_EVENT = 'grab-start';
 	    this.UNGRAB_EVENT = 'grab-end';
-	    this.constraint = null;
 	    this.grabbed = false;
+	    this.grabbers = [];
+	    this.constraints = new Map();
 
 	    this.start = this.start.bind(this);
 	    this.end = this.end.bind(this);
@@ -612,13 +613,12 @@
 	    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
 	  },
 	  update: function update(oldDat) {
-	    if (this.data.usePhysics === 'never' && this.constraint) {
-	      this.el.body.world.removeConstraint(this.constraint);
-	      this.constraint = null;
+	    if (this.data.usePhysics === 'never' && this.constraints.size) {
+	      this.clearConstraints();
 	    }
 	  },
 	  tick: function tick() {
-	    if (this.grabbed && !this.constraint && this.data.usePhysics !== 'only') {
+	    if (this.grabber && !this.constraints.size && this.data.usePhysics !== 'only') {
 	      var handPosition = this.grabber.getAttribute('position'),
 	          previousPosition = this.previousPosition || handPosition,
 	          deltaPosition = {
@@ -639,42 +639,109 @@
 	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+	    this.clearConstraints();
 	  },
 	  start: function start(evt) {
-	    if (this.grabbed) {
-	      return;
-	    } //already grabbed
-	    this.grabber = evt.detail.hand;
-	    this.grabbed = true;
-	    this.el.addState(this.GRABBED_STATE);
-	    // notify super-hands that the gesture was accepted
-	    if (evt.preventDefault) {
-	      evt.preventDefault();
+	    var _this = this;
+
+	    var grabInitiated = false;
+	    //    if (this.grabbers.indexOf(evt.detail.hand) !== -1) { return; } //already grabbed
+	    //    this.grabbers.push(evt.detail.hand);
+	    if (this.grabbers.indexOf(evt.detail.hand) === -1) {
+	      this.grabbers.push(evt.detail.hand);
+	      this.el.addEventListener('mouseout', function (e) {
+	        return _this.lostGrabber(e);
+	      });
 	    }
-	    if (this.data.usePhysics !== 'never' && this.el.body && this.grabber.body) {
-	      this.constraint = new window.CANNON.LockConstraint(this.el.body, this.grabber.body);
-	      this.el.body.world.addConstraint(this.constraint);
-	    } else if (this.data.usePhysics !== 'only') {
+	    // initiate physics constraint if available and not already existing
+	    if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+	      var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
+	      this.el.body.world.addConstraint(newCon);
+	      this.constraints.set(evt.detail.hand, newCon);
+	      grabInitiated = true;
+	    } else if (!this.grabber) {
+	      // otherwise, initiate manual grab if first grabber
+	      // notify super-hands that the gesture was accepted
+	      if (evt.preventDefault) {
+	        evt.preventDefault();
+	      }
+	      this.grabber = evt.detail.hand;
 	      this.previousPosition = null;
+	      grabInitiated = true;
+	    }
+	    if (grabInitiated) {
+	      // notify super-hands that the gesture was accepted
+	      if (evt.preventDefault) {
+	        evt.preventDefault();
+	      }
+	      this.grabbed = true;
+	      this.el.addState(this.GRABBED_STATE);
 	    }
 	  },
 	  end: function end(evt) {
-	    if (evt.detail.hand !== this.grabber) {
-	      return;
-	    }
-	    if (this.constraint) {
-	      this.el.body.world.removeConstraint(this.constraint);
-	      this.constraint = null;
+	    var handIndex = this.grabbers.indexOf(evt.detail.hand),
+	        constraint = this.constraints.get(evt.detail.hand),
+	        nextGrabber;
+	    if (handIndex !== -1) {
+	      this.grabbers.splice(handIndex, 1);
 	    }
 	    this.grabber = null;
-	    this.grabbed = false;
-	    this.el.removeState(this.GRABBED_STATE);
+	    if (constraint) {
+	      this.el.body.world.removeConstraint(constraint);
+	      this.constraints.delete(evt.detail.hand);
+	    }
+	    nextGrabber = this.grabbers[0];
+	    // refresh super-hands grab for manual (no physics) grabs
+	    if (nextGrabber && !this.constraints.has(nextGrabber)) {
+	      if (nextGrabber.components['super-hands']) {
+	        nextGrabber.components['super-hands'].updateGrabbed();
+	      }
+	    } else {
+	      this.grabbed = false;
+	      this.el.removeState(this.GRABBED_STATE);
+	    }
+	  },
+	  clearConstraints: function clearConstraints() {
+	    if (this.el.body) {
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = this.constraints.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var c = _step.value;
+
+	          this.el.body.world.removeConstraint(c);
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+	    }
+	    this.constraints.clear();
+	  },
+	  lostGrabber: function lostGrabber(evt) {
+	    var i = this.grabbers.indexOf(evt.relatedTarget);
+	    // if a queued, non-physics grabber leaves the collision zone, forget it
+	    if (i !== -1 && !this.constraints.has(evt.relatedTarget)) {
+	      this.grabbers.splice(i, 1);
+	    }
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -757,9 +824,9 @@
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -817,9 +884,9 @@
 	  }
 	});
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -859,5 +926,5 @@
 	  }
 	});
 
-/***/ }
+/***/ })
 /******/ ]);
