@@ -78,9 +78,7 @@ suite('grabbable-function without physics', function () {
     posStub.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
-    myGrabbable.grabbed = true;
-    myGrabbable.grabber = this.hand;
-    this.el.addState(myGrabbable.GRABBED_STATE);
+    myGrabbable.start({ detail: {hand: this.hand }});
     myGrabbable.tick();
     myGrabbable.end({ detail: { hand: this.hand }});
     myGrabbable.tick();
@@ -89,16 +87,14 @@ suite('grabbable-function without physics', function () {
     assert.notOk(myGrabbable.grabbed);
     assert.notOk(myGrabbable.grabber);
   });
-  test('grabbing from a second hand is rejected', function() {
+  test('grabbing from a second hand does not change grabber', function() {
     var myGrabbable = this.el.components.grabbable,
         secondHand = {};
-    myGrabbable.grabbed = true;
-    myGrabbable.grabber = this.hand;
-    this.el.addState(myGrabbable.GRABBED_STATE);
-    myGrabbable.start({ detail: { hand: secondHand }});
+    myGrabbable.start({ detail: { hand: this.hand } });
+    myGrabbable.start({ detail: { hand: secondHand } });
     assert.strictEqual(myGrabbable.grabber, this.hand);
   });
-  
+
 });
 
 suite('grabbable-function with physics', function () {
@@ -122,31 +118,101 @@ suite('grabbable-function with physics', function () {
   });
   test('constraint registered on grab', function () {
     this.comp.start({ detail: { hand: this.hand } });
-    assert.isOk(this.comp.constraint);
-    assert.instanceOf(this.comp.constraint, window.CANNON.LockConstraint);
-    assert.notEqual(this.el.body.world.constraints.indexOf(this.comp.constraint), -1);
+    let c = this.comp.constraints.get(this.hand);
+    assert.isOk(c);
+    assert.instanceOf(c, window.CANNON.LockConstraint);
+    assert.notEqual(this.el.body.world.constraints.indexOf(c), -1);
   });
   test('constraint not registered when usePhysics = never', function () {
     this.el.setAttribute('grabbable', 'usePhysics', 'never');
     this.comp.start({ detail: { hand: this.hand } });
-    assert.notOk(this.comp.constraint);
+    assert.strictEqual(this.comp.constraints.size, 0);
   });
   test('constraint removed on release', function() {
     var constraint;
     this.comp.start({ detail: { hand: this.hand } });
-    assert.isOk(this.comp.constraint);
-    constraint = this.comp.constraint;
+    assert.isOk(this.comp.constraints.has(this.hand));
+    constraint = this.comp.constraints.get(this.hand);
     this.comp.end({ detail: { hand: this.hand } });
-    assert.notOk(this.comp.constraint);
+    assert.notOk(this.comp.constraints.has(this.hand));
     assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
   });
   test('changing usePhysics to never during grab removes constraint', function () {
     var constraint;
     this.comp.start({ detail: { hand: this.hand } });
-    assert.isOk(this.comp.constraint);
-    constraint = this.comp.constraint;
+    assert.isOk(this.comp.constraints.has(this.hand));
+    constraint = this.comp.constraints.get(this.hand);
     this.el.setAttribute('grabbable', 'usePhysics', 'never');
-    assert.notOk(this.comp.constraint);
-    assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
+    assert.notOk(this.comp.constraints.has(this.hand));
+    assert.strictEqual(this.el.body.world.constraints.indexOf(constraint), -1);
+    assert.strictEqual(this.comp.constraints.size, 0)
+  });
+});
+
+suite('two-handed grab w/o physics', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand1 = helpers
+      .controllerFactory({ 'super-hands': ''});
+    this.hand2 = helpers
+      .controllerFactory({ 'super-hands': ''});
+    el.setAttribute('grabbable', '');
+    el.sceneEl.addEventListener('loaded', evt => {
+     this.comp = el.components.grabbable;
+     done();
+    });
+  });
+  test('two-handed grab can pass object between hands', function () {
+    // stub out super-hands method called from grabbable.end
+    this.hand2.components['super-hands'].updateGrabbed = () => {
+      this.comp.start({ detail: { hand: this.hand2 } });
+    }
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.isTrue(this.comp.grabbed, 'first hand');
+    assert.strictEqual(this.comp.grabber, this.hand1, 'hand 1 grabbing');
+    this.comp.start({ detail: { hand: this.hand2 } });
+    this.comp.end({ detail: { hand: this.hand1 } });
+    assert.isTrue(this.comp.grabbed, 'passed to 2nd hand');
+    assert.strictEqual(this.comp.grabber, this.hand2, 'hand 2 grabbing');
+  });
+});
+
+suite('two-handed grab with physics', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand1 = helpers
+      .controllerFactory({ 
+      'super-hands': '',
+      'static-body': '',
+      geometry: 'primitive: sphere' 
+    });
+    this.hand2 = helpers
+      .controllerFactory({ 
+      'super-hands': '',
+      'static-body': '',
+      geometry: 'primitive: sphere' 
+    });
+    el.setAttribute('grabbable', '');
+    el.setAttribute('geometry', 'primitive: box');
+    el.setAttribute('dynamic-body', '');
+    el.addEventListener('body-loaded', evt => {
+      this.comp = el.components.grabbable;
+      if(!this.hand2.body) {
+        this.hand2.addEventListener('body-loaded', evt => done());
+      } else {
+        done();
+      }
+    });
+  });
+  test('two-handed grab makes dual constraints', function () {
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.isTrue(this.comp.grabbed, 'first hand');
+    assert.isTrue(this.comp.constraints.has(this.hand1), '1st hand');
+    this.comp.start({ detail: { hand: this.hand2 } });
+    assert.isTrue(this.comp.constraints.has(this.hand1), 'still 1st hand');
+    assert.isTrue(this.comp.constraints.has(this.hand2), 'also second hand');
+    this.comp.end({ detail: { hand: this.hand1 } });
+    assert.isTrue(this.comp.constraints.has(this.hand2), 'still second hand');
+    assert.isFalse(this.comp.constraints.has(this.hand1), '1st hand free');
   });
 });
