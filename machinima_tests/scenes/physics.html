@@ -1,16 +1,6 @@
 <html>
   <head>
     <script src="build.js"></script>
-        <script>
-      //delayed addition of physics body component to controllers due to AFRAME 0.4.0 changes
-      AFRAME.registerComponent('controller-loaded', {
-        init: function() {
-          this.el.addEventListener('model-loaded', function() {
-            this.addState('loaded');
-          });
-        }
-      });
-    </script>
   </head>
   <body>
     <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2" physics>

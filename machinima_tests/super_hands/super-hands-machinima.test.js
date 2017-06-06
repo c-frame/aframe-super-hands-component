@@ -3,7 +3,7 @@
 // One scene per suite, but recordings set at the test level
 var SCENE_FILE = 'hands.html';
 
-suite('example machinima test', function () {
+suite('basic interactions', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
@@ -107,4 +107,95 @@ suite('example machinima test', function () {
       done();
     }, { once: true });
   });
+  test('Pass betwen hands with two-handed grab', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/hands-twoHandedPass.json' 
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.isAbove(this.boxGrnUp.getAttribute('position').z, 0.5);
+      done();
+    }, { once: true });
+  });
+  test('Two-handed pass fails if 2nd hand moved out of range', function (done) {
+    //this.boxGrnUp.removeAttribute('stretchable');
+    //assert.isNotOk(this.boxGrnUp.components['stretchable']);
+    //disable stretching to observe a hand leaving collision zone while grabbing
+    this.boxGrnUp.components['stretchable'].remove();
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/hands-nostretch-badTwoHandedGrab.json' 
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.isBelow(this.boxGrnUp.getAttribute('position').z, 0.5);
+      assert.isFalse(this.boxGrnUp.components['grabbable'].grabbed);
+      assert.strictEqual(this.boxGrnUp.components['grabbable'].grabbers.length, 0);
+      done();
+    }, { once: true });
+  });
 });
+
+
+suite('Nested object targeting', function () {
+  this.timeout(0); // disable Mocha timeout within tests
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    var body = document.querySelector('body'),
+        sceneReg =  /<a-scene[^]+a-scene>/,
+        sceneResult = sceneReg.exec(window.__html__['nested.html']),
+        recorderReg = /avatar-recorder(=".*")?/;
+    // set avatar-replayer to use the specified recoring file
+    sceneResult = sceneResult[0]
+      .replace(recorderReg, 'avatar-replayer');
+    body.innerHTML = sceneResult + body.innerHTML;
+    this.scene = document.querySelector('a-scene');
+    this.scene.addEventListener('loaded', e => {
+      this.outter = document.getElementById('outter');
+      this.middle = document.getElementById('middle');
+      this.inner = document.getElementById('inner');
+      done();
+    });
+  });
+  test('able to move nested entities', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/nested-grab.json' 
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      assert.isAbove(this.inner.getAttribute('position').y, 2);
+      assert.isBelow(this.middle.getAttribute('position').y, 0);
+      assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1});
+      done();
+    }, { once: true }); 
+  });
+});
+
+suite('Physics grab', function () {
+  this.timeout(0); // disable Mocha timeout within tests
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    var body = document.querySelector('body'),
+        sceneReg =  /<a-scene[^]+a-scene>/,
+        sceneResult = sceneReg.exec(window.__html__['physics.html']),
+        recorderReg = /avatar-recorder(=".*")?/;
+    // set avatar-replayer to use the specified recoring file
+    sceneResult = sceneResult[0]
+      .replace(recorderReg, 'avatar-replayer');
+    body.innerHTML = sceneResult + body.innerHTML;
+    this.scene = document.querySelector('a-scene');
+    this.hand1 = document.getElementById('rhand');
+    this.hand2 = document.getElementById('lhand');
+    this.target = document.getElementById('target');
+    this.scene.addEventListener('loaded', e => {
+      done();
+    });
+  });
+  test('entity affected by two contraints', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/physics-twoHandedTwist.json' 
+    });
+    this.target.addEventListener('grab-end', e => {
+      let yRot = this.target.getObject3D('mesh').getWorldRotation()._y
+      assert.isBelow(yRot, -0.3);
+      done();
+    }, { once: true }); 
+  });
+});
+
