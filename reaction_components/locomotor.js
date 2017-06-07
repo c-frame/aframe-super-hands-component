@@ -13,8 +13,7 @@ AFRAME.registerComponent('locomotor', {
     
     this.el.addEventListener(this.MOVE_EVENT, this.start);
     this.el.addEventListener(this.STOP_EVENT, this.end);
-  },
-  update: function (oldDat) {
+
     // make sure locomotor is collidable
     this.el.childNodes.forEach(el => {
       let col = el.getAttribute && el.getAttribute('sphere-collider');
@@ -22,7 +21,15 @@ AFRAME.registerComponent('locomotor', {
         el.setAttribute('sphere-collider', {objects: col.objects + ', a-locomotor'});
       }
     });
-    
+    // make default camera child of locomotor so it can me moved
+    this.el.sceneEl.addEventListener('loaded', e => {
+      var defCam = document.querySelector('[camera][aframe-injected]');
+      if (defCam) {
+        this.el.appendChild(defCam);
+      }
+    });
+  },
+  update: function (oldDat) {
   },
   tick: function() {
     if(this.mover) {
