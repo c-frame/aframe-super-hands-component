@@ -30,26 +30,10 @@ components attached to translate the gestures into actions. `super-hands`
 includes components for typical reactions to the implemented gestures: 
 `hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
-![Separation of Gesture and Response API](readme_files/super-hands-api.png)
-
-Separating the reaction to be the responsibility of the entity affected allows for extensibility. 
-In response to a grab, you may want some entities to lock to the controller and move, 
-others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged. 
-With this API schema, these options can be handled by adding or creating different reaction
-components to the entities in your scene, and `super-hands` can work with all of them. 
-
-#### Interactivity
-
-There are two pathways to adding additional interactivity.
-
-1. A-Frame style: Each component's API documentation describes the A-Frame 
-custom events and states it uses. 
-These are best processed by creating new A-Frame components that register
-event listeners and react accordingly. 
-1. HTML style: The `super-hands` component also integrates with the
-Global Event Handlers Web API to trigger standard mouse events analogous
-to the VR interactions that can easily be handled through 
-properties like `onclick`.
+**Avatar Locomotion**: Inspired by a demo from @caseyyee, the `super-hands`
+grab and stretch gestures can also serve as a comfortable locomotion system
+by moving and scaling the world around the player. Use the `a-locomotor` primitive
+to provide intuitive freedom of motion in your WebVR experiences. 
 
 ### Installation
 
@@ -67,12 +51,14 @@ Install and use by directly including the [browser files](dist):
 
 <body>
   <a-scene>
-    <!-- Make sure your super-hands entities also have controller and collider components -->
-    <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
-    <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
-    <!-- hover, click, & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-box hoverable grabbable stretchable drag-droppable
-           color="red"></a-box>
+    <!-- adding stretchable to the locomotor lets users re-scale the scene -->
+    <a-locomotor stretchable>
+      <!-- Make sure your super-hands entities also have controller and collider components -->
+      <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
+      <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
+    </a-locomotor>
+    <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable grabbable stretchable drag-droppable></a-box>
   </a-scene>
 </body>
 ```
@@ -97,6 +83,31 @@ require('super-hands');
 
 [Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
 
+### Concepts
+
+![Separation of Gesture and Response API](readme_files/super-hands-api.png)
+
+Separating the reaction to be the responsibility of the entity affected allows for extensibility. 
+In response to a grab, you may want some entities to lock to the controller and move, 
+others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged. 
+With this API schema, these options can be handled by adding or creating different reaction
+components to the entities in your scene, and `super-hands` can work with all of them. 
+
+#### Interactivity
+
+There are two pathways to adding additional interactivity.
+
+1. A-Frame style: Each component's API documentation describes the A-Frame 
+custom events and states it uses. 
+These are best processed by creating new A-Frame components that register
+event listeners and react accordingly. 
+1. HTML style: The `super-hands` component also integrates with the
+Global Event Handlers Web API to trigger standard mouse events analogous
+to the VR interactions that can easily be handled through 
+properties like `onclick`.
+
+
+
 ### News
 
 v1.0.0
@@ -115,6 +126,8 @@ v1.0.0
   `super-hands` entities. In non-physics interactions, this makes passing
   entities between hands much easier. In physics-based interactions, this
   creates multiple constraints for advanced handling
+* `a-locomotor`: drop-in freedom of motion for WebVR experiences
+  with this new primitive
 * `strechable` flexibility: state tracking of hands attempting to
   stretch moved from `super-hands` to `strechable`. This should allow for 
   different avatars in a multi-user setting to stretch a single entity 
@@ -240,6 +253,40 @@ If needed, use `event.target` instead.
 The event passed to the handler will be a `MouseEvent`. At present the only property implemented
 is `relatedTarget`, which is set as
 listed in the table. Drag-dropping events will be dispatched on both the entity being dragged and the drop target, and the `relatedTarget` property for each will point to the other entity in the interaction.
+
+#### a-locomotor primitive
+
+Add freedom of movement by wrapping the player avatar in an `a-locomotor` primitive. 
+Users can then grab and move the world around themselves to navigate your WebVR experience
+in a way that is comfortable even for most people prone to simulation sickness. 
+
+The component works by enveloping the player in an invisible sphere that picks up grabbing
+gestures made on empty space and translates into movement for the `a-locomotor`. Your camera
+and controller entities need to be children of the locomotor for this to work properly.
+If you do not specify any camera in the scene, `a-locomotor` will automatically pick up 
+the A-Frame default camera and take care of it. Your colliders must also be configured to 
+detect `a-locomotor`. If you are using A-Frame Extras `sphere-collider`, `a-locomotor` will
+automatically add itself to the `objects` selector property. 
+Using the automatic camera and collider configuration, 
+setting up `a-locomotor` simply requires wrapping your controller
+entities like so:
+
+```html
+<a-locomotor stretchable>
+  <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
+  <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
+</a-locomotor>
+```
+
+You can also give the player the ability
+to re-scale the world around themselves by adding the `strechable` component to `a-locomotor`.
+
+
+##### Component Schema
+
+| Property | Description | Default Value |
+| -------- | ----------- | ------------- |
+| restrictY | should vertical movement be suppressed | `true` |
 
 #### hoverable component
 

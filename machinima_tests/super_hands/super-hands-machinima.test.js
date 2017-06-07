@@ -199,7 +199,7 @@ suite('Physics grab', function () {
   });
 });
 
-suite.only('Locomotion', function () {
+suite('Locomotion', function () {
   this.timeout(0);
   setup(function (done) {
     /* inject the scene html into the testing docoument */
@@ -242,6 +242,28 @@ suite.only('Locomotion', function () {
         done();
       }, { once: true }); // once flag because this event emitted multiple times
     }, 4000);
+  });
+  test('locomotor does not interfere with normal interactions', function (done) {
+    var boxGreenTop = document.getElementById('greenHigh'),
+        boxGreenBottom = document.getElementById('greenLow'),
+        redBox = document.getElementById('redHigh'),
+        startPos = redBox.getAttribute('position'),
+        startScale = redBox.getAttribute('scale');
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/handsRecording.json' 
+    });
+    assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'box');
+    assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'box');
+    this.scene.addEventListener('replayingstopped', e => {
+      var endScale = redBox.getAttribute('scale');
+      assert.notDeepEqual(redBox.getAttribute('position'), startPos, 'moved');
+      assert.isTrue(endScale.x > startScale.x, 'grew-x');
+      assert.isTrue(endScale.y > startScale.y, 'grew-y');
+      assert.isTrue(endScale.z > startScale.z, 'grew-z');
+      assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'sphere');
+      assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'sphere');
+      done();
+    }, { once: true }); // once flag because this event emitted multiple times
   });
 });
 
