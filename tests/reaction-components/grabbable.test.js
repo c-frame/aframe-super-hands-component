@@ -163,7 +163,7 @@ suite('two-handed grab w/o physics', function () {
     });
   });
   test('two-handed grab can pass object between hands', function () {
-    // stub out super-hands method called from grabbable.end
+    // stub out super-hands method called from grabbable.end becase no collider active
     this.hand2.components['super-hands'].updateGrabbed = () => {
       this.comp.start({ detail: { hand: this.hand2 } });
     }
@@ -174,6 +174,13 @@ suite('two-handed grab w/o physics', function () {
     this.comp.end({ detail: { hand: this.hand1 } });
     assert.isTrue(this.comp.grabbed, 'passed to 2nd hand');
     assert.strictEqual(this.comp.grabber, this.hand2, 'hand 2 grabbing');
+  });
+  test('two-handed grab disabled by maxGrabbers = 1', function () {
+    this.el.setAttribute('grabbable', 'maxGrabbers: 1');
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.sameMembers(this.comp.grabbers, [this.hand1], 'first grab accpeted');
+    this.comp.start({ detail: { hand: this.hand2 } });
+    assert.sameMembers(this.comp.grabbers, [this.hand1], 'second grab rejected');
   });
 });
 
@@ -214,5 +221,12 @@ suite('two-handed grab with physics', function () {
     this.comp.end({ detail: { hand: this.hand1 } });
     assert.isTrue(this.comp.constraints.has(this.hand2), 'still second hand');
     assert.isFalse(this.comp.constraints.has(this.hand1), '1st hand free');
+  });
+  test('two-handed grab disabled by maxGrabbers = 1', function () {
+    this.el.setAttribute('grabbable', 'maxGrabbers: 1');
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.isTrue(this.comp.constraints.has(this.hand1), 'first grab accpeted');
+    this.comp.start({ detail: { hand: this.hand2 } });
+    assert.isFalse(this.comp.constraints.has(this.hand2), 'second grab rejected');
   });
 });

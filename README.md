@@ -278,6 +278,7 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'ifavailable' |
+| maxGrabbers | Limit number of hands that can grab entity simultaneously | NaN (no limit) |
 
 ##### States
 

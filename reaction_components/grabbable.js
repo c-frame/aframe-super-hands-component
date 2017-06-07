@@ -1,6 +1,7 @@
 AFRAME.registerComponent('grabbable', {
   schema: { 
-    usePhysics: { default: 'ifavailable' },
+    usePhysics: {default: 'ifavailable'},
+    maxGrabbers: {type: 'int', default: NaN}
   },
   init: function () {
     this.GRABBED_STATE = 'grabbed';
@@ -48,15 +49,15 @@ AFRAME.registerComponent('grabbable', {
   },
   start: function(evt) {
     let grabInitiated = false;
-//    if (this.grabbers.indexOf(evt.detail.hand) !== -1) { return; } //already grabbed
-//    this.grabbers.push(evt.detail.hand);
-    if (this.grabbers.indexOf(evt.detail.hand) === -1) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 &&
+        (!Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers)) {
       this.grabbers.push(evt.detail.hand);
       this.el.addEventListener('mouseout', e => this.lostGrabber(e));
     }
     // initiate physics constraint if available and not already existing
     if(this.data.usePhysics !== 'never' && this.el.body && 
-       evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+       evt.detail.hand.body && !this.constraints.has(evt.detail.hand) &&
+       (!Number.isFinite(this.data.maxGrabbers) || this.constraints.size < this.data.maxGrabbers)) {
       let newCon = new window.CANNON
         .LockConstraint(this.el.body, evt.detail.hand.body);
       this.el.body.world.addConstraint(newCon);

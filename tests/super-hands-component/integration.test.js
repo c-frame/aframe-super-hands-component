@@ -227,4 +227,15 @@ suite('super-hands collider integration', function () {
     assert.equal(stretchSpy.callCount, 1, 'stretch not repeated');
     assert.equal(dragSpy.callCount, 1, 'drag not repeated');
   });
+  test('super-hands knows when grab rejected due to grabbale.maxGrabbers', function () {
+    this.target1.setAttribute('grabbable', 'maxGrabbers: 1');
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.isTrue(this.sh1.state.has(this.sh1.GRAB_EVENT), 
+                  '1st super-hand recognizes grab');
+    this.sh2.onGrabStartButton();
+    this.sh2.onHit({ detail: { el: this.target1 } });
+    assert.isFalse(this.sh2.state.has(this.sh1.GRAB_EVENT), 
+                   '2nd super-hand recognizes rejection');
+  });
 });
