@@ -199,3 +199,49 @@ suite('Physics grab', function () {
   });
 });
 
+suite.only('Locomotion', function () {
+  this.timeout(0);
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    var body = document.querySelector('body'),
+        sceneReg =  /<a-scene[^]+a-scene>/,
+        sceneResult = sceneReg.exec(window.__html__['locomotor.html']),
+        recorderReg = /avatar-recorder(=".*")?/;
+    // set avatar-replayer to use the specified recoring file
+    sceneResult = sceneResult[0]
+      .replace(recorderReg, 'avatar-replayer');
+    body.innerHTML = sceneResult + body.innerHTML;
+    this.scene = document.querySelector('a-scene');
+    this.scene.addEventListener('loaded', e => {
+      done();
+    });
+  });
+  test('player location moves', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/hands-worldMover.json'
+    });
+    this.scene.addEventListener('replayingstopped', e => {
+      let z = document.querySelector('[camera]')
+        .object3DMap.camera.getWorldPosition().z;
+      assert.isBelow(z, -0.5, 'camera ending z position');
+      done();
+    }, { once: true }); // once flag because this event emitted multiple times
+  });
+  test('player scale changes', function (done) {
+    this.scene.setAttribute('avatar-replayer', { 
+      src: 'base/recordings/hands-worldScaler.json'
+    });
+    window.setTimeout(() => {
+      var camScale = document.querySelector('[camera]')
+          .object3DMap.camera.getWorldScale();
+      assert.isBelow(camScale.x, 1, 'scaled down');
+      this.scene.addEventListener('replayingstopped', e => {
+        let newCamScale = document.querySelector('[camera]')
+          .object3DMap.camera.getWorldScale();
+        assert.isAbove(newCamScale.x, camScale.x, 'camera scales back up');
+        done();
+      }, { once: true }); // once flag because this event emitted multiple times
+    }, 4000);
+  });
+});
+

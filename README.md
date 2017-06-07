@@ -71,7 +71,7 @@ Install and use by directly including the [browser files](dist):
     <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
     <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
     <!-- hover, click, & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-box hoverable clickable grabbable stretchable drag-droppable
+    <a-box hoverable grabbable stretchable drag-droppable
            color="red"></a-box>
   </a-scene>
 </body>

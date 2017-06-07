@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <script src="build.js"></script>
+  </head>
+  <body>
+    <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
+      <a-assets>
+        <!-- <img id="grid" src="grid.png"/> -->
+  
+        <a-mixin id="controller" super-hands 
+                 sphere-collider="objects: .cube, [locomotor]"></a-mixin>
+        <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 hoverable grabbable stretchable drag-droppable
+                 event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
+        <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
+        </a-mixin>
+        <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
+      </a-assets>
+      <a-sphere locomotor stretchable material="side: double; wireframe: true;" radius="2.5">
+        <a-entity camera="userHeight: 1.6" look-controls></a-entity>
+        <a-entity id="lhand" hand-controls="left" mixin="controller"></a-entity>
+        <a-entity id="rhand" hand-controls="right" mixin="controller"></a-entity>
+      </a-sphere>
+      <a-entity id="redLow" class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
+      <a-entity id="redHigh" class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
+      <a-entity id="blueLow" class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity id="blueHigh" class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity id="greenLow" class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity id="greenHigh" class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
+      <a-plane rotation="-90 0 0" color="#888"
+                 width="50" height="50"></a-plane>
+    </a-scene>
+  </body>
+</html>
