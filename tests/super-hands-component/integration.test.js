@@ -239,3 +239,30 @@ suite('super-hands collider integration', function () {
                    '2nd super-hand recognizes rejection');
   });
 });
+suite('super-hands & clickable component integration', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target1.setAttribute('clickable', '');
+    this.hand1 = helpers.controllerFactory({
+      'super-hands': ''
+    });
+    this.hand2 = helpers.controllerFactory({
+      'vive-controls': 'hand: left',
+      'super-hands': ''
+    }, true);
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      this.sh2 = this.hand2.components['super-hands'];
+      done();
+    });
+  });
+  test('clickable', function () {
+    this.sh1.onGrabStartButton();
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target1);
+    assert.ok(this.target1.is('clicked'), 'clicked');
+    this.sh1.onGrabEndButton();
+    assert.isFalse(this.target1.is('clicked'), 'released');
+    assert.notEqual(this.sh1.hoverEls.indexOf(this.target1), -1, 'still watched');
+  });
+});

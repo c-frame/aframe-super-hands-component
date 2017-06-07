@@ -254,16 +254,6 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
 
-#### clickable component
-
-Used to indicate when buttons are pressed while the controller is within range 
-to interact with an entity. Adds the 'clicked' state while the grab button is held.
-
-##### States
-
-| Name | Description |
-| --- | --- |
-| clicked | Added to entity while a button is held down |
 
 #### grabbable component
 
@@ -285,6 +275,18 @@ to manage grabbed entity movement, but it will fallback to manual `position` upd
 | Name | Description |
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
+
+#### clickable component
+
+An alternative version of `grabbable` that registers that a button was pressed, but does not
+move the entity. Do not use `clickable` and `grabbable` on the same entity 
+(just use `grabbable` and watch the "grabbed" state instead of "clicked")
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| clicked | Added to entity while a button is held down |
 
 #### stretchable component
 

@@ -44,7 +44,17 @@ suite('clickable function', function () {
     assert.equal(this.clicker.clickers.length, 0);
   });
   test('handles multiple clickers', function () {
-    
+    var hand2 = {};
+    this.clicker.start({ detail: { hand: this.hand } });
+    this.clicker.start({ detail: { hand: hand2 } });
+    assert.sameMembers(this.clicker.clickers, [this.hand, hand2]);
+    assert.isTrue(this.el.is(this.clicker.CLICKED_STATE));
+    this.clicker.end({ detail: { hand: this.hand } });
+    assert.sameMembers(this.clicker.clickers, [hand2]);
+    assert.isTrue(this.el.is(this.clicker.CLICKED_STATE));
+    this.clicker.end({ detail: { hand: hand2 } });
+    assert.strictEqual(this.clicker.clickers.length, 0);
+    assert.isFalse(this.el.is(this.clicker.CLICKED_STATE));
   });
 
 });
