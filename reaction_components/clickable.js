@@ -21,6 +21,7 @@ AFRAME.registerComponent('clickable', {
     this.el.addState(this.CLICKED_STATE);
     if(this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
+      if (evt.preventDefault) { evt.preventDefault() };
     }
   },
   end: function (evt) {

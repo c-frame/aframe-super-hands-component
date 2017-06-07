@@ -29,15 +29,18 @@ suite('stretchable', function () {
     });
   });
   test('stretchers captured and state added/removed', function () {
-    this.comp.start({ detail: {
-      hand: this.hand1,
-      secondHand: this.hand2
-    }});
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand2 } });
     assert.isOk(this.el.is('stretched'));
-    assert.isOk(this.comp.stretchers[0] === this.hand1);
-    assert.isOk(this.comp.stretchers[1] === this.hand2);
+    assert.sameMembers(this.comp.stretchers, [this.hand1, this.hand2]);
     this.comp.end({ detail: { hand: this.hand1 }});
     assert.notOk(this.el.is('stretched'));
+  });
+  test('reject duplicate stretchers', function () {
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand1 } });
+    assert.equal(this.comp.stretchers.length, 1);
+    assert.isFalse(this.el.is('stretched'));
   });
   test('scale updates during stretch', function () {
     var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
@@ -46,10 +49,8 @@ suite('stretchable', function () {
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
       .onThirdCall().returns(coord('2 2 2'));
-    this.comp.start({ detail: {
-      hand: this.hand1,
-      secondHand: this.hand2
-    }});
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
     assert.deepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
     this.comp.tick();
@@ -83,10 +84,8 @@ suite('stretchable-physics', function () {
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
       .onThirdCall().returns(coord('2 2 2'));
-    this.comp.start({ detail: {
-      hand: this.hand1,
-      secondHand: this.hand2
-    }});
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
     assert.deepEqual(this.el.body.shapes[0].halfExtents, 
                      scale.set(0.5, 0.5, 0.5));
@@ -102,10 +101,9 @@ suite('stretchable-physics', function () {
       .onSecondCall().returns(coord('1 1 1'))
       .onThirdCall().returns(coord('2 2 2'));
     this.el.setAttribute('stretchable', 'usePhysics: never');
-    this.comp.start({ detail: {
-      hand: this.hand1,
-      secondHand: this.hand2
-    }});
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand2 } });
+    assert.ok(this.el.is('stretched'));
     this.comp.tick();
     assert.deepEqual(this.el.body.shapes[0].halfExtents, 
                      scale.set(0.5, 0.5, 0.5));

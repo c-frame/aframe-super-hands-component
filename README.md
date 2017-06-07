@@ -28,7 +28,7 @@ The currently implemented gestures are:
 For an entity to respond to the `super-hands` gestures, it needs to have 
 components attached to translate the gestures into actions. `super-hands` 
 includes components for typical reactions to the implemented gestures: 
-`hoverable`, `grabbable`, `stretchable`, and `drag-droppable`.
+`hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
@@ -47,7 +47,7 @@ custom events and states it uses.
 These are best processed by creating new A-Frame components that register
 event listeners and react accordingly. 
 1. HTML style: The `super-hands` component also integrates with the
-Global Event Handlers Web API to trigger standard events analogous
+Global Event Handlers Web API to trigger standard mouse events analogous
 to the VR interactions that can easily be handled through 
 properties like `onclick`.
 
@@ -99,6 +99,30 @@ require('super-hands');
 
 ### News
 
+v1.0.0
+
+* Maturation of A-Frame style API: Reaction components now need to cancel
+  gesture events in order to communicate acceptance of the gesture to `super-hands`.
+  This improves state tracking and handling of overlapping/nested 
+  entities 
+* Improved Global Event Handlers integration: 
+    * When overlapping entities create multiple potential targets for GEH 
+      events, the events fire on all potential targets
+    * `click` now functions more like its mouse counterpart, only firing 
+      if a mouseup occurs after a mousedown and without losing collision 
+      with the target entity
+* Two-handed grabbing: `grabbable` can now process grabs from multiple
+  `super-hands` entities. In non-physics interactions, this makes passing
+  entities between hands much easier. In physics-based interactions, this
+  creates multiple constraints for advanced handling
+* `strechable` flexibility: state tracking of hands attempting to
+  stretch moved from `super-hands` to `strechable`. This should allow for 
+  different avatars in a multi-user setting to stretch a single entity 
+  cooperatively
+* Added [machinima testing](https://github.com/wmurphyrd/aframe-machinima-testing)
+  for automated testing based on motion-captured user input to improve
+  regression detection
+
 v0.3.1
 
 * New: integration with GlobalEventHandlers for easy reactivity via element 
@@ -131,7 +155,8 @@ v0.2.3
 
 | A-Frame Version | super-hands Version |
 | --- | --- |
-| v0.5.x | ^v0.3.0 |
+| v0.6.x | ^v1.0.0 |
+| v0.5.x | v1.0.0 |
 | v0.4.x | v0.2.4 |
 
 ### API
@@ -177,9 +202,11 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | grab-end | Button released after grab-start | collided entity | hand: `super-hands` entity |
 | stretch-start | Both controllers have button pressed while collided with entity | collided entity | hand: `super-hands` entity, secondHand: second controller entity |
 | stretch-end | Release of button after stretch-start | collided entity | hand: `super-hands` entity |
-| dragover-start | Collision with entity while holding another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
+| drag-start | Drag-drop button pressed while collided with entity and hand is empty | collided entity | hand: `super-hands` entity |
+| drag-end | Drag-drop button released while dragging an entity | dragged entity | hand: `super-hands` entity |
+| dragover-start | Collision with entity while dragging another entity | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
-| drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on: receiving entity |
+| drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on (carried entity only): receiving entity |
 
 Notes: 
 
@@ -192,6 +219,8 @@ even if the trigger was *released* earlier.
 * Only one entity at a time will be targeted for each event type, 
 even if multiple overlapping collision zones exist. `super-hands` tracks a 
 FIFO queue of collided entities to determine which will be affected.
+* drag-drop: For the receiving entity, `on` entry in the details is `null`. 
+If needed, use `event.target` instead. 
 
 ##### Global Event Handler Integration
 
@@ -200,7 +229,8 @@ FIFO queue of collided entities to determine which will be affected.
 | onmouseover | hovering in an entity's collision zone | `super-hands` entity |
 | onmouseout | leaving an entity's collision zone | `super-hands` entity |
 | onmousedown | grab started while collided with entity | `super-hands` entity |
-| onmouseup, onclick | grab ended after onmousedown | controller entity |
+| onmouseup | grab ended while collided with entity | controller entity |
+| onclick | grab started and then ended while collided with entity | controller entity |
 | ondragstart | drag-drop started while collided with entity | controller entity |
 | ondragend | drag-drop started while collided with entity | controller entity |
 | ondragenter | hovering in an entity's collision zone while drag-dropping another entity | the other entity\* |
@@ -224,16 +254,6 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 | --- | --- |
 | hovered | Added to entity while it is collided with the controller |
 
-#### clickable component
-
-Used to indicate when buttons are pressed while the controller is within range 
-to interact with an entity. Adds the 'clicked' state while the grab button is held.
-
-##### States
-
-| Name | Description |
-| --- | --- |
-| clicked | Added to entity while a button is held down |
 
 #### grabbable component
 
@@ -243,17 +263,35 @@ This works best with [aframe-physics-system](https://github.com/donmccurdy/afram
 to manage grabbed entity movement, but it will fallback to manual `position` updates 
 (without rotational translation) if physics is not available or is disabled with `usePhysics = never`. 
 
+Allows for multiple hands to register a grab on an entity. In a non-physics setup, this has no effect
+other than allowing smooth passing of entities between hands. With physics enabled, additional grabbing
+hands register their own physics constraints to allow for two-handed wielding of entities. Limit or disable
+by setting the maxGrabbers schema property. 
+
 ##### Component Schema
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'ifavailable' |
+| maxGrabbers | Limit number of hands that can grab entity simultaneously | NaN (no limit) |
 
 ##### States
 
 | Name | Description |
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
+
+#### clickable component
+
+An alternative version of `grabbable` that registers that a button was pressed, but does not
+move the entity. Do not use `clickable` and `grabbable` on the same entity 
+(just use `grabbable` and watch the "grabbed" state instead of "clicked")
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| clicked | Added to entity while a button is held down |
 
 #### stretchable component
 

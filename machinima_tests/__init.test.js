@@ -4,7 +4,7 @@
  * __init.test.js is run before every test case.
  */
 window.debug = true;
-var AScene = require('aframe').AScene;
+/*var AScene = require('aframe').AScene;
 
 navigator.getVRDisplays = function () {
   var resolvePromise = Promise.resolve();
@@ -15,22 +15,24 @@ navigator.getVRDisplays = function () {
     requestAnimationFrame: function () { return 1; }
   };
   return Promise.resolve([mockVRDisplay]);
-};
+};*/
 
 setup(function () {
   this.sinon = sinon.sandbox.create();
-  // Stubs to not create a WebGL context since Travis CI runs headless.
-  this.sinon.stub(AScene.prototype, 'render');
-  this.sinon.stub(AScene.prototype, 'resize');
-  this.sinon.stub(AScene.prototype, 'setupRenderer');
 });
 
 teardown(function () {
   // Clean up any attached elements.
-  var attachedEls = ['canvas', 'a-assets', 'a-scene'];
+  var attachedEls = ['canvas', 'a-assets', 'a-scene'],
+      replayer;
+  replayer = document.querySelector('a-scene') &&
+    document.querySelector('a-scene').components &&
+    document.querySelector('a-scene').components['avatar-replayer'];
+  if (replayer) { replayer.isReplaying = false; }
   var els = document.querySelectorAll(attachedEls.join(','));
+ 
   for (var i = 0; i < els.length; i++) {
     els[i].parentNode.removeChild(els[i]);
-  }
+  } 
   this.sinon.restore();
 });

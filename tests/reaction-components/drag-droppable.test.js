@@ -23,9 +23,15 @@ suite('drag-droppable', function () {
     });
   });
   test('el gains and loses dragover state', function () {
-    this.comp.start({ detail: { hand: this.hand } });
+    this.el.emit('dragover-start', { hand: this.hand });
     assert.isTrue(this.el.is('dragover'));
-    this.comp.end({ detail: { hand: this.hand } });
+    this.el.emit('dragover-end', { hand: this.hand });
     assert.isFalse(this.el.is('dragover'));
+  });  
+  test('el gains and loses dragged state', function () {
+    this.el.emit('drag-start', { hand: this.hand });
+    assert.isTrue(this.el.is('dragged'));
+    this.el.emit('drag-end', { hand: this.hand });
+    assert.isFalse(this.el.is('dragged'));
   });  
 });
