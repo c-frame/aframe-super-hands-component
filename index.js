@@ -145,6 +145,7 @@ AFRAME.registerComponent('super-hands', {
     for(i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
+    this.gehClicking.clear();
     if(this.state.has(this.GRAB_EVENT)) {
       this.state.get(this.GRAB_EVENT)
         .emit(this.UNGRAB_EVENT, { hand: this.el });

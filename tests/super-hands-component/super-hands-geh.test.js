@@ -229,6 +229,13 @@ suite('super-hands GlobalEventHandler integration', function () {
     assert.isTrue(spy1.called, 'original target');
     assert.isFalse(spy2.called, 'new target');
   });
+  test('click state tracking clears on release', function () {
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
+    assert.isTrue(this.sh1.gehClicking.has(this.target1));
+    this.sh1.onGrabEndButton();
+    assert.strictEqual(this.sh1.gehClicking.size, 0);
+  });
 });
 
 suite('super-hands GlobalEventHandler multiple targets', function () {
