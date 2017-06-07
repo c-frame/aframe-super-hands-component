@@ -11,6 +11,7 @@ require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
 require('./reaction_components/locomotor.js');
+require('./primitives/a-locomotor.js');
 
 /**
  * Super Hands component for A-Frame.

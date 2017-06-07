@@ -15,6 +15,14 @@ AFRAME.registerComponent('locomotor', {
     this.el.addEventListener(this.STOP_EVENT, this.end);
   },
   update: function (oldDat) {
+    // make sure locomotor is collidable
+    this.el.childNodes.forEach(el => {
+      let col = el.getAttribute && el.getAttribute('sphere-collider');
+      if (col && col.objects.indexOf('a-locomotor') === -1) {
+        el.setAttribute('sphere-collider', {objects: col.objects + ', a-locomotor'});
+      }
+    });
+    
   },
   tick: function() {
     if(this.mover) {
