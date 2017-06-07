@@ -28,7 +28,7 @@ The currently implemented gestures are:
 For an entity to respond to the `super-hands` gestures, it needs to have 
 components attached to translate the gestures into actions. `super-hands` 
 includes components for typical reactions to the implemented gestures: 
-`hoverable`, `grabbable`, `stretchable`, and `drag-droppable`.
+`hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
@@ -47,7 +47,7 @@ custom events and states it uses.
 These are best processed by creating new A-Frame components that register
 event listeners and react accordingly. 
 1. HTML style: The `super-hands` component also integrates with the
-Global Event Handlers Web API to trigger standard events analogous
+Global Event Handlers Web API to trigger standard mouse events analogous
 to the VR interactions that can easily be handled through 
 properties like `onclick`.
 
@@ -99,6 +99,30 @@ require('super-hands');
 
 ### News
 
+v1.0.0
+
+* Maturation of A-Frame style API: Reaction components now need to cancel
+  gesture events in order to communicate acceptance of the gesture to `super-hands`.
+  This improves state tracking and handling of overlapping/nested 
+  entities 
+* Improved Global Event Handlers integration: 
+    * When overlapping entities create multiple potential targets for GEH 
+      events, the events fire on all potential targets
+    * `click` now functions more like its mouse counterpart, only firing 
+      if a mouseup occurs after a mousedown and without losing collision 
+      with the target entity
+* Two-handed grabbing: `grabbable` can now process grabs from multiple
+  `super-hands` entities. In non-physics interactions, this makes passing
+  entities between hands much easier. In physics-based interactions, this
+  creates multiple constraints for advanced handling
+* `strechable` flexibility: state tracking of hands attempting to
+  stretch moved from `super-hands` to `strechable`. This should allow for 
+  different avatars in a multi-user setting to stretch a single entity 
+  cooperatively
+* Added [machinima testing](https://github.com/wmurphyrd/aframe-machinima-testing)
+  for automated testing based on motion-captured user input to improve
+  regression detection
+
 v0.3.1
 
 * New: integration with GlobalEventHandlers for easy reactivity via element 
@@ -131,7 +155,8 @@ v0.2.3
 
 | A-Frame Version | super-hands Version |
 | --- | --- |
-| v0.5.x | ^v0.3.0 |
+| v0.6.x | ^v1.0.0 |
+| v0.5.x | v1.0.0 |
 | v0.4.x | v0.2.4 |
 
 ### API
