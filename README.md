@@ -263,6 +263,11 @@ This works best with [aframe-physics-system](https://github.com/donmccurdy/afram
 to manage grabbed entity movement, but it will fallback to manual `position` updates 
 (without rotational translation) if physics is not available or is disabled with `usePhysics = never`. 
 
+Allows for multiple hands to register a grab on an entity. In a non-physics setup, this has no effect
+other than allowing smooth passing of entities between hands. With physics enabled, additional grabbing
+hands register their own physics constraints to allow for two-handed wielding of entities. Limit or disable
+by setting the maxGrabbers schema property. 
+
 ##### Component Schema
 
 | Property | Description | Default Value |
