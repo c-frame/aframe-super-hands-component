@@ -21,8 +21,10 @@
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
-      <a-entity hand-controls="left" mixin="controller"></a-entity>
-      <a-entity hand-controls="right" mixin="controller"></a-entity>
+      <a-locomotor stretchable>
+        <a-entity hand-controls="left" mixin="controller"></a-entity>
+        <a-entity hand-controls="right" mixin="controller"></a-entity>
+      </a-locomotor>
       <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>

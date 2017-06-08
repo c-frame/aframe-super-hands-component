@@ -46,8 +46,10 @@
         <a-mixin id="transformer" color-randomizer drag-droppable
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
       </a-assets>
-      <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
-      <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
+      <a-locomotor stretchable>
+        <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
+        <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
+      </a-locomotor>
       <a-entity class="cube" mixin="cube" position="0 0.15 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.15 -0.5" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 0.15 -1" material="color: blue"></a-entity>

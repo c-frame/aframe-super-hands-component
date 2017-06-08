@@ -35,7 +35,7 @@
         <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"></a-sphere>
       </a-entity>
       <a-box position="0 1 -1" color="red" 
-             onmousedown="randomizeColor(this)"
+             onclick="randomizeColor(this)"
              ondragstart="paintBall(event)"
              ondragend="unPaintBall(event)"
              ondrop="event.relatedTarget.setAttribute('color', this.getAttribute('color'))">

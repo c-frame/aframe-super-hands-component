@@ -2,18 +2,18 @@
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.3.0/dist/aframe-extras.min.js"></script>
-  <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js" -->
-    <script src="../build.js"></script></script>
+  <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
 </head>
 
 <body>
   <a-scene>
-    <!-- Make sure your super-hands entities also have controller and collider components -->
-    <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
-    <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
-    <!-- hover, click, & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-box hoverable clickable grabbable stretchable drag-droppable
-           color="red"></a-box>
+    <!-- adding stretchable to the locomotor lets users re-scale the scene -->
+    <a-locomotor stretchable>
+      <!-- Make sure your super-hands entities also have controller and collider components -->
+      <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
+      <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
+    </a-locomotor>
+    <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable grabbable stretchable drag-droppable></a-box>
   </a-scene>
 </body>
