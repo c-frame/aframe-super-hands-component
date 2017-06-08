@@ -21,7 +21,7 @@ AFRAME.registerComponent('locomotor', {
         el.setAttribute('sphere-collider', {objects: col.objects + ', a-locomotor'});
       }
     });
-    // make default camera child of locomotor so it can me moved
+    // make default camera child of locomotor so it can be moved
     this.el.sceneEl.addEventListener('loaded', e => {
       var defCam = document.querySelector('[camera][aframe-injected]');
       if (defCam) {
@@ -32,7 +32,7 @@ AFRAME.registerComponent('locomotor', {
   update: function (oldDat) {
   },
   tick: function() {
-    if(this.mover) {
+    if (this.mover) {
       var handPosition = this.mover.getAttribute('position'),
         previousPosition = this.previousPosition || handPosition,
         deltaPosition = {
@@ -56,6 +56,7 @@ AFRAME.registerComponent('locomotor', {
   start: function(evt) {
     this.mover = evt.detail.hand;
     this.previousPosition = null;
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   end: function (evt) {
     this.mover = null;

@@ -21,6 +21,8 @@ require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
+require('./reaction_components/locomotor.js');
+require('./primitives/a-locomotor.js');
 
 /**
  * Super Hands component for A-Frame.
@@ -156,6 +158,7 @@ AFRAME.registerComponent('super-hands', {
     for(i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
+    this.gehClicking.clear();
     if(this.state.has(this.GRAB_EVENT)) {
       this.state.get(this.GRAB_EVENT)
         .emit(this.UNGRAB_EVENT, { hand: this.el });
@@ -235,7 +238,7 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   updateGrabbed: function () {
-    var carried = this.state.get(this.DRAG_EVENT);
+    var carried = this.state.get(this.GRAB_EVENT);
     if (this.grabbing && !carried) {
       carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
       if (carried) {
@@ -475,7 +478,29 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./reaction_components/clickable.js":3,"./reaction_components/drag-droppable.js":4,"./reaction_components/grabbable.js":5,"./reaction_components/hoverable.js":6,"./reaction_components/stretchable.js":7,"./systems/super-hands-system.js":8}],3:[function(require,module,exports){
+},{"./primitives/a-locomotor.js":3,"./reaction_components/clickable.js":4,"./reaction_components/drag-droppable.js":5,"./reaction_components/grabbable.js":6,"./reaction_components/hoverable.js":7,"./reaction_components/locomotor.js":8,"./reaction_components/stretchable.js":9,"./systems/super-hands-system.js":10}],3:[function(require,module,exports){
+var extendDeep = AFRAME.utils.extendDeep;
+// The mesh mixin provides common material properties for creating mesh-based primitives.
+// This makes the material component a default component and maps all the base material properties.
+var meshMixin = AFRAME.primitives.getMeshMixin();
+AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
+  // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
+  defaultComponents: {
+    geometry: {
+      primitive: 'sphere',
+      radius: 2.5
+    },
+    material: {
+      transparent: true,
+      opacity: 0
+    },
+    locomotor: {}
+  },
+  mappings: {
+    restrictY: 'locomotor.restrictY'
+  }
+}));
+},{}],4:[function(require,module,exports){
 AFRAME.registerComponent('clickable', {
   schema: {
     onclick: { type: 'string' }
@@ -499,6 +524,7 @@ AFRAME.registerComponent('clickable', {
     this.el.addState(this.CLICKED_STATE);
     if(this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
+      if (evt.preventDefault) { evt.preventDefault() };
     }
   },
   end: function (evt) {
@@ -511,7 +537,7 @@ AFRAME.registerComponent('clickable', {
     }
   }
 });
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
@@ -559,42 +585,45 @@ AFRAME.registerComponent('drag-droppable', {
     if (evt.preventDefault) { evt.preventDefault(); }
   }
 });
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+/* global AFRAME */
 AFRAME.registerComponent('grabbable', {
-  schema: { 
-    usePhysics: { default: 'ifavailable' },
+  schema: {
+    usePhysics: {default: 'ifavailable'},
+    maxGrabbers: {type: 'int', default: NaN}
   },
   init: function () {
     this.GRABBED_STATE = 'grabbed';
     this.GRAB_EVENT = 'grab-start';
     this.UNGRAB_EVENT = 'grab-end';
-    this.constraint = null;
     this.grabbed = false;
-    
+    this.grabbers = [];
+    this.constraints = new Map();
+
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-    
+
     this.el.addEventListener(this.GRAB_EVENT, this.start);
     this.el.addEventListener(this.UNGRAB_EVENT, this.end);
+    this.el.addEventListener('mouseout', e => this.lostGrabber(e));
   },
   update: function (oldDat) {
-    if(this.data.usePhysics === 'never' && this.constraint) {
-      this.el.body.world.removeConstraint(this.constraint);
-      this.constraint = null;
+    if (this.data.usePhysics === 'never' && this.constraints.size) {
+      this.clearConstraints();
     }
   },
-  tick: function() {
-    if(this.grabbed && !this.constraint && 
+  tick: function () {
+    if (this.grabber && !this.constraints.size &&
        this.data.usePhysics !== 'only') {
-      var handPosition = this.grabber.getAttribute('position'),
-        previousPosition = this.previousPosition || handPosition,
-        deltaPosition = {
-          x: handPosition.x - previousPosition.x,
-          y: handPosition.y - previousPosition.y,
-          z: handPosition.z - previousPosition.z
-        },
-        position = this.el.getAttribute('position');
-      
+      const handPosition = this.grabber.getAttribute('position');
+      const previousPosition = this.previousPosition || handPosition;
+      const deltaPosition = {
+        x: handPosition.x - previousPosition.x,
+        y: handPosition.y - previousPosition.y,
+        z: handPosition.z - previousPosition.z
+      };
+      const position = this.el.getAttribute('position');
+
       this.previousPosition = handPosition;
       this.el.setAttribute('position', {
         x: position.x + deltaPosition.x,
@@ -606,35 +635,70 @@ AFRAME.registerComponent('grabbable', {
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+    this.clearConstraints();
   },
-  start: function(evt) {
-    if (this.grabbed) { return; } //already grabbed
-    this.grabber = evt.detail.hand;
-    this.grabbed = true;
-    this.el.addState(this.GRABBED_STATE);
-    // notify super-hands that the gesture was accepted
-    if (evt.preventDefault) { evt.preventDefault(); }
-    if(this.data.usePhysics !== 'never' && this.el.body && 
-       this.grabber.body) {
-      this.constraint = new window.CANNON
-        .LockConstraint(this.el.body, this.grabber.body);
-      this.el.body.world.addConstraint(this.constraint);
-    } else if(this.data.usePhysics !== 'only') {
-      this.previousPosition = null;
+  start: function (evt) {
+    // room for more grabbers?
+    const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
+        this.grabbers.length < this.data.maxGrabbers;
+
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+      this.grabbers.push(evt.detail.hand);
+      // initiate physics constraint if available and not already existing
+      if (this.data.usePhysics !== 'never' && this.el.body &&
+          evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+        let newCon = new window.CANNON.LockConstraint(
+          this.el.body, evt.detail.hand.body
+        );
+        this.el.body.world.addConstraint(newCon);
+        this.constraints.set(evt.detail.hand, newCon);
+      } else if (!this.grabber) {
+        // otherwise, initiate manual grab if first grabber
+        this.grabber = evt.detail.hand;
+        this.previousPosition = null;
+      }
+      // notify super-hands that the gesture was accepted
+      if (evt.preventDefault) { evt.preventDefault(); }
+      this.grabbed = true;
+      this.el.addState(this.GRABBED_STATE);
     }
   },
   end: function (evt) {
-    if(evt.detail.hand !== this.grabber) { return; }
-    if(this.constraint) {
-      this.el.body.world.removeConstraint(this.constraint);
-      this.constraint = null;
+    const handIndex = this.grabbers.indexOf(evt.detail.hand);
+    let constraint = this.constraints.get(evt.detail.hand);
+    if (handIndex !== -1) {
+      this.grabbers.splice(handIndex, 1);
+      this.grabber = this.grabbers[0];
+      this.previousPosition = null;
     }
-    this.grabber = null;
-    this.grabbed = false;
-    this.el.removeState(this.GRABBED_STATE);
+    if (constraint) {
+      this.el.body.world.removeConstraint(constraint);
+      this.constraints.delete(evt.detail.hand);
+    }
+    if (!this.grabber) {
+      this.grabbed = false;
+      this.el.removeState(this.GRABBED_STATE);
+    }
+  },
+  clearConstraints: function () {
+    if (this.el.body) {
+      for (let c of this.constraints.values()) {
+        this.el.body.world.removeConstraint(c);
+      }
+    }
+    this.constraints.clear();
+  },
+  lostGrabber: function (evt) {
+    let i = this.grabbers.indexOf(evt.relatedTarget);
+    // if a queued, non-physics grabber leaves the collision zone, forget it
+    if (i !== -1 && evt.relatedTarget !== this.grabber &&
+        !this.constraints.has(evt.relatedTarget)) {
+      this.grabbers.splice(i, 1);
+    }
   }
 });
-},{}],6:[function(require,module,exports){
+
+},{}],7:[function(require,module,exports){
 AFRAME.registerComponent('hoverable', {
   init: function () {
     this.HOVERED_STATE = 'hovered';
@@ -670,7 +734,72 @@ AFRAME.registerComponent('hoverable', {
     }
   }
 });
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+AFRAME.registerComponent('locomotor', {
+  schema: { 
+    restrictY: {default: true}
+  },
+  init: function () {
+    this.MOVE_STATE = 'moving';
+    this.MOVE_EVENT = 'grab-start';
+    this.STOP_EVENT = 'grab-end';
+    this.mover = null;
+    
+    this.start = this.start.bind(this);
+    this.end = this.end.bind(this);
+    
+    this.el.addEventListener(this.MOVE_EVENT, this.start);
+    this.el.addEventListener(this.STOP_EVENT, this.end);
+
+    // make sure locomotor is collidable
+    this.el.childNodes.forEach(el => {
+      let col = el.getAttribute && el.getAttribute('sphere-collider');
+      if (col && col.objects.indexOf('a-locomotor') === -1) {
+        el.setAttribute('sphere-collider', {objects: col.objects + ', a-locomotor'});
+      }
+    });
+    // make default camera child of locomotor so it can be moved
+    this.el.sceneEl.addEventListener('loaded', e => {
+      var defCam = document.querySelector('[camera][aframe-injected]');
+      if (defCam) {
+        this.el.appendChild(defCam);
+      }
+    });
+  },
+  update: function (oldDat) {
+  },
+  tick: function() {
+    if (this.mover) {
+      var handPosition = this.mover.getAttribute('position'),
+        previousPosition = this.previousPosition || handPosition,
+        deltaPosition = {
+          x: handPosition.x - previousPosition.x,
+          y: handPosition.y - previousPosition.y,
+          z: handPosition.z - previousPosition.z
+        }, position = this.el.getAttribute('position');
+      // subtract delta to invert movement
+      this.el.setAttribute('position', {
+        x: position.x - deltaPosition.x,
+        y: position.y - deltaPosition.y * !this.data.restrictY,
+        z: position.z - deltaPosition.z
+      });
+      this.previousPosition = handPosition;
+    }
+  },
+  remove: function () {
+    this.el.removeEventListener(this.MOVE_EVENT, this.start);
+    this.el.removeEventListener(this.STOP_EVENT, this.end);
+  },
+  start: function(evt) {
+    this.mover = evt.detail.hand;
+    this.previousPosition = null;
+    if (evt.preventDefault) { evt.preventDefault(); }
+  },
+  end: function (evt) {
+    this.mover = null;
+  }
+});
+},{}],9:[function(require,module,exports){
 AFRAME.registerComponent('stretchable', {
   schema: { 
     usePhysics: { default: 'ifavailable' },
@@ -748,7 +877,7 @@ AFRAME.registerComponent('stretchable', {
     this.el.removeState(this.STRETCHED_STATE);
   } 
 });
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 AFRAME.registerSystem('super-hands', {
   init: function () {
     this.superHands = [];

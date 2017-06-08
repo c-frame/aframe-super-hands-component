@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test */
+/* global assert, process, setup, suite, test, sinon */
 
 // One scene per suite, but recordings set at the test level
 var SCENE_FILE = 'hands.html';
@@ -7,12 +7,12 @@ suite('basic interactions', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
-    var body = document.querySelector('body'),
-        sceneReg =  /<a-scene[^]+a-scene>/,
-        sceneResult = sceneReg.exec(window.__html__[SCENE_FILE]),
-        recorderReg = /avatar-recorder(=".*")?/;
+    const body = document.querySelector('body');
+    const sceneReg = /<a-scene[^]+a-scene>/;
+    const sceneRegResult = sceneReg.exec(window.__html__[SCENE_FILE]);
+    const recorderReg = /avatar-recorder(=".*")?/;
     // set avatar-replayer to use the specified recoring file
-    sceneResult = sceneResult[0]
+    const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
     this.scene = document.querySelector('a-scene');
@@ -23,25 +23,27 @@ suite('basic interactions', function () {
     });
   });
   test('green boxes turn into spheres', function (done) {
-    var boxGreenTop = document.getElementById('greenHigh'),
-        boxGreenBottom = document.getElementById('greenLow');
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/handsRecording.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/handsRecording.json'
     });
-    assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'box');
-    assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'box');
+    assert.equal(this.boxGrnUp.getAttribute('geometry').primitive, 'box');
+    assert.equal(this.boxGrnDn.getAttribute('geometry').primitive, 'box');
     this.scene.addEventListener('replayingstopped', e => {
-      assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'sphere');
-      assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'sphere');
+      assert.equal(
+        this.boxGrnUp.getAttribute('geometry').primitive, 'sphere'
+      );
+      assert.equal(
+        this.boxGrnDn.getAttribute('geometry').primitive, 'sphere'
+      );
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });
   test('red box is stretched & moved', function (done) {
-    var redBox = document.getElementById('redHigh'),
-        startPos = redBox.getAttribute('position'),
-        startScale = redBox.getAttribute('scale');
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/handsRecording.json' 
+    const redBox = document.getElementById('redHigh');
+    const startPos = redBox.getAttribute('position');
+    const startScale = redBox.getAttribute('scale');
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/handsRecording.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
       var endScale = redBox.getAttribute('scale');
@@ -53,8 +55,8 @@ suite('basic interactions', function () {
     }, { once: true });
   });
   test('carried entities unhovers properly after drag-drop', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/leftoverHover.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/leftoverHover.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
       assert.isFalse(this.boxGrnUp.is('hovered'));
@@ -68,7 +70,8 @@ suite('basic interactions', function () {
      hand exits
   */
   test.skip('hover persist when hands overlap', function (done) {
-    var unHoverSpy = sinon.spy(this.boxGrnUp, 'removeState'); //no sinon cleanup
+    const unHoverSpy = sinon
+      .spy(this.boxGrnUp, 'removeState'); // no sinon cleanup
     unHoverSpy.withArgs('hovered');
     this.scene.setAttribute('avatar-replayer', {
       src: 'base/recordings/multihover.json'
@@ -99,8 +102,8 @@ suite('basic interactions', function () {
     }, { once: true });
   });
   test('No stray hover after drag-drop', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/handsRecording.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/handsRecording.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
       assert.isFalse(this.boxGrnDn.is('hovered'));
@@ -108,8 +111,8 @@ suite('basic interactions', function () {
     }, { once: true });
   });
   test('Pass betwen hands with two-handed grab', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/hands-twoHandedPass.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/hands-twoHandedPass.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
       assert.isAbove(this.boxGrnUp.getAttribute('position').z, 0.5);
@@ -117,15 +120,13 @@ suite('basic interactions', function () {
     }, { once: true });
   });
   test('Two-handed pass fails if 2nd hand moved out of range', function (done) {
-    //this.boxGrnUp.removeAttribute('stretchable');
-    //assert.isNotOk(this.boxGrnUp.components['stretchable']);
-    //disable stretching to observe a hand leaving collision zone while grabbing
+    // disable stretching so hand can leave collision zone while grabbing
     this.boxGrnUp.components['stretchable'].remove();
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/hands-nostretch-badTwoHandedGrab.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/hands-nostretch-badTwoHandedGrab.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
-      assert.isBelow(this.boxGrnUp.getAttribute('position').z, 0.5);
+      assert.isBelow(this.boxGrnUp.getAttribute('position').z, -0.8);
       assert.isFalse(this.boxGrnUp.components['grabbable'].grabbed);
       assert.strictEqual(this.boxGrnUp.components['grabbable'].grabbers.length, 0);
       done();
@@ -133,17 +134,16 @@ suite('basic interactions', function () {
   });
 });
 
-
 suite('Nested object targeting', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
-    var body = document.querySelector('body'),
-        sceneReg =  /<a-scene[^]+a-scene>/,
-        sceneResult = sceneReg.exec(window.__html__['nested.html']),
-        recorderReg = /avatar-recorder(=".*")?/;
+    const body = document.querySelector('body');
+    const sceneReg = /<a-scene[^]+a-scene>/;
+    const sceneRegResult = sceneReg.exec(window.__html__['nested.html']);
+    const recorderReg = /avatar-recorder(=".*")?/;
     // set avatar-replayer to use the specified recoring file
-    sceneResult = sceneResult[0]
+    const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
     this.scene = document.querySelector('a-scene');
@@ -155,15 +155,15 @@ suite('Nested object targeting', function () {
     });
   });
   test('able to move nested entities', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/nested-grab.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/nested-grab.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
       assert.isAbove(this.inner.getAttribute('position').y, 2);
       assert.isBelow(this.middle.getAttribute('position').y, 0);
       assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1});
       done();
-    }, { once: true }); 
+    }, { once: true });
   });
 });
 
@@ -171,12 +171,12 @@ suite('Physics grab', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
-    var body = document.querySelector('body'),
-        sceneReg =  /<a-scene[^]+a-scene>/,
-        sceneResult = sceneReg.exec(window.__html__['physics.html']),
-        recorderReg = /avatar-recorder(=".*")?/;
+    const body = document.querySelector('body');
+    const sceneReg = /<a-scene[^]+a-scene>/;
+    const sceneRegResult = sceneReg.exec(window.__html__['physics.html']);
+    const recorderReg = /avatar-recorder(=".*")?/;
     // set avatar-replayer to use the specified recoring file
-    sceneResult = sceneResult[0]
+    const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
     this.scene = document.querySelector('a-scene');
@@ -188,14 +188,14 @@ suite('Physics grab', function () {
     });
   });
   test('entity affected by two contraints', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/physics-twoHandedTwist.json' 
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/physics-twoHandedTwist.json'
     });
     this.target.addEventListener('grab-end', e => {
-      let yRot = this.target.getObject3D('mesh').getWorldRotation()._y
+      let yRot = this.target.getObject3D('mesh').getWorldRotation()._y;
       assert.isBelow(yRot, -0.3);
       done();
-    }, { once: true }); 
+    }, { once: true });
   });
 });
 
@@ -203,12 +203,12 @@ suite('Locomotion', function () {
   this.timeout(0);
   setup(function (done) {
     /* inject the scene html into the testing docoument */
-    var body = document.querySelector('body'),
-        sceneReg =  /<a-scene[^]+a-scene>/,
-        sceneResult = sceneReg.exec(window.__html__['locomotor.html']),
-        recorderReg = /avatar-recorder(=".*")?/;
+    const body = document.querySelector('body');
+    const sceneReg = /<a-scene[^]+a-scene>/;
+    const sceneRegResult = sceneReg.exec(window.__html__['locomotor.html']);
+    const recorderReg = /avatar-recorder(=".*")?/;
     // set avatar-replayer to use the specified recoring file
-    sceneResult = sceneResult[0]
+    const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
     this.scene = document.querySelector('a-scene');
@@ -217,7 +217,7 @@ suite('Locomotion', function () {
     });
   });
   test('player location moves', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
+    this.scene.setAttribute('avatar-replayer', {
       src: 'base/recordings/hands-worldMover.json'
     });
     this.scene.addEventListener('replayingstopped', e => {
@@ -228,7 +228,7 @@ suite('Locomotion', function () {
     }, { once: true }); // once flag because this event emitted multiple times
   });
   test('player scale changes', function (done) {
-    this.scene.setAttribute('avatar-replayer', { 
+    this.scene.setAttribute('avatar-replayer', {
       src: 'base/recordings/hands-worldScaler.json'
     });
     window.setTimeout(() => {
@@ -244,13 +244,13 @@ suite('Locomotion', function () {
     }, 4000);
   });
   test('locomotor does not interfere with normal interactions', function (done) {
-    var boxGreenTop = document.getElementById('greenHigh'),
-        boxGreenBottom = document.getElementById('greenLow'),
-        redBox = document.getElementById('redHigh'),
-        startPos = redBox.getAttribute('position'),
-        startScale = redBox.getAttribute('scale');
-    this.scene.setAttribute('avatar-replayer', { 
-      src: 'base/recordings/handsRecording.json' 
+    const boxGreenTop = document.getElementById('greenHigh');
+    const boxGreenBottom = document.getElementById('greenLow');
+    const redBox = document.getElementById('redHigh');
+    const startPos = redBox.getAttribute('position');
+    const startScale = redBox.getAttribute('scale');
+    this.scene.setAttribute('avatar-replayer', {
+      src: 'base/recordings/handsRecording.json'
     });
     assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'box');
     assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'box');
@@ -266,4 +266,3 @@ suite('Locomotion', function () {
     }, { once: true }); // once flag because this event emitted multiple times
   });
 });
-
