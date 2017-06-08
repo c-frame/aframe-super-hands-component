@@ -613,11 +613,12 @@
 	    this.grabbers = [];
 	    this.constraints = new Map();
 
-	    this.start = this.start.bind(this);
-	    this.end = this.end.bind(this);
-
-	    this.el.addEventListener(this.GRAB_EVENT, this.start);
-	    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
+	    this.el.addEventListener(this.GRAB_EVENT, function (e) {
+	      return _this.start(e);
+	    });
+	    this.el.addEventListener(this.UNGRAB_EVENT, function (e) {
+	      return _this.end(e);
+	    });
 	    this.el.addEventListener('mouseout', function (e) {
 	      return _this.lostGrabber(e);
 	    });

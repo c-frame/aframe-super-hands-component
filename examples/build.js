@@ -596,11 +596,8 @@ AFRAME.registerComponent('grabbable', {
     this.grabbers = [];
     this.constraints = new Map();
 
-    this.start = this.start.bind(this);
-    this.end = this.end.bind(this);
-
-    this.el.addEventListener(this.GRAB_EVENT, this.start);
-    this.el.addEventListener(this.UNGRAB_EVENT, this.end);
+    this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
+    this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
     this.el.addEventListener('mouseout', e => this.lostGrabber(e));
   },
   update: function (oldDat) {
