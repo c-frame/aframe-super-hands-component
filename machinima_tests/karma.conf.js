@@ -6,7 +6,7 @@ var karma_conf = {
 //  browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   browsers: ['Firefox', 'Chrome'],
   // machinima: prevent timeout during recording playback
-  browserNoActivityTimeout: 600000, 
+  browserNoActivityTimeout: 600000,
   client: {
     captureConsole: true,
     mocha: {'ui': 'tdd'}
@@ -22,7 +22,7 @@ var karma_conf = {
   ],
   files: [
     // module and dependencies
-    {pattern: 'main.js', included: true}, 
+    {pattern: 'main.js', included: true},
     // test files.
     {pattern: './**/*.test.js'},
     // HTML machinima scenes (pre-processed by html2js)
@@ -40,10 +40,9 @@ var karma_conf = {
   reporters: ['mocha'],
   // machinima: make scene html available
   html2JsPreprocessor: {
-      stripPrefix: 'scenes/',
-    }
+    stripPrefix: 'scenes/'
+  }
 };
-
 
 // Apply configuration
 module.exports = function (config) {

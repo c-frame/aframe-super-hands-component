@@ -226,7 +226,7 @@
 	    this.dragging = false; // keep _unHover() from activating another droptarget
 	    this.gehDragged.forEach(function (carried) {
 	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
-	      // fire event both ways for all intersected targets 
+	      // fire event both ways for all intersected targets
 	      _this2.dispatchMouseEventAll('drop', carried, true, true);
 	      _this2.dispatchMouseEventAll('dragleave', carried, true, true);
 	    });
@@ -300,7 +300,7 @@
 	    if (this.dragging && !dragged) {
 	      /* prefer carried so that a drag started after a grab will work
 	       with carried element rather than a currently intersected drop target.
-	       fall back to queue in case a drag is initiated independent 
+	       fall back to queue in case a drag is initiated independent
 	       of a grab */
 	      if (this.state.get(this.GRAB_EVENT) && !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT, { hand: this.el })) {
 	        dragged = this.state.get(this.GRAB_EVENT);
@@ -342,7 +342,7 @@
 	        this.state.set(this.DRAGOVER_EVENT, hoverEl);
 	      }
 	    }
-	    // fallback to hover if not dragging or dragover wasn't successful 
+	    // fallback to hover if not dragging or dragover wasn't successful
 	    if (!this.state.has(this.DRAGOVER_EVENT)) {
 	      hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
 	      if (hoverEl) {
@@ -380,7 +380,7 @@
 	      this.state.delete(this.HOVER_EVENT);
 	      this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
 	    }
-	    //activate next target, if present
+	    // activate next target, if present
 	    if (!skipNextHover) {
 	      this.hover();
 	    }
@@ -527,7 +527,7 @@
 	    this.superHands = [];
 	  },
 	  registerMe: function registerMe(comp) {
-	    //when second hand registers, store links
+	    // when second hand registers, store links
 	    if (this.superHands.length === 1) {
 	      this.superHands[0].otherSuperHand = comp;
 	      comp.otherSuperHand = this.superHands[0];
@@ -778,7 +778,7 @@
 	        physicsShape.updateConvexPolyhedronRepresentation();
 	      } else {
 	        if (!this.shapeWarned) {
-	          console.warn("Unable to stretch physics body: unsupported shape");
+	          console.warn('Unable to stretch physics body: unsupported shape');
 	          this.shapeWarned = true;
 	        }
 	        // todo: suport more shapes
@@ -906,7 +906,7 @@
 	      this.clickers.push(evt.detail.hand);
 	      if (evt.preventDefault) {
 	        evt.preventDefault();
-	      };
+	      }
 	    }
 	  },
 	  end: function end(evt) {

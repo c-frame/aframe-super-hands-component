@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 
-var helpers = require('../helpers'), 
-    entityFactory = helpers.entityFactory;
+var helpers = require('../helpers'),
+  entityFactory = helpers.entityFactory;
 
 suite('super-hands GlobalEventHandler integration', function () {
   setup(function (done) {
@@ -40,9 +40,9 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.hand1);
       done();
     };
-    this.sh1.unHover({ 
-      target: this.target1, 
-      detail: { state: 'collided' } 
+    this.sh1.unHover({
+      target: this.target1,
+      detail: { state: 'collided' }
     });
   });
   test('dragenter - carried', function (done) {
@@ -266,7 +266,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('mouseover all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy();
     this.target1.addEventListener('mouseover', t1Spy);
     this.target2.addEventListener('mouseover', t2Spy);
     this.target3.addEventListener('mouseover', t3Spy);
@@ -279,7 +279,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('mousedown all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy();
     this.target1.addEventListener('mousedown', t1Spy);
     this.target2.addEventListener('mousedown', t2Spy);
     this.target3.addEventListener('mousedown', t3Spy);
@@ -293,7 +293,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('mouseup all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy();
     this.target1.onmouseup = t1Spy;
     this.target2.onmouseup = t2Spy;
     this.target3.onmouseup = t3Spy;
@@ -308,7 +308,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('click all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy();
     this.target1.onclick = t1Spy;
     this.target2.onclick = t2Spy;
     this.target3.onclick = t3Spy;
@@ -324,7 +324,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   // consider making multiple entities draggable
   test('dragstart all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy();
     this.target1.ondragstart = t1Spy;
     this.target2.ondragstart = t2Spy;
     this.target3.ondragstart = t3Spy;
@@ -338,7 +338,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('dragenter all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.addEventListener('dragenter', t1Spy);
     this.target2.addEventListener('dragenter', t2Spy);
     this.target3.addEventListener('dragenter', t3Spy);
@@ -361,7 +361,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('drop all', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.ondrop = t1Spy;
     this.target2.ondrop = t2Spy;
     this.target3.ondrop = t3Spy;
@@ -390,7 +390,7 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   test('dragleave all on drop', function () {
     var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-        t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
     this.target1.ondragleave = t1Spy;
     this.target2.ondragleave = t2Spy;
     this.target3.ondragleave = t3Spy;

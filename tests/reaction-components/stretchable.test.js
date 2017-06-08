@@ -1,8 +1,8 @@
 /* global assert, process, setup, suite, test */
 
 var helpers = require('../helpers'),
-    entityFactory = helpers.entityFactory,
-    coord = AFRAME.utils.coordinates.parse;
+  entityFactory = helpers.entityFactory,
+  coord = AFRAME.utils.coordinates.parse;
 
 suite('stretchable', function () {
   setup(function (done) {
@@ -12,9 +12,9 @@ suite('stretchable', function () {
     this.hand2 = helpers
       .controllerFactory({ 'hand-controls': 'left' }, true);
     el.setAttribute('stretchable', '');
-   el.sceneEl.addEventListener('loaded', evt => {
-     this.comp = el.components.stretchable;
-     done();
+    el.sceneEl.addEventListener('loaded', evt => {
+      this.comp = el.components.stretchable;
+      done();
     });
   });
   test('component attaches without errors', function () {
@@ -44,7 +44,7 @@ suite('stretchable', function () {
   });
   test('scale updates during stretch', function () {
     var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-        lastScale;
+      lastScale;
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
@@ -79,7 +79,7 @@ suite('stretchable-physics', function () {
   });
   test('box bodies update with scaling', function () {
     var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-        scale = new window.CANNON.Vec3();
+      scale = new window.CANNON.Vec3();
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
@@ -87,15 +87,15 @@ suite('stretchable-physics', function () {
     this.comp.start({ detail: { hand: this.hand1 } });
     this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
-    assert.deepEqual(this.el.body.shapes[0].halfExtents, 
+    assert.deepEqual(this.el.body.shapes[0].halfExtents,
                      scale.set(0.5, 0.5, 0.5));
     this.comp.tick();
-    assert.notDeepEqual(this.el.body.shapes[0].halfExtents, 
+    assert.notDeepEqual(this.el.body.shapes[0].halfExtents,
                         scale.set(0.5, 0.5, 0.5));
   });
   test('box bodies do not update when usePhysics = never', function () {
     var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-        scale = new window.CANNON.Vec3();
+      scale = new window.CANNON.Vec3();
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
@@ -105,10 +105,10 @@ suite('stretchable-physics', function () {
     this.comp.start({ detail: { hand: this.hand2 } });
     assert.ok(this.el.is('stretched'));
     this.comp.tick();
-    assert.deepEqual(this.el.body.shapes[0].halfExtents, 
+    assert.deepEqual(this.el.body.shapes[0].halfExtents,
                      scale.set(0.5, 0.5, 0.5));
     this.comp.tick();
-    assert.deepEqual(this.el.body.shapes[0].halfExtents, 
+    assert.deepEqual(this.el.body.shapes[0].halfExtents,
                         scale.set(0.5, 0.5, 0.5));
   });
 });

@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 
-var helpers = require('../helpers'), 
-    entityFactory = helpers.entityFactory;
+var helpers = require('../helpers'),
+  entityFactory = helpers.entityFactory;
 
 suite('super-hands & reaction component integration', function () {
   setup(function (done) {
@@ -62,14 +62,14 @@ suite('super-hands & reaction component integration', function () {
     assert.isFalse(this.target1.is('stretched'), 'hand 1 release');
     this.sh1.onStretchStartButton();
     assert.isTrue(this.target1.is('stretched'), 'resume stretch');
-    this.sh2.onStretchEndButton(); 
+    this.sh2.onStretchEndButton();
     assert.isFalse(this.target1.is('stretched'), 'hand 2 release');
     this.sh1.onStretchEndButton();
     assert.equal(this.target1.components.stretchable.stretchers.length, 0);
   });
   test('drag-droppable', function () {
     var dropSpy = this.sinon.spy(),
-        targetDropSpy = this.sinon.spy();
+      targetDropSpy = this.sinon.spy();
     this.target1.addEventListener('drag-drop', dropSpy);
     this.target2.addEventListener('drag-drop', targetDropSpy);
     this.sh1.onDragDropStartButton();
@@ -152,7 +152,8 @@ suite('super-hands collider integration', function () {
     this.hand1 = helpers.controllerFactory({
       'vive-controls': 'hand: right; model: false',
       geometry: 'primitive: sphere',
-      'super-hands': '', 'sphere-collider': 'objects: #target1, #target2'
+      'super-hands': '',
+      'sphere-collider': 'objects: #target1, #target2'
     }, true);
     this.hand2 = helpers.controllerFactory({
       'vive-controls': 'hand: left; model: false',
@@ -170,7 +171,7 @@ suite('super-hands collider integration', function () {
   });
   test('avoid excessive drag event dispatch', function () {
     var dragenterSpy = this.sinon.spy(),
-        aFrameDragoverSpy = this.sinon.spy();
+      aFrameDragoverSpy = this.sinon.spy();
     this.target2.ondragenter = dragenterSpy;
     this.target2.addEventListener('dragover-start', aFrameDragoverSpy);
     this.target1.addEventListener('drag-start', e => e.preventDefault());
@@ -193,9 +194,9 @@ suite('super-hands collider integration', function () {
   });
   test('avoid excessive hover event dispatch', function () {
     var mouseoverSpy = this.sinon.spy(),
-        aFrameHoverSpy = this.sinon.spy();
+      aFrameHoverSpy = this.sinon.spy();
     // multiple targets cause justifiable event repetition, so limit to one
-    this.col1.els = [this.target1]; 
+    this.col1.els = [this.target1];
     this.target1.onmouseover = mouseoverSpy;
     this.target1.addEventListener('hover-start', aFrameHoverSpy);
     this.target1.addEventListener('hover-start', e => e.preventDefault());
@@ -208,10 +209,10 @@ suite('super-hands collider integration', function () {
   });
   test('avoid excessive rejected event dispatch', function () {
     var grabSpy = this.sinon.spy(),
-        stretchSpy = this.sinon.spy(),
-        dragSpy = this.sinon.spy();
+      stretchSpy = this.sinon.spy(),
+      dragSpy = this.sinon.spy();
     // multiple targets cause justifiable event repetition, so limit to one
-    this.col1.els = [this.target1]; 
+    this.col1.els = [this.target1];
     this.target1.addEventListener('grab-start', grabSpy);
     this.target1.addEventListener('stretch-start', stretchSpy);
     this.target1.addEventListener('drag-start', dragSpy);
@@ -231,12 +232,16 @@ suite('super-hands collider integration', function () {
     this.target1.setAttribute('grabbable', 'maxGrabbers: 1');
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
-    assert.isTrue(this.sh1.state.has(this.sh1.GRAB_EVENT), 
-                  '1st super-hand recognizes grab');
+    assert.isTrue(
+      this.sh1.state.has(this.sh1.GRAB_EVENT),
+      '1st super-hand recognizes grab'
+    );
     this.sh2.onGrabStartButton();
     this.sh2.onHit({ detail: { el: this.target1 } });
-    assert.isFalse(this.sh2.state.has(this.sh1.GRAB_EVENT), 
-                   '2nd super-hand recognizes rejection');
+    assert.isFalse(
+      this.sh2.state.has(this.sh1.GRAB_EVENT),
+      '2nd super-hand recognizes rejection'
+    );
   });
 });
 suite('super-hands & clickable component integration', function () {

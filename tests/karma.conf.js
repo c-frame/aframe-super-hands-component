@@ -7,8 +7,8 @@ var karma_conf = {
       ['babelify', {presets: ['es2015']}]
     ]
   },
-  //browsers: ['Firefox', 'Chrome'],
-  //browsers: ['Chromium'],
+  // browsers: ['Firefox', 'Chrome'],
+  // browsers: ['Chromium'],
   browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
@@ -24,14 +24,14 @@ var karma_conf = {
     'TEST_ENV'
   ],
   files: [
-    //dependencies
-    {pattern: 'tests/testDependencies.js', included: true}, 
-    //module
+    // dependencies
+    {pattern: 'tests/testDependencies.js', included: true},
+    // module
     {pattern: 'index.js', included: true},
     // Define test files.
-    {pattern: 'tests/**/*.test.js'},
+    {pattern: 'tests/**/*.test.js'}
     // Serve test assets.
-    //{pattern: 'tests/assets/**/*', included: false, served: true}
+    // {pattern: 'tests/assets/**/*', included: false, served: true}
   ],
   frameworks: ['mocha', 'sinon-chai', 'chai-shallow-deep-equal', 'browserify'],
   preprocessors: {

@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 var helpers = require('../helpers'),
-    entityFactory = helpers.entityFactory,
-    coord = AFRAME.utils.coordinates.parse;
+  entityFactory = helpers.entityFactory,
+  coord = AFRAME.utils.coordinates.parse;
 suite('clickable-lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
@@ -56,6 +56,4 @@ suite('clickable function', function () {
     assert.strictEqual(this.clicker.clickers.length, 0);
     assert.isFalse(this.el.is(this.clicker.CLICKED_STATE));
   });
-
 });
-

@@ -1,5 +1,5 @@
 AFRAME.registerComponent('locomotor', {
-  schema: { 
+  schema: {
     restrictY: {default: true}
   },
   init: function () {
@@ -7,10 +7,10 @@ AFRAME.registerComponent('locomotor', {
     this.MOVE_EVENT = 'grab-start';
     this.STOP_EVENT = 'grab-end';
     this.mover = null;
-    
+
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-    
+
     this.el.addEventListener(this.MOVE_EVENT, this.start);
     this.el.addEventListener(this.STOP_EVENT, this.end);
 
@@ -31,7 +31,7 @@ AFRAME.registerComponent('locomotor', {
   },
   update: function (oldDat) {
   },
-  tick: function() {
+  tick: function () {
     if (this.mover) {
       var handPosition = this.mover.getAttribute('position'),
         previousPosition = this.previousPosition || handPosition,
@@ -53,7 +53,7 @@ AFRAME.registerComponent('locomotor', {
     this.el.removeEventListener(this.MOVE_EVENT, this.start);
     this.el.removeEventListener(this.STOP_EVENT, this.end);
   },
-  start: function(evt) {
+  start: function (evt) {
     this.mover = evt.detail.hand;
     this.previousPosition = null;
     if (evt.preventDefault) { evt.preventDefault(); }

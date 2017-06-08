@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 
 var helpers = require('../helpers'),
-    entityFactory = helpers.entityFactory;
+  entityFactory = helpers.entityFactory;
 
 suite('hoverable', function () {
   setup(function (done) {
@@ -32,7 +32,7 @@ suite('hoverable', function () {
   });
   test('state consistent through hoverer overlap', function () {
     var h2 = helpers
-      .controllerFactory( { 'vive-controls': 'hand: left' }, true);
+      .controllerFactory({ 'vive-controls': 'hand: left' }, true);
     this.comp.start({ detail: { hand: this.hand } });
     this.comp.start({ detail: { hand: h2 } });
     assert.isOk(this.el.is('hovered'));

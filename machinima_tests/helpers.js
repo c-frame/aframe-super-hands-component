@@ -79,4 +79,3 @@ module.exports.controllerFactory = function (comps, controllerOverride, scene) {
   scene.appendChild(contrEl);
   return contrEl;
 };
-

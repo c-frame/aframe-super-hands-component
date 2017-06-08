@@ -3,12 +3,12 @@ AFRAME.registerComponent('hoverable', {
     this.HOVERED_STATE = 'hovered';
     this.HOVER_EVENT = 'hover-start';
     this.UNHOVER_EVENT = 'hover-end';
-    
+
     this.hoverers = [];
-    
+
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
-    
+
     this.el.addEventListener(this.HOVER_EVENT, this.start);
     this.el.addEventListener(this.UNHOVER_EVENT, this.end);
   },
@@ -16,19 +16,19 @@ AFRAME.registerComponent('hoverable', {
     this.el.removeEventListener(this.HOVER_EVENT, this.start);
     this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
   },
-  start: function(evt) {
+  start: function (evt) {
     this.el.addState(this.HOVERED_STATE);
-    if(this.hoverers.indexOf(evt.detail.hand) === -1) {
+    if (this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
     }
-    if(evt.preventDefault) { evt.preventDefault(); }
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   end: function (evt) {
     var handIndex = this.hoverers.indexOf(evt.detail.hand);
-    if(handIndex !== -1) {
+    if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
     }
-    if(this.hoverers.length < 1) {
+    if (this.hoverers.length < 1) {
       this.el.removeState(this.HOVERED_STATE);
     }
   }
