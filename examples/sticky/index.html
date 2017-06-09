@@ -23,7 +23,7 @@
     <a-scene physics>
       <a-assets>
         <img id="grid" src="grid.png"/>
-        <a-mixin id="controller" 
+        <a-mixin id="controller"
                  super-hands="grabStartButtons: triggerdown; grabEndButtons: gripdown; stretchStartButtons: trackpaddown; stretchEndButtons: trackpadup"
                  controller-loaded
                  sphere-collider="objects: a-cone#stick"></a-mixin>
@@ -37,10 +37,8 @@
         <a-mixin id="bat-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
         <a-mixin id="bat-stretched" material="wireframe: true"></a-mixin>
       </a-assets>
-      <a-locomotor stretchable>
-        <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
-        <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      </a-locomotor>
+      <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.15 -1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.15 -0.5" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="-1 0.15 -1" material="color: blue"></a-entity>
@@ -54,7 +52,7 @@
       <a-plane mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-plane>
       <a-plane mixin="floor" position="0 0 1.5" rotation="85 0 0" side="back"></a-plane>
       <a-plane mixin="floor" position="-1.5 0 0" rotation="-85 90 0"></a-plane>
-      <a-plane mixin="floor" position="1.5 0 0" rotation="-85 -90 0"></a-plane> 
+      <a-plane mixin="floor" position="1.5 0 0" rotation="-85 -90 0"></a-plane>
     </a-scene>
 
     <!-- GitHub Corner. -->
