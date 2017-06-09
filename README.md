@@ -7,33 +7,33 @@
 Effortlessly add natural, intuitive hand controller interaction in
 [A-Frame](https://aframe.io).
 
-![Demo Gif](readme_files/super-hands-demo.gif) 
+![Demo Gif](readme_files/super-hands-demo.gif)
 
 ![Super Hans Can't Make a Fist](readme_files/peep-show-super-hans.gif)
 
 ### Description
 
-The `super-hands` component interprets input from tracked controllers and 
+The `super-hands` component interprets input from tracked controllers and
 collision detection components
-into interaction gestures and communicates those gestures to 
+into interaction gestures and communicates those gestures to
 target entities for them to respond.  
 
 The currently implemented gestures are:
 
 * Hover: Holding a controller in the collision space of an entity
 * Grab: Pressing a button while hovering an entity, potentially also moving it
-* Stretch: Grabbing an entity with two hands and resizing 
+* Stretch: Grabbing an entity with two hands and resizing
 * Drag-drop: Dragging an entity onto another entity
 
-For an entity to respond to the `super-hands` gestures, it needs to have 
-components attached to translate the gestures into actions. `super-hands` 
-includes components for typical reactions to the implemented gestures: 
+For an entity to respond to the `super-hands` gestures, it needs to have
+components attached to translate the gestures into actions. `super-hands`
+includes components for typical reactions to the implemented gestures:
 `hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
 **Avatar Locomotion**: Inspired by a demo from @caseyyee, the `super-hands`
 grab and stretch gestures can also serve as a comfortable locomotion system
 by moving and scaling the world around the player. Use the `a-locomotor` primitive
-to provide intuitive freedom of motion in your WebVR experiences. 
+to provide intuitive freedom of motion in your WebVR experiences.
 
 ### Installation
 
@@ -63,7 +63,7 @@ Install and use by directly including the [browser files](dist):
 </body>
 ```
 
-#### npm 
+#### npm
 
 Install via npm:
 
@@ -87,23 +87,23 @@ require('super-hands');
 
 ![Separation of Gesture and Response API](readme_files/super-hands-api.png)
 
-Separating the reaction to be the responsibility of the entity affected allows for extensibility. 
-In response to a grab, you may want some entities to lock to the controller and move, 
-others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged. 
+Separating the reaction to be the responsibility of the entity affected allows for extensibility.
+In response to a grab, you may want some entities to lock to the controller and move,
+others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged.
 With this API schema, these options can be handled by adding or creating different reaction
-components to the entities in your scene, and `super-hands` can work with all of them. 
+components to the entities in your scene, and `super-hands` can work with all of them.
 
 #### Interactivity
 
 There are two pathways to adding additional interactivity.
 
-1. A-Frame style: Each component's API documentation describes the A-Frame 
-custom events and states it uses. 
+1. A-Frame style: Each component's API documentation describes the A-Frame
+custom events and states it uses.
 These are best processed by creating new A-Frame components that register
-event listeners and react accordingly. 
+event listeners and react accordingly.
 1. HTML style: The `super-hands` component also integrates with the
 Global Event Handlers Web API to trigger standard mouse events analogous
-to the VR interactions that can easily be handled through 
+to the VR interactions that can easily be handled through
 properties like `onclick`.
 
 
@@ -114,13 +114,13 @@ v1.0.0
 
 * Maturation of A-Frame style API: Reaction components now need to cancel
   gesture events in order to communicate acceptance of the gesture to `super-hands`.
-  This improves state tracking and handling of overlapping/nested 
-  entities 
-* Improved Global Event Handlers integration: 
-    * When overlapping entities create multiple potential targets for GEH 
+  This improves state tracking and handling of overlapping/nested
+  entities
+* Improved Global Event Handlers integration:
+    * When overlapping entities create multiple potential targets for GEH
       events, the events fire on all potential targets
-    * `click` now functions more like its mouse counterpart, only firing 
-      if a mouseup occurs after a mousedown and without losing collision 
+    * `click` now functions more like its mouse counterpart, only firing
+      if a mouseup occurs after a mousedown and without losing collision
       with the target entity
 * Two-handed grabbing: `grabbable` can now process grabs from multiple
   `super-hands` entities. In non-physics interactions, this makes passing
@@ -129,8 +129,8 @@ v1.0.0
 * `a-locomotor`: drop-in freedom of motion for WebVR experiences
   with this new primitive
 * `strechable` flexibility: state tracking of hands attempting to
-  stretch moved from `super-hands` to `strechable`. This should allow for 
-  different avatars in a multi-user setting to stretch a single entity 
+  stretch moved from `super-hands` to `strechable`. This should allow for
+  different avatars in a multi-user setting to stretch a single entity
   cooperatively
 * Added [machinima testing](https://github.com/wmurphyrd/aframe-machinima-testing)
   for automated testing based on motion-captured user input to improve
@@ -138,12 +138,12 @@ v1.0.0
 
 v0.3.1
 
-* New: integration with GlobalEventHandlers for easy reactivity via element 
+* New: integration with GlobalEventHandlers for easy reactivity via element
   properties such as `onclick`
 * New: `clickable` reaction component for interacting with an entity
   without moving it
-  
-  
+
+
 v0.3.0
 
 * Confirmed compatibility with A-Frame v0.5.0 (no changes)
@@ -163,6 +163,12 @@ v0.2.3
 #### Known Issues
 
 * Collision zones for stretched entities don't update to new scale (`sphere-collider` does not take entity scale into account)
+  * This makes it difficult to shrink back down if you've enlarged yourself via
+    `a-locomotor` & `stretchable`
+* When both hands are hovering an entity and one leaves, the entity will lose
+  the hover state for one tick
+  * Related to messaging from `sphere-collider`; unable to distinguish which
+    collider instance is signaling the collision termination.
 
 #### Compatibility
 
@@ -177,7 +183,7 @@ v0.2.3
 #### super-hands component
 
 `super-hands` should be added to same entities as your controller
-component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc) 
+component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc)
 or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
 
 ##### Component Schema
@@ -193,18 +199,18 @@ or the in-development, physics system-based [physics-collider](https://github.co
 | dragDropStartButtons | Array of button event types that can initiate dragging/hovering | Trigger, grip, thumb press events |
 | dragDropEndButtons | Array of button event types that can execute drag-drop | Trigger, grip, thumb release events |
 
-Default button events include specific events for `vive-controls`, `hand-controls` and 
+Default button events include specific events for `vive-controls`, `hand-controls` and
 `oculus-touch-controls`.
 
-Default start events: 'gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 
+Default start events: 'gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown'
 
-Default end events: 'gripup', 'trackpadup', 'triggerup', 'gripopen', 
+Default end events: 'gripup', 'trackpadup', 'triggerup', 'gripopen',
 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup'
 
 ##### Events
 
-Events will be emitted by the entity being interacted with. 
+Events will be emitted by the entity being interacted with.
 The entity that `super-hands` is attached to is sent in the event `details` as the property `hand`.
 
 | Type | Description | Target |  details object |
@@ -221,19 +227,19 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 | dragover-end | No longer collided with entity from dragover-start | collided entity & held entity | hand: `super-hands` entity, hovered: collided entity, carried: held entity |
 | drag-drop | Button released while holding an entity and collided with another | collided entity & held entity | hand: `super-hands` entity, dropped: carried entity, on (carried entity only): receiving entity |
 
-Notes: 
+Notes:
 
-* References to buttons being "released" and "pressed" are dependent on the schema settings. 
-For example, to make grab 'sticky', you could set grabStartButtons to 
-'triggerdown' and grabEndButtons to 'gripdown' (as in the 
+* References to buttons being "released" and "pressed" are dependent on the schema settings.
+For example, to make grab 'sticky', you could set grabStartButtons to
+'triggerdown' and grabEndButtons to 'gripdown' (as in the
 [sticky example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)).
-This way the grab-end event would not fire until the grip button was *pressed*, 
-even if the trigger was *released* earlier. 
-* Only one entity at a time will be targeted for each event type, 
-even if multiple overlapping collision zones exist. `super-hands` tracks a 
+This way the grab-end event would not fire until the grip button was *pressed*,
+even if the trigger was *released* earlier.
+* Only one entity at a time will be targeted for each event type,
+even if multiple overlapping collision zones exist. `super-hands` tracks a
 FIFO queue of collided entities to determine which will be affected.
-* drag-drop: For the receiving entity, `on` entry in the details is `null`. 
-If needed, use `event.target` instead. 
+* drag-drop: For the receiving entity, `on` entry in the details is `null`.
+If needed, use `event.target` instead.
 
 ##### Global Event Handler Integration
 
@@ -256,18 +262,18 @@ listed in the table. Drag-dropping events will be dispatched on both the entity 
 
 #### a-locomotor primitive
 
-Add freedom of movement by wrapping the player avatar in an `a-locomotor` primitive. 
+Add freedom of movement by wrapping the player avatar in an `a-locomotor` primitive.
 Users can then grab and move the world around themselves to navigate your WebVR experience
-in a way that is comfortable even for most people prone to simulation sickness. 
+in a way that is comfortable even for most people prone to simulation sickness.
 
 The component works by enveloping the player in an invisible sphere that picks up grabbing
 gestures made on empty space and translates into movement for the `a-locomotor`. Your camera
 and controller entities need to be children of the locomotor for this to work properly.
-If you do not specify any camera in the scene, `a-locomotor` will automatically pick up 
-the A-Frame default camera and take care of it. Your colliders must also be configured to 
+If you do not specify any camera in the scene, `a-locomotor` will automatically pick up
+the A-Frame default camera and take care of it. Your colliders must also be configured to
 detect `a-locomotor`. If you are using A-Frame Extras `sphere-collider`, `a-locomotor` will
-automatically add itself to the `objects` selector property. 
-Using the automatic camera and collider configuration, 
+automatically add itself to the `objects` selector property.
+Using the automatic camera and collider configuration,
 setting up `a-locomotor` simply requires wrapping your controller
 entities like so:
 
@@ -279,13 +285,17 @@ entities like so:
 ```
 
 You can also give the player the ability
-to re-scale the world around themselves by adding the `strechable` component to `a-locomotor`.
+to re-scale the world around themselves by adding the `strechable`
+component to `a-locomotor`. It works best with the `invert` property of
+stretchable set to `true`, and `a-locomotor` will set this automatically
+when `autoConfig` is on.
 
 
 ##### Component Schema
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
+| autoConfig | check and fix camera parentage, collider selector, and strechable inversion | `true` |
 | restrictY | should vertical movement be suppressed | `true` |
 
 #### hoverable component
@@ -306,14 +316,14 @@ in the assets withe same id + '-hovered' will activate automatically, as in
 
 Makes and entity move along with the controller while it is grabbed.
 
-This works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system) 
-to manage grabbed entity movement, but it will fallback to manual `position` updates 
-(without rotational translation) if physics is not available or is disabled with `usePhysics = never`. 
+This works best with [aframe-physics-system](https://github.com/donmccurdy/aframe-physics-system)
+to manage grabbed entity movement, but it will fallback to manual `position` updates
+(without rotational translation) if physics is not available or is disabled with `usePhysics = never`.
 
 Allows for multiple hands to register a grab on an entity. In a non-physics setup, this has no effect
 other than allowing smooth passing of entities between hands. With physics enabled, additional grabbing
 hands register their own physics constraints to allow for two-handed wielding of entities. Limit or disable
-by setting the maxGrabbers schema property. 
+by setting the maxGrabbers schema property.
 
 ##### Component Schema
 
@@ -331,7 +341,7 @@ by setting the maxGrabbers schema property.
 #### clickable component
 
 An alternative version of `grabbable` that registers that a button was pressed, but does not
-move the entity. Do not use `clickable` and `grabbable` on the same entity 
+move the entity. Do not use `clickable` and `grabbable` on the same entity
 (just use `grabbable` and watch the "grabbed" state instead of "clicked")
 
 ##### States
@@ -349,8 +359,9 @@ Makes and entity rescale while grabbed by both controllers as they are moved clo
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | usePhysics | Whether to update physics body shapes with scale changes, 'ifavailable' or 'never' | 'ifavailable' |
+| invert | Reverse the direction of scaling in relation to controller movement | `false` |
 
-There is no CANNON api method for updating physics body scale, but `stretchable` will manually rescale basic shapes. Currently rescalable shapes are: box. 
+There is no CANNON api method for updating physics body scale, but `stretchable` will manually rescale basic shapes. Currently rescalable shapes are: box.
 
 ##### States
 
@@ -360,12 +371,12 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 
 #### drag-droppable component
 
-`drag-droppable` is a shell component that only manages the 'hovered' state for the entity. 
-This can be combined with  with a '-hovered' mixin to easily highlight when an entity is 
-hovering in a drag-drop location. 
+`drag-droppable` is a shell component that only manages the 'hovered' state for the entity.
+This can be combined with  with a '-hovered' mixin to easily highlight when an entity is
+hovering in a drag-drop location.
 
-For interactivity, use the global event handler integration, 
-the `event-set` from [kframe](http://github.com/ngokevin/kframe) 
+For interactivity, use the global event handler integration,
+the `event-set` from [kframe](http://github.com/ngokevin/kframe)
 with the `drag-dropped` event, or create your own component.
 
 ##### States
@@ -374,5 +385,5 @@ with the `drag-dropped` event, or create your own component.
 | --- | --- |
 | dragover | Added to while a carried entity is colliding with a a `drag-droppable` entity |
 
-Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to 
-receive the hovered state. 
+Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to
+receive the hovered state.
