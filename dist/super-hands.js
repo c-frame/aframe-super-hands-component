@@ -737,9 +737,11 @@
 
 	'use strict';
 
+	/* global AFRAME, THREE */
 	AFRAME.registerComponent('stretchable', {
 	  schema: {
-	    usePhysics: { default: 'ifavailable' }
+	    usePhysics: { default: 'ifavailable' },
+	    invert: { default: false }
 	  },
 	  init: function init() {
 	    this.STRETCHED_STATE = 'stretched';
@@ -759,14 +761,13 @@
 	    if (!this.stretched) {
 	      return;
 	    }
-	    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale')),
-	        myGeom = this.el.getAttribute('geometry'),
-	        handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position')),
-	        otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position')),
-	        currentStretch = handPos.distanceTo(otherHandPos),
-	        deltaStretch = 1;
+	    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
+	    var handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position'));
+	    var otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position'));
+	    var currentStretch = handPos.distanceTo(otherHandPos);
+	    var deltaStretch = 1;
 	    if (this.previousStretch !== null && currentStretch !== 0) {
-	      deltaStretch = currentStretch / this.previousStretch;
+	      deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
 	    }
 	    this.previousStretch = currentStretch;
 	    scale = scale.multiplyScalar(deltaStretch);
@@ -927,8 +928,10 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	AFRAME.registerComponent('locomotor', {
 	  schema: {
+	    autoConfig: { default: true },
 	    restrictY: { default: true }
 	  },
 	  init: function init() {
@@ -945,32 +948,41 @@
 	    this.el.addEventListener(this.MOVE_EVENT, this.start);
 	    this.el.addEventListener(this.STOP_EVENT, this.end);
 
-	    // make sure locomotor is collidable
-	    this.el.childNodes.forEach(function (el) {
-	      var col = el.getAttribute && el.getAttribute('sphere-collider');
-	      if (col && col.objects.indexOf('a-locomotor') === -1) {
-	        el.setAttribute('sphere-collider', { objects: col.objects + ', a-locomotor' });
+	    if (this.data.autoConfig) {
+	      var stretcher = this.el.getDOMAttribute('stretchable');
+	      // make sure locomotor is collidable
+	      this.el.childNodes.forEach(function (el) {
+	        var col = el.getAttribute && el.getAttribute('sphere-collider');
+	        if (col && col.objects.indexOf('a-locomotor') === -1) {
+	          el.setAttribute('sphere-collider', {
+	            objects: col.objects === '' ? 'a-locomotor' : col.objects + ', a-locomotor'
+	          });
+	        }
+	      });
+	      // make default camera child of locomotor so it can be moved
+	      this.el.sceneEl.addEventListener('camera-ready', function (e) {
+	        var defCam = document.querySelector('[data-aframe-default-camera]');
+	        if (defCam) {
+	          _this.el.appendChild(defCam);
+	        }
+	      });
+	      // invert stretch if not specified
+	      if (stretcher === '') {
+	        this.el.setAttribute('stretchable', 'invert: true');
 	      }
-	    });
-	    // make default camera child of locomotor so it can be moved
-	    this.el.sceneEl.addEventListener('loaded', function (e) {
-	      var defCam = document.querySelector('[camera][aframe-injected]');
-	      if (defCam) {
-	        _this.el.appendChild(defCam);
-	      }
-	    });
+	    }
 	  },
 	  update: function update(oldDat) {},
 	  tick: function tick() {
 	    if (this.mover) {
-	      var handPosition = this.mover.getAttribute('position'),
-	          previousPosition = this.previousPosition || handPosition,
-	          deltaPosition = {
+	      var handPosition = this.mover.getAttribute('position');
+	      var previousPosition = this.previousPosition || handPosition;
+	      var deltaPosition = {
 	        x: handPosition.x - previousPosition.x,
 	        y: handPosition.y - previousPosition.y,
 	        z: handPosition.z - previousPosition.z
-	      },
-	          position = this.el.getAttribute('position');
+	      };
+	      var position = this.el.getAttribute('position');
 	      // subtract delta to invert movement
 	      this.el.setAttribute('position', {
 	        x: position.x - deltaPosition.x,
