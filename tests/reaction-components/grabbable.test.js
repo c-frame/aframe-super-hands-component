@@ -1,7 +1,7 @@
-/* global assert, process, setup, suite, test */
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory,
-  coord = AFRAME.utils.coordinates.parse;
+/* global assert, process, setup, suite, test, AFRAME */
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
+const coord = AFRAME.utils.coordinates.parse;
 suite('grabbable-lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
@@ -39,17 +39,17 @@ suite('grabbable-function without physics', function () {
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
-    myGrabbable.start({ detail: { hand: this.hand }});
+    myGrabbable.start({detail: {hand: this.hand}});
     assert.isOk(myGrabbable.grabbed);
     assert.isOk(myGrabbable.grabber);
     assert.strictEqual(myGrabbable.grabber, hand);
     assert.isOk(el.is(myGrabbable.GRABBED_STATE));
   });
   test('position updates during grab', function () {
-    var posStub = sinon.stub(this.hand, 'getAttribute'),
-      myGrabbable = this.el.components.grabbable;
+    const posStub = this.sinon.stub(this.hand.object3D, 'getWorldPosition');
+    const myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
-    posStub.withArgs('position')
+    posStub // .withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
     myGrabbable.start({detail: {hand: this.hand}});

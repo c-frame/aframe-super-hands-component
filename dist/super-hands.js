@@ -599,7 +599,9 @@
 	AFRAME.registerComponent('grabbable', {
 	  schema: {
 	    usePhysics: { default: 'ifavailable' },
-	    maxGrabbers: { type: 'int', default: NaN }
+	    maxGrabbers: { type: 'int', default: NaN },
+	    invert: { default: false },
+	    suppressY: { default: false }
 	  },
 	  init: function init() {
 	    var _this = this;
@@ -625,10 +627,13 @@
 	    if (this.data.usePhysics === 'never' && this.constraints.size) {
 	      this.clearConstraints();
 	    }
+	    this.xFactor = this.data.invert ? -1 : 1;
+	    this.zFactor = this.data.invert ? -1 : 1;
+	    this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
 	  },
 	  tick: function tick() {
 	    if (this.grabber && !this.constraints.size && this.data.usePhysics !== 'only') {
-	      var handPosition = this.grabber.getAttribute('position');
+	      var handPosition = this.grabber.object3D ? this.grabber.object3D.getWorldPosition() : this.grabber.getAttribute('position');
 	      var previousPosition = this.previousPosition || handPosition;
 	      var deltaPosition = {
 	        x: handPosition.x - previousPosition.x,
@@ -636,12 +641,11 @@
 	        z: handPosition.z - previousPosition.z
 	      };
 	      var position = this.el.getAttribute('position');
-
 	      this.previousPosition = handPosition;
 	      this.el.setAttribute('position', {
-	        x: position.x + deltaPosition.x,
-	        y: position.y + deltaPosition.y,
-	        z: position.z + deltaPosition.z
+	        x: position.x + deltaPosition.x * this.xFactor,
+	        y: position.y + deltaPosition.y * this.yFactor,
+	        z: position.z + deltaPosition.z * this.zFactor
 	      });
 	    }
 	  },
@@ -929,36 +933,38 @@
 	'use strict';
 
 	/* global AFRAME */
-	AFRAME.registerComponent('locomotor', {
+	AFRAME.registerComponent('locomotor-auto-config', {
 	  schema: {
-	    autoConfig: { default: true },
-	    restrictY: { default: true }
+	    camera: { default: true },
+	    stretch: { default: true },
+	    move: { default: true },
+	    collider: { default: true }
 	  },
 	  init: function init() {
 	    var _this = this;
 
-	    this.MOVE_STATE = 'moving';
-	    this.MOVE_EVENT = 'grab-start';
-	    this.STOP_EVENT = 'grab-end';
-	    this.mover = null;
-
-	    this.start = this.start.bind(this);
-	    this.end = this.end.bind(this);
-
-	    this.el.addEventListener(this.MOVE_EVENT, this.start);
-	    this.el.addEventListener(this.STOP_EVENT, this.end);
-
-	    if (this.data.autoConfig) {
-	      var stretcher = this.el.getDOMAttribute('stretchable');
+	    if (!this.data.stretch) {
+	      this.el.removeComponent('stretchable');
+	    }
+	    if (!this.data.move) {
+	      this.el.removeComponent('grabbable');
+	    }
+	    if (this.data.collider) {
 	      // make sure locomotor is collidable
 	      this.el.childNodes.forEach(function (el) {
 	        var col = el.getAttribute && el.getAttribute('sphere-collider');
 	        if (col && col.objects.indexOf('a-locomotor') === -1) {
 	          el.setAttribute('sphere-collider', {
-	            objects: col.objects === '' ? 'a-locomotor' : col.objects + ', a-locomotor'
+	            objects: col.objects === '' ?
+	            // empty objects property will collide with everything
+	            col.objects
+	            // otherwise add self to selector string
+	            : col.objects + ', a-locomotor'
 	          });
 	        }
 	      });
+	    }
+	    if (this.data.camera) {
 	      // make default camera child of locomotor so it can be moved
 	      this.el.sceneEl.addEventListener('camera-ready', function (e) {
 	        var defCam = document.querySelector('[data-aframe-default-camera]');
@@ -966,45 +972,7 @@
 	          _this.el.appendChild(defCam);
 	        }
 	      });
-	      // invert stretch if not specified
-	      if (stretcher === '') {
-	        this.el.setAttribute('stretchable', 'invert: true');
-	      }
 	    }
-	  },
-	  update: function update(oldDat) {},
-	  tick: function tick() {
-	    if (this.mover) {
-	      var handPosition = this.mover.getAttribute('position');
-	      var previousPosition = this.previousPosition || handPosition;
-	      var deltaPosition = {
-	        x: handPosition.x - previousPosition.x,
-	        y: handPosition.y - previousPosition.y,
-	        z: handPosition.z - previousPosition.z
-	      };
-	      var position = this.el.getAttribute('position');
-	      // subtract delta to invert movement
-	      this.el.setAttribute('position', {
-	        x: position.x - deltaPosition.x,
-	        y: position.y - deltaPosition.y * !this.data.restrictY,
-	        z: position.z - deltaPosition.z
-	      });
-	      this.previousPosition = handPosition;
-	    }
-	  },
-	  remove: function remove() {
-	    this.el.removeEventListener(this.MOVE_EVENT, this.start);
-	    this.el.removeEventListener(this.STOP_EVENT, this.end);
-	  },
-	  start: function start(evt) {
-	    this.mover = evt.detail.hand;
-	    this.previousPosition = null;
-	    if (evt.preventDefault) {
-	      evt.preventDefault();
-	    }
-	  },
-	  end: function end(evt) {
-	    this.mover = null;
 	  }
 	});
 
@@ -1030,10 +998,22 @@
 	      transparent: true,
 	      opacity: 0
 	    },
-	    locomotor: {}
+	    grabbable: {
+	      usePhysics: 'never',
+	      invert: true,
+	      suppressY: true
+	    },
+	    stretchable: {
+	      invert: true
+	    },
+	    'locomotor-auto-config': {}
 	  },
 	  mappings: {
-	    restrictY: 'locomotor.restrictY'
+	    'fetch-camera': 'locomotor-auto-config.camera',
+	    'add-to-colliders': 'locomotor-auto-config.collider',
+	    'allow-movement': 'locomotor-auto-config.move',
+	    'horizontal-only': 'grabbable.suppressY',
+	    'allow-scaling': 'locomotor-auto-config.stretch'
 	  }
 	}));
 

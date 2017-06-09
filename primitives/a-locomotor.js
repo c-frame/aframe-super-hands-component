@@ -14,9 +14,21 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
       transparent: true,
       opacity: 0
     },
-    locomotor: {}
+    grabbable: {
+      usePhysics: 'never',
+      invert: true,
+      suppressY: true
+    },
+    stretchable: {
+      invert: true
+    },
+    'locomotor-auto-config': {}
   },
   mappings: {
-    restrictY: 'locomotor.restrictY'
+    'fetch-camera': 'locomotor-auto-config.camera',
+    'add-to-colliders': 'locomotor-auto-config.collider',
+    'allow-movement': 'locomotor-auto-config.move',
+    'horizontal-only': 'grabbable.suppressY',
+    'allow-scaling': 'locomotor-auto-config.stretch'
   }
 }));

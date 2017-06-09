@@ -2,7 +2,9 @@
 AFRAME.registerComponent('grabbable', {
   schema: {
     usePhysics: {default: 'ifavailable'},
-    maxGrabbers: {type: 'int', default: NaN}
+    maxGrabbers: {type: 'int', default: NaN},
+    invert: {default: false},
+    suppressY: {default: false}
   },
   init: function () {
     this.GRABBED_STATE = 'grabbed';
@@ -20,11 +22,16 @@ AFRAME.registerComponent('grabbable', {
     if (this.data.usePhysics === 'never' && this.constraints.size) {
       this.clearConstraints();
     }
+    this.xFactor = (this.data.invert) ? -1 : 1;
+    this.zFactor = (this.data.invert) ? -1 : 1;
+    this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
     if (this.grabber && !this.constraints.size &&
        this.data.usePhysics !== 'only') {
-      const handPosition = this.grabber.getAttribute('position');
+      const handPosition = (this.grabber.object3D)
+          ? this.grabber.object3D.getWorldPosition()
+          : this.grabber.getAttribute('position');
       const previousPosition = this.previousPosition || handPosition;
       const deltaPosition = {
         x: handPosition.x - previousPosition.x,
@@ -32,12 +39,11 @@ AFRAME.registerComponent('grabbable', {
         z: handPosition.z - previousPosition.z
       };
       const position = this.el.getAttribute('position');
-
       this.previousPosition = handPosition;
       this.el.setAttribute('position', {
-        x: position.x + deltaPosition.x,
-        y: position.y + deltaPosition.y,
-        z: position.z + deltaPosition.z
+        x: position.x + deltaPosition.x * this.xFactor,
+        y: position.y + deltaPosition.y * this.yFactor,
+        z: position.z + deltaPosition.z * this.zFactor
       });
     }
   },

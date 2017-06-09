@@ -51,8 +51,7 @@ Install and use by directly including the [browser files](dist):
 
 <body>
   <a-scene>
-    <!-- adding stretchable to the locomotor lets users re-scale the scene -->
-    <a-locomotor stretchable>
+    <a-locomotor>
       <!-- Make sure your super-hands entities also have controller and collider components -->
       <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
       <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
@@ -112,6 +111,8 @@ properties like `onclick`.
 
 v1.0.0
 
+* `a-locomotor`: drop-in freedom of motion for WebVR experiences
+  with this new primitive
 * Maturation of A-Frame style API: Reaction components now need to cancel
   gesture events in order to communicate acceptance of the gesture to `super-hands`.
   This improves state tracking and handling of overlapping/nested
@@ -126,8 +127,6 @@ v1.0.0
   `super-hands` entities. In non-physics interactions, this makes passing
   entities between hands much easier. In physics-based interactions, this
   creates multiple constraints for advanced handling
-* `a-locomotor`: drop-in freedom of motion for WebVR experiences
-  with this new primitive
 * `strechable` flexibility: state tracking of hands attempting to
   stretch moved from `super-hands` to `strechable`. This should allow for
   different avatars in a multi-user setting to stretch a single entity
@@ -267,36 +266,37 @@ Users can then grab and move the world around themselves to navigate your WebVR 
 in a way that is comfortable even for most people prone to simulation sickness.
 
 The component works by enveloping the player in an invisible sphere that picks up grabbing
-gestures made on empty space and translates into movement for the `a-locomotor`. Your camera
-and controller entities need to be children of the locomotor for this to work properly.
-If you do not specify any camera in the scene, `a-locomotor` will automatically pick up
-the A-Frame default camera and take care of it. Your colliders must also be configured to
-detect `a-locomotor`. If you are using A-Frame Extras `sphere-collider`, `a-locomotor` will
-automatically add itself to the `objects` selector property.
-Using the automatic camera and collider configuration,
+gestures made on empty space and translates into movement for the `a-locomotor`.
+To function, the player camera and controllers must be children of `a-locomotor`,
+and the controllers' colliders must be configured to collide with `a-locomotor`.
+On initialization, `a-locomotor` will automatically re-parent the A-Frame
+default camera and add itself to the `objects` property of `sphere-collider`
+(see schema below if you want to disable this). With this automatic
+configuration,
 setting up `a-locomotor` simply requires wrapping your controller
 entities like so:
 
 ```html
-<a-locomotor stretchable>
-  <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
-  <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
+<a-locomotor>
+  <a-entity hand-controls="left" super-hands sphere-collider></a-entity>
+  <a-entity hand-controls="right" super-hands sphere-collider></a-entity>
 </a-locomotor>
 ```
 
-You can also give the player the ability
-to re-scale the world around themselves by adding the `strechable`
-component to `a-locomotor`. It works best with the `invert` property of
-stretchable set to `true`, and `a-locomotor` will set this automatically
-when `autoConfig` is on.
+By default, `a-locomotor` gives the player the ability to move freely in the
+horizontal plane and to scale up or down.
+Behavior can be customized by setting the attributes below on the `a-locomotor`
+entity.
 
+##### Primitive Attributes
 
-##### Component Schema
-
-| Property | Description | Default Value |
+| Attribute | Description | Default Value |
 | -------- | ----------- | ------------- |
-| autoConfig | check and fix camera parentage, collider selector, and strechable inversion | `true` |
-| restrictY | should vertical movement be suppressed | `true` |
+| fetch-camera | Make the default camera a child of `a-locomotor` so it can be moved with the player | "true" |
+| add-to-colliders | Ensure `a-locomotor` is visible to child entity `sphere-collider` components | `true` |
+| allow-movement | Allow grabbing gestures to reposition the player | `true` |
+| horizontal-only | Restrict movement to the X-Z plane | `true` |
+| allow-scaling | Allow stretching gestures to rescale the player |`true`|
 
 #### hoverable component
 
@@ -331,6 +331,8 @@ by setting the maxGrabbers schema property.
 | -------- | ----------- | ------------- |
 | usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'ifavailable' |
 | maxGrabbers | Limit number of hands that can grab entity simultaneously | NaN (no limit) |
+| invert | Reverse direction of entity movement compared to grabbing hand | false |
+| suppressY | Allow movement only in the horizontal plane | false |
 
 ##### States
 
