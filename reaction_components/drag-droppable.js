@@ -1,3 +1,4 @@
+/* global AFRAME */
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';

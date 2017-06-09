@@ -1,6 +1,8 @@
+/* global AFRAME, THREE */
 AFRAME.registerComponent('stretchable', {
   schema: {
-    usePhysics: { default: 'ifavailable' }
+    usePhysics: {default: 'ifavailable'},
+    invert: {default: false}
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -20,16 +22,20 @@ AFRAME.registerComponent('stretchable', {
   },
   tick: function () {
     if (!this.stretched) { return; }
-    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale')),
-      myGeom = this.el.getAttribute('geometry'),
-      handPos = new THREE.Vector3()
-        .copy(this.stretchers[0].getAttribute('position')),
-      otherHandPos = new THREE.Vector3()
-        .copy(this.stretchers[1].getAttribute('position')),
-      currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = 1;
+    let scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
+    const handPos = new THREE.Vector3()
+        .copy(this.stretchers[0].getAttribute('position'));
+    const otherHandPos = new THREE.Vector3()
+        .copy(this.stretchers[1].getAttribute('position'));
+    const currentStretch = handPos.distanceTo(otherHandPos);
+    let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
-      deltaStretch = currentStretch / this.previousStretch;
+      deltaStretch = Math.pow(
+          currentStretch / this.previousStretch,
+          (this.data.invert)
+            ? -1
+            : 1
+      );
     }
     this.previousStretch = currentStretch;
     scale = scale.multiplyScalar(deltaStretch);
@@ -38,8 +44,8 @@ AFRAME.registerComponent('stretchable', {
     if (this.el.body && this.data.usePhysics !== 'never') {
       var physicsShape = this.el.body.shapes[0];
       if (physicsShape.halfExtents) {
-        physicsShape.halfExtents.scale(deltaStretch,
-                                      physicsShape.halfExtents);
+        physicsShape.halfExtents
+            .scale(deltaStretch, physicsShape.halfExtents);
         physicsShape.updateConvexPolyhedronRepresentation();
       } else {
         if (!this.shapeWarned) {

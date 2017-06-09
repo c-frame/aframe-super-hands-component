@@ -1,8 +1,8 @@
-/* global assert, process, setup, suite, test */
+/* global assert, process, setup, suite, test, AFRAME */
 
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory,
-  coord = AFRAME.utils.coordinates.parse;
+var helpers = require('../helpers');
+var entityFactory = helpers.entityFactory;
+var coord = AFRAME.utils.coordinates.parse;
 
 suite('stretchable', function () {
   setup(function (done) {
@@ -33,7 +33,7 @@ suite('stretchable', function () {
     this.comp.start({ detail: { hand: this.hand2 } });
     assert.isOk(this.el.is('stretched'));
     assert.sameMembers(this.comp.stretchers, [this.hand1, this.hand2]);
-    this.comp.end({ detail: { hand: this.hand1 }});
+    this.comp.end({detail: {hand: this.hand1}});
     assert.notOk(this.el.is('stretched'));
   });
   test('reject duplicate stretchers', function () {
@@ -43,18 +43,42 @@ suite('stretchable', function () {
     assert.isFalse(this.el.is('stretched'));
   });
   test('scale updates during stretch', function () {
-    var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-      lastScale;
+    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute');
+    const posStub2 = this.sinon.stub(this.hand2, 'getAttribute');
+    var lastScale;
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
       .onThirdCall().returns(coord('2 2 2'));
+    posStub2.withArgs('position').returns(coord('-1 -1 -1'));
     this.comp.start({ detail: { hand: this.hand1 } });
     this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
     assert.deepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
     this.comp.tick();
     assert.notDeepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
+    assert.isAbove(this.el.getAttribute('scale').x, 1);
+    lastScale = this.el.getAttribute('scale');
+    this.comp.end({ detail: { hand: this.hand1 } });
+    this.comp.tick();
+    assert.deepEqual(this.el.getAttribute('scale'), lastScale);
+  });
+  test('scale updates are invertable', function () {
+    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute');
+    const posStub2 = this.sinon.stub(this.hand2, 'getAttribute');
+    var lastScale;
+    this.el.setAttribute('stretchable', {invert: true});
+    posStub1.withArgs('position')
+      .onFirstCall().returns(coord('0 0 0'))
+      .onSecondCall().returns(coord('1 1 1'))
+      .onThirdCall().returns(coord('2 2 2'));
+    posStub2.withArgs('position').returns(coord('-1 -1 -1'));
+    this.comp.start({ detail: { hand: this.hand1 } });
+    this.comp.start({ detail: { hand: this.hand2 } });
+    this.comp.tick();
+    assert.deepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
+    this.comp.tick();
+    assert.isBelow(this.el.getAttribute('scale').x, 1);
     lastScale = this.el.getAttribute('scale');
     this.comp.end({ detail: { hand: this.hand1 } });
     this.comp.tick();

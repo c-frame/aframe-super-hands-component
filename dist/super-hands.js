@@ -178,10 +178,9 @@
 
 	    var clickables = this.hoverEls.filter(function (h) {
 	      return _this.gehClicking.has(h);
-	    }),
-	        i;
+	    });
 	    this.dispatchMouseEventAll('mouseup', this.el, true);
-	    for (i = 0; i < clickables.length; i++) {
+	    for (var i = 0; i < clickables.length; i++) {
 	      this.dispatchMouseEvent(clickables[i], 'click', this.el);
 	    }
 	    this.gehClicking.clear();
@@ -220,9 +219,9 @@
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
 	    var _this2 = this;
 
-	    var ddevt,
-	        dropTarget,
-	        carried = this.state.get(this.DRAG_EVENT);
+	    var ddevt;
+	    var dropTarget;
+	    var carried = this.state.get(this.DRAG_EVENT);
 	    this.dragging = false; // keep _unHover() from activating another droptarget
 	    this.gehDragged.forEach(function (carried) {
 	      _this2.dispatchMouseEvent(carried, 'dragend', _this2.el);
@@ -248,9 +247,8 @@
 	  onHit: function onHit(evt) {
 	    var _this3 = this;
 
-	    var hitEl = evt.detail.el,
-	        used = false,
-	        hitElIndex;
+	    var hitEl = evt.detail.el;
+	    var hitElIndex;
 	    if (!hitEl) {
 	      return;
 	    }
@@ -462,39 +460,38 @@
 	    detail = detail || {};
 	    data = { bubbles: true, cancelable: true, detail: detail };
 	    data.detail.target = data.detail.target || target;
-	    evt = new CustomEvent(name, data);
+	    evt = new window.CustomEvent(name, data);
 	    return target.dispatchEvent(evt);
 	  },
 	  dispatchMouseEvent: function dispatchMouseEvent(target, name, relatedTarget) {
-	    var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
+	    var mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget });
 	    target.dispatchEvent(mEvt);
 	  },
 	  dispatchMouseEventAll: function dispatchMouseEventAll(name, relatedTarget, filterUsed, alsoReverse) {
 	    var _this7 = this;
 
-	    var els = this.hoverEls,
-	        i;
+	    var els = this.hoverEls;
 	    if (filterUsed) {
 	      els = els.filter(function (el) {
 	        return el !== _this7.state.get(_this7.GRAB_EVENT) && el !== _this7.state.get(_this7.DRAG_EVENT) && el !== _this7.state.get(_this7.STRETCH_EVENT) && !_this7.gehDragged.has(el);
 	      });
 	    }
 	    if (alsoReverse) {
-	      for (i = 0; i < els.length; i++) {
+	      for (var i = 0; i < els.length; i++) {
 	        this.dispatchMouseEvent(els[i], name, relatedTarget);
 	        this.dispatchMouseEvent(relatedTarget, name, els[i]);
 	      }
 	    } else {
-	      for (i = 0; i < els.length; i++) {
-	        this.dispatchMouseEvent(els[i], name, relatedTarget);
+	      for (var _i = 0; _i < els.length; _i++) {
+	        this.dispatchMouseEvent(els[_i], name, relatedTarget);
 	      }
 	    }
 	  },
 	  findTarget: function findTarget(evType, detail, filterUsed) {
 	    var _this8 = this;
 
-	    var elIndex,
-	        eligibleEls = this.hoverEls;
+	    var elIndex;
+	    var eligibleEls = this.hoverEls;
 	    if (filterUsed) {
 	      eligibleEls = eligibleEls.filter(function (el) {
 	        return el !== _this8.state.get(_this8.GRAB_EVENT) && el !== _this8.state.get(_this8.DRAG_EVENT) && el !== _this8.state.get(_this8.STRETCH_EVENT);
@@ -522,6 +519,7 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	AFRAME.registerSystem('super-hands', {
 	  init: function init() {
 	    this.superHands = [];
@@ -737,9 +735,11 @@
 
 	'use strict';
 
+	/* global AFRAME, THREE */
 	AFRAME.registerComponent('stretchable', {
 	  schema: {
-	    usePhysics: { default: 'ifavailable' }
+	    usePhysics: { default: 'ifavailable' },
+	    invert: { default: false }
 	  },
 	  init: function init() {
 	    this.STRETCHED_STATE = 'stretched';
@@ -759,14 +759,13 @@
 	    if (!this.stretched) {
 	      return;
 	    }
-	    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale')),
-	        myGeom = this.el.getAttribute('geometry'),
-	        handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position')),
-	        otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position')),
-	        currentStretch = handPos.distanceTo(otherHandPos),
-	        deltaStretch = 1;
+	    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
+	    var handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position'));
+	    var otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position'));
+	    var currentStretch = handPos.distanceTo(otherHandPos);
+	    var deltaStretch = 1;
 	    if (this.previousStretch !== null && currentStretch !== 0) {
-	      deltaStretch = currentStretch / this.previousStretch;
+	      deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
 	    }
 	    this.previousStretch = currentStretch;
 	    scale = scale.multiplyScalar(deltaStretch);
@@ -822,6 +821,7 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	AFRAME.registerComponent('drag-droppable', {
 	  init: function init() {
 	    this.HOVERED_STATE = 'dragover';
@@ -882,6 +882,7 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	AFRAME.registerComponent('clickable', {
 	  schema: {
 	    onclick: { type: 'string' }
@@ -927,8 +928,10 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	AFRAME.registerComponent('locomotor', {
 	  schema: {
+	    autoConfig: { default: true },
 	    restrictY: { default: true }
 	  },
 	  init: function init() {
@@ -945,32 +948,41 @@
 	    this.el.addEventListener(this.MOVE_EVENT, this.start);
 	    this.el.addEventListener(this.STOP_EVENT, this.end);
 
-	    // make sure locomotor is collidable
-	    this.el.childNodes.forEach(function (el) {
-	      var col = el.getAttribute && el.getAttribute('sphere-collider');
-	      if (col && col.objects.indexOf('a-locomotor') === -1) {
-	        el.setAttribute('sphere-collider', { objects: col.objects + ', a-locomotor' });
+	    if (this.data.autoConfig) {
+	      var stretcher = this.el.getDOMAttribute('stretchable');
+	      // make sure locomotor is collidable
+	      this.el.childNodes.forEach(function (el) {
+	        var col = el.getAttribute && el.getAttribute('sphere-collider');
+	        if (col && col.objects.indexOf('a-locomotor') === -1) {
+	          el.setAttribute('sphere-collider', {
+	            objects: col.objects === '' ? 'a-locomotor' : col.objects + ', a-locomotor'
+	          });
+	        }
+	      });
+	      // make default camera child of locomotor so it can be moved
+	      this.el.sceneEl.addEventListener('camera-ready', function (e) {
+	        var defCam = document.querySelector('[data-aframe-default-camera]');
+	        if (defCam) {
+	          _this.el.appendChild(defCam);
+	        }
+	      });
+	      // invert stretch if not specified
+	      if (stretcher === '') {
+	        this.el.setAttribute('stretchable', 'invert: true');
 	      }
-	    });
-	    // make default camera child of locomotor so it can be moved
-	    this.el.sceneEl.addEventListener('loaded', function (e) {
-	      var defCam = document.querySelector('[camera][aframe-injected]');
-	      if (defCam) {
-	        _this.el.appendChild(defCam);
-	      }
-	    });
+	    }
 	  },
 	  update: function update(oldDat) {},
 	  tick: function tick() {
 	    if (this.mover) {
-	      var handPosition = this.mover.getAttribute('position'),
-	          previousPosition = this.previousPosition || handPosition,
-	          deltaPosition = {
+	      var handPosition = this.mover.getAttribute('position');
+	      var previousPosition = this.previousPosition || handPosition;
+	      var deltaPosition = {
 	        x: handPosition.x - previousPosition.x,
 	        y: handPosition.y - previousPosition.y,
 	        z: handPosition.z - previousPosition.z
-	      },
-	          position = this.el.getAttribute('position');
+	      };
+	      var position = this.el.getAttribute('position');
 	      // subtract delta to invert movement
 	      this.el.setAttribute('position', {
 	        x: position.x - deltaPosition.x,
@@ -1002,6 +1014,7 @@
 
 	'use strict';
 
+	/* global AFRAME */
 	var extendDeep = AFRAME.utils.extendDeep;
 	// The mesh mixin provides common material properties for creating mesh-based primitives.
 	// This makes the material component a default component and maps all the base material properties.

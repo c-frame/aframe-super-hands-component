@@ -22,8 +22,8 @@ require('./primitives/a-locomotor.js');
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: { default: 'collided'},
-    colliderEvent: { default: 'hit' },
+    colliderState: {default: 'collided'},
+    colliderEvent: {default: 'hit'},
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
@@ -146,9 +146,9 @@ AFRAME.registerComponent('super-hands', {
     this.updateGrabbed();
   },
   onGrabEndButton: function (evt) {
-    var clickables = this.hoverEls.filter(h => this.gehClicking.has(h)), i;
+    const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
     this.dispatchMouseEventAll('mouseup', this.el, true);
-    for (i = 0; i < clickables.length; i++) {
+    for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
@@ -186,8 +186,9 @@ AFRAME.registerComponent('super-hands', {
     this.updateDragged();
   },
   onDragDropEndButton: function (evt) {
-    var ddevt, dropTarget,
-      carried = this.state.get(this.DRAG_EVENT);
+    var ddevt;
+    var dropTarget;
+    const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
     this.gehDragged.forEach(carried => {
       this.dispatchMouseEvent(carried, 'dragend', this.el);
@@ -211,7 +212,8 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   onHit: function (evt) {
-    var hitEl = evt.detail.el, used = false, hitElIndex;
+    const hitEl = evt.detail.el;
+    var hitElIndex;
     if (!hitEl) { return; }
     hitElIndex = this.hoverEls.indexOf(hitEl);
     if (hitElIndex === -1) {
@@ -420,15 +422,15 @@ AFRAME.registerComponent('super-hands', {
     detail = detail || {};
     data = { bubbles: true, cancelable: true, detail: detail };
     data.detail.target = data.detail.target || target;
-    evt = new CustomEvent(name, data);
+    evt = new window.CustomEvent(name, data);
     return target.dispatchEvent(evt);
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
-    var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
+    var mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
   },
   dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
-    var els = this.hoverEls, i;
+    let els = this.hoverEls;
     if (filterUsed) {
       els = els
         .filter(el => el !== this.state.get(this.GRAB_EVENT) &&
@@ -437,18 +439,19 @@ AFRAME.registerComponent('super-hands', {
                 !this.gehDragged.has(el));
     }
     if (alsoReverse) {
-      for (i = 0; i < els.length; i++) {
+      for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
         this.dispatchMouseEvent(relatedTarget, name, els[i]);
       }
     } else {
-      for (i = 0; i < els.length; i++) {
+      for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
       }
     }
   },
   findTarget: function (evType, detail, filterUsed) {
-    var elIndex, eligibleEls = this.hoverEls;
+    var elIndex;
+    var eligibleEls = this.hoverEls;
     if (filterUsed) {
       eligibleEls = eligibleEls
         .filter(el => el !== this.state.get(this.GRAB_EVENT) &&
@@ -472,6 +475,7 @@ AFRAME.registerComponent('super-hands', {
 });
 
 },{"./primitives/a-locomotor.js":3,"./reaction_components/clickable.js":4,"./reaction_components/drag-droppable.js":5,"./reaction_components/grabbable.js":6,"./reaction_components/hoverable.js":7,"./reaction_components/locomotor.js":8,"./reaction_components/stretchable.js":9,"./systems/super-hands-system.js":10}],3:[function(require,module,exports){
+/* global AFRAME */
 var extendDeep = AFRAME.utils.extendDeep;
 // The mesh mixin provides common material properties for creating mesh-based primitives.
 // This makes the material component a default component and maps all the base material properties.
@@ -495,6 +499,7 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
 }));
 
 },{}],4:[function(require,module,exports){
+/* global AFRAME */
 AFRAME.registerComponent('clickable', {
   schema: {
     onclick: { type: 'string' }
@@ -533,6 +538,7 @@ AFRAME.registerComponent('clickable', {
 });
 
 },{}],5:[function(require,module,exports){
+/* global AFRAME */
 AFRAME.registerComponent('drag-droppable', {
   init: function () {
     this.HOVERED_STATE = 'dragover';
@@ -729,8 +735,10 @@ AFRAME.registerComponent('hoverable', {
 });
 
 },{}],8:[function(require,module,exports){
+/* global AFRAME */
 AFRAME.registerComponent('locomotor', {
   schema: {
+    autoConfig: {default: true},
     restrictY: {default: true}
   },
   init: function () {
@@ -745,32 +753,44 @@ AFRAME.registerComponent('locomotor', {
     this.el.addEventListener(this.MOVE_EVENT, this.start);
     this.el.addEventListener(this.STOP_EVENT, this.end);
 
-    // make sure locomotor is collidable
-    this.el.childNodes.forEach(el => {
-      let col = el.getAttribute && el.getAttribute('sphere-collider');
-      if (col && col.objects.indexOf('a-locomotor') === -1) {
-        el.setAttribute('sphere-collider', {objects: col.objects + ', a-locomotor'});
+    if (this.data.autoConfig) {
+      let stretcher = this.el.getDOMAttribute('stretchable');
+      // make sure locomotor is collidable
+      this.el.childNodes.forEach(el => {
+        let col = el.getAttribute && el.getAttribute('sphere-collider');
+        if (col && col.objects.indexOf('a-locomotor') === -1) {
+          el.setAttribute('sphere-collider', {
+            objects: (col.objects === '')
+                ? 'a-locomotor'
+                : col.objects + ', a-locomotor'
+          });
+        }
+      });
+      // make default camera child of locomotor so it can be moved
+      this.el.sceneEl.addEventListener('camera-ready', e => {
+        var defCam = document.querySelector('[data-aframe-default-camera]');
+        if (defCam) {
+          this.el.appendChild(defCam);
+        }
+      });
+      // invert stretch if not specified
+      if (stretcher === '') {
+        this.el.setAttribute('stretchable', 'invert: true');
       }
-    });
-    // make default camera child of locomotor so it can be moved
-    this.el.sceneEl.addEventListener('loaded', e => {
-      var defCam = document.querySelector('[camera][aframe-injected]');
-      if (defCam) {
-        this.el.appendChild(defCam);
-      }
-    });
+    }
   },
   update: function (oldDat) {
   },
   tick: function () {
     if (this.mover) {
-      var handPosition = this.mover.getAttribute('position'),
-        previousPosition = this.previousPosition || handPosition,
-        deltaPosition = {
-          x: handPosition.x - previousPosition.x,
-          y: handPosition.y - previousPosition.y,
-          z: handPosition.z - previousPosition.z
-        }, position = this.el.getAttribute('position');
+      const handPosition = this.mover.getAttribute('position');
+      const previousPosition = this.previousPosition || handPosition;
+      const deltaPosition = {
+        x: handPosition.x - previousPosition.x,
+        y: handPosition.y - previousPosition.y,
+        z: handPosition.z - previousPosition.z
+      };
+      const position = this.el.getAttribute('position');
       // subtract delta to invert movement
       this.el.setAttribute('position', {
         x: position.x - deltaPosition.x,
@@ -795,9 +815,11 @@ AFRAME.registerComponent('locomotor', {
 });
 
 },{}],9:[function(require,module,exports){
+/* global AFRAME, THREE */
 AFRAME.registerComponent('stretchable', {
   schema: {
-    usePhysics: { default: 'ifavailable' }
+    usePhysics: {default: 'ifavailable'},
+    invert: {default: false}
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -817,16 +839,20 @@ AFRAME.registerComponent('stretchable', {
   },
   tick: function () {
     if (!this.stretched) { return; }
-    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale')),
-      myGeom = this.el.getAttribute('geometry'),
-      handPos = new THREE.Vector3()
-        .copy(this.stretchers[0].getAttribute('position')),
-      otherHandPos = new THREE.Vector3()
-        .copy(this.stretchers[1].getAttribute('position')),
-      currentStretch = handPos.distanceTo(otherHandPos),
-      deltaStretch = 1;
+    let scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
+    const handPos = new THREE.Vector3()
+        .copy(this.stretchers[0].getAttribute('position'));
+    const otherHandPos = new THREE.Vector3()
+        .copy(this.stretchers[1].getAttribute('position'));
+    const currentStretch = handPos.distanceTo(otherHandPos);
+    let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
-      deltaStretch = currentStretch / this.previousStretch;
+      deltaStretch = Math.pow(
+          currentStretch / this.previousStretch,
+          (this.data.invert)
+            ? -1
+            : 1
+      );
     }
     this.previousStretch = currentStretch;
     scale = scale.multiplyScalar(deltaStretch);
@@ -835,8 +861,8 @@ AFRAME.registerComponent('stretchable', {
     if (this.el.body && this.data.usePhysics !== 'never') {
       var physicsShape = this.el.body.shapes[0];
       if (physicsShape.halfExtents) {
-        physicsShape.halfExtents.scale(deltaStretch,
-                                      physicsShape.halfExtents);
+        physicsShape.halfExtents
+            .scale(deltaStretch, physicsShape.halfExtents);
         physicsShape.updateConvexPolyhedronRepresentation();
       } else {
         if (!this.shapeWarned) {
@@ -874,6 +900,7 @@ AFRAME.registerComponent('stretchable', {
 });
 
 },{}],10:[function(require,module,exports){
+/* global AFRAME */
 AFRAME.registerSystem('super-hands', {
   init: function () {
     this.superHands = [];

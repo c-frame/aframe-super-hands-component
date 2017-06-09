@@ -229,19 +229,23 @@ suite('Locomotion', function () {
   });
   test('player scale changes', function (done) {
     this.scene.setAttribute('avatar-replayer', {
-      src: 'base/recordings/hands-worldScaler.json'
+      src: 'base/recordings/locomotor-worldScaleGrowShrink.json'
     });
-    window.setTimeout(() => {
+    this.scene.addEventListener('grab-end', e => {
       var camScale = document.querySelector('[camera]')
           .object3DMap.camera.getWorldScale();
-      assert.isBelow(camScale.x, 1, 'scaled down');
+      assert.isBelow(camScale.x, 1, 'scaled up');
+      assert.isBelow(camScale.y, 1, 'scaled up');
+      assert.isBelow(camScale.z, 1, 'scaled up');
       this.scene.addEventListener('replayingstopped', e => {
         let newCamScale = document.querySelector('[camera]')
           .object3DMap.camera.getWorldScale();
-        assert.isAbove(newCamScale.x, camScale.x, 'camera scales back up');
+        assert.isAbove(newCamScale.x, camScale.x, 'camera scales back down');
+        assert.isAbove(newCamScale.y, camScale.y, 'camera scales back down');
+        assert.isAbove(newCamScale.z, camScale.z, 'camera scales back down');
         done();
-      }, { once: true }); // once flag because this event emitted multiple times
-    }, 4000);
+      }, {once: true}); // once flag because this event emitted multiple times
+    }, {once: true});
   });
   test('locomotor does not interfere with normal interactions', function (done) {
     const boxGreenTop = document.getElementById('greenHigh');
