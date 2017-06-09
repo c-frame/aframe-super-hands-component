@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 
 suite('super-hands GlobalEventHandler integration', function () {
   setup(function (done) {
@@ -184,7 +184,8 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onGrabEndButton();
   });
   test('mouseup different target than mousedown', function () {
-    var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
+    const spy1 = this.sinon.spy();
+    const spy2 = this.sinon.spy();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
@@ -219,7 +220,8 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   // need to add state tracking for mousedown-ed element
   test('click only on target previously mousedown-ed', function () {
-    var spy1 = this.sinon.spy(), spy2 = this.sinon.spy();
+    const spy1 = this.sinon.spy();
+    const spy2 = this.sinon.spy();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
@@ -265,8 +267,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     });
   });
   test('mouseover all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.addEventListener('mouseover', t1Spy);
     this.target2.addEventListener('mouseover', t2Spy);
     this.target3.addEventListener('mouseover', t3Spy);
@@ -278,8 +281,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t3Spy.called, 'target 3');
   });
   test('mousedown all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.addEventListener('mousedown', t1Spy);
     this.target2.addEventListener('mousedown', t2Spy);
     this.target3.addEventListener('mousedown', t3Spy);
@@ -292,8 +296,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isFalse(t3Spy.called, 'target 3 - after grab');
   });
   test('mouseup all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.onmouseup = t1Spy;
     this.target2.onmouseup = t2Spy;
     this.target3.onmouseup = t3Spy;
@@ -307,8 +312,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t3Spy.called, 'target 3');
   });
   test('click all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.onclick = t1Spy;
     this.target2.onclick = t2Spy;
     this.target3.onclick = t3Spy;
@@ -323,8 +329,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
   });
   // consider making multiple entities draggable
   test('dragstart all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.ondragstart = t1Spy;
     this.target2.ondragstart = t2Spy;
     this.target3.ondragstart = t3Spy;
@@ -337,8 +344,10 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t3Spy.called, 'target 3');
   });
   test('dragenter all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
+    const t4Spy = this.sinon.spy();
     this.target1.addEventListener('dragenter', t1Spy);
     this.target2.addEventListener('dragenter', t2Spy);
     this.target3.addEventListener('dragenter', t3Spy);
@@ -360,8 +369,10 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isTrue(t3Spy.calledWithMatch({ relatedTarget: this.target4 }), 'target 3 - carried 4');
   });
   test('drop all', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
+    const t4Spy = this.sinon.spy();
     this.target1.ondrop = t1Spy;
     this.target2.ondrop = t2Spy;
     this.target3.ondrop = t3Spy;
@@ -389,8 +400,9 @@ suite('super-hands GlobalEventHandler multiple targets', function () {
     assert.isFalse(t1Spy.calledWithMatch({ relatedTarget: this.target4 }), 'dropper1 other dropper');
   });
   test('dragleave all on drop', function () {
-    var t1Spy = this.sinon.spy(), t2Spy = this.sinon.spy(),
-      t3Spy = this.sinon.spy(), t4Spy = this.sinon.spy();
+    const t1Spy = this.sinon.spy();
+    const t2Spy = this.sinon.spy();
+    const t3Spy = this.sinon.spy();
     this.target1.ondragleave = t1Spy;
     this.target2.ondragleave = t2Spy;
     this.target3.ondragleave = t3Spy;

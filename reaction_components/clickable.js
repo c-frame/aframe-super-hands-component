@@ -1,3 +1,4 @@
+/* global AFRAME */
 AFRAME.registerComponent('clickable', {
   schema: {
     onclick: { type: 'string' }

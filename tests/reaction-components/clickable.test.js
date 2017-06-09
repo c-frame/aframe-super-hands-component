@@ -1,7 +1,6 @@
 /* global assert, process, setup, suite, test */
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory,
-  coord = AFRAME.utils.coordinates.parse;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 suite('clickable-lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();

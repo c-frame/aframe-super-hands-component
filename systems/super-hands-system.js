@@ -1,3 +1,4 @@
+/* global AFRAME */
 AFRAME.registerSystem('super-hands', {
   init: function () {
     this.superHands = [];

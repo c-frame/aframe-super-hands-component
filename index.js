@@ -18,8 +18,8 @@ require('./primitives/a-locomotor.js');
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: { default: 'collided'},
-    colliderEvent: { default: 'hit' },
+    colliderState: {default: 'collided'},
+    colliderEvent: {default: 'hit'},
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
@@ -142,9 +142,9 @@ AFRAME.registerComponent('super-hands', {
     this.updateGrabbed();
   },
   onGrabEndButton: function (evt) {
-    var clickables = this.hoverEls.filter(h => this.gehClicking.has(h)), i;
+    const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
     this.dispatchMouseEventAll('mouseup', this.el, true);
-    for (i = 0; i < clickables.length; i++) {
+    for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
@@ -182,8 +182,9 @@ AFRAME.registerComponent('super-hands', {
     this.updateDragged();
   },
   onDragDropEndButton: function (evt) {
-    var ddevt, dropTarget,
-      carried = this.state.get(this.DRAG_EVENT);
+    var ddevt;
+    var dropTarget;
+    const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
     this.gehDragged.forEach(carried => {
       this.dispatchMouseEvent(carried, 'dragend', this.el);
@@ -207,7 +208,8 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   onHit: function (evt) {
-    var hitEl = evt.detail.el, used = false, hitElIndex;
+    const hitEl = evt.detail.el;
+    var hitElIndex;
     if (!hitEl) { return; }
     hitElIndex = this.hoverEls.indexOf(hitEl);
     if (hitElIndex === -1) {
@@ -416,15 +418,15 @@ AFRAME.registerComponent('super-hands', {
     detail = detail || {};
     data = { bubbles: true, cancelable: true, detail: detail };
     data.detail.target = data.detail.target || target;
-    evt = new CustomEvent(name, data);
+    evt = new window.CustomEvent(name, data);
     return target.dispatchEvent(evt);
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
-    var mEvt = new MouseEvent(name, { relatedTarget: relatedTarget });
+    var mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
   },
   dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
-    var els = this.hoverEls, i;
+    let els = this.hoverEls;
     if (filterUsed) {
       els = els
         .filter(el => el !== this.state.get(this.GRAB_EVENT) &&
@@ -433,18 +435,19 @@ AFRAME.registerComponent('super-hands', {
                 !this.gehDragged.has(el));
     }
     if (alsoReverse) {
-      for (i = 0; i < els.length; i++) {
+      for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
         this.dispatchMouseEvent(relatedTarget, name, els[i]);
       }
     } else {
-      for (i = 0; i < els.length; i++) {
+      for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
       }
     }
   },
   findTarget: function (evType, detail, filterUsed) {
-    var elIndex, eligibleEls = this.hoverEls;
+    var elIndex;
+    var eligibleEls = this.hoverEls;
     if (filterUsed) {
       eligibleEls = eligibleEls
         .filter(el => el !== this.state.get(this.GRAB_EVENT) &&
