@@ -1,3 +1,4 @@
+/* global AFRAME */
 AFRAME.registerComponent('hoverable', {
   init: function () {
     this.HOVERED_STATE = 'hovered';

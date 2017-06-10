@@ -1,9 +1,9 @@
 // karma configuration
-var karma_conf = {
+var karmaConf = {
   browserify: {
     debug: true
   },
-//  browsers: ['FirefoxNightly', 'Chromium_WebVR'],
+  // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   browsers: ['Firefox', 'Chrome'],
   // machinima: prevent timeout during recording playback
   browserNoActivityTimeout: 600000,
@@ -46,5 +46,5 @@ var karma_conf = {
 
 // Apply configuration
 module.exports = function (config) {
-  config.set(karma_conf);
+  config.set(karmaConf);
 };

@@ -102,8 +102,8 @@ suite('stretchable-physics', function () {
     });
   });
   test('box bodies update with scaling', function () {
-    var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-      scale = new window.CANNON.Vec3();
+    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute');
+    const scale = new window.CANNON.Vec3();
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))
@@ -118,8 +118,8 @@ suite('stretchable-physics', function () {
                         scale.set(0.5, 0.5, 0.5));
   });
   test('box bodies do not update when usePhysics = never', function () {
-    var posStub1 = this.sinon.stub(this.hand1, 'getAttribute'),
-      scale = new window.CANNON.Vec3();
+    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute');
+    const scale = new window.CANNON.Vec3();
     posStub1.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'))

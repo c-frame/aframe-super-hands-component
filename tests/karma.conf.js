@@ -1,5 +1,5 @@
 // karma configuration
-var karma_conf = {
+var karmaConf = {
   basePath: '../',
   browserify: {
     debug: true,
@@ -7,8 +7,7 @@ var karma_conf = {
       ['babelify', {presets: ['es2015']}]
     ]
   },
-  // browsers: ['Firefox', 'Chrome'],
-  // browsers: ['Chromium'],
+  // browsers: ['Chrome', 'Firefox'],
   browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
@@ -44,7 +43,7 @@ var karma_conf = {
 
 // configuration for code coverage reporting
 if (process.env.TEST_ENV === 'ci') {
-  Object.assign(karma_conf.browserify, {
+  Object.assign(karmaConf.browserify, {
     transform: [
       [
         'browserify-istanbul', {
@@ -57,7 +56,7 @@ if (process.env.TEST_ENV === 'ci') {
       ]
     ]
   });
-  karma_conf.coverageReporter = {
+  karmaConf.coverageReporter = {
     dir: 'tests/coverage',
     includeAllSources: true,
     reporters: [
@@ -65,11 +64,11 @@ if (process.env.TEST_ENV === 'ci') {
       {'type': 'lcov', subdir: '.'}
     ]
   };
-  karma_conf.reporters.push('coverage');
-  karma_conf.preprocessors['src/**/*.js'] = ['coverage'];
+  karmaConf.reporters.push('coverage');
+  karmaConf.preprocessors['src/**/*.js'] = ['coverage'];
 }
 
 // Apply configuration
 module.exports = function (config) {
-  config.set(karma_conf);
+  config.set(karmaConf);
 };

@@ -1,7 +1,6 @@
 /* global assert, process, setup, suite, test */
-
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 
 suite('super-hands & reaction component integration', function () {
   setup(function (done) {
@@ -68,8 +67,8 @@ suite('super-hands & reaction component integration', function () {
     assert.equal(this.target1.components.stretchable.stretchers.length, 0);
   });
   test('drag-droppable', function () {
-    var dropSpy = this.sinon.spy(),
-      targetDropSpy = this.sinon.spy();
+    const dropSpy = this.sinon.spy();
+    const targetDropSpy = this.sinon.spy();
     this.target1.addEventListener('drag-drop', dropSpy);
     this.target2.addEventListener('drag-drop', targetDropSpy);
     this.sh1.onDragDropStartButton();
@@ -170,8 +169,8 @@ suite('super-hands collider integration', function () {
     });
   });
   test('avoid excessive drag event dispatch', function () {
-    var dragenterSpy = this.sinon.spy(),
-      aFrameDragoverSpy = this.sinon.spy();
+    const dragenterSpy = this.sinon.spy();
+    const aFrameDragoverSpy = this.sinon.spy();
     this.target2.ondragenter = dragenterSpy;
     this.target2.addEventListener('dragover-start', aFrameDragoverSpy);
     this.target1.addEventListener('drag-start', e => e.preventDefault());
@@ -193,8 +192,8 @@ suite('super-hands collider integration', function () {
     assert.equal(aFrameDragoverSpy.callCount, 1, ' AF no duplicate dragover');
   });
   test('avoid excessive hover event dispatch', function () {
-    var mouseoverSpy = this.sinon.spy(),
-      aFrameHoverSpy = this.sinon.spy();
+    const mouseoverSpy = this.sinon.spy();
+    const aFrameHoverSpy = this.sinon.spy();
     // multiple targets cause justifiable event repetition, so limit to one
     this.col1.els = [this.target1];
     this.target1.onmouseover = mouseoverSpy;
@@ -208,9 +207,9 @@ suite('super-hands collider integration', function () {
     assert.equal(aFrameHoverSpy.callCount, 1, ' AF no duplicate hover');
   });
   test('avoid excessive rejected event dispatch', function () {
-    var grabSpy = this.sinon.spy(),
-      stretchSpy = this.sinon.spy(),
-      dragSpy = this.sinon.spy();
+    const grabSpy = this.sinon.spy();
+    const stretchSpy = this.sinon.spy();
+    const dragSpy = this.sinon.spy();
     // multiple targets cause justifiable event repetition, so limit to one
     this.col1.els = [this.target1];
     this.target1.addEventListener('grab-start', grabSpy);

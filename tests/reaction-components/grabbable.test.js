@@ -33,9 +33,9 @@ suite('grabbable-function without physics', function () {
     });
   });
   test('initiates grab on event when not grabbed', function () {
-    var myGrabbable = this.el.components.grabbable,
-      hand = this.hand,
-      el = this.el;
+    const myGrabbable = this.el.components.grabbable;
+    const hand = this.hand;
+    const el = this.el;
     assert.isNotOk(myGrabbable.grabbed);
     assert.notStrictEqual(myGrabbable.grabber, this.hand);
     assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE));
@@ -61,8 +61,8 @@ suite('grabbable-function without physics', function () {
   test(
     'position does not update during grab when usePhysics set to "only"',
     function () {
-      var posStub = sinon.stub(this.hand, 'getAttribute'),
-        myGrabbable = this.el.components.grabbable;
+      const posStub = this.sinon.stub(this.hand, 'getAttribute');
+      const myGrabbable = this.el.components.grabbable;
       assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
       posStub.withArgs('position')
         .onFirstCall().returns(coord('0 0 0'))
@@ -71,17 +71,17 @@ suite('grabbable-function without physics', function () {
       myGrabbable.start({detail: {hand: this.hand}});
       myGrabbable.tick();
       assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
-     });
+    });
   test('updates cease on release event', function () {
-    var posStub = sinon.stub(this.hand, 'getAttribute'),
-      myGrabbable = this.el.components.grabbable;
+    const posStub = this.sinon.stub(this.hand, 'getAttribute');
+    const myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
     posStub.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
-    myGrabbable.start({ detail: {hand: this.hand }});
+    myGrabbable.start({detail: {hand: this.hand}});
     myGrabbable.tick();
-    myGrabbable.end({ detail: { hand: this.hand }});
+    myGrabbable.end({detail: {hand: this.hand}});
     myGrabbable.tick();
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
     assert.notOk(this.el.is(myGrabbable.GRABBED_STATE));
@@ -89,10 +89,10 @@ suite('grabbable-function without physics', function () {
     assert.notOk(myGrabbable.grabber);
   });
   test('grabbing from a second hand does not change grabber', function () {
-    var myGrabbable = this.el.components.grabbable,
-      secondHand = {};
-    myGrabbable.start({ detail: { hand: this.hand } });
-    myGrabbable.start({ detail: { hand: secondHand } });
+    const myGrabbable = this.el.components.grabbable;
+    const secondHand = {};
+    myGrabbable.start({detail: {hand: this.hand}});
+    myGrabbable.start({detail: {hand: secondHand}});
     assert.strictEqual(myGrabbable.grabber, this.hand);
   });
 });
@@ -153,9 +153,9 @@ suite('two-handed grab w/o physics', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     this.hand1 = helpers
-      .controllerFactory({ 'super-hands': ''});
+      .controllerFactory({'super-hands': ''});
     this.hand2 = helpers
-      .controllerFactory({ 'super-hands': ''});
+      .controllerFactory({'super-hands': ''});
     el.setAttribute('grabbable', '');
     el.sceneEl.addEventListener('loaded', evt => {
       this.comp = el.components.grabbable;

@@ -11,11 +11,10 @@ setup(function () {
 
 teardown(function () {
   // Clean up any attached elements.
-  var attachedEls = ['canvas', 'a-assets', 'a-scene'],
-    replayer;
-  replayer = document.querySelector('a-scene') &&
-    document.querySelector('a-scene').components &&
-    document.querySelector('a-scene').components['avatar-replayer'];
+  const attachedEls = ['canvas', 'a-assets', 'a-scene'];
+  const replayer = document.querySelector('a-scene') &&
+      document.querySelector('a-scene').components &&
+      document.querySelector('a-scene').components['avatar-replayer'];
   if (replayer) { replayer.isReplaying = false; }
   var els = document.querySelectorAll(attachedEls.join(','));
 

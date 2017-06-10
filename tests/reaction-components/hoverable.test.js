@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test */
 
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 
 suite('hoverable', function () {
   setup(function (done) {

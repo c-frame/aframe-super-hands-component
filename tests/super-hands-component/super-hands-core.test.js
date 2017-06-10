@@ -1,7 +1,7 @@
 /* global assert, process, setup, suite, test, sinon */
 
-var helpers = require('../helpers'),
-  entityFactory = helpers.entityFactory;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 
 suite('super-hands lifecycle', function () {
   setup(function (done) {
@@ -139,10 +139,11 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh2.otherSuperHand, this.sh1);
   });
   test('stretch event', function () {
-    var emitSpy = sinon.spy(this.target1, 'emit'), // no this.sinon because cleanup causes error
-      stretchSpy = this.sinon.spy(this.sh2, 'emitCancelable')
-          .withArgs(this.target1, 'stretch-start'),
-      unStretchSpy = emitSpy.withArgs('stretch-end');
+    // no this.sinon because cleanup causes error
+    const emitSpy = sinon.spy(this.target1, 'emit');
+    const stretchSpy = this.sinon.spy(this.sh2, 'emitCancelable')
+        .withArgs(this.target1, 'stretch-start');
+    const unStretchSpy = emitSpy.withArgs('stretch-end');
     this.target1.addEventListener('stretch-start', e => e.preventDefault());
     this.sh1.onStretchStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -204,14 +205,13 @@ suite('super-hands hit processing & event emission', function () {
   });
 
   test('drag events', function () {
-    var emitSpy1 = this.sinon.spy(this.sh1, 'emitCancelable'),
-      dragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-start'),
-      unDragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-end'),
-      dragDropSpy1 = emitSpy1.withArgs(this.target1, 'drag-drop'),
-        // emitSpy2 = sinon.spy(this.target2, 'emit'),
-      dragOverSpy2 = emitSpy1.withArgs(this.target2, 'dragover-start'),
-      unDragOverSpy2 = emitSpy1.withArgs(this.target2, 'dragover-end'),
-      dragDropSpy2 = emitSpy1.withArgs(this.target2, 'drag-drop');
+    const emitSpy1 = this.sinon.spy(this.sh1, 'emitCancelable');
+    const dragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-start');
+    const unDragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-end');
+    const dragDropSpy1 = emitSpy1.withArgs(this.target1, 'drag-drop');
+    const dragOverSpy2 = emitSpy1.withArgs(this.target2, 'dragover-start');
+    const unDragOverSpy2 = emitSpy1.withArgs(this.target2, 'dragover-end');
+    const dragDropSpy2 = emitSpy1.withArgs(this.target2, 'drag-drop');
     this.sh1.onDragDropStartButton();
     this.target1.addEventListener('drag-start', e => e.preventDefault());
     this.target1.addEventListener('dragover-start', e => e.preventDefault());
@@ -296,9 +296,9 @@ suite('super-hands hit processing & event emission', function () {
     );
   });
   test('pressing button after collision', function () {
-    var grabSpy = sinon.spy(),
-      stretchSpy = sinon.spy(),
-      dragSpy = sinon.spy();
+    const grabSpy = sinon.spy();
+    const stretchSpy = sinon.spy();
+    const dragSpy = sinon.spy();
     this.target1.addEventListener('grab-start', grabSpy);
     this.target1.addEventListener('stretch-start', stretchSpy);
     this.target1.addEventListener('drag-start', dragSpy);
