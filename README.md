@@ -294,10 +294,10 @@ entity.
 | Attribute | Description | Default Value |
 | -------- | ----------- | ------------- |
 | fetch-camera | Make the default camera a child of `a-locomotor` so it can be moved with the player | "true" |
-| add-to-colliders | Ensure `a-locomotor` is visible to child entity `sphere-collider` components | `true` |
-| allow-movement | Allow grabbing gestures to reposition the player | `true` |
-| horizontal-only | Restrict movement to the X-Z plane | `true` |
-| allow-scaling | Allow stretching gestures to rescale the player |`true`|
+| add-to-colliders | Ensure `a-locomotor` is visible to child entity `sphere-collider` components | "true" |
+| allow-movement | Allow grabbing gestures to reposition the player | "true" |
+| horizontal-only | Restrict movement to the X-Z plane | "true" |
+| allow-scaling | Allow stretching gestures to rescale the player | "true" |
 
 #### hoverable component
 
