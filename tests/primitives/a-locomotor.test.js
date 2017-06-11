@@ -6,7 +6,7 @@ suite('a-locomotor lifecycle', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     this.loco = document.createElement('a-locomotor');
-    el.parentEl.appendChild(this.loco);
+    el.sceneEl.appendChild(this.loco);
     this.hand1 = helpers
         .controllerFactory({ 'hand-controls': 'right' }, true, this.loco);
     this.hand2 = helpers
@@ -18,20 +18,13 @@ suite('a-locomotor lifecycle', function () {
   test('primitive initialized without errors', function () {
     assert.isOk(document.querySelector('a-locomotor'));
   });
-  test('component removes without errors', function (done) {
-    this.loco.sceneEl.removeChild(this.loco);
-    process.nextTick(function () {
-      assert.notOk(document.querySelector('a-locomotor'));
-      done();
-    });
-  });
 });
 
 suite('a-locomotor autoconfig', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     this.loco = document.createElement('a-locomotor');
-    el.parentEl.appendChild(this.loco);
+    el.sceneEl.appendChild(this.loco);
     this.hand1 = helpers.controllerFactory({
       'hand-controls': 'right',
       'sphere-collider': 'objects: .test'
@@ -90,7 +83,7 @@ suite('a-locomotor autoconfig options', function () {
     this.loco.setAttribute('allow-movement', 'false');
     this.loco.setAttribute('horizontal-only', 'false');
     this.loco.setAttribute('allow-scaling', 'false');
-    el.parentEl.appendChild(this.loco);
+    el.sceneEl.appendChild(this.loco);
     this.hand1 = helpers.controllerFactory({
       'hand-controls': 'right',
       'sphere-collider': 'objects: .test'
@@ -99,7 +92,7 @@ suite('a-locomotor autoconfig options', function () {
       'hand-controls': 'left',
       'sphere-collider': 'objects: .test'
     }, true, this.loco);
-    el.sceneEl.addEventListener('loaded', function () {
+    el.sceneEl.addEventListener('camera-ready', function () {
       done();
     });
   });
@@ -129,11 +122,11 @@ suite('a-locomotor autoconfig options', function () {
   });
   test('Not grabbable', function () {
     const grab = this.loco.components['grabbable'];
-    assert.isNotOk(grab);
+    process.nextTick(() => assert.isNotOk(grab));
   });
   test('not stretchable', function () {
     const stretch = this.loco.components['stretchable'];
-    assert.isNotOk(stretch);
+    process.nextTick(() => assert.isNotOk(stretch));
   });
 });
 
@@ -142,7 +135,7 @@ suite('a-locomotor autoconfig options: horizontal-only', function () {
     var el = this.el = entityFactory();
     this.loco = document.createElement('a-locomotor');
     this.loco.setAttribute('horizontal-only', 'false');
-    el.parentEl.appendChild(this.loco);
+    el.sceneEl.appendChild(this.loco);
     this.hand1 = helpers.controllerFactory({
       'hand-controls': 'right',
       'sphere-collider': 'objects: .test'
