@@ -7,8 +7,8 @@ var karmaConf = {
       ['babelify', {presets: ['es2015']}]
     ]
   },
-  // browsers: ['Chrome', 'Firefox'],
-  browsers: ['FirefoxNightly', 'Chromium_WebVR'],
+  browsers: ['Chrome', 'Firefox'],
+  // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
     mocha: {'ui': 'tdd'}

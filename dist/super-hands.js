@@ -1015,8 +1015,7 @@
 	      radius: 2.5
 	    },
 	    material: {
-	      transparent: true,
-	      opacity: 0
+	      visible: false
 	    },
 	    grabbable: {
 	      usePhysics: 'never',
