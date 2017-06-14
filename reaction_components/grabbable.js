@@ -62,9 +62,17 @@ AFRAME.registerComponent('grabbable', {
       // initiate physics constraint if available and not already existing
       if (this.data.usePhysics !== 'never' && this.el.body &&
           evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-        let newCon = new window.CANNON.LockConstraint(
-          this.el.body, evt.detail.hand.body
-        );
+        let newCon;
+        if (this.grabbers.length > 1) {
+          newCon = new window.CANNON.DistanceConstraint(
+            this.el.body,
+            evt.detail.hand.body
+          );
+        } else {
+          newCon = new window.CANNON.LockConstraint(
+            this.el.body, evt.detail.hand.body
+          );
+        }
         this.el.body.world.addConstraint(newCon);
         this.constraints.set(evt.detail.hand, newCon);
       } else if (!this.grabber) {
