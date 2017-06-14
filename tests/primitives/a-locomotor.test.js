@@ -11,7 +11,7 @@ suite('a-locomotor lifecycle', function () {
         .controllerFactory({ 'hand-controls': 'right' }, true, this.loco);
     this.hand2 = helpers
         .controllerFactory({ 'hand-controls': 'left' }, true, this.loco);
-    el.sceneEl.addEventListener('loaded', function () {
+    el.sceneEl.addEventListener('locomotor-ready', function () {
       done();
     });
   });
@@ -33,7 +33,7 @@ suite('a-locomotor autoconfig', function () {
       'hand-controls': 'left',
       'sphere-collider': 'objects: .test'
     }, true, this.loco);
-    el.sceneEl.addEventListener('loaded', function () {
+    el.sceneEl.addEventListener('locomotor-ready', function (e) {
       done();
     });
   });
@@ -55,11 +55,14 @@ suite('a-locomotor autoconfig', function () {
       [this.loco]
     );
   });
-  test('captures default camera', function () {
-    assert.strictEqual(
-      document.querySelector('[camera]').parentElement,
-      this.loco
-    );
+  test('captures default camera', function (done) {
+    process.nextTick(() => {
+      assert.strictEqual(
+        document.querySelector('[camera]').parentElement,
+        this.loco
+      );
+      done();
+    });
   });
   test('grabbable setup', function () {
     const grab = this.loco.components['grabbable'];
@@ -92,7 +95,7 @@ suite('a-locomotor autoconfig options', function () {
       'hand-controls': 'left',
       'sphere-collider': 'objects: .test'
     }, true, this.loco);
-    el.sceneEl.addEventListener('camera-ready', function () {
+    el.sceneEl.addEventListener('locomotor-ready', function () {
       done();
     });
   });
@@ -114,11 +117,15 @@ suite('a-locomotor autoconfig options', function () {
       -1
     );
   });
-  test('disabled camera capture', function () {
-    assert.notStrictEqual(
-      document.querySelector('[camera]').parentElement,
-      this.loco
-    );
+  test('disabled camera capture', function (done) {
+    // initialization order differs when camera setup is disabled
+    this.el.sceneEl.addEventListener('camera-ready', function () {
+      assert.notStrictEqual(
+        document.querySelector('[camera]').parentElement,
+        this.loco
+      );
+      done();
+    });
   });
   test('Not grabbable', function () {
     const grab = this.loco.components['grabbable'];
@@ -144,7 +151,7 @@ suite('a-locomotor autoconfig options: horizontal-only', function () {
       'hand-controls': 'left',
       'sphere-collider': 'objects: .test'
     }, true, this.loco);
-    el.sceneEl.addEventListener('loaded', function () {
+    el.sceneEl.addEventListener('locomotor-ready', function () {
       done();
     });
   });

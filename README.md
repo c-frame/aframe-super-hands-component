@@ -299,6 +299,11 @@ entity.
 | horizontal-only | Restrict movement to the X-Z plane | "true" |
 | allow-scaling | Allow stretching gestures to rescale the player | "true" |
 
+##### Events
+
+| Type | Description | Target | Bubbles |
+| 'locomotor-ready' | All auto-configuration steps complete | `a-locomotor` | yes |
+
 #### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity

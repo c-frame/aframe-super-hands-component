@@ -944,6 +944,7 @@
 	  init: function init() {
 	    var _this = this;
 
+	    var ready = true;
 	    if (!this.data.stretch) {
 	      this.el.removeComponent('stretchable');
 	    }
@@ -966,14 +967,32 @@
 	      });
 	    }
 	    if (this.data.camera) {
+	      // this step has to be done asnychronously
+	      ready = false;
 	      // make default camera child of locomotor so it can be moved
 	      this.el.sceneEl.addEventListener('camera-ready', function (e) {
 	        var defCam = document.querySelector('[data-aframe-default-camera]');
 	        if (defCam) {
-	          _this.el.appendChild(defCam);
+	          (function () {
+	            // re-parenting resets the userHeight, so save and add it back
+	            var camComp = defCam.getAttribute('camera');
+	            var uh = camComp && camComp.userHeight ? camComp.userHeight : 1.6;
+	            _this.el.appendChild(defCam);
+	            // put the attribute change on the stack to make it work in FF
+	            window.setTimeout(function () {
+	              defCam.setAttribute('camera', { userHeight: uh });
+	              _this.ready();
+	            }, 0);
+	          })();
 	        }
 	      });
 	    }
+	    if (ready) {
+	      this.ready();
+	    }
+	  },
+	  ready: function ready() {
+	    this.el.emit('locomotor-ready', {});
 	  }
 	});
 

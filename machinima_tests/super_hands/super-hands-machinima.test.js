@@ -187,7 +187,7 @@ suite('Physics grab', function () {
       done();
     });
   });
-  test('entity affected by two contraints', function (done) {
+  test('entity affected by two constraints', function (done) {
     this.scene.setAttribute('avatar-replayer', {
       src: 'base/recordings/physics-twoHandedTwist.json'
     });
@@ -268,5 +268,29 @@ suite('Locomotion', function () {
       assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'sphere');
       done();
     }, { once: true }); // once flag because this event emitted multiple times
+  });
+});
+suite('camera userHeight', function () {
+  this.timeout(0);
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    const body = document.querySelector('body');
+    const sceneReg = /<a-scene[^]+a-scene>/;
+    const sceneRegResult = sceneReg.exec(window.__html__['locomotor.html']);
+    const recorderReg = /avatar-recorder(=".*")?/;
+    // set avatar-replayer to use the specified recoring file
+    const sceneResult = sceneRegResult[0]
+      .replace(recorderReg, '');
+    body.innerHTML = sceneResult + body.innerHTML;
+    this.scene = document.querySelector('a-scene');
+    this.scene.addEventListener('locomotor-ready', e => {
+      done();
+    });
+  });
+  test('camera userHeight preserved', function () {
+    assert.isAbove(
+      document.querySelector('[camera]').object3D.getWorldPosition().y,
+      1
+    );
   });
 });
