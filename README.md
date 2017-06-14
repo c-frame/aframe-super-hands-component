@@ -169,6 +169,9 @@ v0.2.3
   the hover state for one tick
   * Related to messaging from `sphere-collider`; unable to distinguish which
     collider instance is signaling the collision termination.
+* Two-handed physics grabs don't feel great
+  * Someone that knows something about game dev could be smarter about the
+    constraints
 
 #### Compatibility
 
