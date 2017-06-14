@@ -237,7 +237,7 @@ This way the grab-end event would not fire until the grip button was *pressed*,
 even if the trigger was *released* earlier.
 * Only one entity at a time will be targeted for each event type,
 even if multiple overlapping collision zones exist. `super-hands` tracks a
-FIFO queue of collided entities to determine which will be affected.
+LIFO stack of collided entities to determine which will be affected.
 * drag-drop: For the receiving entity, `on` entry in the details is `null`.
 If needed, use `event.target` instead.
 
@@ -266,8 +266,10 @@ Add freedom of movement by wrapping the player avatar in an `a-locomotor` primit
 Users can then grab and move the world around themselves to navigate your WebVR experience
 in a way that is comfortable even for most people prone to simulation sickness.
 
-The component works by enveloping the player in an invisible sphere that picks up grabbing
-gestures made on empty space and translates into movement for the `a-locomotor`.
+The component works by enveloping the player in an invisible sphere that picks up
+grabbing and stretching
+gestures made on empty space and translates those into
+movement and scaling for player avatar.
 To function, the player camera and controllers must be children of `a-locomotor`,
 and the controllers' colliders must be configured to collide with `a-locomotor`.
 On initialization, `a-locomotor` will automatically re-parent the A-Frame
@@ -302,6 +304,7 @@ entity.
 ##### Events
 
 | Type | Description | Target | Bubbles |
+| --- | --- | --- | --- |
 | 'locomotor-ready' | All auto-configuration steps complete | `a-locomotor` | yes |
 
 #### hoverable component
@@ -379,8 +382,8 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 
 #### drag-droppable component
 
-`drag-droppable` is a shell component that only manages the 'hovered' state for the entity.
-This can be combined with  with a '-hovered' mixin to easily highlight when an entity is
+`drag-droppable` is a shell component that only manages the 'dragover' state for the entity.
+This can be combined with  with a '-dragover' mixin to easily highlight when an entity is
 hovering in a drag-drop location.
 
 For interactivity, use the global event handler integration,
@@ -394,4 +397,4 @@ with the `drag-dropped` event, or create your own component.
 | dragover | Added to while a carried entity is colliding with a a `drag-droppable` entity |
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to
-receive the hovered state.
+receive the dragover state.

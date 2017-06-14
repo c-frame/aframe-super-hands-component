@@ -4,18 +4,21 @@
     <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.3.0/dist/aframe-extras.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
+    <script src="aframe-sun-sky.min.js"></script>
+    <script src="a-painter-loader-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
-    <script src="a-painter-loader-component.min.js"></script>
   </head>
   <body>
     <a-scene>
+      <a-sun-sky material="sunPosition: 5 5 5"></a-sun-sky>
       <a-locomotor>
         <a-entity hand-controls="left" super-hands sphere-collider></a-entity>
         <a-entity hand-controls="right" super-hands sphere-collider></a-entity>
       </a-locomotor>
-      <a-entity a-painter-loader="src: https://ucarecdn.com/e1fb7084-88d3-4c0c-bbec-ab43b4d88722/">
+      <a-entity a-painter-loader="src: https://ucarecdn.com/e1fb7084-88d3-4c0c-bbec-ab43b4d88722/"
+       rotation="0 90 0" scale="1.25 1.25 1.25">
       </a-entity>
     </a-scene>
 
