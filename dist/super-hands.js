@@ -1012,7 +1012,7 @@
 	  defaultComponents: {
 	    geometry: {
 	      primitive: 'sphere',
-	      radius: 2.5
+	      radius: 100
 	    },
 	    material: {
 	      visible: false

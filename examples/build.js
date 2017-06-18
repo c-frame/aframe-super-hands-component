@@ -485,7 +485,7 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   defaultComponents: {
     geometry: {
       primitive: 'sphere',
-      radius: 2.5
+      radius: 100
     },
     material: {
       visible: false
