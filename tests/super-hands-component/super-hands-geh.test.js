@@ -40,10 +40,7 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.hand1);
       done();
     };
-    this.sh1.unHover({
-      target: this.target1,
-      detail: { state: 'collided' }
-    });
+    this.target1.emit('stateremoved', {state: 'collided'});
   });
   test('dragenter - carried', function (done) {
     this.target1.ondragenter = e => {
