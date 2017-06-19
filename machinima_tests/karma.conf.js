@@ -3,8 +3,8 @@ var karmaConf = {
   browserify: {
     debug: true
   },
-  browsers: ['FirefoxNightly', 'Chromium_WebVR'],
-  // browsers: ['Firefox', 'Chrome'],
+  // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
+  browsers: ['Firefox', 'Chrome'],
   // machinima: prevent timeout during recording playback
   browserNoActivityTimeout: 600000,
   client: {
