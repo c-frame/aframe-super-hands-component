@@ -141,7 +141,6 @@
 	   * Generally modifies the entity based on the data.
 	   */
 	  update: function update(oldData) {
-	    // TODO: update event listeners
 	    this.unRegisterListeners(oldData);
 	    this.registerListeners();
 	  },
@@ -255,6 +254,7 @@
 	    hitElIndex = this.hoverEls.indexOf(hitEl);
 	    if (hitElIndex === -1) {
 	      this.hoverEls.push(hitEl);
+	      // later loss of collision will remove from hoverEls
 	      hitEl.addEventListener('stateremoved', this.unWatch);
 	      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
 	      if (this.dragging && this.gehDragged.size) {
@@ -274,10 +274,8 @@
 	    if (this.grabbing && !carried) {
 	      carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
 	      if (carried) {
-	        // save in state, end hover, and put back on watch list
 	        this.state.set(this.GRAB_EVENT, carried);
 	        this._unHover(carried);
-	        carried.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
@@ -286,10 +284,8 @@
 	    if (this.stretching && !stretched) {
 	      stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
 	      if (stretched) {
-	        // save in state, end hover, and put back on watch list
 	        this.state.set(this.STRETCH_EVENT, stretched);
 	        this._unHover(stretched);
-	        stretched.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
@@ -306,10 +302,8 @@
 	        dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
 	      }
 	      if (dragged) {
-	        // end hover and put back on watch list
 	        this.state.set(this.DRAG_EVENT, dragged);
 	        this._unHover(dragged);
-	        dragged.addEventListener('stateremoved', this.unWatch);
 	      }
 	    }
 	  },
@@ -318,12 +312,9 @@
 	    var hvrevt, hoverEl;
 	    // end previous hover
 	    if (this.state.has(this.HOVER_EVENT)) {
-	      // put back on watch list
-	      this.state.get(this.HOVER_EVENT).addEventListener('stateremoved', this.unWatch);
 	      this._unHover(this.state.get(this.HOVER_EVENT), true);
 	    }
 	    if (this.state.has(this.DRAGOVER_EVENT)) {
-	      this.state.get(this.DRAGOVER_EVENT).addEventListener('stateremoved', this.unWatch);
 	      this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
 	    }
 	    if (this.dragging && this.state.get(this.DRAG_EVENT)) {
@@ -334,7 +325,6 @@
 	      };
 	      hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
 	      if (hoverEl) {
-	        hoverEl.removeEventListener('stateremoved', this.unWatch);
 	        hoverEl.addEventListener('stateremoved', this.unHover);
 	        this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt);
 	        this.state.set(this.DRAGOVER_EVENT, hoverEl);
@@ -344,7 +334,6 @@
 	    if (!this.state.has(this.DRAGOVER_EVENT)) {
 	      hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
 	      if (hoverEl) {
-	        hoverEl.removeEventListener('stateremoved', this.unWatch);
 	        hoverEl.addEventListener('stateremoved', this.unHover);
 	        this.state.set(this.HOVER_EVENT, hoverEl);
 	      }
@@ -354,7 +343,6 @@
 	     called when controller moves out of collision range of entity */
 	  unHover: function unHover(evt) {
 	    if (evt.detail.state === this.data.colliderState) {
-	      this._unWatch(evt.target);
 	      this._unHover(evt.target);
 	    }
 	  },
@@ -385,7 +373,6 @@
 	  },
 	  unWatch: function unWatch(evt) {
 	    if (evt.detail.state === this.data.colliderState) {
-	      evt.target.removeEventListener('stateremoved', this.unWatch);
 	      this._unWatch(evt.target);
 	    }
 	  },
@@ -393,6 +380,7 @@
 	    var _this4 = this;
 
 	    var hoverIndex = this.hoverEls.indexOf(target);
+	    target.removeEventListener('stateremoved', this.unWatch);
 	    if (hoverIndex !== -1) {
 	      this.hoverEls.splice(hoverIndex, 1);
 	    }
