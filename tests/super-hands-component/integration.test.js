@@ -93,6 +93,16 @@ suite('super-hands & reaction component integration', function () {
     assert.isFalse(this.target1.is('dragged'), 'carried released');
     assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
   });
+  test('drop target remains watched for collision end', function () {
+    this.timeout(0);
+    this.target2.removeAttribute('hoverable');
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
+    this.sh1.onHit({ detail: { el: this.target2 } });
+    this.sh1.onDragDropEndButton();
+    this.target2.emit('stateremoved', { state: 'collided' });
+    assert.strictEqual(this.sh1.hoverEls.indexOf(this.target2), -1);
+  });
   test('lastHover not confused by rejected dragover', function () {
     this.target2.removeComponent('drag-droppable');
     this.sh1.onDragDropStartButton();
