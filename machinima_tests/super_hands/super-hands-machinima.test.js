@@ -1,4 +1,4 @@
-/* global assert, process, setup, teardown, suite, test, sinon */
+/* global assert, process, setup, suite, test, sinon */
 
 // One scene per suite, but recordings set at the test level
 var SCENE_FILE = 'hands.html';
@@ -11,7 +11,6 @@ suite('basic interactions', function () {
     const sceneReg = /<a-scene[^]+a-scene>/;
     const sceneRegResult = sceneReg.exec(window.__html__[SCENE_FILE]);
     const recorderReg = /avatar-recorder(=".*")?/;
-    // set avatar-replayer to use the specified recoring file
     const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
@@ -142,7 +141,6 @@ suite('Nested object targeting', function () {
     const sceneReg = /<a-scene[^]+a-scene>/;
     const sceneRegResult = sceneReg.exec(window.__html__['nested.html']);
     const recorderReg = /avatar-recorder(=".*")?/;
-    // set avatar-replayer to use the specified recoring file
     const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
@@ -166,7 +164,7 @@ suite('Nested object targeting', function () {
     }, { once: true });
   });
 });
-// can't get a clean physiccs cleanup working - causes subsequent tests to fail
+// can't get a stable physiccs test working
 suite.skip('Physics grab', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
@@ -175,7 +173,6 @@ suite.skip('Physics grab', function () {
     const sceneReg = /<a-scene[^]+a-scene>/;
     const sceneRegResult = sceneReg.exec(window.__html__['physics.html']);
     const recorderReg = /avatar-recorder(=".*")?/;
-    // set avatar-replayer to use the specified recoring file
     const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
@@ -210,7 +207,6 @@ suite('Locomotion', function () {
     const sceneReg = /<a-scene[^]+a-scene>/;
     const sceneRegResult = sceneReg.exec(window.__html__['locomotor.html']);
     const recorderReg = /avatar-recorder(=".*")?/;
-    // set avatar-replayer to use the specified recoring file
     const sceneResult = sceneRegResult[0]
       .replace(recorderReg, 'avatar-replayer');
     body.innerHTML = sceneResult + body.innerHTML;
@@ -281,7 +277,6 @@ suite('camera userHeight', function () {
     const sceneReg = /<a-scene[^]+a-scene>/;
     const sceneRegResult = sceneReg.exec(window.__html__['locomotor.html']);
     const recorderReg = /avatar-recorder(=".*")?/;
-    // set avatar-replayer to use the specified recoring file
     const sceneResult = sceneRegResult[0]
       .replace(recorderReg, '');
     body.innerHTML = sceneResult + body.innerHTML;

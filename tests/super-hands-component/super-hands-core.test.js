@@ -79,10 +79,10 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.equal(this.sh1.hoverEls.length, 2);
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
-    this.sh1.unHover({target: this.target1, detail: {state: 'collided'}});
+    this.target1.emit('stateremoved', {state: 'collided'});
     assert.equal(this.sh1.hoverEls.length, 1);
     assert.strictEqual(this.sh1.hoverEls[0], this.target2);
-    this.sh1.unHover({target: this.target2, detail: {state: 'collided'}});
+    this.target2.emit('stateremoved', {state: 'collided'});
     assert.equal(this.sh1.hoverEls.length, 0);
   });
   test('finding targets in the stack', function () {
