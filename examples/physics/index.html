@@ -13,7 +13,7 @@
       AFRAME.registerComponent('color-randomizer', {
         play: function() {
           this.el.addEventListener('drag-drop', function(evt) {
-            evt.detail.dropped.setAttribute('material', 'color', 
+            evt.detail.dropped.setAttribute('material', 'color',
               '#'+(Math.random()*0xFFFFFF<<0).toString(16));
             // color randomizer credit: http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036
           });
@@ -46,17 +46,15 @@
         <a-mixin id="transformer" color-randomizer drag-droppable
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
       </a-assets>
-      <a-locomotor stretchable>
-        <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
-        <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      </a-locomotor>
+      <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.15 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.15 -0.5" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 0.15 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 0.15 -0.5" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 0.15 -1" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 0.15 -0.5" material="color: green"></a-entity>
-      <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1" 
+      <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1"
                 material="src:#colortransform"></a-entity>
       <a-grid static-body></a-grid>
     </a-scene>

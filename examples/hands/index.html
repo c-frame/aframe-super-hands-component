@@ -12,7 +12,7 @@
     <a-scene>
       <a-assets>
         <img id="grid" src="grid.png"/>
-        <a-mixin id="controller" super-hands 
+        <a-mixin id="controller" super-hands
                  sphere-collider="objects: .cube"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
@@ -21,17 +21,15 @@
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
-      <a-locomotor stretchable>
-        <a-entity hand-controls="left" mixin="controller"></a-entity>
-        <a-entity hand-controls="right" mixin="controller"></a-entity>
-      </a-locomotor>
+      <a-entity hand-controls="left" mixin="controller"></a-entity>
+      <a-entity hand-controls="right" mixin="controller"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
-      <a-plane rotation="-90 0 0" src="#grid" repeat="50 50" 
+      <a-plane rotation="-90 0 0" src="#grid" repeat="50 50"
                  width="50" height="50"></a-plane>
     </a-scene>
 

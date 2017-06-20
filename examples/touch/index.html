@@ -12,7 +12,7 @@
   <body>
     <a-scene>
       <a-assets>
-        <a-mixin id="controller" super-hands 
+        <a-mixin id="controller" super-hands
                  sphere-collider="objects: .cube"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
@@ -21,10 +21,8 @@
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
-      <a-locomotor stretchable>
-        <a-entity oculus-touch-controls="hand: left" mixin="controller"></a-entity>
-        <a-entity oculus-touch-controls="hand: right" mixin="controller"></a-entity>
-      </a-locomotor>
+      <a-entity oculus-touch-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity oculus-touch-controls="hand: right" mixin="controller"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
