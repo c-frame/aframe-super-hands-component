@@ -52,13 +52,15 @@ Install and use by directly including the [browser files](dist):
 
 <body>
   <a-scene>
+    <a-assets></a-assets>
     <a-locomotor>
       <!-- Make sure your super-hands entities also have controller and collider components -->
       <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
       <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
     </a-locomotor>
     <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-box hoverable grabbable stretchable drag-droppable></a-box>
+    <a-box hoverable grabbable stretchable drag-droppable
+    color="blue" position="0 0 -1"></a-box>
   </a-scene>
 </body>
 ```
