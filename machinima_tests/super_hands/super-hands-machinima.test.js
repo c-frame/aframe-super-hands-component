@@ -164,8 +164,7 @@ suite('Nested object targeting', function () {
     }, { once: true });
   });
 });
-// can't get a stable physiccs test working
-suite.skip('Physics grab', function () {
+suite('Physics grab', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
