@@ -2,8 +2,8 @@
   <head>
     <title>A-Frame Super Hands Component - Vive With Physics</title>
     <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.3.0/dist/aframe-extras.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.3.0/dist/aframe-physics-system.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.5/dist/aframe-extras.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.4.1/dist/aframe-physics-system.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.0/dist/super-hands.min.js" -->
@@ -19,14 +19,6 @@
           });
         }
       });
-      //delayed addition of physics body component to controllers due to AFRAME 0.4.0 changes
-      AFRAME.registerComponent('controller-loaded', {
-        init: function() {
-          this.el.addEventListener('model-loaded', function() {
-            this.addState('loaded');
-          });
-        }
-      });
     </script>
   </head>
   <body>
@@ -34,9 +26,8 @@
       <a-assets>
         <img id="colortransform" src="./colortransform.png" />
         <a-mixin id="controller" super-hands
-                 controller-loaded
-                 sphere-collider="objects: .cube, .transformer"></a-mixin>
-        <a-mixin id="controller-loaded" static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
+                 sphere-collider="objects: .cube, .transformer"
+                 static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  hoverable grabbable stretchable drag-droppable
                  dynamic-body></a-mixin>
