@@ -46,7 +46,7 @@ Install and use by directly including the [browser files](dist):
 <head>
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
-  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.3.0/dist/aframe-extras.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.5/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/super-hands@1.0.0/dist/super-hands.min.js"></script>
 </head>
 
@@ -112,6 +112,11 @@ properties like `onclick`.
 
 ### News
 
+master branch
+
+* Updated documentation and examples with latest versions of `aframe-extras` and
+  `aframe-physics-system`. 
+
 v1.0.0
 
 * `a-locomotor`: drop-in freedom of motion for WebVR experiences
@@ -138,35 +143,8 @@ v1.0.0
   for automated testing based on motion-captured user input to improve
   regression detection
 
-v0.3.1
-
-* New: integration with GlobalEventHandlers for easy reactivity via element
-  properties such as `onclick`
-* New: `clickable` reaction component for interacting with an entity
-  without moving it
-
-
-v0.3.0
-
-* Confirmed compatibility with A-Frame v0.5.0 (no changes)
-
-v0.2.4
-
-* Fix error with systm registration that broke most everything
-
-v0.2.3
-
-* Fix `usePhysics: only` not being honored by `grabbable`
-* Fix handling of edge cases in `stretchable`
-* `super-hands` now respects with custom button mappings applied after initalization
-* Added `super-hands` system to better manage links between two controllers
-* Adding unit testing to prepare for updates
-
 #### Known Issues
 
-* Collision zones for stretched entities don't update to new scale (`sphere-collider` does not take entity scale into account)
-  * This makes it difficult to shrink back down if you've enlarged yourself via
-    `a-locomotor` & `stretchable`
 * When both hands are hovering an entity and one leaves, the entity will lose
   the hover state for one tick
   * Related to messaging from `sphere-collider`; unable to distinguish which
@@ -177,11 +155,10 @@ v0.2.3
 
 #### Compatibility
 
-| A-Frame Version | super-hands Version |
-| --- | --- |
-| v0.6.x | ^v1.0.0 |
-| v0.5.x | v1.0.0 |
-| v0.4.x | v0.2.4 |
+| A-Frame Version | super-hands Version | aframe-extras Version | aframe-physics-system Version |
+| --- | --- | --- | --- |
+| v0.5.x | ^v1.0.0 |^v3.8.5 | ^v1.4.1 |
+| v0.4.x | v0.2.4 | v3.7.0 | v1.3.0 |
 
 ### API
 
