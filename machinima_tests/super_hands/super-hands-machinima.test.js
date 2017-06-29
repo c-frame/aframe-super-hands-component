@@ -164,7 +164,7 @@ suite('Nested object targeting', function () {
     }, { once: true });
   });
 });
-suite('Physics grab', function () {
+suite.only('Physics grab', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
