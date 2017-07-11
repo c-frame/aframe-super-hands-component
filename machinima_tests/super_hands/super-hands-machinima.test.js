@@ -280,7 +280,7 @@ suite('camera userHeight', function () {
       .replace(recorderReg, '');
     body.innerHTML = sceneResult + body.innerHTML;
     this.scene = document.querySelector('a-scene');
-    this.scene.addEventListener('locomotor-ready', e => {
+    this.scene.addEventListener('camera-ready', e => {
       done();
     });
   });
