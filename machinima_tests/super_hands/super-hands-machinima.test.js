@@ -164,7 +164,7 @@ suite('Nested object targeting', function () {
     }, { once: true });
   });
 });
-suite.only('Physics grab', function () {
+suite('Physics grab', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
@@ -221,7 +221,7 @@ suite('Locomotion', function () {
     this.scene.addEventListener('replayingstopped', e => {
       let z = document.querySelector('[camera]')
         .object3DMap.camera.getWorldPosition().z;
-      assert.isBelow(z, 1, 'camera ending z position');
+      assert.isBelow(z, 0.25, 'camera ending z position');
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });
