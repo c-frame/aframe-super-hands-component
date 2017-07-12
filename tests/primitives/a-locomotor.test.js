@@ -55,15 +55,6 @@ suite('a-locomotor autoconfig', function () {
       [this.loco]
     );
   });
-  test('captures default camera', function (done) {
-    process.nextTick(() => {
-      assert.strictEqual(
-        document.querySelector('[camera]').parentElement,
-        this.loco
-      );
-      done();
-    });
-  });
   test('grabbable setup', function () {
     const grab = this.loco.components['grabbable'];
     assert.isOk(grab);
@@ -160,5 +151,41 @@ suite('a-locomotor autoconfig options: horizontal-only', function () {
     assert.isOk(grab);
     assert.isFalse(grab.data.suppressY, 'vertical movement allowed');
     assert.isTrue(grab.data.invert);
+  });
+});
+suite('a-locomotor camera options', function () {
+  setup(function () {
+    this.el = entityFactory();
+  });
+  test('Creates a camera by default', function (done) {
+    const loco = document.createElement('a-locomotor');
+    this.el.sceneEl.appendChild(loco);
+    this.el.sceneEl.addEventListener('camera-ready', function () {
+      assert.isOk(document.querySelector('a-locomotor [camera]'));
+      done();
+    });
+  });
+  test('Does not create camera if a-camera already exists', function (done) {
+    const cam = document.createElement('a-camera');
+    const loco = document.createElement('a-locomotor');
+    this.el.sceneEl.appendChild(cam);
+    this.el.sceneEl.appendChild(loco);
+    this.el.sceneEl.addEventListener('camera-ready', function () {
+      assert.isNotOk(document.querySelector('a-locomotor [camera]'));
+      assert.isOk(document.querySelector('a-scene>[camera]'));
+      done();
+    });
+  });
+  test('Does not create camera if [camera] already exists', function (done) {
+    const cam = document.createElement('a-entity');
+    const loco = document.createElement('a-locomotor');
+    cam.setAttribute('camera', '');
+    this.el.sceneEl.appendChild(cam);
+    this.el.sceneEl.appendChild(loco);
+    this.el.sceneEl.addEventListener('camera-ready', function () {
+      assert.isNotOk(document.querySelector('a-locomotor [camera]'));
+      assert.isOk(document.querySelector('a-scene>[camera]'));
+      done();
+    });
   });
 });

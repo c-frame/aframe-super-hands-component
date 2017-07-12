@@ -45,9 +45,9 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
-  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.5/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@1.0.0/dist/super-hands.min.js"></script>
+  <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
+  <script src="https://unpkg.com/super-hands@.0.1/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -112,10 +112,12 @@ properties like `onclick`.
 
 ### News
 
-master branch
+v1.0.1
 
+* A-Frame v0.6.0 compatibility: fixed issue with camera freezing when using
+  `a-locomotor`'s automatic camera config
 * Updated documentation and examples with latest versions of `aframe-extras` and
-  `aframe-physics-system`. 
+  `aframe-physics-system`.
 
 v1.0.0
 
@@ -157,6 +159,7 @@ v1.0.0
 
 | A-Frame Version | super-hands Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
+| v0.6.x | ^v1.0.1 |^v3.8.6 | ^v1.4.2 |
 | v0.5.x | ^v1.0.0 |^v3.8.5 | ^v1.4.1 |
 | v0.4.x | v0.2.4 | v3.7.0 | v1.3.0 |
 

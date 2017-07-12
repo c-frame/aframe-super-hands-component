@@ -773,23 +773,12 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (this.data.camera) {
       // this step has to be done asnychronously
       ready = false;
-      // make default camera child of locomotor so it can be moved
-      this.el.sceneEl.addEventListener('camera-ready', e => {
-        var defCam = document.querySelector('[data-aframe-default-camera]');
-        if (defCam) {
-          // re-parenting resets the userHeight, so save and add it back
-          const camComp = defCam.getAttribute('camera');
-          const uh = (camComp && camComp.userHeight) ? camComp.userHeight : 1.6;
-          this.el.appendChild(defCam);
-          // put the attribute change on the stack to make it work in FF
-          window.setTimeout(
-            () => {
-              defCam.setAttribute('camera', {userHeight: uh});
-              this.ready();
-            },
-            0
-          );
+      this.el.addEventListener('loaded', e => {
+        if (!document.querySelector('a-camera, [camera]')) {
+          let cam = document.createElement('a-camera');
+          this.el.appendChild(cam);
         }
+        this.ready();
       });
     }
     if (ready) {
