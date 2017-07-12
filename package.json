@@ -47,9 +47,9 @@
   "devDependencies": {
     "aframe": "^0.6.0",
     "aframe-event-set-component": "^3.0.2",
-    "aframe-extras": "^3.8.5",
+    "aframe-extras": "^3.8.6",
     "aframe-motion-capture-components": "^0.1.4",
-    "aframe-physics-system": "^1.4.1",
+    "aframe-physics-system": "^1.4.2",
     "babel-loader": "^6.2.10",
     "babel-preset-es2015": "^6.22.0",
     "babelify": "^7.3.0",
