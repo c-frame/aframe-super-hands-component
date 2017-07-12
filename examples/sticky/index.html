@@ -10,7 +10,7 @@
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene physics>
+    <a-scene physics="debug: true">
       <a-assets>
         <img id="grid" src="grid.png"/>
         <a-mixin id="controller"
@@ -28,12 +28,12 @@
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.15 -1" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.15 -0.5" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.15 -1" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.15 -0.5" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.15 -1" material="color: green"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.15 -0.5" material="color: green"></a-entity>
+      <a-entity class="ball" mixin="ball" position="0 1 -1" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="0 1 -0.5" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 1 -0.5" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 1 -0.5" material="color: green"></a-entity>
       <a-cone id="stick" mixin="bat" position = "0 1 0" height="1" dynamic-body
               radius-top="0.03" radius-bottom="0.02" >
       </a-cone>
