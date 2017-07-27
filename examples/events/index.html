@@ -3,6 +3,7 @@
     <title>A-Frame Super Hands Component - GlobalEventHandler Integration</title>
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
+    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
@@ -22,7 +23,7 @@
     </script>
   </head>
   <body>
-    <a-scene>
+    <a-scene environment="preset: japan">
       <a-assets>
         <img id="grid" src="grid.png"/>
         <a-mixin id="controller" super-hands
@@ -44,16 +45,12 @@
                 width="1" wrap-count="15" anchor="center"></a-text>
       </a-box>
       <a-torus-knot position="0 0.25 -0.15" radius="0.15" radius-tubular="0.04"
-                    transparent="true" grabbable
+                    transparent="true"
                     ondragenter="this.setAttribute('opacity', 0.5)"
                     ondragleave="this.setAttribute('opacity', 1)"
                     onmousedown="this.setAttribute('wireframe', true)"
                     onmouseup="this.setAttribute('wireframe', false)">
       </a-torus-knot>
-
-
-      <a-plane rotation="-90 0 0" src="#grid" repeat="50 50"
-                 width="50" height="50"></a-plane>
       <a-sky color="skyblue"></a-sky>
     </a-scene>
 

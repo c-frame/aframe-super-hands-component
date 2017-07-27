@@ -5,6 +5,7 @@
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.4.2/dist/aframe-physics-system.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
@@ -22,7 +23,7 @@
     </script>
   </head>
   <body>
-    <a-scene physics>
+    <a-scene physics environment="preset: tron">
       <a-assets>
         <img id="colortransform" src="./colortransform.png" />
         <a-mixin id="controller" super-hands
@@ -47,7 +48,7 @@
       <a-entity class="cube" mixin="cube" position="1 0.265 -0.5" material="color: green"></a-entity>
       <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1"
                 material="src:#colortransform"></a-entity>
-      <a-grid static-body></a-grid>
+      <a-box static-body width=100 height=0.001 depth=100 visible="false"></a-box>
     </a-scene>
 
     <!-- GitHub Corner. -->

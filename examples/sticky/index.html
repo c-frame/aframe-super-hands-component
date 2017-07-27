@@ -4,13 +4,13 @@
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.4.2/dist/aframe-physics-system.min.js"></script>
-    <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
-    <!-- Replace "../build.js" with the super-hands distribution to run locally:
+    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
+  <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene physics>
+    <a-scene physics environment="preset: contact">
       <a-assets>
         <img id="grid" src="grid.png"/>
         <a-mixin id="controller"
@@ -28,16 +28,16 @@
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.265 -1" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.265 -0.5" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.265 -1" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.265 -0.5" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.265 -1" material="color: green"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.265 -0.5" material="color: green"></a-entity>
+      <a-entity class="ball" mixin="ball" position="0 0.45 -1" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="0 0.45 1" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 0.45 -1" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 0.45 1" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 0.45 -1" material="color: green"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 0.45 1" material="color: green"></a-entity>
       <a-cone id="stick" mixin="bat" position = "0 1 0" height="1" dynamic-body
               radius-top="0.03" radius-bottom="0.02" >
       </a-cone>
-      <a-plane mixin="floor" rotation="-90 0 0"></a-plane>
+      <a-plane mixin="floor" rotation="-90 0 0" position="0 0.01 0"></a-plane>
       <a-plane mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-plane>
       <a-plane mixin="floor" position="0 0 1.5" rotation="85 0 0" side="back"></a-plane>
       <a-plane mixin="floor" position="-1.5 0 0" rotation="-85 90 0"></a-plane>
