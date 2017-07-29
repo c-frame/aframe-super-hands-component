@@ -1,47 +1,55 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Sticky Grab</title>
-    <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v1.4.2/dist/aframe-physics-system.min.js"></script>
-    <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
-    <!-- Replace "../build.js" with the super-hands distribution to run locally:
+    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
+  <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene physics>
+    <a-scene physics environment="preset: contact; shadow: true">
       <a-assets>
         <img id="grid" src="grid.png"/>
         <a-mixin id="controller"
                  super-hands="grabStartButtons: triggerdown; grabEndButtons: gripdown; stretchStartButtons: trackpaddown; stretchEndButtons: trackpadup"
                  static-body="shape: sphere; sphereRadius: 0.02;"
-                 sphere-collider="objects: a-cone#stick"></a-mixin>
+                 sphere-collider="objects: #stick, [link]"></a-mixin>
         <a-mixin id="ball" geometry="primitive: sphere; radius: 0.33"
-                 dynamic-body></a-mixin>
+                 dynamic-body shadow></a-mixin>
         <a-mixin id="floor" material="src: #grid; repeat: 50 50" static-body
-                 geometry="width: 50; height: 50"></a-mixin>
+                 geometry="width: 50; height: 50; depth: 0.01"
+                 shadow="cast: false"></a-mixin>
         <a-mixin id="bat" grabbable hoverable stretchable
-                 material="color: brown"></a-mixin>
+                 material="color: brown" shadow></a-mixin>
         <a-mixin id="bat-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
         <a-mixin id="bat-stretched" material="wireframe: true"></a-mixin>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.15 -1" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="0 0.15 -0.5" material="color: red"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.15 -1" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="-1 0.15 -0.5" material="color: blue"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.15 -1" material="color: green"></a-entity>
-      <a-entity class="ball" mixin="ball" position="1 0.15 -0.5" material="color: green"></a-entity>
-      <a-cone id="stick" mixin="bat" position = "0 1 0" height="1" dynamic-body
+      <a-entity class="ball" mixin="ball" position="0 0.45 -1" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="0 0.45 1" material="color: red"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 0.45 -1" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="-1 0.45 1" material="color: blue"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 0.45 -1" material="color: green"></a-entity>
+      <a-entity class="ball" mixin="ball" position="1 0.45 1" material="color: green"></a-entity>
+      <a-cone id="stick" mixin="bat" position="0 2 0" height="1" dynamic-body
               radius-top="0.03" radius-bottom="0.02" >
       </a-cone>
-      <a-plane mixin="floor" rotation="-90 0 0"></a-plane>
-      <a-plane mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-plane>
-      <a-plane mixin="floor" position="0 0 1.5" rotation="85 0 0" side="back"></a-plane>
-      <a-plane mixin="floor" position="-1.5 0 0" rotation="-85 90 0"></a-plane>
-      <a-plane mixin="floor" position="1.5 0 0" rotation="-85 -90 0"></a-plane>
+      <a-box mixin="floor" rotation="-90 0 0" position="0 0.01 0"></a-box>
+      <a-box mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-box>
+      <a-box mixin="floor" position="0 0 1.5" rotation="85 0 0" side="back"></a-box>
+      <a-box mixin="floor" position="-1.5 0 0" rotation="-85 90 0"></a-box>
+      <a-box mixin="floor" position="1.5 0 0" rotation="-85 -90 0"></a-box>
+      <a-entity link="href: ../portals.html; title: Other Examples;
+              image: #portals-preview; on: mousedown"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
     </a-scene>
 
     <!-- GitHub Corner. -->

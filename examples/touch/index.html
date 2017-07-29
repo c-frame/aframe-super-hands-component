@@ -1,21 +1,23 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Oculus Touch Controls</title>
-    <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene>
+    <a-scene environment="preset: default; shadow: true">
       <a-assets>
         <a-mixin id="controller" super-hands
                  sphere-collider="objects: .cube"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
+                 shadow
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
@@ -29,7 +31,6 @@
       <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
-      <a-grid></a-grid>
     </a-scene>
 
     <!-- GitHub Corner. -->

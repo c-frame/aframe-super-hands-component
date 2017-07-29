@@ -45,7 +45,7 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/super-hands@1.0.1/dist/super-hands.min.js"></script>
 </head>
