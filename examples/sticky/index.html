@@ -16,7 +16,7 @@
         <a-mixin id="controller"
                  super-hands="grabStartButtons: triggerdown; grabEndButtons: gripdown; stretchStartButtons: trackpaddown; stretchEndButtons: trackpadup"
                  static-body="shape: sphere; sphereRadius: 0.02;"
-                 sphere-collider="objects: a-cone#stick"></a-mixin>
+                 sphere-collider="objects: #stick, [link]"></a-mixin>
         <a-mixin id="ball" geometry="primitive: sphere; radius: 0.33"
                  dynamic-body shadow></a-mixin>
         <a-mixin id="floor" material="src: #grid; repeat: 50 50" static-body
@@ -26,6 +26,7 @@
                  material="color: brown" shadow></a-mixin>
         <a-mixin id="bat-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
         <a-mixin id="bat-stretched" material="wireframe: true"></a-mixin>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
@@ -43,6 +44,12 @@
       <a-box mixin="floor" position="0 0 1.5" rotation="85 0 0" side="back"></a-box>
       <a-box mixin="floor" position="-1.5 0 0" rotation="-85 90 0"></a-box>
       <a-box mixin="floor" position="1.5 0 0" rotation="-85 -90 0"></a-box>
+      <a-entity link="href: ../portals.html; title: Other Examples;
+              image: #portals-preview; on: mousedown"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
     </a-scene>
 
     <!-- GitHub Corner. -->

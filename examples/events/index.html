@@ -25,9 +25,10 @@
   <body>
     <a-scene environment="preset: japan; shadow: true">
       <a-assets>
-        <img id="grid" src="grid.png"/>
         <a-mixin id="controller" super-hands
-                 sphere-collider="objects: a-box, a-torus-knot"></a-mixin>
+                 sphere-collider="objects: a-box, a-torus-knot, a-link">
+        </a-mixin>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity hand-controls="left" mixin="controller">
         <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
@@ -48,14 +49,19 @@
                 value="click to change color\ndrag-drop to paint the knot"
                 width="1" wrap-count="15" anchor="center"></a-text>
       </a-box>
-      <a-torus-knot position="0 0.25 -0.15" radius="0.15" radius-tubular="0.04"
+      <a-torus-knot position="0 0.838 0.152" radius="0.15" radius-tubular="0.04"
                     transparent="true" shadow
                     ondragenter="this.setAttribute('opacity', 0.5)"
                     ondragleave="this.setAttribute('opacity', 1)"
                     onmousedown="this.setAttribute('wireframe', true)"
                     onmouseup="this.setAttribute('wireframe', false)">
       </a-torus-knot>
-      <a-sky color="skyblue"></a-sky>
+      <a-link href="../portals.html" title="Other Examples"
+              image="#portals-preview"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
     </a-scene>
 
     <!-- GitHub Corner. -->

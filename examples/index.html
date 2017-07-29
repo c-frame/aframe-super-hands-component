@@ -98,6 +98,30 @@
       <li>Press grip to drop the bat</li>
       <li>Stretch the bat by pressing both trackpads</li>
     </ul>
+    <a id="portals" class="example" href="portals.html">Link Portals</a>
+    <p>A-Frame 0.6.0 added the ability to traverse experiences without
+      leaving VR with the <code>link</code> component and <code>a-link</code>
+      primitive. Just make sure your colliders are configured to find the link
+      entities and you'll be able to activate the portals with
+      <code>super-hands</code> automatically (because
+      both use the <code>'click'</code> <code>MouseEvent</code> by default).</p>
+      <p>You can make the experience even better by activating the
+        <code>highlighted</code> property of the link when a hand is hovering
+        in it. There are a few way to accomplish this:</p>
+      <ul>
+        <li>With the <code>hoverable</code> reaction component
+          and a <code>-hovered</code> mixin.
+        </li>
+        <li>With kframe's <code>event-set</code>
+          listening for <code>'mouseover'</code> and
+          <code>'mouseout'</code>.
+        </li>
+        <li>With <code>onmouseover</code> and <code>onmouseout</code>
+          Global Event Handlers on each link entity.
+        </li>
+      </ul>
+      <p>Each of these methods is demonstrated in the portals
+        example source</p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers</a>
     <p>Basic example using the <code>oculus-touch-controls</code> A-Frame component.
       Note: I don't have the equiment to test this one, so please

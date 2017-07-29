@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>A-Frame Super Hands Component - Hand Controls</title>
+    <title>A-Frame Super Hands Component - Hand Locomotion</title>
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
     <script src="a-painter-loader-component.min.js"></script>
@@ -12,10 +12,15 @@
     <a-scene>
       <a-assets>
         <img id="sky" src="sky.png"></img>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-locomotor>
-        <a-entity hand-controls="left" super-hands sphere-collider></a-entity>
-        <a-entity hand-controls="right" super-hands sphere-collider></a-entity>
+        <a-entity hand-controls="left" super-hands
+                  sphere-collider="objects: a-link">
+        </a-entity>
+        <a-entity hand-controls="right" super-hands
+                  sphere-collider="objects: a-link">
+        </a-entity>
       </a-locomotor>
       <a-entity a-painter-loader="src: https://ucarecdn.com/e1fb7084-88d3-4c0c-bbec-ab43b4d88722/"
        rotation="0 90 0" scale="15 15 15" position="0 -1.4 0">
@@ -23,6 +28,12 @@
       <!-- <a-entity a-painter-loader="src:https://ucarecdn.com/bc781073-b16a-4513-86e3-0171e5972bce/"
        rotation="0 0 0" scale="0.1 0.1 0.1">
       </a-entity> -->
+      <a-link href="../portals.html" title="Other Examples"
+              image="#portals-preview"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
       <a-sky src="#sky"></a-sky>
     </a-scene>
 

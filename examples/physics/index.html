@@ -27,7 +27,7 @@
       <a-assets>
         <img id="colortransform" src="./colortransform.png" />
         <a-mixin id="controller" super-hands
-                 sphere-collider="objects: .cube, .transformer"
+                 sphere-collider="objects: .cube, .transformer, a-link"
                  static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  hoverable grabbable stretchable drag-droppable
@@ -37,6 +37,7 @@
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
         <a-mixin id="transformer" color-randomizer drag-droppable
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
       <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
@@ -50,6 +51,12 @@
                 material="src:#colortransform" shadow></a-entity>
       <!-- ground collider keeps objets from falling -->
       <a-box static-body width=100 height=0.001 depth=100 visible="false"></a-box>
+      <a-link href="../portals.html" title="Other Examples"
+              image="#portals-preview"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
     </a-scene>
 
     <!-- GitHub Corner. -->
