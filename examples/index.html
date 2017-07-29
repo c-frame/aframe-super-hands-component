@@ -29,11 +29,18 @@
         font-size: smaller;
         color: #BBB;
       }
+      .preview {
+        width: 192px;
+        height: 96px;
+        display: block;
+        margin: 3px 0px;
+      }
      </style>
   </head>
   <body>
     <h1>A-Frame Super Hands Component</h1>
     <a id="hands" class="example" href="hands/">Hand controllers without physics</a>
+    <img class="preview" src="./assets/hand-controls.jpg"/>
     <p>Example of super-hands interactivity with <code>hand-controls</code> without using a
       physics system. The <code>super-hands</code> component is added to
     the controller entities, and the <code>hoverable</code>,
@@ -46,6 +53,7 @@
         <code>event-set</code> component listening for the 'drag-drop' event</li>
     </ul>
     <a id="locomotion" class="example" href="locomotion/">Grab-based locomotion</a>
+    <img class="preview" src="./assets/locomotion.jpg"/>
     <p>Example of the <code>a-locomotor</code> primitive to add easy
       locomotion to a scene</p>
     <ul>
@@ -53,6 +61,7 @@
       <li>Stretch with two hands to scale the scene up or down</li>
     </ul>
     <a id="events" class="example" href="events/">Integration with Global Event Handlers</a>
+    <img class="preview" src="./assets/events.jpg"/>
     <p>Another option for customizing reactions is by using the
       Global Event Handlers Web API (e.g., 'onclick').
       super-hands will trigger standard events that are analogous to the VR
@@ -69,7 +78,9 @@
       <li>onmousedown the torus knot changes to wireframe</li>
     </ul>
     <a id="physics" class="example" href="physics/">Vive controllers with physics
-      and a custom reaction component</a>
+      and a custom reaction component
+    </a>
+    <img class="preview" src="./assets/physics.jpg"/>
     <p>Example of super-hands interactivity with <code>vive-controls</code> and
       <code>afame-physics-system</code>. Also includes <code>color-randomizer</code>,
       an example of a creating a component to customize the response to cues from
@@ -91,6 +102,7 @@
       <li><code>color-randomizer</code> changes the color of entities dropped inside of the color changer box</li>
     </ul>
     <a id="sticky" class="example" href="sticky/">Sticky Grab via Custom Button Mapping</a>
+    <img class="preview" src="./assets/sticky.jpg"/>
     <p>Example of customizing the button event schema options</p>
     <ul>
       <li>Press trigger to lock bat to controller</li>
@@ -99,6 +111,7 @@
       <li>Stretch the bat by pressing both trackpads</li>
     </ul>
     <a id="portals" class="example" href="portals.html">Link Portals</a>
+    <img class="preview" src="./assets/portals.jpg"/>
     <p>A-Frame 0.6.0 added the ability to traverse experiences without
       leaving VR with the <code>link</code> component and <code>a-link</code>
       primitive. Just make sure your colliders are configured to find the link
@@ -123,6 +136,7 @@
       <p>Each of these methods is demonstrated in the portals
         example source</p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers</a>
+    <img class="preview" src="./assets/hand-controls.jpg"/>
     <p>Basic example using the <code>oculus-touch-controls</code> A-Frame component.
       Note: I don't have the equiment to test this one, so please
       <a href="https://github.com/wmurphyrd/aframe-super-hands-component/issues">report any issues</a>.
