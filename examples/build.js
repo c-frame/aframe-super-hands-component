@@ -5,8 +5,8 @@ require('../index.js');
 require('aframe-motion-capture-components');
 /* used in examples to allow a desktop playback without HMD
    defined here to keep example files clear of clutter */
-window.playDemoRecording = function () {
-  var l = document.querySelector('a-link');
+window.playDemoRecording = function (spectate) {
+  var l = document.querySelector('a-link, a-entity[link]');
   var s = document.querySelector('a-scene');
   l.setAttribute('visible', 'false');
   s.addEventListener('replayingstopped', function (e) {
@@ -19,7 +19,7 @@ window.playDemoRecording = function () {
   });
   s.setAttribute('avatar-replayer', {
     src: './demo-recording.json',
-    spectatorMode: true,
+    spectatorMode: spectate === undefined ? true : spectate,
     spectatorPosition: '0 1.6 2'
   });
 };

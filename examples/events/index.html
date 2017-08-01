@@ -21,8 +21,12 @@
         evt.relatedTarget.children[0].setAttribute('visible', false);
       }
     </script>
+    <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
+    <button id="replayer-button" type="button" onclick="playDemoRecording()">
+      Don't have a Vive or Rift handy? Click here for a preview.
+    </button>
     <a-scene environment="preset: japan; shadow: true">
       <a-assets>
         <a-mixin id="controller" super-hands
@@ -30,12 +34,12 @@
         </a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity hand-controls="left" mixin="controller">
+      <a-entity id="lhand" hand-controls="left" mixin="controller">
         <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
          shadow>
         </a-sphere>
       </a-entity>
-      <a-entity hand-controls="right" mixin="controller">
+      <a-entity id="rhand" hand-controls="right" mixin="controller">
         <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
          shadow>
         </a-sphere>
