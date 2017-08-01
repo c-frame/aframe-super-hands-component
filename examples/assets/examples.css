@@ -1,0 +1,8 @@
+#replayer-button {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    padding: 5px;
+    z-index: 100;
+}

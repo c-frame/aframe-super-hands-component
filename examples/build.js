@@ -3,6 +3,26 @@
 
 require('../index.js');
 require('aframe-motion-capture-components');
+/* used in examples to allow a desktop playback without HMD
+   defined here to keep example files clear of clutter */
+window.playDemoRecording = function () {
+  var l = document.querySelector('a-link');
+  var s = document.querySelector('a-scene');
+  l.setAttribute('visible', 'false');
+  s.addEventListener('replayingstopped', function (e) {
+    var c = document.querySelector('[camera]');
+    window.setTimeout(function () {
+      console.log('reset camera');
+      c.setAttribute('position', '0 1.6 2');
+      c.setAttribute('rotation', '0 0 0');
+    });
+  });
+  s.setAttribute('avatar-replayer', {
+    src: './demo-recording.json',
+    spectatorMode: true,
+    spectatorPosition: '0 1.6 2'
+  });
+};
 
 },{"../index.js":2,"aframe-motion-capture-components":8}],2:[function(require,module,exports){
 'use strict';
