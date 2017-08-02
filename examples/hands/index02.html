@@ -80,7 +80,6 @@
                  sphere-collider="objects: .cube, a-link"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
-		 class="myclickable"
                  shadow
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
@@ -95,12 +94,12 @@
     <a-camera>
       <a-cursor id="rhand" cursor="fuse: false" mixin="controller" raycaster="objects: .myclickable;far: 100"></a-cursor>
 		</a-camera>
-      <a-entity class="cube" mixin="cube" position="0 1 -0.2" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1.6 -0.2" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1 -0.2" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1.6 -0.2" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1 -0.2" material="color: green"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1.6 -0.2" material="color: green"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 1 -0.2" material="color: red" class="myclickable"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 1.6 -0.2" material="color: red" class="myclickable"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 1 -0.2" material="color: blue" class="myclickable"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 1.6 -0.2" material="color: blue" class="myclickable"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 1 -0.2" material="color: green" class="myclickable"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 1.6 -0.2" material="color: green" class="myclickable"></a-entity>
       <a-link href="../portals.html" title="Other Examples"
               image="#portals-preview"
               mixin="portal" hoverable
