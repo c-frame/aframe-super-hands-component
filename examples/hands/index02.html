@@ -23,7 +23,7 @@
                  super-hands="grabStartButtons: mousedown,touchdown; grabEndButtons: mouseup,touchup"
                  sphere-collider="objects: .cube, a-link"></a-mixin-->
         <a-mixin id="controller"
-                 super-hands="colliderEvent: mouseenter"
+                 super-hands="colliderEvent: raycaster-intersection"
                  sphere-collider="objects: .cube, a-link"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
