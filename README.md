@@ -112,6 +112,14 @@ properties like `onclick`.
 
 ### News
 
+v1.2.0
+
+* NEW: Compatibility with desktop mouse control via A-Frame `cursor` component
+  * Added new schema property `colliderEventProperty` to configure
+    where in the `event.details` to look for the collision target
+  * Requires some configuration of schema properties, see new example: [Mouse Controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
+* Select examples now have `avatar-replayer` to preview actions without needing
+  VR equipment
 v1.0.1
 
 * A-Frame v0.6.0 compatibility: fixed issue with camera freezing when using
@@ -157,11 +165,11 @@ v1.0.0
 
 #### Compatibility
 
-| A-Frame Version | super-hands Version | aframe-extras Version | aframe-physics-system Version |
+| super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
-| v0.6.x | ^v1.0.1 |^v3.8.6 | ^v1.4.2 |
-| v0.5.x | ^v1.0.0 |^v3.8.5 | ^v1.4.1 |
-| v0.4.x | v0.2.4 | v3.7.0 | v1.3.0 |
+| ^v1.0.1 | v0.6.x |^v3.8.6 | ^v1.4.2 |
+| v1.0.0 | v0.5.x |v3.8.5 | v1.4.1 |
+| v0.2.4 | v0.4.x | v3.7.0 | v1.3.0 |
 
 ### API
 
@@ -177,6 +185,7 @@ or the in-development, physics system-based [physics-collider](https://github.co
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
+| colliderEventProperty | Name of property in event `details` object which contains the collided entity | `'el'` (default for `sphere-collider` and `physics-collider`) |
 | grabStartButtons | Array of button event types that can initiate grab | Trigger, grip, thumb press events |
 | grabEndButtons | Array of button event types that can terminate grab | Trigger, grip, thumb release events |
 | stretchStartButtons | Array of button event types that can initiate stretch | Trigger, grip, thumb press events |

@@ -8,8 +8,10 @@
         font-family: sans-serif;
         font-size: 20px;
         padding: 10px 20px;
+        max-width: 41em;
+        margin: 0 auto;
       }
-      h1 {
+      h1,h2 {
         font-weight: 300;
         font-family: serif;
       }
@@ -40,14 +42,14 @@
       .bonus {
         color: #f4f4a1;
         background-color: #3f506d7e;
-        font-size: 20px;
+        font-size: 18px;
         width: 93px;
         height: 96px;
         float: left;
         margin: 3px 0px;
         padding: 0 0 0 5px;
         position: absolute;
-
+        overflow: hidden;
       }
       .bonus::after {
         content: 'Motion-Captured Preview Available'
@@ -177,6 +179,28 @@
       </ul>
       <p>Each of these methods is demonstrated in the portals
         example source</p>
+    <h2>Other Types of Controls</h2>
+    <p>These examples show how <code>super-hands</code> works with, or can be
+      configured to work with, other devices and controller types.</p>
+    <a id="mouse" class="example" href="mouse/">Mouse Controls
+      <br />
+      <img class="preview" src="./assets/hand-controls.jpg"/>
+    </a>
+    <p>By altering the <code>super-hands</code> configuration to look for
+      the events and states used by the <code>cursor</code> A-Frame
+      core component, we can add interactivity even without motion
+      controllers.</p>
+      <pre>
+  &lta-camera&gt
+    &lta-cursor super-hands="colliderEvent: mouseenter;
+                             colliderEventProperty: intersectedEl;
+                             colliderState: cursor-hovered;
+                             grabStartButtons: mousedown;
+                             grabEndButtons: mouseup;
+                             dragDropStartButtons: mousedown;
+                             dragDropEndButtons: mouseup;"&gt
+    &lt/a-cursor&gt
+  &lt/a-camera&gt</pre>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
