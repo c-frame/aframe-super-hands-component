@@ -29,7 +29,6 @@
       console.log(evt);
     });
     floor.addEventListener('mouseenter', function (evt) {
-	    evt.detail.intersectedEl.addState('collided');
 	    floor.emit('hit', {el:evt.detail.intersectedEl}) // the emit method wraps the second argument in event.detail automatically
       //AFRAME.log(evt);
       console.log(evt);
@@ -85,7 +84,11 @@
                  super-hands
                  sphere-collider="objects: .cube, a-link"></a-mixin-->
 	      <a-mixin id="controller"
-                 super-hands></a-mixin>
+                 super-hands="colliderState: cursor-hovered">
+          <!-- it's important that the state gets removed when the collision
+               ends, so we'll just tell super-hands to track the cursor state
+               instead of adding collided manually -->
+        </a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable drag-droppable
                  shadow
