@@ -46,6 +46,17 @@ suite('super-hands hit processing & event emission', function () {
       done();
     });
   });
+  test('onHit finds the target entity in event details', function () {
+    this.hand1.emit('hit', {el: this.target1});
+    assert.includeMembers(this.sh1.hoverEls, [this.target1]);
+    // change to cursor config
+    this.hand1.setAttribute('super-hands', {
+      colliderEvent: 'mouseenter',
+      colliderEventProperty: 'intersectedEl'
+    });
+    this.hand1.emit('mouseenter', {intersectedEl: this.target2});
+    assert.includeMembers(this.sh1.hoverEls, [this.target2]);
+  });
   test('hover event', function (done) {
     this.target1.addEventListener('hover-start', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
