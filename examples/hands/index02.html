@@ -30,7 +30,7 @@
     });
     floor.addEventListener('mouseenter', function (evt) {
 	    evt.detail.intersectedEl.addState('collided');
-	    floor.emit('hit', {detail:{el:evt.detail.intersectedEl}})
+	    floor.emit('hit', {el:evt.detail.intersectedEl}) // the emit method wraps the second argument in event.detail automatically
       //AFRAME.log(evt);
       console.log(evt);
     });
