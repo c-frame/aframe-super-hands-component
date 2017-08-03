@@ -97,7 +97,7 @@
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-    <a-camera>
+    <a-camera position="0 0 0.5"> <!-- cursor was too close to center box and wasn't registering it -->
       <a-cursor id="rhand" cursor="fuse: false" mixin="controller" raycaster="objects: .myclickable;far: 100"></a-cursor>
 		</a-camera>
 	  <!--a-entity id="lhand" laser-controls="left" mixin="controller"></a-entity-->
