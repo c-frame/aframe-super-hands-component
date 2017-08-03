@@ -15,8 +15,8 @@
   init: function () {
     var floor = this.el.sceneEl.querySelector('#rhand');
     var camera = this.el.sceneEl.querySelector('a-camera');
-    
-    
+
+
     floor.addEventListener('mousedown', function (evt) {
       //var pos = evt.detail.intersection.point;
       //var yy = camera.getAttribute('position').y;
@@ -52,7 +52,7 @@
     });
     floor.addEventListener('raycaster-intersection', function (evt) {
       //AFRAME.log(evt);
-	    
+
       console.log(evt);
     });
     floor.addEventListener('raycaster-intersected-cleared', function (evt) {
@@ -102,12 +102,13 @@
 		</a-camera>
 	  <!--a-entity id="lhand" laser-controls="left" mixin="controller"></a-entity-->
       <!--a-entity id="rhand" laser-controls="right" mixin="controller"></a-entity-->
-      <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red" class="myclickable"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red" class="myclickable"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue" class="myclickable"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue" class="myclickable"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green" class="myclickable"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green" class="myclickable"></a-entity>
+      <a-entity class="cube myclickable" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
+      <!-- the class="cube" declaration was overriding the later class="myclickable". I combined them -->
+      <a-entity class="cube myclickable" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
+      <a-entity class="cube myclickable" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity class="cube myclickable" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity class="cube myclickable" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity class="cube myclickable" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
       <a-link href="../portals.html" title="Other Examples"
               image="#portals-preview"
               mixin="portal" hoverable
