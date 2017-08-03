@@ -49,6 +49,7 @@ AFRAME.registerComponent('super-hands', {
   schema: {
     colliderState: { default: 'collided' },
     colliderEvent: { default: 'hit' },
+    colliderEventProperty: { default: 'el' },
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown']
     },
@@ -227,7 +228,7 @@ AFRAME.registerComponent('super-hands', {
   onHit: function onHit(evt) {
     var _this3 = this;
 
-    var hitEl = evt.detail.el;
+    var hitEl = evt.detail[this.data.colliderEventProperty];
     var hitElIndex;
     if (!hitEl) {
       return;
