@@ -5,7 +5,7 @@
 [![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
 
-Effortlessly add natural, intuitive hand controller interaction in
+Effortlessly add natural, intuitive hand controller and mouse interaction in
 [A-Frame](https://aframe.io).
 
 ![Demo Gif](readme_files/super-hands-demo.gif)
@@ -14,7 +14,7 @@ Effortlessly add natural, intuitive hand controller interaction in
 
 ### Description
 
-The `super-hands` component interprets input from tracked controllers and
+The `super-hands` component interprets input from controls and
 collision detection components
 into interaction gestures and communicates those gestures to
 target entities for them to respond.  
@@ -31,10 +31,17 @@ components attached to translate the gestures into actions. `super-hands`
 includes components for typical reactions to the implemented gestures:
 `hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
-**Avatar Locomotion**: Inspired by a demo from @caseyyee, the `super-hands`
+**Avatar Locomotion**: Inspired by a demo from [@caseyyee](https://github.com/caseyyee), the `super-hands`
 grab and stretch gestures can also serve as a comfortable locomotion system
 by moving and scaling the world around the player. Use the `a-locomotor` primitive
 to provide intuitive freedom of motion in your WebVR experiences.
+
+**Mouse and Mobile VR Support**: With valuable input from [@milan-rusev](https://github.com/milan-rusev),
+we were able to integrate mouse and other controller input via
+the `cursor` component to support a wider variety of controllers.
+See
+[the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
+for more info.
 
 ### Installation
 
@@ -120,6 +127,7 @@ v1.2.0
   * Requires some configuration of schema properties, see new example: [Mouse Controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
 * Select examples now have `avatar-replayer` to preview actions without needing
   VR equipment
+
 v1.0.1
 
 * A-Frame v0.6.0 compatibility: fixed issue with camera freezing when using

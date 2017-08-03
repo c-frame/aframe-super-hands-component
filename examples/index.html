@@ -201,6 +201,21 @@
                              dragDropEndButtons: mouseup;"&gt
     &lt/a-cursor&gt
   &lt/a-camera&gt</pre>
+    <a id="laser" class="example" href="laser/">Laser Pointer Controls
+      <br />
+      <img class="preview" src="./assets/hand-controls.jpg"/>
+      <div class="bonus"></div>
+    </a>
+    <p>The new <code>laser-controls</code> component in the A-Frame core
+      provides a consistent experience across PC and mobile VR devices.
+      Since it uses the <code>cursor</code> component for collision management,
+      the same <code>super-hands</code> configuration used above in the
+      Mouse Controls example works here as well. The movement of grabbed
+      entities is still tacked to controller xyz translation, so only
+      <code>hoverable</code> and <code>drag-droppable</code> will work well with
+      3-DOF controllers like Google Daydream for now. I'll be working on a
+      modified version of <code>grabbable</code> that works off of controller
+      rotation to improve this type of experience.</p> 
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
