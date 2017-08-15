@@ -7,10 +7,24 @@
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
-    <script>document.querySelector('a-scene').addEventListener('enter-vr', function () {document.querySelector('a-cursor').setAttribute('fuse', 'true');});</script>
+    <script>
+      // The cursor component only listens for mouse input from the user,
+      // so we trick it into accepting touch as well
+      AFRAME.registerComponent('touch-to-click-converter', {
+        init: function () {
+          this.el.canvas.addEventListener('touchstart', function (e) {
+            e.target.dispatchEvent(new CustomEvent('mousedown'));
+          });
+          this.el.canvas.addEventListener('touchend', function (e) {
+            e.target.dispatchEvent(new CustomEvent('mouseup'));
+          });
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene environment="preset: default; shadow: true">
+    <a-scene environment="preset: default; shadow: true"
+             touch-to-click-converter>
       <a-assets>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable drag-droppable

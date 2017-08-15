@@ -182,14 +182,20 @@
     <h2>Other Types of Controls</h2>
     <p>These examples show how <code>super-hands</code> works with, or can be
       configured to work with, other devices and controller types.</p>
-    <a id="mouse" class="example" href="mouse/">Mouse Controls
+    <a id="mouse" class="example" href="mouse/">
+      Touch, Mouse, and Cardboard Controls
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
     </a>
     <p>By altering the <code>super-hands</code> configuration to look for
       the events and states used by the <code>cursor</code> A-Frame
       core component, we can add interactivity even without motion
-      controllers.</p>
+      controllers. There's also a small tweak in this example to
+      expand the A-Frame <copde>cursor</code>
+      to also accept touch input, so it will 
+      work with simple mobile VR viewers like Cardboard
+      and even regular handheld mobile viewing.
+      </p>
       <pre>
   &lta-camera&gt
     &lta-cursor super-hands="colliderEvent: mouseenter;
@@ -215,7 +221,7 @@
       <code>hoverable</code> and <code>drag-droppable</code> will work well with
       3-DOF controllers like Google Daydream for now. I'll be working on a
       modified version of <code>grabbable</code> that works off of controller
-      rotation to improve this type of experience.</p> 
+      rotation to improve this type of experience.</p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
