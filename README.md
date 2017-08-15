@@ -93,7 +93,7 @@ require('super-hands');
 The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
 
 | Example Scene | Description | Target VR Devices | MoCap preview |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | [Basic hand controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#hands) | Simple setup for grab, stretch, and drag-drop | Vive, Rift | Yes |
 | [Grab-based locomotion](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion) | Explore a scene by dragging or stretching the world around you | Vive, Rift | Yes |
 | [Global Event Handler integration](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events) | An easy way to customize  interactions using familiar HTML event handler properties like `onclick` | Vive, Rift | Yes |
