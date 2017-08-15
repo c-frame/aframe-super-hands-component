@@ -5,8 +5,8 @@
 [![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard)
 
-Effortlessly add natural, intuitive hand controller and mouse interaction in
-[A-Frame](https://aframe.io).
+Effortlessly add natural, intuitive interactions with tracked controller,
+touch, or mouse input in [A-Frame](https://aframe.io).
 
 ![Demo Gif](readme_files/super-hands-demo.gif)
 
@@ -90,7 +90,18 @@ require('super-hands');
 
 #### Examples
 
-[Visit the Examples Page to see super-hands in action](https://wmurphyrd.github.io/aframe-super-hands-component/examples/)
+The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
+
+| Example Scene | Description | Target VR Devices | MoCap preview |
+| --- | --- | --- | --- |
+| [Basic hand controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#hands) | Simple setup for grab, stretch, and drag-drop | Vive, Rift | Yes |
+| [Grab-based locomotion](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion) | Explore a scene by dragging or stretching the world around you | Vive, Rift | Yes |
+| [Global Event Handler integration](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events) | An easy way to customize  interactions using familiar HTML event handler properties like `onclick` | Vive, Rift | Yes |
+| [Hand controls with physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior | Vive | Yes |
+| [Custom button mapping](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky) | Configuring the `super-hands` schema to change button functions | Vive | No |
+| [Link Portals](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#portals) | Using `super-hands` with A-Frame link portals | Vive, Rift | No |
+| [Gaze-based interactivity](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Using `super-hands` with `cursor` to add grab and drag-drop interactivity for simpler VR setups | Desktop, mobile, cardboard | No |
+| [Laser pointer controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#laser) | Using the A-Frame `laser-controls` to support a variety of VR controllers | Gear VR, Daydream, Vive, Rift | Yes |
 
 ### Concepts
 
