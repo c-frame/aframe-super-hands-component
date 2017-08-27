@@ -192,7 +192,7 @@
       core component, we can add interactivity even without motion
       controllers. There's also a small tweak in this example to
       expand the A-Frame <copde>cursor</code>
-      to also accept touch input, so it will 
+      to also accept touch input, so it will
       work with simple mobile VR viewers like Cardboard
       and even regular handheld mobile viewing.
       </p>
@@ -216,12 +216,12 @@
       provides a consistent experience across PC and mobile VR devices.
       Since it uses the <code>cursor</code> component for collision management,
       the same <code>super-hands</code> configuration used above in the
-      Mouse Controls example works here as well. The movement of grabbed
-      entities is still tacked to controller xyz translation, so only
-      <code>hoverable</code> and <code>drag-droppable</code> will work well with
-      3-DOF controllers like Google Daydream for now. I'll be working on a
-      modified version of <code>grabbable</code> that works off of controller
-      rotation to improve this type of experience.</p>
+      Mouse Controls example works here as well. This is using a beta
+      version of a new reaction component, <code>pointable</code> to improve
+      the experience with 3DOF controllers like Daydream and GearVR. More
+      info on the <a href="https://github.com/wmurphyrd/aframe-super-hands-component#news">
+        <code>pointable</code> beta here</a>.
+    </p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
