@@ -36,6 +36,7 @@ if (typeof AFRAME === 'undefined') {
 require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
+require('./reaction_components/pointable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
@@ -483,7 +484,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./primitives/a-locomotor.js":10,"./reaction_components/clickable.js":11,"./reaction_components/drag-droppable.js":12,"./reaction_components/grabbable.js":13,"./reaction_components/hoverable.js":14,"./reaction_components/locomotor-auto-config.js":15,"./reaction_components/stretchable.js":16,"./systems/super-hands-system.js":17}],3:[function(require,module,exports){
+},{"./primitives/a-locomotor.js":10,"./reaction_components/clickable.js":11,"./reaction_components/drag-droppable.js":12,"./reaction_components/grabbable.js":13,"./reaction_components/hoverable.js":14,"./reaction_components/locomotor-auto-config.js":15,"./reaction_components/pointable.js":16,"./reaction_components/stretchable.js":17,"./systems/super-hands-system.js":18}],3:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:info');
 var warn = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:warn');
@@ -2033,6 +2034,124 @@ AFRAME.registerComponent('locomotor-auto-config', {
 'use strict';
 
 /* global AFRAME, THREE */
+AFRAME.registerComponent('pointable', {
+  schema: {
+    maxGrabbers: { type: 'int', default: NaN }
+  },
+  init: function init() {
+    var _this = this;
+
+    this.GRABBED_STATE = 'grabbed';
+    this.GRAB_EVENT = 'grab-start';
+    this.UNGRAB_EVENT = 'grab-end';
+    this.grabbed = false;
+    this.grabbers = [];
+    this.constraints = new Map();
+    this.deltaPositionIsValid = false;
+    this.grabDistance = undefined;
+    this.grabDirection = { x: 0, y: 0, z: -1 };
+    this.grabOffset = { x: 0, y: 0, z: 0 };
+
+    this.el.addEventListener(this.GRAB_EVENT, function (e) {
+      return _this.start(e);
+    });
+    this.el.addEventListener(this.UNGRAB_EVENT, function (e) {
+      return _this.end(e);
+    });
+    this.el.addEventListener('mouseout', function (e) {
+      return _this.lostGrabber(e);
+    });
+  },
+  tick: function () {
+    var deltaPosition = new THREE.Vector3();
+    var targetPosition = new THREE.Vector3();
+    return function () {
+      var entityPosition;
+      if (this.grabber) {
+        // reflect on z-axis to point in same direction as the laser
+        // targetPosition.set(0, 0, -1);
+        targetPosition.copy(this.grabDirection);
+        targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
+        if (this.deltaPositionIsValid) {
+          // relative position changes work better with nested entities
+          deltaPosition.sub(targetPosition);
+          entityPosition = this.el.getAttribute('position');
+          entityPosition.x -= deltaPosition.x;
+          entityPosition.y -= deltaPosition.y;
+          entityPosition.z -= deltaPosition.z;
+          this.el.setAttribute('position', entityPosition);
+        } else {
+          this.deltaPositionIsValid = true;
+        }
+        deltaPosition.copy(targetPosition);
+      }
+    };
+  }(),
+  remove: function remove() {
+    this.el.removeEventListener(this.GRAB_EVENT, this.start);
+    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+  },
+  start: function start(evt) {
+    // room for more grabbers?
+    var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
+
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+      if (!evt.detail.hand.object3D) {
+        console.warn('pointable entities must have an object3D');
+        return;
+      }
+      this.grabbers.push(evt.detail.hand);
+      // initiate manual grab if first grabber
+      if (!this.grabber) {
+        this.grabber = evt.detail.hand;
+        this.resetGrabber();
+      }
+      // notify super-hands that the gesture was accepted
+      if (evt.preventDefault) {
+        evt.preventDefault();
+      }
+      this.grabbed = true;
+      this.el.addState(this.GRABBED_STATE);
+    }
+  },
+  end: function end(evt) {
+    var handIndex = this.grabbers.indexOf(evt.detail.hand);
+    if (handIndex !== -1) {
+      this.grabbers.splice(handIndex, 1);
+      this.grabber = this.grabbers[0];
+    }
+    if (!this.resetGrabber()) {
+      this.grabbed = false;
+      this.el.removeState(this.GRABBED_STATE);
+    }
+  },
+  resetGrabber: function resetGrabber() {
+    var raycaster = void 0;
+    if (!this.grabber) {
+      return false;
+    }
+    raycaster = this.grabber.getAttribute('raycaster');
+    this.deltaPositionIsValid = false;
+    this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
+    if (raycaster) {
+      this.grabDirection = raycaster.direction;
+      this.grabOffset = raycaster.origin;
+    }
+    return true;
+  },
+  lostGrabber: function lostGrabber(evt) {
+    var i = this.grabbers.indexOf(evt.relatedTarget);
+    // if a queued, non-physics grabber leaves the collision zone, forget it
+    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.constraints.has(evt.relatedTarget)) {
+      this.grabbers.splice(i, 1);
+    }
+  }
+});
+
+},{}],17:[function(require,module,exports){
+'use strict';
+
+/* global AFRAME, THREE */
 AFRAME.registerComponent('stretchable', {
   schema: {
     usePhysics: { default: 'ifavailable' },
@@ -2112,7 +2231,7 @@ AFRAME.registerComponent('stretchable', {
   }
 });
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

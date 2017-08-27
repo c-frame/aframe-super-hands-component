@@ -7,6 +7,7 @@ if (typeof AFRAME === 'undefined') {
 require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
+require('./reaction_components/pointable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');

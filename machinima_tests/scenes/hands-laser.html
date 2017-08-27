@@ -1,20 +1,9 @@
 <html>
   <head>
-    <title>A-Frame Super Hands Component - Laser Controls</title>
-    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
-    <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
-    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
-    <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js" -->
-    <script src="../build.js"></script>
-    <link rel="stylesheet" type="text/css" href="../assets/examples.css">
+    <script src="build.js"></script>
   </head>
   <body>
-    <button id="replayer-button" type="button" onclick="playDemoRecording()">
-      Don't have a Vive or Rift handy? Click here for a preview.
-    </button>
-    <a-scene environment="preset: default; shadow: true" avatar-recorder>
+    <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
       <a-assets>
         <a-mixin id="controller"
                  super-hands="colliderEvent: mouseenter;
@@ -26,29 +15,21 @@
                               dragDropEndButtons: mouseup;"
                  sphere-collider="objects: .cube, a-link"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable pointable stretchable drag-droppable
-                 shadow
+                 hoverable pointable
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
+        <a-mixin id="cube-grabbed" material="opacity: 0.7; transparent: true">
         </a-mixin>
-        <a-mixin id="portal"></a-mixin>
-        <a-mixin id="portal-hovered" link="highlighted: true"></a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
-        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity>
+      <!-- <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity> -->
       <a-entity id="rhand" laser-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
-      <a-link href="../portals.html" title="Other Examples"
-              image="#portals-preview"
-              mixin="portal" hoverable
-              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
-      </a-link>
+      <a-entity id="redLow" class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
+      <a-entity id="redHigh" class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
+      <a-entity id="blueLow" class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity id="blueHigh" class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity id="greenLow" class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity id="greenHigh" class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
     </a-scene>
 
     <!-- GitHub Corner. -->
