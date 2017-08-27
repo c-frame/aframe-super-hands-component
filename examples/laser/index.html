@@ -26,7 +26,7 @@
                               dragDropEndButtons: mouseup;"
                  sphere-collider="objects: .cube, a-link"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable grabbable stretchable drag-droppable
+                 hoverable pointable stretchable drag-droppable
                  shadow
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">

@@ -130,6 +130,20 @@ properties like `onclick`.
 
 ### News
 
+Master branch
+
+* New `pointable` reaction component.
+  * Like `grabbable` for moving objects, but from a distance
+  * Uses controller orientation for better compatibility with 3DOF controllers
+    like Daydream and GearVR
+  * Designed to work with `laser-controls`
+
+To test out master branch features, use this script tag:
+
+```html
+<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
+```
+
 v1.1.0
 
 * NEW: Compatibility with desktop mouse control via A-Frame `cursor` component
@@ -362,6 +376,21 @@ by setting the maxGrabbers schema property.
 | --- | --- |
 | grabbed | Added to entity while it is being carried |
 
+#### pointable component
+
+**BETA Feature** An alternative version of `grabbable` that
+works with `laser-controls` and 3DOF controllers like Daydream and GearVR
+by using controller orientation and distance to move entities.
+
+Note: `pointable` is not yet in the latest super-hands release,
+see [master branch news](#news) to get the beta version.
+
+##### States
+
+| Name | Description |
+| --- | --- |
+| grabbed | Added to entity while a button is held down |
+
 #### clickable component
 
 An alternative version of `grabbable` that registers that a button was pressed, but does not
@@ -373,6 +402,7 @@ move the entity. Do not use `clickable` and `grabbable` on the same entity
 | Name | Description |
 | --- | --- |
 | clicked | Added to entity while a button is held down |
+
 
 #### stretchable component
 
