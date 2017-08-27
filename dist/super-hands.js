@@ -730,13 +730,10 @@
 
 	'use strict';
 
-	/* global AFRAME */
+	/* global AFRAME, THREE */
 	AFRAME.registerComponent('pointable', {
 	  schema: {
-	    usePhysics: { default: 'ifavailable' },
-	    maxGrabbers: { type: 'int', default: NaN },
-	    invert: { default: false },
-	    suppressY: { default: false }
+	    maxGrabbers: { type: 'int', default: NaN }
 	  },
 	  init: function init() {
 	    var _this = this;
@@ -747,7 +744,10 @@
 	    this.grabbed = false;
 	    this.grabbers = [];
 	    this.constraints = new Map();
-	    this.toRadians = Math.PI / 180;
+	    this.deltaPositionIsValid = false;
+	    this.grabDistance = undefined;
+	    this.grabDirection = { x: 0, y: 0, z: -1 };
+	    this.grabOffset = { x: 0, y: 0, z: 0 };
 
 	    this.el.addEventListener(this.GRAB_EVENT, function (e) {
 	      return _this.start(e);
@@ -759,41 +759,49 @@
 	      return _this.lostGrabber(e);
 	    });
 	  },
-	  update: function update(oldDat) {
-	    if (this.data.usePhysics === 'never' && this.constraints.size) {
-	      this.clearConstraints();
-	    }
-	    this.xFactor = this.data.invert ? -1 : 1;
-	    this.zFactor = this.data.invert ? -1 : 1;
-	    this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
-	  },
-	  tick: function tick() {
-	    if (this.grabber && !this.constraints.size && this.data.usePhysics !== 'only') {
-	      var handPosition = this.grabber.object3D ? this.grabber.object3D.getWorldPosition() : this.grabber.getAttribute('position');
-	      // TODO: Update entity position
-	    }
-	  },
+	  tick: function () {
+	    var deltaPosition = new THREE.Vector3();
+	    var targetPosition = new THREE.Vector3();
+	    return function () {
+	      var entityPosition;
+	      if (this.grabber) {
+	        // reflect on z-axis to point in same direction as the laser
+	        // targetPosition.set(0, 0, -1);
+	        targetPosition.copy(this.grabDirection);
+	        targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
+	        if (this.deltaPositionIsValid) {
+	          // relative position changes work better with nested entities
+	          deltaPosition.sub(targetPosition);
+	          entityPosition = this.el.getAttribute('position');
+	          entityPosition.x -= deltaPosition.x;
+	          entityPosition.y -= deltaPosition.y;
+	          entityPosition.z -= deltaPosition.z;
+	          this.el.setAttribute('position', entityPosition);
+	        } else {
+	          this.deltaPositionIsValid = true;
+	        }
+	        deltaPosition.copy(targetPosition);
+	      }
+	    };
+	  }(),
 	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
-	    this.clearConstraints();
 	  },
 	  start: function start(evt) {
 	    // room for more grabbers?
 	    var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
 	    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+	      if (!evt.detail.hand.object3D) {
+	        console.warn('pointable entities must have an object3D');
+	        return;
+	      }
 	      this.grabbers.push(evt.detail.hand);
-	      // initiate physics constraint if available and not already existing
-	      if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-	        var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
-	        this.el.body.world.addConstraint(newCon);
-	        this.constraints.set(evt.detail.hand, newCon);
-	      } else if (!this.grabber) {
-	        // otherwise, initiate manual grab if first grabber
+	      // initiate manual grab if first grabber
+	      if (!this.grabber) {
 	        this.grabber = evt.detail.hand;
-	        this.previousPosition = null;
-	        this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
+	        this.resetGrabber();
 	      }
 	      // notify super-hands that the gesture was accepted
 	      if (evt.preventDefault) {
@@ -805,49 +813,28 @@
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.grabbers.indexOf(evt.detail.hand);
-	    var constraint = this.constraints.get(evt.detail.hand);
 	    if (handIndex !== -1) {
 	      this.grabbers.splice(handIndex, 1);
 	      this.grabber = this.grabbers[0];
-	      this.previousPosition = null;
 	    }
-	    if (constraint) {
-	      this.el.body.world.removeConstraint(constraint);
-	      this.constraints.delete(evt.detail.hand);
-	    }
-	    if (!this.grabber) {
+	    if (!this.resetGrabber()) {
 	      this.grabbed = false;
 	      this.el.removeState(this.GRABBED_STATE);
 	    }
 	  },
-	  clearConstraints: function clearConstraints() {
-	    if (this.el.body) {
-	      var _iteratorNormalCompletion = true;
-	      var _didIteratorError = false;
-	      var _iteratorError = undefined;
-
-	      try {
-	        for (var _iterator = this.constraints.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	          var c = _step.value;
-
-	          this.el.body.world.removeConstraint(c);
-	        }
-	      } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion && _iterator.return) {
-	            _iterator.return();
-	          }
-	        } finally {
-	          if (_didIteratorError) {
-	            throw _iteratorError;
-	          }
-	        }
-	      }
+	  resetGrabber: function resetGrabber() {
+	    var raycaster = void 0;
+	    if (!this.grabber) {
+	      return false;
 	    }
-	    this.constraints.clear();
+	    raycaster = this.grabber.getAttribute('raycaster');
+	    this.deltaPositionIsValid = false;
+	    this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
+	    if (raycaster) {
+	      this.grabDirection = raycaster.direction;
+	      this.grabOffset = raycaster.origin;
+	    }
+	    return true;
 	  },
 	  lostGrabber: function lostGrabber(evt) {
 	    var i = this.grabbers.indexOf(evt.relatedTarget);

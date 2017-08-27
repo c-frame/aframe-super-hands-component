@@ -292,7 +292,7 @@ suite('camera userHeight', function () {
   });
 });
 
-suite.only('laser-controls pointable', function () {
+suite('laser-controls pointable', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */
@@ -306,7 +306,9 @@ suite.only('laser-controls pointable', function () {
     this.scene = document.querySelector('a-scene');
     this.scene.addEventListener('loaded', e => {
       this.boxGrnUp = document.getElementById('greenHigh');
-      this.boxGrnDn = document.getElementById('greenLow');
+      this.boxBlueUp = document.getElementById('blueHigh');
+      this.boxRedUp = document.getElementById('redHigh');
+      this.boxRedDn = document.getElementById('redLow');
       done();
     });
   });
@@ -317,6 +319,10 @@ suite.only('laser-controls pointable', function () {
       spectatorPosition: '0 1.6 5'
     });
     this.scene.addEventListener('replayingstopped', e => {
+      assert.isAbove(this.boxGrnUp.getAttribute('position').z, 2, 'Green behind');
+      assert.isBelow(this.boxRedUp.getAttribute('position').y, -0.5, 'Red below');
+      assert.isAbove(this.boxBlueUp.getAttribute('position').y, 3, 'Blue above');
+      assert.isBelow(this.boxRedDn.getAttribute('position').x, -1, 'Red left');
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });

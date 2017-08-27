@@ -18,18 +18,18 @@
                  hoverable pointable
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
+        <a-mixin id="cube-grabbed" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
-        <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity>
+      <!-- <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity> -->
       <a-entity id="rhand" laser-controls="hand: right" mixin="controller"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
-      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
+      <a-entity id="redLow" class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
+      <a-entity id="redHigh" class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
+      <a-entity id="blueLow" class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
+      <a-entity id="blueHigh" class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity id="greenLow" class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
+      <a-entity id="greenHigh" class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
     </a-scene>
 
     <!-- GitHub Corner. -->
