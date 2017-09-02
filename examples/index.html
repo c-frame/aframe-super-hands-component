@@ -67,55 +67,6 @@
       </a>
       for super-easy hand controller interactivity in A-Frame WebVR experiences.
     </p>
-    <a id="hands" class="example" href="hands/">Hand controllers without physics
-      <br />
-      <img class="preview" src="./assets/hand-controls.jpg"/>
-      <div class="bonus"></div>
-    </a>
-    <p>Example of super-hands interactivity with <code>hand-controls</code> without using a
-      physics system. The <code>super-hands</code> component is added to
-    the controller entities, and the <code>hoverable</code>,
-      <code>grabbable</code>, <code>stretchable</code>, and
-        <code>drag-droppable</code> components are added to the interactable boxes.</p>
-    <ul>
-      <li>Grabbed entities track position only (use physics for rotation)</li>
-      <li>Drag-drop targets and their hovering entity appear in wireframe</li>
-      <li>Entities change to spheres upon completing drag-drop interaction via the
-        <code>event-set</code> component listening for the 'drag-drop' event</li>
-    </ul>
-    <a id="locomotion" class="example" href="locomotion/">Grab-based locomotion
-      <br />
-      <img class="preview" src="./assets/locomotion.jpg"/>
-      <div class="bonus"></div>
-    </a>
-
-    <p>Example of the <code>a-locomotor</code> primitive to add easy
-      locomotion to a scene</p>
-    <ul>
-      <li>Grab the air and drag the scene around you to move</li>
-      <li>Stretch with two hands to scale the scene up or down</li>
-    </ul>
-    <a id="events" class="example" href="events/">
-      Integration with Global Event Handlers
-      <br />
-      <img class="preview" src="./assets/events.jpg"/>
-      <div class="bonus"></div>
-    </a>
-    <p>Another option for customizing reactions is by using the
-      Global Event Handlers Web API (e.g., 'onclick').
-      super-hands will trigger standard events that are analogous to the VR
-      interactions taking place, like mousedown, click, dragenter, et c.
-      Just like in standard HTML, setting the
-      related 'on' property for an entity will register the event listener, so
-      simple reactions can be defined inline.
-    </p>
-    <ul>
-      <li>onmousedown changes the box color</li>
-      <li>ondragstart the controller gets a blob of the box's color</li>
-      <li>ondragenter the torus knot turns transparent</li>
-      <li>ondrop the torus knot takes on the current color of the box</li>
-      <li>onmousedown the torus knot changes to wireframe</li>
-    </ul>
     <a id="physics" class="example" href="physics/">Vive controllers with physics
       and a custom reaction component <br />
       <img class="preview" src="./assets/physics.jpg"/>
@@ -140,6 +91,55 @@
       <li>Grabbed boxes lock position and rotation to controller</li>
       <li>Grabbed boxes appear in wireframe when held inside the color changer box</li>
       <li><code>color-randomizer</code> changes the color of entities dropped inside of the color changer box</li>
+    </ul>
+    <a id="locomotion" class="example" href="locomotion/">Grab-based locomotion
+      <br />
+      <img class="preview" src="./assets/locomotion.jpg"/>
+      <div class="bonus"></div>
+    </a>
+
+    <p>Example of the <code>a-locomotor</code> primitive to add easy
+      locomotion to a scene</p>
+    <ul>
+      <li>Grab the air and drag the scene around you to move</li>
+      <li>Stretch with two hands to scale the scene up or down</li>
+    </ul>
+    <a id="hands" class="example" href="hands/">Hand controllers without physics
+      <br />
+      <img class="preview" src="./assets/hand-controls.jpg"/>
+      <div class="bonus"></div>
+    </a>
+    <p>Example of super-hands interactivity with <code>hand-controls</code> without using a
+      physics system. The <code>super-hands</code> component is added to
+    the controller entities, and the <code>hoverable</code>,
+      <code>grabbable</code>, <code>stretchable</code>, and
+        <code>drag-droppable</code> components are added to the interactable boxes.</p>
+    <ul>
+      <li>Grabbed entities track position only (use physics for rotation)</li>
+      <li>Drag-drop targets and their hovering entity appear in wireframe</li>
+      <li>Entities change to spheres upon completing drag-drop interaction via the
+        <code>event-set</code> component listening for the 'drag-drop' event</li>
+    </ul>
+    <a id="events" class="example" href="events/">
+      Integration with Global Event Handlers
+      <br />
+      <img class="preview" src="./assets/events.jpg"/>
+      <div class="bonus"></div>
+    </a>
+    <p>Another option for customizing reactions is by using the
+      Global Event Handlers Web API (e.g., 'onclick').
+      super-hands will trigger standard events that are analogous to the VR
+      interactions taking place, like mousedown, click, dragenter, et c.
+      Just like in standard HTML, setting the
+      related 'on' property for an entity will register the event listener, so
+      simple reactions can be defined inline.
+    </p>
+    <ul>
+      <li>onmousedown changes the box color</li>
+      <li>ondragstart the controller gets a blob of the box's color</li>
+      <li>ondragenter the torus knot turns transparent</li>
+      <li>ondrop the torus knot takes on the current color of the box</li>
+      <li>onmousedown the torus knot changes to wireframe</li>
     </ul>
     <a id="sticky" class="example" href="sticky/">Sticky Grab via Custom Button Mapping
       <br />
@@ -191,23 +191,22 @@
       the events and states used by the <code>cursor</code> A-Frame
       core component, we can add interactivity even without motion
       controllers. There's also a small tweak in this example to
-      expand the A-Frame <copde>cursor</code>
-      to also accept touch input, so it will
-      work with simple mobile VR viewers like Cardboard
-      and even regular handheld mobile viewing.
+      help the <code>cursor</code> detect
+      touch input from simple mobile VR viewers like Cardboard
+      and handheld mobile viewing.
       </p>
       <pre>
-  &lta-camera&gt
-    &lta-cursor super-hands="colliderEvent: mouseenter;
-                             colliderEventProperty: intersectedEl;
-                             colliderState: cursor-hovered;
-                             grabStartButtons: mousedown;
-                             grabEndButtons: mouseup;
-                             dragDropStartButtons: mousedown;
-                             dragDropEndButtons: mouseup;"&gt
-    &lt/a-cursor&gt
+  &lta-camera super-hands="colliderEvent: mouseenter;
+                         colliderEventProperty: intersectedEl;
+                         colliderState: cursor-hovered;
+                         grabStartButtons: mousedown;
+                         grabEndButtons: mouseup;
+                         dragDropStartButtons: mousedown;
+                         dragDropEndButtons: mouseup;"&gt
+    &lta-cursor&gt&lt/a-cursor&gt
   &lt/a-camera&gt</pre>
-    <a id="laser" class="example" href="laser/">Laser Pointer Controls
+    <a id="laser" class="example" href="laser-physics/">
+      Laser Pointer Controls (Daydream & GearVR)
       <br />
       <img class="preview" src="./assets/hand-controls.jpg"/>
       <div class="bonus"></div>
@@ -216,11 +215,15 @@
       provides a consistent experience across PC and mobile VR devices.
       Since it uses the <code>cursor</code> component for collision management,
       the same <code>super-hands</code> configuration used above in the
-      Mouse Controls example works here as well. This is using a beta
-      version of a new reaction component, <code>pointable</code> to improve
-      the experience with 3DOF controllers like Daydream and GearVR. More
-      info on the <a href="https://github.com/wmurphyrd/aframe-super-hands-component#news">
-        <code>pointable</code> beta here</a>.
+      Mouse Controls example works here as well. For scenes including
+      physics like this one, the <code>grabbable</code> component
+      works equally well for moving entities close at hand or far away.
+      For scenes without physics, the
+      <a href="https://github.com/wmurphyrd/aframe-super-hands-component#pointable">
+      <code>pointable</code> reaction component</a> can be substituted
+      for <code>grabbable</code> to manipulate entities at a distance,
+      especially for 3DOF controllers like Daydream and GearVR.
+      <a href="laser/">Here is an example using <code>pointable</code></a>.
     </p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
