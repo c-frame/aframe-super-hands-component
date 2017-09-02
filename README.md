@@ -378,15 +378,25 @@ by setting the maxGrabbers schema property.
 
 #### pointable component
 
-An alternative version of `grabbable` that
-works with `laser-controls` and 3DOF controllers like Daydream and GearVR
-by using controller orientation and distance to move entities.
+An alternative version of `grabbable` designed for `laser-controls`.
+When using physics, `pointable` and `grabbable` are identical.
+When not using physics, `pointable` provides fallback manual
+movement based on controller orientation, so it works well with
+3DOF controllers like Daydream and GearVR in addition to fully tracked
+controls. 
+
+##### Component Schema
+
+| Property | Description | Default Value |
+| -------- | ----------- | ------------- |
+| usePhysics | Whether to use physics system constraints to handle movement, 'ifavailable', 'only', or 'never' | 'ifavailable' |
+| maxGrabbers | Limit number of hands that can grab entity simultaneously | NaN (no limit) |
 
 ##### States
 
 | Name | Description |
 | --- | --- |
-| grabbed | Added to entity while a button is held down |
+| grabbed | Added to entity while it is being moved |
 
 #### clickable component
 
