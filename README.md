@@ -378,12 +378,9 @@ by setting the maxGrabbers schema property.
 
 #### pointable component
 
-**BETA Feature** An alternative version of `grabbable` that
+An alternative version of `grabbable` that
 works with `laser-controls` and 3DOF controllers like Daydream and GearVR
 by using controller orientation and distance to move entities.
-
-Note: `pointable` is not yet in the latest super-hands release,
-see [master branch news](#news) to get the beta version.
 
 ##### States
 
