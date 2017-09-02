@@ -55,12 +55,12 @@
 	__webpack_require__(1);
 	__webpack_require__(2);
 	__webpack_require__(3);
-	__webpack_require__(4);
 	__webpack_require__(5);
 	__webpack_require__(6);
 	__webpack_require__(7);
 	__webpack_require__(8);
 	__webpack_require__(9);
+	__webpack_require__(10);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -582,14 +582,14 @@
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	/* global AFRAME */
-	AFRAME.registerComponent('grabbable', {
+	var physicsCore = __webpack_require__(4);
+	AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
 	  schema: {
-	    usePhysics: { default: 'ifavailable' },
 	    maxGrabbers: { type: 'int', default: NaN },
 	    invert: { default: false },
 	    suppressY: { default: false }
@@ -602,7 +602,7 @@
 	    this.UNGRAB_EVENT = 'grab-end';
 	    this.grabbed = false;
 	    this.grabbers = [];
-	    this.constraints = new Map();
+	    this.physicsInit();
 
 	    this.el.addEventListener(this.GRAB_EVENT, function (e) {
 	      return _this.start(e);
@@ -615,15 +615,13 @@
 	    });
 	  },
 	  update: function update(oldDat) {
-	    if (this.data.usePhysics === 'never' && this.constraints.size) {
-	      this.clearConstraints();
-	    }
+	    this.physicsUpdate();
 	    this.xFactor = this.data.invert ? -1 : 1;
 	    this.zFactor = this.data.invert ? -1 : 1;
 	    this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
 	  },
 	  tick: function tick() {
-	    if (this.grabber && !this.constraints.size && this.data.usePhysics !== 'only') {
+	    if (this.grabber && !this.physicsIsGrabbing() && this.data.usePhysics !== 'only') {
 	      var handPosition = this.grabber.object3D ? this.grabber.object3D.getWorldPosition() : this.grabber.getAttribute('position');
 	      var previousPosition = this.previousPosition || handPosition;
 	      var deltaPosition = {
@@ -643,7 +641,7 @@
 	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
-	    this.clearConstraints();
+	    this.physicsRemove();
 	  },
 	  start: function start(evt) {
 	    // room for more grabbers?
@@ -651,12 +649,8 @@
 
 	    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
 	      this.grabbers.push(evt.detail.hand);
-	      // initiate physics constraint if available and not already existing
-	      if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-	        var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
-	        this.el.body.world.addConstraint(newCon);
-	        this.constraints.set(evt.detail.hand, newCon);
-	      } else if (!this.grabber) {
+	      // initiate physics if available
+	      if (!this.physicsStart(evt) && !this.grabber) {
 	        // otherwise, initiate manual grab if first grabber
 	        this.grabber = evt.detail.hand;
 	        this.previousPosition = null;
@@ -671,22 +665,65 @@
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.grabbers.indexOf(evt.detail.hand);
-	    var constraint = this.constraints.get(evt.detail.hand);
 	    if (handIndex !== -1) {
 	      this.grabbers.splice(handIndex, 1);
 	      this.grabber = this.grabbers[0];
 	      this.previousPosition = null;
 	    }
-	    if (constraint) {
-	      this.el.body.world.removeConstraint(constraint);
-	      this.constraints.delete(evt.detail.hand);
-	    }
+	    this.physicsEnd(evt);
 	    if (!this.grabber) {
 	      this.grabbed = false;
 	      this.el.removeState(this.GRABBED_STATE);
 	    }
 	  },
-	  clearConstraints: function clearConstraints() {
+	  lostGrabber: function lostGrabber(evt) {
+	    var i = this.grabbers.indexOf(evt.relatedTarget);
+	    // if a queued, non-physics grabber leaves the collision zone, forget it
+	    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
+	      this.grabbers.splice(i, 1);
+	    }
+	  }
+	}, physicsCore));
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = {
+	  schema: {
+	    usePhysics: { default: 'ifavailable' }
+	  },
+	  physicsInit: function physicsInit() {
+	    this.constraints = new Map();
+	  },
+	  physicsUpdate: function physicsUpdate() {
+	    if (this.data.usePhysics === 'never' && this.constraints.size) {
+	      this.physicsClear();
+	    }
+	  },
+	  physicsRemove: function physicsRemove() {
+	    this.physicsClear();
+	  },
+	  physicsStart: function physicsStart(evt) {
+	    // initiate physics constraint if available and not already existing
+	    if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+	      var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
+	      this.el.body.world.addConstraint(newCon);
+	      this.constraints.set(evt.detail.hand, newCon);
+	      return true;
+	    }
+	    return false;
+	  },
+	  physicsEnd: function physicsEnd(evt) {
+	    var constraint = this.constraints.get(evt.detail.hand);
+	    if (constraint) {
+	      this.el.body.world.removeConstraint(constraint);
+	      this.constraints.delete(evt.detail.hand);
+	    }
+	  },
+	  physicsClear: function physicsClear() {
 	    if (this.el.body) {
 	      var _iteratorNormalCompletion = true;
 	      var _didIteratorError = false;
@@ -715,17 +752,16 @@
 	    }
 	    this.constraints.clear();
 	  },
-	  lostGrabber: function lostGrabber(evt) {
-	    var i = this.grabbers.indexOf(evt.relatedTarget);
-	    // if a queued, non-physics grabber leaves the collision zone, forget it
-	    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.constraints.has(evt.relatedTarget)) {
-	      this.grabbers.splice(i, 1);
-	    }
+	  physicsIsConstrained: function physicsIsConstrained(el) {
+	    return this.constraints.has(el);
+	  },
+	  physicsIsGrabbing: function physicsIsGrabbing() {
+	    return this.constraints.size > 0;
 	  }
-	});
+	};
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -846,7 +882,7 @@
 	});
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -932,7 +968,7 @@
 	});
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -993,7 +1029,7 @@
 	});
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1039,7 +1075,7 @@
 	});
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1098,7 +1134,7 @@
 	});
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	'use strict';
