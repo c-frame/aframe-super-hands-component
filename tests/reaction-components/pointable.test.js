@@ -53,6 +53,59 @@ suite('pointable-function', function () {
   });
 });
 
+suite('pointable-function with physics', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({
+      'static-body': '',
+      geometry: 'primitive: sphere'
+    });
+    el.setAttribute('pointable', '');
+    el.setAttribute('geometry', 'primitive: box');
+    el.setAttribute('dynamic-body', '');
+    el.addEventListener('body-loaded', evt => {
+      this.comp = el.components.pointable;
+      if (!this.hand.body) {
+        this.hand.addEventListener('body-loaded', evt => done());
+      } else {
+        done();
+      }
+    });
+  });
+  test('constraint registered on grab', function () {
+    this.comp.start({ detail: { hand: this.hand } });
+    let c = this.comp.constraints.get(this.hand);
+    assert.isOk(c);
+    assert.instanceOf(c, window.CANNON.LockConstraint);
+    assert.notEqual(this.el.body.world.constraints.indexOf(c), -1);
+  });
+  test('constraint not registered when usePhysics = never', function () {
+    this.el.setAttribute('pointable', 'usePhysics', 'never');
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.strictEqual(this.comp.constraints.size, 0);
+  });
+  test('constraint removed on release', function () {
+    var constraint;
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.isOk(this.comp.constraints.has(this.hand));
+    constraint = this.comp.constraints.get(this.hand);
+    this.comp.end({ detail: { hand: this.hand } });
+    assert.notOk(this.comp.constraints.has(this.hand));
+    assert.equal(this.el.body.world.constraints.indexOf(constraint), -1);
+  });
+  test('changing usePhysics to never during grab removes constraint', function () {
+    var constraint;
+    this.comp.start({ detail: { hand: this.hand } });
+    assert.isOk(this.comp.constraints.has(this.hand));
+    constraint = this.comp.constraints.get(this.hand);
+    this.el.setAttribute('pointable', 'usePhysics', 'never');
+    assert.notOk(this.comp.constraints.has(this.hand));
+    assert.strictEqual(this.el.body.world.constraints.indexOf(constraint), -1);
+    assert.strictEqual(this.comp.constraints.size, 0);
+  });
+});
+
+
 suite('two-handed grab', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
