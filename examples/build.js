@@ -2067,7 +2067,8 @@ module.exports = {
 'use strict';
 
 /* global AFRAME, THREE */
-AFRAME.registerComponent('pointable', {
+var physicsCore = require('./physics-grab.js');
+AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
   schema: {
     maxGrabbers: { type: 'int', default: NaN }
   },
@@ -2084,6 +2085,7 @@ AFRAME.registerComponent('pointable', {
     this.grabDistance = undefined;
     this.grabDirection = { x: 0, y: 0, z: -1 };
     this.grabOffset = { x: 0, y: 0, z: 0 };
+    this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, function (e) {
       return _this.start(e);
@@ -2094,6 +2096,9 @@ AFRAME.registerComponent('pointable', {
     this.el.addEventListener('mouseout', function (e) {
       return _this.lostGrabber(e);
     });
+  },
+  update: function update() {
+    this.physicsUpdate();
   },
   tick: function () {
     var deltaPosition = new THREE.Vector3();
@@ -2123,6 +2128,7 @@ AFRAME.registerComponent('pointable', {
   remove: function remove() {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+    this.physicsRemove();
   },
   start: function start(evt) {
     // room for more grabbers?
@@ -2134,8 +2140,8 @@ AFRAME.registerComponent('pointable', {
         return;
       }
       this.grabbers.push(evt.detail.hand);
-      // initiate manual grab if first grabber
-      if (!this.grabber) {
+      // initiate physics if available, otherwise manual
+      if (!this.physicsStart(evt) && !this.grabber) {
         this.grabber = evt.detail.hand;
         this.resetGrabber();
       }
@@ -2153,6 +2159,7 @@ AFRAME.registerComponent('pointable', {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
     }
+    this.physicsEnd(evt);
     if (!this.resetGrabber()) {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
@@ -2175,13 +2182,13 @@ AFRAME.registerComponent('pointable', {
   lostGrabber: function lostGrabber(evt) {
     var i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
-    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.constraints.has(evt.relatedTarget)) {
+    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
       this.grabbers.splice(i, 1);
     }
   }
-});
+}, physicsCore));
 
-},{}],18:[function(require,module,exports){
+},{"./physics-grab.js":16}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */

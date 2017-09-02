@@ -762,12 +762,13 @@
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	/* global AFRAME, THREE */
-	AFRAME.registerComponent('pointable', {
+	var physicsCore = __webpack_require__(4);
+	AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
 	  schema: {
 	    maxGrabbers: { type: 'int', default: NaN }
 	  },
@@ -784,6 +785,7 @@
 	    this.grabDistance = undefined;
 	    this.grabDirection = { x: 0, y: 0, z: -1 };
 	    this.grabOffset = { x: 0, y: 0, z: 0 };
+	    this.physicsInit();
 
 	    this.el.addEventListener(this.GRAB_EVENT, function (e) {
 	      return _this.start(e);
@@ -794,6 +796,9 @@
 	    this.el.addEventListener('mouseout', function (e) {
 	      return _this.lostGrabber(e);
 	    });
+	  },
+	  update: function update() {
+	    this.physicsUpdate();
 	  },
 	  tick: function () {
 	    var deltaPosition = new THREE.Vector3();
@@ -823,6 +828,7 @@
 	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
+	    this.physicsRemove();
 	  },
 	  start: function start(evt) {
 	    // room for more grabbers?
@@ -834,8 +840,8 @@
 	        return;
 	      }
 	      this.grabbers.push(evt.detail.hand);
-	      // initiate manual grab if first grabber
-	      if (!this.grabber) {
+	      // initiate physics if available, otherwise manual
+	      if (!this.physicsStart(evt) && !this.grabber) {
 	        this.grabber = evt.detail.hand;
 	        this.resetGrabber();
 	      }
@@ -853,6 +859,7 @@
 	      this.grabbers.splice(handIndex, 1);
 	      this.grabber = this.grabbers[0];
 	    }
+	    this.physicsEnd(evt);
 	    if (!this.resetGrabber()) {
 	      this.grabbed = false;
 	      this.el.removeState(this.GRABBED_STATE);
@@ -875,11 +882,11 @@
 	  lostGrabber: function lostGrabber(evt) {
 	    var i = this.grabbers.indexOf(evt.relatedTarget);
 	    // if a queued, non-physics grabber leaves the collision zone, forget it
-	    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.constraints.has(evt.relatedTarget)) {
+	    if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
 	      this.grabbers.splice(i, 1);
 	    }
 	  }
-	});
+	}, physicsCore));
 
 /***/ },
 /* 6 */
