@@ -14,7 +14,8 @@
     <button id="replayer-button" type="button" onclick="playDemoRecording()">
       Don't have a Vive, Rift, Daydream, or GearVR handy? Click here for a preview.
     </button>
-    <a-scene environment="preset: default; shadow: true" avatar-recorder>
+    <a-scene environment="preset: default; shadow: true" avatar-recorder
+             physics="gravity: 0">
       <a-assets>
         <a-mixin id="controller"
                  super-hands="colliderEvent: mouseenter;
@@ -24,11 +25,12 @@
                               grabEndButtons: mouseup;
                               dragDropStartButtons: mousedown;
                               dragDropEndButtons: mouseup;"
-                 raycaster="objects: .cube">
+                  raycaster="objects: .cube"
+                  static-body="shape: sphere; sphereRadius: 0.02;">
         </a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable pointable drag-droppable
-                 shadow
+                 shadow dynamic-body
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
@@ -50,6 +52,9 @@
               mixin="portal" hoverable
               position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
       </a-link>
+      <!-- floor -->
+      <a-box height="0.01" width="50" depth="50" visible="false" static-body>
+      </a-box>
     </a-scene>
 
     <!-- GitHub Corner. -->

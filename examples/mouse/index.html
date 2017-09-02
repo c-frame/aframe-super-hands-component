@@ -4,12 +4,14 @@
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <script>
-      // The cursor component only listens for mouse input from the user,
-      // so we trick it into accepting touch as well
+      // This component enables "carboard" viewer button interactions
+      // when using A-Frame v0.6.1 or below. After the next
+      // A-Frame release, it will no longer be necessary
       AFRAME.registerComponent('touch-to-click-converter', {
         init: function () {
           this.el.canvas.addEventListener('touchstart', function (e) {
@@ -24,25 +26,26 @@
   </head>
   <body>
     <a-scene environment="preset: default; shadow: true"
-             touch-to-click-converter>
+             touch-to-click-converter physics="gravity: 0">
       <a-assets>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable grabbable drag-droppable
+                 hoverable pointable drag-droppable
                  shadow
+                 dynamic-body
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
-      <a-camera>
-        <a-cursor super-hands="colliderEvent: mouseenter;
-                               colliderEventProperty: intersectedEl;
-                               colliderState: cursor-hovered;
-                               grabStartButtons: mousedown;
-                               grabEndButtons: mouseup;
-                               dragDropStartButtons: mousedown;
-                               dragDropEndButtons: mouseup;">
-        </a-cursor>
+      <a-camera super-hands="colliderEvent: mouseenter;
+                             colliderEventProperty: intersectedEl;
+                             colliderState: cursor-hovered;
+                             grabStartButtons: mousedown;
+                             grabEndButtons: mouseup;
+                             dragDropStartButtons: mousedown;
+                             dragDropEndButtons: mouseup;"
+                 static-body="shape: sphere; sphereRadius: 0.02;">
+        <a-cursor></a-cursor>
       </a-camera>
       <a-entity class="cube" mixin="cube" position="0 1 -1.25" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1.5" material="color: red"></a-entity>

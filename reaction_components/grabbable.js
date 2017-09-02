@@ -1,7 +1,7 @@
 /* global AFRAME */
-AFRAME.registerComponent('grabbable', {
+const physicsCore = require('./physics-grab.js');
+AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
   schema: {
-    usePhysics: {default: 'ifavailable'},
     maxGrabbers: {type: 'int', default: NaN},
     invert: {default: false},
     suppressY: {default: false}
@@ -12,22 +12,20 @@ AFRAME.registerComponent('grabbable', {
     this.UNGRAB_EVENT = 'grab-end';
     this.grabbed = false;
     this.grabbers = [];
-    this.constraints = new Map();
+    this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
     this.el.addEventListener('mouseout', e => this.lostGrabber(e));
   },
   update: function (oldDat) {
-    if (this.data.usePhysics === 'never' && this.constraints.size) {
-      this.clearConstraints();
-    }
+    this.physicsUpdate();
     this.xFactor = (this.data.invert) ? -1 : 1;
     this.zFactor = (this.data.invert) ? -1 : 1;
     this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
-    if (this.grabber && !this.constraints.size &&
+    if (this.grabber && !this.physicsIsGrabbing() &&
        this.data.usePhysics !== 'only') {
       const handPosition = (this.grabber.object3D)
           ? this.grabber.object3D.getWorldPosition()
@@ -50,7 +48,7 @@ AFRAME.registerComponent('grabbable', {
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
-    this.clearConstraints();
+    this.physicsRemove();
   },
   start: function (evt) {
     // room for more grabbers?
@@ -59,15 +57,8 @@ AFRAME.registerComponent('grabbable', {
 
     if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       this.grabbers.push(evt.detail.hand);
-      // initiate physics constraint if available and not already existing
-      if (this.data.usePhysics !== 'never' && this.el.body &&
-          evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-        let newCon = new window.CANNON.LockConstraint(
-          this.el.body, evt.detail.hand.body
-        );
-        this.el.body.world.addConstraint(newCon);
-        this.constraints.set(evt.detail.hand, newCon);
-      } else if (!this.grabber) {
+      // initiate physics if available
+      if (!this.physicsStart(evt) && !this.grabber) {
         // otherwise, initiate manual grab if first grabber
         this.grabber = evt.detail.hand;
         this.previousPosition = null;
@@ -80,35 +71,23 @@ AFRAME.registerComponent('grabbable', {
   },
   end: function (evt) {
     const handIndex = this.grabbers.indexOf(evt.detail.hand);
-    let constraint = this.constraints.get(evt.detail.hand);
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
       this.previousPosition = null;
     }
-    if (constraint) {
-      this.el.body.world.removeConstraint(constraint);
-      this.constraints.delete(evt.detail.hand);
-    }
+    this.physicsEnd(evt);
     if (!this.grabber) {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
   },
-  clearConstraints: function () {
-    if (this.el.body) {
-      for (let c of this.constraints.values()) {
-        this.el.body.world.removeConstraint(c);
-      }
-    }
-    this.constraints.clear();
-  },
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
     if (i !== -1 && evt.relatedTarget !== this.grabber &&
-        !this.constraints.has(evt.relatedTarget)) {
+        !this.physicsIsConstrained(evt.relatedTarget)) {
       this.grabbers.splice(i, 1);
     }
   }
-});
+}, physicsCore));
