@@ -215,15 +215,18 @@
       provides a consistent experience across PC and mobile VR devices.
       Since it uses the <code>cursor</code> component for collision management,
       the same <code>super-hands</code> configuration used above in the
-      Mouse Controls example works here as well. For scenes including
-      physics like this one, the <code>grabbable</code> component
-      works equally well for moving entities close at hand or far away.
-      For scenes without physics, the
-      <a href="https://github.com/wmurphyrd/aframe-super-hands-component#pointable">
-      <code>pointable</code> reaction component</a> can be substituted
-      for <code>grabbable</code> to manipulate entities at a distance,
-      especially for 3DOF controllers like Daydream and GearVR.
-      <a href="laser/">Here is an example using <code>pointable</code></a>.
+      Mouse Controls example works here as well. This example also uses the
+      <code>pointable</code> reaction component which provides consistent
+      grab-at-a-distance functionality across VR devices.
+    </p>
+    <p>For scenes including
+      physics like this one, <code>pointable</code>
+      uses the same physics-based movement as <code>grabbable</code>.
+      For scenes without physics, <code>pointable</code>
+      provides fallback manual manipulations of entities at a distance
+      that works well even with 3DOF controllers like Daydream and GearVR.
+      <a href="laser/">Here is an example using <code>pointable</code>
+      without physics</a>.
     </p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />
