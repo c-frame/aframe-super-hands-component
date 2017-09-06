@@ -37,24 +37,6 @@ suite('a-locomotor autoconfig', function () {
       done();
     });
   });
-  test('injects self into collider objects', function () {
-    assert.notStrictEqual(
-      this.hand1.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.includeMembers(
-      this.hand1.components['sphere-collider'].els,
-      [this.loco]
-    );
-    assert.notStrictEqual(
-      this.hand2.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.includeMembers(
-      this.hand2.components['sphere-collider'].els,
-      [this.loco]
-    );
-  });
   test('grabbable setup', function () {
     const grab = this.loco.components['grabbable'];
     assert.isOk(grab);
@@ -89,24 +71,6 @@ suite('a-locomotor autoconfig options', function () {
     el.sceneEl.addEventListener('locomotor-ready', function () {
       done();
     });
-  });
-  test('disabled collider config', function () {
-    assert.strictEqual(
-      this.hand1.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.strictEqual(
-      this.hand1.components['sphere-collider'].els.indexOf(this.loco),
-      -1
-    );
-    assert.strictEqual(
-      this.hand2.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.strictEqual(
-      this.hand2.components['sphere-collider'].els.indexOf(this.loco),
-      -1
-    );
   });
   test('disabled camera capture', function (done) {
     // initialization order differs when camera setup is disabled
