@@ -137,6 +137,8 @@ Master branch
   * Uses controller orientation for better compatibility with 3DOF controllers
     like Daydream and GearVR
   * Designed to work with `laser-controls`
+* `a-locomotor` now functions independently from colliders;
+  removed `add-to-colliders` attribute.
 
 To test out master branch features, use this script tag:
 
@@ -289,30 +291,35 @@ listed in the table. Drag-dropping events will be dispatched on both the entity 
 
 #### a-locomotor primitive
 
-Add freedom of movement by wrapping the player avatar in an `a-locomotor` primitive.
-Users can then grab and move the world around themselves to navigate your WebVR experience
+Add freedom of movement by wrapping the player avatar in an `a-locomotor`
+primitive.
+Users can then grab and move the world around themselves to navigate your
+WebVR experience
 in a way that is comfortable even for most people prone to simulation sickness.
 
-The component works by enveloping the player in an invisible sphere that picks up
+The component works by wrapping the player in an entity that responds to
 grabbing and stretching
 gestures made on empty space and translates those into
 movement and scaling for player avatar.
-To function, the player camera and controllers must be children of `a-locomotor`,
-and the controllers' colliders must be configured to collide with `a-locomotor`.
-On initialization, `a-locomotor` will automatically re-parent the A-Frame
-default camera and add itself to the `objects` property of `sphere-collider`
-(see schema below if you want to disable this). With this automatic
-configuration,
+To function, the player camera and controllers must be children
+of `a-locomotor`.
+On initialization, `a-locomotor` will automatically set the default camera
+as a child unless it has been declared elsewhere
+(see schema below if you want to disable this), so
 setting up `a-locomotor` simply requires wrapping your controller
 entities like so:
 
 ```html
 <a-locomotor>
-  <a-entity hand-controls="left" super-hands sphere-collider></a-entity>
-  <a-entity hand-controls="right" super-hands sphere-collider></a-entity>
+  <a-entity hand-controls="left" super-hands></a-entity>
+  <a-entity hand-controls="right" super-hands></a-entity>
 </a-locomotor>
 ```
 
+`a-locomotor` does not require a collision detection component to function, so,
+if the only `super-hands` functionality you need is locomotion, you do
+not need to include `sphere-collider` components on your controllers
+(as in the above example).
 By default, `a-locomotor` gives the player the ability to move freely in the
 horizontal plane and to scale up or down.
 Behavior can be customized by setting the attributes below on the `a-locomotor`
@@ -323,7 +330,6 @@ entity.
 | Attribute | Description | Default Value |
 | -------- | ----------- | ------------- |
 | fetch-camera | Make the default camera a child of `a-locomotor` so it can be moved with the player | "true" |
-| add-to-colliders | Ensure `a-locomotor` is visible to child entity `sphere-collider` components | "true" |
 | allow-movement | Allow grabbing gestures to reposition the player | "true" |
 | horizontal-only | Restrict movement to the X-Z plane | "true" |
 | allow-scaling | Allow stretching gestures to rescale the player | "true" |
@@ -383,7 +389,7 @@ When using physics, `pointable` and `grabbable` are identical.
 When not using physics, `pointable` provides fallback manual
 movement based on controller orientation, so it works well with
 3DOF controllers like Daydream and GearVR in addition to fully tracked
-controls. 
+controls.
 
 ##### Component Schema
 

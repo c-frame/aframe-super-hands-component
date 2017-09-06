@@ -37,24 +37,6 @@ suite('a-locomotor autoconfig', function () {
       done();
     });
   });
-  test('injects self into collider objects', function () {
-    assert.notStrictEqual(
-      this.hand1.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.includeMembers(
-      this.hand1.components['sphere-collider'].els,
-      [this.loco]
-    );
-    assert.notStrictEqual(
-      this.hand2.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.includeMembers(
-      this.hand2.components['sphere-collider'].els,
-      [this.loco]
-    );
-  });
   test('grabbable setup', function () {
     const grab = this.loco.components['grabbable'];
     assert.isOk(grab);
@@ -89,24 +71,6 @@ suite('a-locomotor autoconfig options', function () {
     el.sceneEl.addEventListener('locomotor-ready', function () {
       done();
     });
-  });
-  test('disabled collider config', function () {
-    assert.strictEqual(
-      this.hand1.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.strictEqual(
-      this.hand1.components['sphere-collider'].els.indexOf(this.loco),
-      -1
-    );
-    assert.strictEqual(
-      this.hand2.getAttribute('sphere-collider').objects.indexOf('a-locomotor'),
-      -1
-    );
-    assert.strictEqual(
-      this.hand2.components['sphere-collider'].els.indexOf(this.loco),
-      -1
-    );
   });
   test('disabled camera capture', function (done) {
     // initialization order differs when camera setup is disabled
@@ -187,5 +151,37 @@ suite('a-locomotor camera options', function () {
       assert.isOk(document.querySelector('a-scene>[camera]'));
       done();
     });
+  });
+});
+
+suite('a-locomotor collision', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.loco = document.createElement('a-locomotor');
+    el.sceneEl.appendChild(this.loco);
+    this.hand1 = helpers.controllerFactory({
+      'hand-controls': 'right',
+      'super-hands': ''
+    }, true, this.loco);
+    this.hand2 = helpers.controllerFactory({
+      'hand-controls': 'left',
+      'super-hands': ''
+    }, true, this.loco);
+    el.sceneEl.addEventListener('loaded', function (e) {
+      done();
+    });
+  });
+  test('injects self into super-hands hoverEls', function () {
+    assert.includeMembers(
+        this.hand1.components['super-hands'].hoverEls,
+        [this.loco]
+    );
+  });
+  test('drops out of hoverEls when removed', function () {
+    this.loco.removeAttribute('locomotor-auto-config');
+    assert.sameMembers(
+      this.hand1.components['super-hands'].hoverEls,
+      []
+    );
   });
 });

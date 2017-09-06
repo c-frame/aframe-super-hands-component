@@ -6,13 +6,6 @@ var meshMixin = AFRAME.primitives.getMeshMixin();
 AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
   defaultComponents: {
-    geometry: {
-      primitive: 'sphere',
-      radius: 100
-    },
-    material: {
-      visible: false
-    },
     grabbable: {
       usePhysics: 'never',
       invert: true,
@@ -25,7 +18,6 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   },
   mappings: {
     'fetch-camera': 'locomotor-auto-config.camera',
-    'add-to-colliders': 'locomotor-auto-config.collider',
     'allow-movement': 'locomotor-auto-config.move',
     'horizontal-only': 'grabbable.suppressY',
     'allow-scaling': 'locomotor-auto-config.stretch'

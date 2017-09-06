@@ -1664,13 +1664,6 @@ var meshMixin = AFRAME.primitives.getMeshMixin();
 AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
   defaultComponents: {
-    geometry: {
-      primitive: 'sphere',
-      radius: 100
-    },
-    material: {
-      visible: false
-    },
     grabbable: {
       usePhysics: 'never',
       invert: true,
@@ -1683,7 +1676,6 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   },
   mappings: {
     'fetch-camera': 'locomotor-auto-config.camera',
-    'add-to-colliders': 'locomotor-auto-config.collider',
     'allow-movement': 'locomotor-auto-config.move',
     'horizontal-only': 'grabbable.suppressY',
     'allow-scaling': 'locomotor-auto-config.stretch'
@@ -1943,8 +1935,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
   schema: {
     camera: { default: true },
     stretch: { default: true },
-    move: { default: true },
-    collider: { default: true }
+    move: { default: true }
   },
   init: function init() {
     var _this = this;
@@ -1956,21 +1947,17 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (!this.data.move) {
       this.el.removeComponent('grabbable');
     }
-    if (this.data.collider) {
-      // make sure locomotor is collidable
-      this.el.childNodes.forEach(function (el) {
-        var col = el.getAttribute && el.getAttribute('sphere-collider');
-        if (col && col.objects.indexOf('a-locomotor') === -1) {
-          el.setAttribute('sphere-collider', {
-            objects: col.objects === '' ?
-            // empty objects property will collide with everything
-            col.objects
-            // otherwise add self to selector string
-            : col.objects + ', a-locomotor'
-          });
-        }
-      });
-    }
+    // generate fake collision to be permanently in super-hands queue
+    this.el.childNodes.forEach(function (el) {
+      var sh = el.getAttribute && el.getAttribute('super-hands');
+      if (sh) {
+        var evtDetails = {};
+        evtDetails[sh.colliderEventProperty] = _this.el;
+        el.emit(sh.colliderEvent, evtDetails);
+        _this.colliderState = sh.colliderState;
+        _this.el.addState(_this.colliderState);
+      }
+    });
     if (this.data.camera) {
       // this step has to be done asnychronously
       ready = false;
@@ -1985,6 +1972,9 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (ready) {
       this.ready();
     }
+  },
+  remove: function remove() {
+    this.el.removeState(this.colliderState);
   },
   ready: function ready() {
     this.el.emit('locomotor-ready', {});
