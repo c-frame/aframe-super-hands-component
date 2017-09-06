@@ -20,7 +20,8 @@ AFRAME.registerComponent('locomotor-auto-config', {
         let evtDetails = {};
         evtDetails[sh.colliderEventProperty] = this.el;
         el.emit(sh.colliderEvent, evtDetails);
-        this.el.addState(sh.colliderState);
+        this.colliderState = sh.colliderState;
+        this.el.addState(this.colliderState);
       }
     });
     if (this.data.camera) {
@@ -37,6 +38,9 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (ready) {
       this.ready();
     }
+  },
+  remove: function () {
+    this.el.removeState(this.colliderState);
   },
   ready: function () {
     this.el.emit('locomotor-ready', {});

@@ -1954,7 +1954,8 @@ AFRAME.registerComponent('locomotor-auto-config', {
         var evtDetails = {};
         evtDetails[sh.colliderEventProperty] = _this.el;
         el.emit(sh.colliderEvent, evtDetails);
-        _this.el.addState(sh.colliderState);
+        _this.colliderState = sh.colliderState;
+        _this.el.addState(_this.colliderState);
       }
     });
     if (this.data.camera) {
@@ -1971,6 +1972,9 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (ready) {
       this.ready();
     }
+  },
+  remove: function remove() {
+    this.el.removeState(this.colliderState);
   },
   ready: function ready() {
     this.el.emit('locomotor-ready', {});
