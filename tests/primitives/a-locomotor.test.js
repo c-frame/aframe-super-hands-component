@@ -213,4 +213,11 @@ suite('a-locomotor collision', function () {
         [this.loco]
     );
   });
+  test('drops out of hoverEls when removed', function () {
+    this.loco.removeAttribute('locomotor-auto-config');
+    assert.sameMembers(
+      this.hand1.components['super-hands'].hoverEls,
+      []
+    );
+  });
 });
