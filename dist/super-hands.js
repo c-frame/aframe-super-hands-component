@@ -586,7 +586,7 @@
 
 	'use strict';
 
-	/* global AFRAME */
+	/* global AFRAME, THREE */
 	var physicsCore = __webpack_require__(4);
 	AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
 	  schema: {
@@ -602,6 +602,7 @@
 	    this.UNGRAB_EVENT = 'grab-end';
 	    this.grabbed = false;
 	    this.grabbers = [];
+	    this.previousPositionIsValid = false;
 	    this.physicsInit();
 
 	    this.el.addEventListener(this.GRAB_EVENT, function (e) {
@@ -620,24 +621,31 @@
 	    this.zFactor = this.data.invert ? -1 : 1;
 	    this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
 	  },
-	  tick: function tick() {
-	    if (this.grabber && !this.physicsIsGrabbing() && this.data.usePhysics !== 'only') {
-	      var handPosition = this.grabber.object3D ? this.grabber.object3D.getWorldPosition() : this.grabber.getAttribute('position');
-	      var previousPosition = this.previousPosition || handPosition;
-	      var deltaPosition = {
-	        x: handPosition.x - previousPosition.x,
-	        y: handPosition.y - previousPosition.y,
-	        z: handPosition.z - previousPosition.z
-	      };
-	      var position = this.el.getAttribute('position');
-	      this.previousPosition = handPosition;
-	      this.el.setAttribute('position', {
-	        x: position.x + deltaPosition.x * this.xFactor,
-	        y: position.y + deltaPosition.y * this.yFactor,
-	        z: position.z + deltaPosition.z * this.zFactor
-	      });
-	    }
-	  },
+	  tick: function () {
+	    // peristent objs for improved garbage collection and aframe type checking
+	    var handPositionV3 = new THREE.Vector3();
+	    var previousPositionV3 = new THREE.Vector3();
+	    var destPosition = { x: 0, y: 0, z: 0 };
+	    return function () {
+	      if (this.grabber && !this.physicsIsGrabbing() && this.data.usePhysics !== 'only') {
+	        if (this.grabber.object3D) {
+	          this.grabber.object3D.getWorldPosition(handPositionV3);
+	        } else {
+	          handPositionV3.copy(this.grabber.getAttribute('position'));
+	        }
+	        if (this.previousPositionIsValid) {
+	          var position = this.el.getAttribute('position');
+	          destPosition.x = position.x + (handPositionV3.x - previousPositionV3.x) * this.xFactor;
+	          destPosition.y = position.y + (handPositionV3.y - previousPositionV3.y) * this.yFactor;
+	          destPosition.z = position.z + (handPositionV3.z - previousPositionV3.z) * this.zFactor;
+	          this.el.setAttribute('position', destPosition);
+	        } else {
+	          this.previousPositionIsValid = true;
+	        }
+	        previousPositionV3.copy(handPositionV3);
+	      }
+	    };
+	  }(),
 	  remove: function remove() {
 	    this.el.removeEventListener(this.GRAB_EVENT, this.start);
 	    this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -653,7 +661,7 @@
 	      if (!this.physicsStart(evt) && !this.grabber) {
 	        // otherwise, initiate manual grab if first grabber
 	        this.grabber = evt.detail.hand;
-	        this.previousPosition = null;
+	        this.previousPositionIsValid = false;
 	      }
 	      // notify super-hands that the gesture was accepted
 	      if (evt.preventDefault) {
@@ -668,7 +676,7 @@
 	    if (handIndex !== -1) {
 	      this.grabbers.splice(handIndex, 1);
 	      this.grabber = this.grabbers[0];
-	      this.previousPosition = null;
+	      this.previousPositionIsValid = false;
 	    }
 	    this.physicsEnd(evt);
 	    if (!this.grabber) {
