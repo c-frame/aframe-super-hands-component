@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
-const physicsCore = require('./physics-grab.js');
-AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
+const physicsCore = require('./physics-grab-proto.js');
+AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN}
   },
@@ -116,4 +116,4 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
       this.grabbers.splice(i, 1);
     }
   }
-}, physicsCore));
+}));

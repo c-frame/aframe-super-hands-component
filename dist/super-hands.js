@@ -588,7 +588,7 @@
 
 	/* global AFRAME, THREE */
 	var physicsCore = __webpack_require__(4);
-	AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
+	AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
 	  schema: {
 	    maxGrabbers: { type: 'int', default: NaN },
 	    invert: { default: false },
@@ -691,7 +691,7 @@
 	      this.grabbers.splice(i, 1);
 	    }
 	  }
-	}, physicsCore));
+	}));
 
 /***/ },
 /* 4 */
@@ -699,6 +699,7 @@
 
 	'use strict';
 
+	// common code used by grabbable and pointable r/t physics interactions
 	module.exports = {
 	  schema: {
 	    usePhysics: { default: 'ifavailable' }
@@ -776,7 +777,7 @@
 
 	/* global AFRAME, THREE */
 	var physicsCore = __webpack_require__(4);
-	AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
+	AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
 	  schema: {
 	    maxGrabbers: { type: 'int', default: NaN }
 	  },
@@ -811,6 +812,7 @@
 	  tick: function () {
 	    var deltaPosition = new THREE.Vector3();
 	    var targetPosition = new THREE.Vector3();
+	    var destPosition = { x: 0, y: 0, z: 0 };
 	    return function () {
 	      var entityPosition;
 	      if (this.grabber) {
@@ -822,10 +824,10 @@
 	          // relative position changes work better with nested entities
 	          deltaPosition.sub(targetPosition);
 	          entityPosition = this.el.getAttribute('position');
-	          entityPosition.x -= deltaPosition.x;
-	          entityPosition.y -= deltaPosition.y;
-	          entityPosition.z -= deltaPosition.z;
-	          this.el.setAttribute('position', entityPosition);
+	          destPosition.x = entityPosition.x - deltaPosition.x;
+	          destPosition.y = entityPosition.y - deltaPosition.y;
+	          destPosition.z = entityPosition.z - deltaPosition.z;
+	          this.el.setAttribute('position', destPosition);
 	        } else {
 	          this.deltaPositionIsValid = true;
 	        }
@@ -894,7 +896,7 @@
 	      this.grabbers.splice(i, 1);
 	    }
 	  }
-	}, physicsCore));
+	}));
 
 /***/ },
 /* 6 */
@@ -922,37 +924,42 @@
 	    this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
 	  },
 	  update: function update(oldDat) {},
-	  tick: function tick() {
-	    if (!this.stretched) {
-	      return;
-	    }
-	    var scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
-	    var handPos = new THREE.Vector3().copy(this.stretchers[0].getAttribute('position'));
-	    var otherHandPos = new THREE.Vector3().copy(this.stretchers[1].getAttribute('position'));
-	    var currentStretch = handPos.distanceTo(otherHandPos);
-	    var deltaStretch = 1;
-	    if (this.previousStretch !== null && currentStretch !== 0) {
-	      deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
-	    }
-	    this.previousStretch = currentStretch;
-	    scale = scale.multiplyScalar(deltaStretch);
-	    this.el.setAttribute('scale', scale);
-	    // force scale update for physics body
-	    if (this.el.body && this.data.usePhysics !== 'never') {
-	      var physicsShape = this.el.body.shapes[0];
-	      if (physicsShape.halfExtents) {
-	        physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
-	        physicsShape.updateConvexPolyhedronRepresentation();
-	      } else {
-	        if (!this.shapeWarned) {
-	          console.warn('Unable to stretch physics body: unsupported shape');
-	          this.shapeWarned = true;
-	        }
-	        // todo: suport more shapes
+	  tick: function () {
+	    var scale = new THREE.Vector3();
+	    var handPos = new THREE.Vector3();
+	    var otherHandPos = new THREE.Vector3();
+	    return function () {
+	      if (!this.stretched) {
+	        return;
 	      }
-	      this.el.body.updateBoundingRadius();
-	    }
-	  },
+	      scale.copy(this.el.getAttribute('scale'));
+	      handPos.copy(this.stretchers[0].getAttribute('position'));
+	      otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+	      var currentStretch = handPos.distanceTo(otherHandPos);
+	      var deltaStretch = 1;
+	      if (this.previousStretch !== null && currentStretch !== 0) {
+	        deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
+	      }
+	      this.previousStretch = currentStretch;
+	      scale.multiplyScalar(deltaStretch);
+	      this.el.setAttribute('scale', scale);
+	      // force scale update for physics body
+	      if (this.el.body && this.data.usePhysics !== 'never') {
+	        var physicsShape = this.el.body.shapes[0];
+	        if (physicsShape.halfExtents) {
+	          physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
+	          physicsShape.updateConvexPolyhedronRepresentation();
+	        } else {
+	          if (!this.shapeWarned) {
+	            console.warn('Unable to stretch physics body: unsupported shape');
+	            this.shapeWarned = true;
+	          }
+	          // todo: suport more shapes
+	        }
+	        this.el.body.updateBoundingRadius();
+	      }
+	    };
+	  }(),
 	  remove: function remove() {
 	    this.el.removeEventListener(this.STRETCH_EVENT, this.start);
 	    this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
