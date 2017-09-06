@@ -27,6 +27,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
   tick: (function () {
     const deltaPosition = new THREE.Vector3();
     const targetPosition = new THREE.Vector3();
+    const destPosition = {x: 0, y: 0, z: 0};
     return function () {
       var entityPosition;
       if (this.grabber) {
@@ -42,10 +43,10 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({
           // relative position changes work better with nested entities
           deltaPosition.sub(targetPosition);
           entityPosition = this.el.getAttribute('position');
-          entityPosition.x -= deltaPosition.x;
-          entityPosition.y -= deltaPosition.y;
-          entityPosition.z -= deltaPosition.z;
-          this.el.setAttribute('position', entityPosition);
+          destPosition.x = entityPosition.x - deltaPosition.x;
+          destPosition.y = entityPosition.y - deltaPosition.y;
+          destPosition.z = entityPosition.z - deltaPosition.z;
+          this.el.setAttribute('position', destPosition);
         } else {
           this.deltaPositionIsValid = true;
         }
