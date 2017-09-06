@@ -46,10 +46,21 @@ suite('grabbable-function without physics', function () {
     assert.isOk(el.is(myGrabbable.GRABBED_STATE));
   });
   test('position updates during grab', function () {
-    const posStub = this.sinon.stub(this.hand.object3D, 'getWorldPosition');
     const myGrabbable = this.el.components.grabbable;
     assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
-    posStub // .withArgs('position')
+    myGrabbable.start({detail: {hand: this.hand}});
+    /* with render loop stubbed out, need to force ticks */
+    myGrabbable.tick();
+    this.hand.setAttribute('position', '1 1 1');
+    myGrabbable.tick();
+    assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'));
+  });
+  test('position updates during grab - fallback no obj3d', function () {
+    const posStub = this.sinon.stub(this.hand, 'getAttribute');
+    const myGrabbable = this.el.components.grabbable;
+    this.hand.object3D = null; // test fallback code for no obj3d
+    assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'));
+    posStub.withArgs('position')
       .onFirstCall().returns(coord('0 0 0'))
       .onSecondCall().returns(coord('1 1 1'));
     myGrabbable.start({detail: {hand: this.hand}});

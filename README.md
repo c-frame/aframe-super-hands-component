@@ -139,6 +139,7 @@ Master branch
   * Designed to work with `laser-controls`
 * `a-locomotor` now functions independently from colliders;
   removed `add-to-colliders` attribute.
+* Performance improvements in `grabbable` and `stretchable`
 
 To test out master branch features, use this script tag:
 

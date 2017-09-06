@@ -1,6 +1,6 @@
-/* global AFRAME */
-const physicsCore = require('./physics-grab.js');
-AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
+/* global AFRAME, THREE */
+const physicsCore = require('./physics-grab-proto.js');
+AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN},
     invert: {default: false},
@@ -12,6 +12,7 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
     this.UNGRAB_EVENT = 'grab-end';
     this.grabbed = false;
     this.grabbers = [];
+    this.previousPositionIsValid = false;
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
@@ -24,27 +25,35 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
     this.zFactor = (this.data.invert) ? -1 : 1;
     this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY;
   },
-  tick: function () {
-    if (this.grabber && !this.physicsIsGrabbing() &&
-       this.data.usePhysics !== 'only') {
-      const handPosition = (this.grabber.object3D)
-          ? this.grabber.object3D.getWorldPosition()
-          : this.grabber.getAttribute('position');
-      const previousPosition = this.previousPosition || handPosition;
-      const deltaPosition = {
-        x: handPosition.x - previousPosition.x,
-        y: handPosition.y - previousPosition.y,
-        z: handPosition.z - previousPosition.z
-      };
-      const position = this.el.getAttribute('position');
-      this.previousPosition = handPosition;
-      this.el.setAttribute('position', {
-        x: position.x + deltaPosition.x * this.xFactor,
-        y: position.y + deltaPosition.y * this.yFactor,
-        z: position.z + deltaPosition.z * this.zFactor
-      });
-    }
-  },
+  tick: (function () {
+    // peristent objs for improved garbage collection and aframe type checking
+    const handPositionV3 = new THREE.Vector3();
+    const previousPositionV3 = new THREE.Vector3();
+    const destPosition = {x: 0, y: 0, z: 0};
+    return function () {
+      if (this.grabber && !this.physicsIsGrabbing() &&
+          this.data.usePhysics !== 'only') {
+        if (this.grabber.object3D) {
+          this.grabber.object3D.getWorldPosition(handPositionV3);
+        } else {
+          handPositionV3.copy(this.grabber.getAttribute('position'));
+        }
+        if (this.previousPositionIsValid) {
+          const position = this.el.getAttribute('position');
+          destPosition.x = position.x +
+              (handPositionV3.x - previousPositionV3.x) * this.xFactor;
+          destPosition.y = position.y +
+              (handPositionV3.y - previousPositionV3.y) * this.yFactor;
+          destPosition.z = position.z +
+              (handPositionV3.z - previousPositionV3.z) * this.zFactor;
+          this.el.setAttribute('position', destPosition);
+        } else {
+          this.previousPositionIsValid = true;
+        }
+        previousPositionV3.copy(handPositionV3);
+      }
+    };
+  })(),
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -61,7 +70,7 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
       if (!this.physicsStart(evt) && !this.grabber) {
         // otherwise, initiate manual grab if first grabber
         this.grabber = evt.detail.hand;
-        this.previousPosition = null;
+        this.previousPositionIsValid = false;
       }
       // notify super-hands that the gesture was accepted
       if (evt.preventDefault) { evt.preventDefault(); }
@@ -74,7 +83,7 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
-      this.previousPosition = null;
+      this.previousPositionIsValid = false;
     }
     this.physicsEnd(evt);
     if (!this.grabber) {
@@ -90,4 +99,4 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({
       this.grabbers.splice(i, 1);
     }
   }
-}, physicsCore));
+}));

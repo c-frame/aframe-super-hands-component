@@ -20,43 +20,46 @@ AFRAME.registerComponent('stretchable', {
   update: function (oldDat) {
 
   },
-  tick: function () {
-    if (!this.stretched) { return; }
-    let scale = new THREE.Vector3().copy(this.el.getAttribute('scale'));
-    const handPos = new THREE.Vector3()
-        .copy(this.stretchers[0].getAttribute('position'));
-    const otherHandPos = new THREE.Vector3()
-        .copy(this.stretchers[1].getAttribute('position'));
-    const currentStretch = handPos.distanceTo(otherHandPos);
-    let deltaStretch = 1;
-    if (this.previousStretch !== null && currentStretch !== 0) {
-      deltaStretch = Math.pow(
-          currentStretch / this.previousStretch,
-          (this.data.invert)
-            ? -1
-            : 1
-      );
-    }
-    this.previousStretch = currentStretch;
-    scale = scale.multiplyScalar(deltaStretch);
-    this.el.setAttribute('scale', scale);
-    // force scale update for physics body
-    if (this.el.body && this.data.usePhysics !== 'never') {
-      var physicsShape = this.el.body.shapes[0];
-      if (physicsShape.halfExtents) {
-        physicsShape.halfExtents
-            .scale(deltaStretch, physicsShape.halfExtents);
-        physicsShape.updateConvexPolyhedronRepresentation();
-      } else {
-        if (!this.shapeWarned) {
-          console.warn('Unable to stretch physics body: unsupported shape');
-          this.shapeWarned = true;
-        }
-        // todo: suport more shapes
+  tick: (function () {
+    const scale = new THREE.Vector3();
+    const handPos = new THREE.Vector3();
+    const otherHandPos = new THREE.Vector3();
+    return function () {
+      if (!this.stretched) { return; }
+      scale.copy(this.el.getAttribute('scale'));
+      handPos.copy(this.stretchers[0].getAttribute('position'));
+      otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+      const currentStretch = handPos.distanceTo(otherHandPos);
+      let deltaStretch = 1;
+      if (this.previousStretch !== null && currentStretch !== 0) {
+        deltaStretch = Math.pow(
+            currentStretch / this.previousStretch,
+            (this.data.invert)
+              ? -1
+              : 1
+        );
       }
-      this.el.body.updateBoundingRadius();
-    }
-  },
+      this.previousStretch = currentStretch;
+      scale.multiplyScalar(deltaStretch);
+      this.el.setAttribute('scale', scale);
+      // force scale update for physics body
+      if (this.el.body && this.data.usePhysics !== 'never') {
+        var physicsShape = this.el.body.shapes[0];
+        if (physicsShape.halfExtents) {
+          physicsShape.halfExtents
+              .scale(deltaStretch, physicsShape.halfExtents);
+          physicsShape.updateConvexPolyhedronRepresentation();
+        } else {
+          if (!this.shapeWarned) {
+            console.warn('Unable to stretch physics body: unsupported shape');
+            this.shapeWarned = true;
+          }
+          // todo: suport more shapes
+        }
+        this.el.body.updateBoundingRadius();
+      }
+    };
+  })(),
   remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
