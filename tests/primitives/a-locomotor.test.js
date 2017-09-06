@@ -189,3 +189,28 @@ suite('a-locomotor camera options', function () {
     });
   });
 });
+
+suite('a-locomotor collision', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.loco = document.createElement('a-locomotor');
+    el.sceneEl.appendChild(this.loco);
+    this.hand1 = helpers.controllerFactory({
+      'hand-controls': 'right',
+      'super-hands': ''
+    }, true, this.loco);
+    this.hand2 = helpers.controllerFactory({
+      'hand-controls': 'left',
+      'super-hands': ''
+    }, true, this.loco);
+    el.sceneEl.addEventListener('loaded', function (e) {
+      done();
+    });
+  });
+  test('injects self into super-hands hoverEls', function () {
+    assert.includeMembers(
+        this.hand1.components['super-hands'].hoverEls,
+        [this.loco]
+    );
+  });
+});
