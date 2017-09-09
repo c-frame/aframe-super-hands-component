@@ -372,6 +372,23 @@ suite('super-hands hit processing & event emission', function () {
     // simpler than async test in this case - just count the tests
     assert.strictEqual(testSpy.callCount, 7);
   });
+  test('end event rejection', function () {
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.target1.addEventListener('stretch-start', e => e.preventDefault());
+    this.target1.addEventListener('drag-start', e => e.preventDefault());
+    this.sh1.onHit({detail: {el: this.target1}});
+    assert.notStrictEqual(this.sh1.state.get('grab-start'), this.target1);
+    assert.notStrictEqual(this.sh1.state.get('drag-start'), this.target1);
+    assert.notStrictEqual(this.sh1.state.get('stretch-start'), this.target1);
+    this.hand1.emit('triggerdown', {});
+    assert.strictEqual(this.sh1.state.get('grab-start'), this.target1);
+    assert.strictEqual(this.sh1.state.get('drag-start'), this.target1);
+    assert.strictEqual(this.sh1.state.get('stretch-start'), this.target1);
+    this.hand1.emit('triggerup', {});
+    assert.strictEqual(this.sh1.state.get('grab-start'), this.target1);
+    assert.strictEqual(this.sh1.state.get('drag-start'), this.target1);
+    assert.strictEqual(this.sh1.state.get('stretch-start'), this.target1);
+  });
 });
 
 suite('custom button mapping', function () {
