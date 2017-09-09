@@ -56,3 +56,36 @@ suite('clickable function', function () {
     assert.isFalse(this.el.is(this.clicker.CLICKED_STATE));
   });
 });
+suite('clickable button mapping', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({'super-hands': ''});
+    el.setAttribute('clickable',
+        'startButtons: triggerdown; endButtons: triggerup');
+    el.addEventListener('loaded', () => {
+      this.comp = el.components.clickable;
+      done();
+    });
+  });
+  test('responds to correct buttons', function () {
+    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}};
+    // reject wrong button start
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.CLICK_EVENT, dtl));
+    assert.notStrictEqual(this.comp.clickers[0], this.hand);
+    assert.isNotOk(this.el.is(this.comp.CLICKED_STATE));
+    // accept correct button start
+    dtl.buttonEvent.type = 'triggerdown';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.CLICK_EVENT, dtl));
+    assert.strictEqual(this.comp.clickers[0], this.hand);
+    assert.isOk(this.el.is(this.comp.CLICKED_STATE));
+    // reject wrong button end
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.UNCLICK_EVENT, dtl));
+    assert.strictEqual(this.comp.clickers[0], this.hand);
+    assert.isOk(this.el.is(this.comp.CLICKED_STATE));
+    // accpect correct button end
+    dtl.buttonEvent.type = 'triggerup';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNCLICK_EVENT, dtl));
+    assert.notStrictEqual(this.comp.clickers[0], this.hand);
+    assert.isNotOk(this.el.is(this.comp.CLICKED_STATE));
+  });
+});
