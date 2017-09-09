@@ -1708,7 +1708,8 @@ module.exports = function () {
 'use strict';
 
 /* global AFRAME */
-AFRAME.registerComponent('clickable', {
+var buttonCore = require('./buttons-proto.js');
+AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: { type: 'string' }
   },
@@ -1728,6 +1729,9 @@ AFRAME.registerComponent('clickable', {
     this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
   },
   start: function start(evt) {
+    if (!this.startButtonOk(evt)) {
+      return;
+    }
     this.el.addState(this.CLICKED_STATE);
     if (this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
@@ -1738,6 +1742,9 @@ AFRAME.registerComponent('clickable', {
   },
   end: function end(evt) {
     var handIndex = this.clickers.indexOf(evt.detail.hand);
+    if (!this.endButtonOk(evt)) {
+      return;
+    }
     if (handIndex !== -1) {
       this.clickers.splice(handIndex, 1);
     }
@@ -1748,9 +1755,9 @@ AFRAME.registerComponent('clickable', {
       evt.preventDefault();
     }
   }
-});
+}));
 
-},{}],13:[function(require,module,exports){
+},{"./buttons-proto.js":11}],13:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

@@ -1098,12 +1098,13 @@
 
 /***/ },
 /* 9 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	/* global AFRAME */
-	AFRAME.registerComponent('clickable', {
+	var buttonCore = __webpack_require__(5);
+	AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
 	  schema: {
 	    onclick: { type: 'string' }
 	  },
@@ -1123,6 +1124,9 @@
 	    this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
 	  },
 	  start: function start(evt) {
+	    if (!this.startButtonOk(evt)) {
+	      return;
+	    }
 	    this.el.addState(this.CLICKED_STATE);
 	    if (this.clickers.indexOf(evt.detail.hand) === -1) {
 	      this.clickers.push(evt.detail.hand);
@@ -1133,6 +1137,9 @@
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.clickers.indexOf(evt.detail.hand);
+	    if (!this.endButtonOk(evt)) {
+	      return;
+	    }
 	    if (handIndex !== -1) {
 	      this.clickers.splice(handIndex, 1);
 	    }
@@ -1143,7 +1150,7 @@
 	      evt.preventDefault();
 	    }
 	  }
-	});
+	}));
 
 /***/ },
 /* 10 */
