@@ -136,3 +136,32 @@ suite('stretchable-physics', function () {
                         scale.set(0.5, 0.5, 0.5));
   });
 });
+suite('stretchable button mapping', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({'super-hands': ''});
+    el.setAttribute('stretchable',
+        'startButtons: triggerdown; endButtons: triggerup');
+    el.addEventListener('loaded', () => {
+      this.comp = el.components.stretchable;
+      done();
+    });
+  });
+  test('responds to correct buttons', function () {
+    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}};
+    // reject wrong button start
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.STRETCH_EVENT, dtl));
+    assert.notStrictEqual(this.comp.stretchers[0], this.hand);
+    // accept correct button start
+    dtl.buttonEvent.type = 'triggerdown';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.STRETCH_EVENT, dtl));
+    assert.strictEqual(this.comp.stretchers[0], this.hand);
+    // reject wrong button end
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.UNSTRETCH_EVENT, dtl));
+    assert.strictEqual(this.comp.stretchers[0], this.hand);
+    // accpect correct button end
+    dtl.buttonEvent.type = 'triggerup';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNSTRETCH_EVENT, dtl));
+    assert.notStrictEqual(this.comp.stretchers[0], this.hand);
+  });
+});
