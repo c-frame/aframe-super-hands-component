@@ -29,6 +29,7 @@ suite('super-hands & reaction component integration', function () {
   test('grabbable', function () {
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton({});
     assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target1);
     assert.strictEqual(this.target1.components.grabbable.grabber, this.hand1);
     assert.ok(this.target1.is('grabbed'), 'grabbed');
@@ -49,9 +50,10 @@ suite('super-hands & reaction component integration', function () {
   test('stretchable', function () {
     this.sh1.onStretchStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onStretchStartButton({});
     assert.isFalse(this.target1.is('stretched'));
     this.sh2.onHit({ detail: { el: this.target1 } });
-    this.sh2.onStretchStartButton();
+    this.sh2.onStretchStartButton({});
     assert.ok(this.target1.is('stretched'));
     assert.includeMembers(this.target1.components.stretchable.stretchers,
                          [this.hand1, this.hand2]);
@@ -71,8 +73,8 @@ suite('super-hands & reaction component integration', function () {
     const targetDropSpy = this.sinon.spy();
     this.target1.addEventListener('drag-drop', dropSpy);
     this.target2.addEventListener('drag-drop', targetDropSpy);
-    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.ok(this.target1.is('dragged'), 'carried dragged');
     assert.ok(this.target2.is('dragover'), 'drop target hovered');
@@ -225,10 +227,10 @@ suite('super-hands collider integration', function () {
     this.target1.addEventListener('grab-start', grabSpy);
     this.target1.addEventListener('stretch-start', stretchSpy);
     this.target1.addEventListener('drag-start', dragSpy);
+    this.col1.tick();
     this.sh1.onGrabStartButton();
     this.sh1.onStretchStartButton();
     this.sh1.onDragDropStartButton();
-    this.col1.tick();
     assert.equal(grabSpy.callCount, 1, 'grab once');
     assert.equal(stretchSpy.callCount, 1, 'stretch once');
     assert.equal(dragSpy.callCount, 1, 'drag once');
@@ -237,16 +239,16 @@ suite('super-hands collider integration', function () {
     assert.equal(stretchSpy.callCount, 1, 'stretch not repeated');
     assert.equal(dragSpy.callCount, 1, 'drag not repeated');
   });
-  test('super-hands knows when grab rejected due to grabbale.maxGrabbers', function () {
+  test('super-hands knows when grab rejected due to grabbable.maxGrabbers', function () {
     this.target1.setAttribute('grabbable', 'maxGrabbers: 1');
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     assert.isTrue(
       this.sh1.state.has(this.sh1.GRAB_EVENT),
       '1st super-hand recognizes grab'
     );
-    this.sh2.onGrabStartButton();
     this.sh2.onHit({ detail: { el: this.target1 } });
+    this.sh2.onGrabStartButton();
     assert.isFalse(
       this.sh2.state.has(this.sh1.GRAB_EVENT),
       '2nd super-hand recognizes rejection'
@@ -271,8 +273,8 @@ suite('super-hands & clickable component integration', function () {
     });
   });
   test('clickable', function () {
-    this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
     assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target1);
     assert.ok(this.target1.is('clicked'), 'clicked');
     this.sh1.onGrabEndButton();

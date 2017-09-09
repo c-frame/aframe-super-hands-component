@@ -140,7 +140,9 @@ Master branch
 * `a-locomotor` now functions independently from colliders;
   removed `add-to-colliders` attribute.
 * Performance improvements in `grabbable` and `stretchable`
-
+* Gesture initiation changed to occur only on button press rather than
+  button press and collision. Pressing a button in empty space and then
+  moving into an object will no long scoop it up in a grab. 
 To test out master branch features, use this script tag:
 
 ```html

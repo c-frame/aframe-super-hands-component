@@ -224,9 +224,6 @@ AFRAME.registerComponent('super-hands', {
           this.dispatchMouseEventAll('dragenter', dragged, true, true);
         });
       }
-      this.updateGrabbed();
-      this.updateStretched();
-      this.updateDragged();
       this.hover();
     }
   },

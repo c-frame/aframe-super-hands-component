@@ -169,10 +169,20 @@
 	   */
 	  play: function play() {},
 	  onGrabStartButton: function onGrabStartButton(evt) {
+	    var carried = this.state.get(this.GRAB_EVENT);
 	    this.grabbing = true;
 	    this.dispatchMouseEventAll('mousedown', this.el);
 	    this.gehClicking = new Set(this.hoverEls);
-	    this.updateGrabbed();
+	    if (this.grabbing && !carried) {
+	      carried = this.findTarget(this.GRAB_EVENT, {
+	        hand: this.el,
+	        buttonEvent: evt
+	      });
+	      if (carried) {
+	        this.state.set(this.GRAB_EVENT, carried);
+	        this._unHover(carried);
+	      }
+	    }
 	  },
 	  onGrabEndButton: function onGrabEndButton(evt) {
 	    var _this = this;
@@ -265,20 +275,7 @@
 	          _this3.dispatchMouseEventAll('dragenter', dragged, true, true);
 	        });
 	      }
-	      this.updateGrabbed();
-	      this.updateStretched();
-	      this.updateDragged();
 	      this.hover();
-	    }
-	  },
-	  updateGrabbed: function updateGrabbed() {
-	    var carried = this.state.get(this.GRAB_EVENT);
-	    if (this.grabbing && !carried) {
-	      carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
-	      if (carried) {
-	        this.state.set(this.GRAB_EVENT, carried);
-	        this._unHover(carried);
-	      }
 	    }
 	  },
 	  updateStretched: function updateStretched() {
