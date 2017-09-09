@@ -326,7 +326,8 @@ suite('super-hands hit processing & event emission', function () {
     });
     assert.equal(this.sh1.state.get(this.sh1.GRAB_EVENT), undefined);
   });
-  test('button events pass through', function (done) {
+  test('button events pass through', function () {
+    let testSpy = this.sinon.spy(assert, 'equal');
     this.hand1.setAttribute('super-hands', {
       grabStartButtons: ['triggerdown'],
       grabEndButtons: ['triggerup'],
@@ -355,15 +356,21 @@ suite('super-hands hit processing & event emission', function () {
     });
     this.target1.addEventListener('drag-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'gripup', 'drag end');
-      done();
+    });
+    this.target2.addEventListener('drag-drop', e => {
+      assert.equal(e.detail.buttonEvent.type, 'gripup', 'dragdrop');
+      e.preventDefault();
     });
     this.sh1.onHit({detail: {el: this.target1}});
+    this.sh1.onHit({detail: {el: this.target2}});
     this.hand1.emit('triggerdown', {});
     this.hand1.emit('trackpaddown', {});
     this.hand1.emit('gripdown', {});
     this.hand1.emit('triggerup', {});
     this.hand1.emit('trackpadup', {});
     this.hand1.emit('gripup', {});
+    // simpler than async test in this case - just count the tests
+    assert.strictEqual(testSpy.callCount, 7);
   });
 });
 

@@ -229,7 +229,7 @@ AFRAME.registerComponent('super-hands', {
     });
     this.gehDragged.clear();
     if (carried) {
-      ddevt = { hand: this.el, dropped: carried, on: null };
+      ddevt = {hand: this.el, dropped: carried, on: null, buttonEvent: evt};
       dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
       if (dropTarget) {
         ddevt.on = dropTarget;
