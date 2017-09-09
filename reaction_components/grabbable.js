@@ -90,6 +90,7 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);

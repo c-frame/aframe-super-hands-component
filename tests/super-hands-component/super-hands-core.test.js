@@ -137,6 +137,7 @@ suite('super-hands hit processing & event emission', function () {
         assert.isNotOk(this.sh1.state.get(this.sh1.GRAB_EVENT));
         done();
       });
+      evt.preventDefault();
     });
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onGrabStartButton();
@@ -149,12 +150,12 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh2.otherSuperHand, this.sh1);
   });
   test('stretch event', function () {
-    // no this.sinon because cleanup causes error
-    const emitSpy = sinon.spy(this.target1, 'emit');
     const stretchSpy = this.sinon.spy(this.sh2, 'emitCancelable')
         .withArgs(this.target1, 'stretch-start');
-    const unStretchSpy = emitSpy.withArgs('stretch-end');
+    const unStretchSpy = this.sinon.spy();
     this.target1.addEventListener('stretch-start', e => e.preventDefault());
+    this.target1.addEventListener('stretch-end', e => e.preventDefault());
+    this.target1.addEventListener('stretch-end', unStretchSpy);
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onStretchStartButton();
     assert.strictEqual(
@@ -200,6 +201,7 @@ suite('super-hands hit processing & event emission', function () {
     var dragEndSpy = this.sinon.spy();
     this.target1
       .addEventListener('drag-start', evt => evt.preventDefault());
+    this.target1.addEventListener('drag-end', evt => evt.preventDefault());
     this.target1.addEventListener('drag-end', dragEndSpy);
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();
@@ -473,6 +475,8 @@ suite('state tracking', function () {
   test('released el placed back at top of stack', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault());
     this.target2.addEventListener('grab-start', e => e.preventDefault());
+    this.target1.addEventListener('grab-end', e => e.preventDefault());
+    this.target2.addEventListener('grab-end', e => e.preventDefault());
     // this.target3.addEventListener('grab-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });

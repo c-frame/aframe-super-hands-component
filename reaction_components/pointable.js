@@ -92,6 +92,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   resetGrabber: function () {
     let raycaster;

@@ -82,5 +82,6 @@ AFRAME.registerComponent('stretchable', {
     this.stretchers.splice(stretcherIndex, 1);
     this.stretched = false;
     this.el.removeState(this.STRETCHED_STATE);
+    if (evt.preventDefault) { evt.preventDefault(); }
   }
 });

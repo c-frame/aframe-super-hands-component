@@ -168,13 +168,15 @@ AFRAME.registerComponent('super-hands', {
     var clickables = this.hoverEls.filter(function (h) {
       return _this.gehClicking.has(h);
     });
+    var grabbed = this.state.get(this.GRAB_EVENT);
+    var endEvt = { hand: this.el, buttonEvent: evt };
     this.dispatchMouseEventAll('mouseup', this.el, true);
     for (var i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
-    if (this.state.has(this.GRAB_EVENT)) {
-      this.state.get(this.GRAB_EVENT).emit(this.UNGRAB_EVENT, { hand: this.el, buttonEvent: evt });
+    // check if grabbed entity accepts ungrab event
+    if (grabbed && !this.emitCancelable(grabbed, this.UNGRAB_EVENT, endEvt)) {
       /* push to top of stack so a drop followed by re-grab gets the same
          target */
       this.promoteHoveredEl(this.state.get(this.GRAB_EVENT));
@@ -197,8 +199,9 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function onStretchEndButton(evt) {
     var stretched = this.state.get(this.STRETCH_EVENT);
-    if (stretched) {
-      stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el, buttonEvent: evt });
+    var endEvt = { hand: this.el, buttonEvent: evt };
+    // check if end event accepted
+    if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
@@ -233,8 +236,6 @@ AFRAME.registerComponent('super-hands', {
   onDragDropEndButton: function onDragDropEndButton(evt) {
     var _this2 = this;
 
-    var ddevt;
-    var dropTarget;
     var carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
     this.gehDragged.forEach(function (carried) {
@@ -245,17 +246,25 @@ AFRAME.registerComponent('super-hands', {
     });
     this.gehDragged.clear();
     if (carried) {
-      ddevt = { hand: this.el, dropped: carried, on: null, buttonEvent: evt };
-      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
+      var ddEvt = {
+        hand: this.el,
+        dropped: carried,
+        on: null,
+        buttonEvent: evt
+      };
+      var endEvt = { hand: this.el, buttonEvent: evt };
+      var dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
       if (dropTarget) {
-        ddevt.on = dropTarget;
-        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
+        ddEvt.on = dropTarget;
+        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddEvt);
         this._unHover(dropTarget);
       }
-      carried.emit(this.UNDRAG_EVENT, { hand: this.el, buttonEvent: evt });
-      this.promoteHoveredEl(carried);
-      this.state.delete(this.DRAG_EVENT);
-      this.hover();
+      // check if end event accepted
+      if (!this.emitCancelable(carried, this.UNDRAG_EVENT, endEvt)) {
+        this.promoteHoveredEl(carried);
+        this.state.delete(this.DRAG_EVENT);
+        this.hover();
+      }
     }
   },
   onHit: function onHit(evt) {
@@ -1713,6 +1722,9 @@ AFRAME.registerComponent('clickable', {
     if (this.clickers.length < 1) {
       this.el.removeState(this.CLICKED_STATE);
     }
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
   }
 });
 
@@ -1766,6 +1778,9 @@ AFRAME.registerComponent('drag-droppable', {
   },
   dragEnd: function dragEnd(evt) {
     this.el.removeState(this.DRAGGED_STATE);
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
   },
   dragDrop: function dragDrop(evt) {
     if (evt.preventDefault) {
@@ -1873,6 +1888,9 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
     if (!this.grabber) {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
+    }
+    if (evt.preventDefault) {
+      evt.preventDefault();
     }
   },
   lostGrabber: function lostGrabber(evt) {
@@ -2155,6 +2173,9 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
   },
   resetGrabber: function resetGrabber() {
     var raycaster = void 0;
@@ -2264,6 +2285,9 @@ AFRAME.registerComponent('stretchable', {
     this.stretchers.splice(stretcherIndex, 1);
     this.stretched = false;
     this.el.removeState(this.STRETCHED_STATE);
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
   }
 });
 

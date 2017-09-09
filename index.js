@@ -151,14 +151,15 @@ AFRAME.registerComponent('super-hands', {
   },
   onGrabEndButton: function (evt) {
     const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
+    const grabbed = this.state.get(this.GRAB_EVENT);
+    const endEvt = {hand: this.el, buttonEvent: evt};
     this.dispatchMouseEventAll('mouseup', this.el, true);
     for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
-    if (this.state.has(this.GRAB_EVENT)) {
-      this.state.get(this.GRAB_EVENT)
-        .emit(this.UNGRAB_EVENT, {hand: this.el, buttonEvent: evt});
+    // check if grabbed entity accepts ungrab event
+    if (grabbed && !this.emitCancelable(grabbed, this.UNGRAB_EVENT, endEvt)) {
       /* push to top of stack so a drop followed by re-grab gets the same
          target */
       this.promoteHoveredEl(this.state.get(this.GRAB_EVENT));
@@ -180,9 +181,11 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   onStretchEndButton: function (evt) {
-    var stretched = this.state.get(this.STRETCH_EVENT);
-    if (stretched) {
-      stretched.emit(this.UNSTRETCH_EVENT, {hand: this.el, buttonEvent: evt});
+    const stretched = this.state.get(this.STRETCH_EVENT);
+    const endEvt = {hand: this.el, buttonEvent: evt};
+    // check if end event accepted
+    if (stretched &&
+        !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
@@ -217,8 +220,6 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   onDragDropEndButton: function (evt) {
-    var ddevt;
-    var dropTarget;
     const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
     this.gehDragged.forEach(carried => {
@@ -229,17 +230,25 @@ AFRAME.registerComponent('super-hands', {
     });
     this.gehDragged.clear();
     if (carried) {
-      ddevt = {hand: this.el, dropped: carried, on: null, buttonEvent: evt};
-      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
+      const ddEvt = {
+        hand: this.el,
+        dropped: carried,
+        on: null,
+        buttonEvent: evt
+      };
+      const endEvt = {hand: this.el, buttonEvent: evt};
+      const dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
       if (dropTarget) {
-        ddevt.on = dropTarget;
-        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
+        ddEvt.on = dropTarget;
+        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddEvt);
         this._unHover(dropTarget);
       }
-      carried.emit(this.UNDRAG_EVENT, {hand: this.el, buttonEvent: evt});
-      this.promoteHoveredEl(carried);
-      this.state.delete(this.DRAG_EVENT);
-      this.hover();
+      // check if end event accepted
+      if (!this.emitCancelable(carried, this.UNDRAG_EVENT, endEvt)) {
+        this.promoteHoveredEl(carried);
+        this.state.delete(this.DRAG_EVENT);
+        this.hover();
+      }
     }
   },
   onHit: function (evt) {

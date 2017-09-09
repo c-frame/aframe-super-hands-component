@@ -41,6 +41,7 @@ AFRAME.registerComponent('drag-droppable', {
   },
   dragEnd: function (evt) {
     this.el.removeState(this.DRAGGED_STATE);
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   dragDrop: function (evt) {
     if (evt.preventDefault) { evt.preventDefault(); }

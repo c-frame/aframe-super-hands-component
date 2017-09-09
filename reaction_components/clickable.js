@@ -33,5 +33,6 @@ AFRAME.registerComponent('clickable', {
     if (this.clickers.length < 1) {
       this.el.removeState(this.CLICKED_STATE);
     }
+    if (evt.preventDefault) { evt.preventDefault(); }
   }
 });
