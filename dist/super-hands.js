@@ -813,8 +813,10 @@
 	'use strict';
 
 	/* global AFRAME, THREE */
+	var inherit = AFRAME.utils.extendDeep;
 	var physicsCore = __webpack_require__(4);
-	AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
+	var buttonsCore = __webpack_require__(5);
+	AFRAME.registerComponent('pointable', inherit({}, physicsCore, buttonsCore, {
 	  schema: {
 	    maxGrabbers: { type: 'int', default: NaN }
 	  },
@@ -878,6 +880,9 @@
 	    this.physicsRemove();
 	  },
 	  start: function start(evt) {
+	    if (!this.startButtonOk(evt)) {
+	      return;
+	    }
 	    // room for more grabbers?
 	    var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
@@ -902,6 +907,9 @@
 	  },
 	  end: function end(evt) {
 	    var handIndex = this.grabbers.indexOf(evt.detail.hand);
+	    if (!this.endButtonOk(evt)) {
+	      return;
+	    }
 	    if (handIndex !== -1) {
 	      this.grabbers.splice(handIndex, 1);
 	      this.grabber = this.grabbers[0];

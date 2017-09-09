@@ -1,6 +1,8 @@
 /* global AFRAME, THREE */
+const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./physics-grab-proto.js');
-AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
+const buttonsCore = require('./buttons-proto.js');
+AFRAME.registerComponent('pointable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN}
   },
@@ -60,6 +62,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
     this.physicsRemove();
   },
   start: function (evt) {
+    if (!this.startButtonOk(evt)) { return; }
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers;
@@ -83,6 +86,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
   },
   end: function (evt) {
     const handIndex = this.grabbers.indexOf(evt.detail.hand);
+    if (!this.endButtonOk(evt)) { return; }
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];

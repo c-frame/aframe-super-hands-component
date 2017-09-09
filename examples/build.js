@@ -2125,8 +2125,10 @@ module.exports = {
 'use strict';
 
 /* global AFRAME, THREE */
+var inherit = AFRAME.utils.extendDeep;
 var physicsCore = require('./physics-grab-proto.js');
-AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
+var buttonsCore = require('./buttons-proto.js');
+AFRAME.registerComponent('pointable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN }
   },
@@ -2190,6 +2192,9 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
     this.physicsRemove();
   },
   start: function start(evt) {
+    if (!this.startButtonOk(evt)) {
+      return;
+    }
     // room for more grabbers?
     var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
@@ -2214,6 +2219,9 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
   },
   end: function end(evt) {
     var handIndex = this.grabbers.indexOf(evt.detail.hand);
+    if (!this.endButtonOk(evt)) {
+      return;
+    }
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
@@ -2250,7 +2258,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
   }
 }));
 
-},{"./physics-grab-proto.js":17}],19:[function(require,module,exports){
+},{"./buttons-proto.js":11,"./physics-grab-proto.js":17}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
