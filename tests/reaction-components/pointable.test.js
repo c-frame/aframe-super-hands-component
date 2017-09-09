@@ -136,3 +136,36 @@ suite('two-handed grab', function () {
     assert.sameMembers(this.comp.grabbers, [this.hand1], 'second grab rejected');
   });
 });
+suite('pointable button mapping', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({'super-hands': ''});
+    el.setAttribute('pointable',
+        'startButtons: triggerdown; endButtons: triggerup');
+    el.addEventListener('loaded', () => {
+      this.comp = el.components.pointable;
+      done();
+    });
+  });
+  test('responds to correct buttons', function () {
+    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}};
+    // reject wrong button start
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.GRAB_EVENT, dtl));
+    assert.notStrictEqual(this.comp.grabber, this.hand);
+    assert.isNotOk(this.el.is(this.comp.GRABBED_STATE));
+    // accept correct button start
+    dtl.buttonEvent.type = 'triggerdown';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.GRAB_EVENT, dtl));
+    assert.strictEqual(this.comp.grabber, this.hand);
+    assert.isOk(this.el.is(this.comp.GRABBED_STATE));
+    // reject wrong button end
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.UNGRAB_EVENT, dtl));
+    assert.strictEqual(this.comp.grabber, this.hand);
+    assert.isOk(this.el.is(this.comp.GRABBED_STATE));
+    // accpect correct button end
+    dtl.buttonEvent.type = 'triggerup';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNGRAB_EVENT, dtl));
+    assert.notStrictEqual(this.comp.grabber, this.hand);
+    assert.isNotOk(this.el.is(this.comp.GRABBED_STATE));
+  });
+});
