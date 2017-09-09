@@ -55,12 +55,12 @@
 	__webpack_require__(1);
 	__webpack_require__(2);
 	__webpack_require__(3);
-	__webpack_require__(5);
 	__webpack_require__(6);
 	__webpack_require__(7);
 	__webpack_require__(8);
 	__webpack_require__(9);
 	__webpack_require__(10);
+	__webpack_require__(11);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -587,8 +587,10 @@
 	'use strict';
 
 	/* global AFRAME, THREE */
+	var inherit = AFRAME.utils.extendDeep;
 	var physicsCore = __webpack_require__(4);
-	AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
+	var buttonsCore = __webpack_require__(5);
+	AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
 	  schema: {
 	    maxGrabbers: { type: 'int', default: NaN },
 	    invert: { default: false },
@@ -652,6 +654,10 @@
 	    this.physicsRemove();
 	  },
 	  start: function start(evt) {
+	    // right button?
+	    if (!this.startButtonOk(evt)) {
+	      return;
+	    }
 	    // room for more grabbers?
 	    var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
@@ -672,6 +678,9 @@
 	    }
 	  },
 	  end: function end(evt) {
+	    if (!this.endButtonOk(evt)) {
+	      return;
+	    }
 	    var handIndex = this.grabbers.indexOf(evt.detail.hand);
 	    if (handIndex !== -1) {
 	      this.grabbers.splice(handIndex, 1);
@@ -774,6 +783,31 @@
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	// common code used in customizing reaction components by button
+	module.exports = function () {
+	  function buttonIsValid(evt, buttonList) {
+	    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+	  }
+	  return {
+	    schema: {
+	      startButtons: { default: [] },
+	      endButtons: { default: [] }
+	    },
+	    startButtonOk: function startButtonOk(evt) {
+	      return buttonIsValid(evt, this.data['startButtons']);
+	    },
+	    endButtonOk: function endButtonOk(evt) {
+	      return buttonIsValid(evt, this.data['endButtons']);
+	    }
+	  };
+	}();
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -905,7 +939,7 @@
 	}));
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -999,7 +1033,7 @@
 	});
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1063,7 +1097,7 @@
 	});
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1112,7 +1146,7 @@
 	});
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1169,7 +1203,7 @@
 	});
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';

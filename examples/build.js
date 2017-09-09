@@ -484,7 +484,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./primitives/a-locomotor.js":10,"./reaction_components/clickable.js":11,"./reaction_components/drag-droppable.js":12,"./reaction_components/grabbable.js":13,"./reaction_components/hoverable.js":14,"./reaction_components/locomotor-auto-config.js":15,"./reaction_components/pointable.js":17,"./reaction_components/stretchable.js":18,"./systems/super-hands-system.js":19}],3:[function(require,module,exports){
+},{"./primitives/a-locomotor.js":10,"./reaction_components/clickable.js":12,"./reaction_components/drag-droppable.js":13,"./reaction_components/grabbable.js":14,"./reaction_components/hoverable.js":15,"./reaction_components/locomotor-auto-config.js":16,"./reaction_components/pointable.js":18,"./reaction_components/stretchable.js":19,"./systems/super-hands-system.js":20}],3:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:info');
 var warn = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:warn');
@@ -1685,6 +1685,28 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
 },{}],11:[function(require,module,exports){
 'use strict';
 
+// common code used in customizing reaction components by button
+module.exports = function () {
+  function buttonIsValid(evt, buttonList) {
+    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+  }
+  return {
+    schema: {
+      startButtons: { default: [] },
+      endButtons: { default: [] }
+    },
+    startButtonOk: function startButtonOk(evt) {
+      return buttonIsValid(evt, this.data['startButtons']);
+    },
+    endButtonOk: function endButtonOk(evt) {
+      return buttonIsValid(evt, this.data['endButtons']);
+    }
+  };
+}();
+
+},{}],12:[function(require,module,exports){
+'use strict';
+
 /* global AFRAME */
 AFRAME.registerComponent('clickable', {
   schema: {
@@ -1728,7 +1750,7 @@ AFRAME.registerComponent('clickable', {
   }
 });
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1789,12 +1811,14 @@ AFRAME.registerComponent('drag-droppable', {
   }
 });
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
+var inherit = AFRAME.utils.extendDeep;
 var physicsCore = require('./physics-grab-proto.js');
-AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
+var buttonsCore = require('./buttons-proto.js');
+AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
     invert: { default: false },
@@ -1858,6 +1882,10 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
     this.physicsRemove();
   },
   start: function start(evt) {
+    // right button?
+    if (!this.startButtonOk(evt)) {
+      return;
+    }
     // room for more grabbers?
     var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
@@ -1878,6 +1906,9 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
     }
   },
   end: function end(evt) {
+    if (!this.endButtonOk(evt)) {
+      return;
+    }
     var handIndex = this.grabbers.indexOf(evt.detail.hand);
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
@@ -1902,7 +1933,7 @@ AFRAME.registerComponent('grabbable', AFRAME.utils.extendDeep({}, physicsCore, {
   }
 }));
 
-},{"./physics-grab-proto.js":16}],14:[function(require,module,exports){
+},{"./buttons-proto.js":11,"./physics-grab-proto.js":17}],15:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1944,7 +1975,7 @@ AFRAME.registerComponent('hoverable', {
   }
 });
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1998,7 +2029,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
   }
 });
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 // common code used by grabbable and pointable r/t physics interactions
@@ -2071,7 +2102,7 @@ module.exports = {
   }
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2200,7 +2231,7 @@ AFRAME.registerComponent('pointable', AFRAME.utils.extendDeep({}, physicsCore, {
   }
 }));
 
-},{"./physics-grab-proto.js":16}],18:[function(require,module,exports){
+},{"./physics-grab-proto.js":17}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2291,7 +2322,7 @@ AFRAME.registerComponent('stretchable', {
   }
 });
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
