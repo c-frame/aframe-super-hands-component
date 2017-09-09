@@ -86,8 +86,6 @@ AFRAME.registerComponent('super-hands', {
     // state tracking - reaction components
     this.hoverEls = [];
     this.state = new Map();
-    this.grabbing = false;
-    this.stretching = false;
     this.dragging = false;
 
     this.unHover = this.unHover.bind(this);
@@ -138,7 +136,6 @@ AFRAME.registerComponent('super-hands', {
   },
   onGrabStartButton: function (evt) {
     let carried = this.state.get(this.GRAB_EVENT);
-    this.grabbing = true;
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
     if (!carried) {
@@ -168,11 +165,9 @@ AFRAME.registerComponent('super-hands', {
       this.state.delete(this.GRAB_EVENT);
       this.hover();
     }
-    this.grabbing = false;
   },
   onStretchStartButton: function (evt) {
     let stretched = this.state.get(this.STRETCH_EVENT);
-    this.stretching = true;
     if (!stretched) {
       stretched = this.findTarget(this.STRETCH_EVENT, {
         hand: this.el,
@@ -192,7 +187,6 @@ AFRAME.registerComponent('super-hands', {
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
     }
-    this.stretching = false;
   },
   onDragDropStartButton: function (evt) {
     let dragged = this.state.get(this.DRAG_EVENT);

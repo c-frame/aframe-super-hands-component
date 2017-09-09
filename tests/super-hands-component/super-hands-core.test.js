@@ -135,7 +135,6 @@ suite('super-hands hit processing & event emission', function () {
       assert.strictEqual(evt.detail.hand, this.hand1);
       process.nextTick(() => {
         assert.isNotOk(this.sh1.state.get(this.sh1.GRAB_EVENT));
-        assert.isFalse(this.sh1.grabbing);
         done();
       });
     });
@@ -158,7 +157,6 @@ suite('super-hands hit processing & event emission', function () {
     this.target1.addEventListener('stretch-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onStretchStartButton();
-    assert.isTrue(this.sh1.stretching);
     assert.strictEqual(
       this.sh1.state.get(this.sh1.STRETCH_EVENT),
       this.target1
@@ -166,19 +164,16 @@ suite('super-hands hit processing & event emission', function () {
     assert.isFalse(stretchSpy.called);
     this.sh2.onHit({ detail: { el: this.target1 } });
     this.sh2.onStretchStartButton();
-    assert.isTrue(this.sh2.stretching);
     assert
       .strictEqual(this.sh2.state.get(this.sh2.STRETCH_EVENT), this.target1);
     assert.isTrue(stretchSpy.called);
     assert.isFalse(unStretchSpy.called);
     this.sh1.onStretchEndButton();
     assert.isTrue(unStretchSpy.called);
-    assert.isNotOk(this.sh1.stretching);
     assert
       .strictEqual(this.sh2.state.get(this.sh2.STRETCH_EVENT), this.target1);
     this.sh2.onStretchEndButton();
     assert.isTrue(unStretchSpy.calledTwice);
-    assert.isNotOk(this.sh2.stretching);
   });
   test('stretch rejected', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -213,7 +208,6 @@ suite('super-hands hit processing & event emission', function () {
       hand: this.hand1
     }}));
     assert.isNotOk(this.sh1.state.get(this.sh1.DRAG_EVENT));
-    assert.isFalse(this.sh1.dragging);
   });
 
   test('drag events', function () {
@@ -230,7 +224,6 @@ suite('super-hands hit processing & event emission', function () {
     this.target2.addEventListener('drag-drop', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();
-    assert.isTrue(this.sh1.dragging, 'dragging');
     assert.strictEqual(this.sh1.state.get(this.sh1.DRAG_EVENT), this.target1);
     assert.isFalse(dragOverSpy1.called, 'dragover-start not emitted with no droptarget');
     assert.isFalse(dragOverSpy2.called, 'dragover-start not emitted with no droptarget');
@@ -385,27 +378,38 @@ suite('custom button mapping', function () {
       done();
     });
   });
-  test('default button mapping', function (done) {
+  test('default button mapping', function () {
+    const grabSpy = this.sinon.spy();
+    const stretchSpy = this.sinon.spy();
+    const dragSpy = this.sinon.spy();
+    this.target1.addEventListener('grab-start', grabSpy);
+    this.target1.addEventListener('stretch-start', stretchSpy);
+    this.target1.addEventListener('drag-start', dragSpy);
+    this.sh1.onHit({detail: {el: this.target1}});
+    assert.isFalse(grabSpy.called);
+    assert.isFalse(stretchSpy.called);
+    assert.isFalse(dragSpy.called);
     this.hand1.emit('triggerdown', {});
-    process.nextTick(() => {
-      assert.isTrue(this.sh1.grabbing);
-      assert.isTrue(this.sh1.stretching);
-      assert.isTrue(this.sh1.dragging);
-      done();
-    });
+    assert.isTrue(grabSpy.called);
+    assert.isTrue(stretchSpy.called);
+    assert.isTrue(dragSpy.called);
   });
-  test('button mapping can be changed after init', function (done) {
+  test('button mapping can be changed after init', function () {
+    const grabSpy = this.sinon.spy();
+    const stretchSpy = this.sinon.spy();
+    const dragSpy = this.sinon.spy();
+    this.target1.addEventListener('grab-start', grabSpy);
+    this.target1.addEventListener('stretch-start', stretchSpy);
+    this.target1.addEventListener('drag-start', dragSpy);
     this.hand1.setAttribute(
       'super-hands',
       'grabStartButtons: trackpaddown; grabEndButtons: trackpadup'
     );
+    this.sh1.onHit({detail: {el: this.target1}});
     this.hand1.emit('triggerdown', {});
-    process.nextTick(() => {
-      assert.isFalse(this.sh1.grabbing);
-      assert.isTrue(this.sh1.stretching);
-      assert.isTrue(this.sh1.dragging);
-      done();
-    });
+    assert.isFalse(grabSpy.called);
+    assert.isTrue(stretchSpy.called);
+    assert.isTrue(dragSpy.called);
   });
 });
 
