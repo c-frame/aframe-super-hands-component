@@ -336,23 +336,41 @@ suite('super-hands hit processing & event emission', function () {
   test('button events pass through', function (done) {
     this.hand1.setAttribute('super-hands', {
       grabStartButtons: ['triggerdown'],
+      grabEndButtons: ['triggerup'],
       stretchStartButtons: ['trackpaddown'],
-      dragDropStartButtons: ['gripdown']
+      stretchEndButtons: ['trackpadup'],
+      dragDropStartButtons: ['gripdown'],
+      dragDropEndButtons: ['gripup']
     });
     this.target1.addEventListener('grab-start', e => {
-      assert.equal(e.detail.buttonEvent.type, 'triggerdown');
+      assert.equal(e.detail.buttonEvent.type, 'triggerdown', 'grab start');
+      e.preventDefault();
     });
     this.target1.addEventListener('stretch-start', e => {
-      assert.equal(e.detail.buttonEvent.type, 'trackpaddown');
+      assert.equal(e.detail.buttonEvent.type, 'trackpaddown', 'stretch start');
+      e.preventDefault();
     });
     this.target1.addEventListener('drag-start', e => {
-      assert.equal(e.detail.buttonEvent.type, 'gripdown');
+      assert.equal(e.detail.buttonEvent.type, 'gripdown', 'drag start');
+      e.preventDefault();
+    });
+    this.target1.addEventListener('grab-end', e => {
+      assert.equal(e.detail.buttonEvent.type, 'triggerup', 'grab end');
+    });
+    this.target1.addEventListener('stretch-end', e => {
+      assert.equal(e.detail.buttonEvent.type, 'trackpadup', 'stretch end');
+    });
+    this.target1.addEventListener('drag-end', e => {
+      assert.equal(e.detail.buttonEvent.type, 'gripup', 'drag end');
       done();
     });
     this.sh1.onHit({detail: {el: this.target1}});
     this.hand1.emit('triggerdown', {});
     this.hand1.emit('trackpaddown', {});
     this.hand1.emit('gripdown', {});
+    this.hand1.emit('triggerup', {});
+    this.hand1.emit('trackpadup', {});
+    this.hand1.emit('gripup', {});
   });
 });
 

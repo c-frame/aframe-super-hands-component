@@ -173,7 +173,7 @@
 	    this.grabbing = true;
 	    this.dispatchMouseEventAll('mousedown', this.el);
 	    this.gehClicking = new Set(this.hoverEls);
-	    if (this.grabbing && !carried) {
+	    if (!carried) {
 	      carried = this.findTarget(this.GRAB_EVENT, {
 	        hand: this.el,
 	        buttonEvent: evt
@@ -196,7 +196,7 @@
 	    }
 	    this.gehClicking.clear();
 	    if (this.state.has(this.GRAB_EVENT)) {
-	      this.state.get(this.GRAB_EVENT).emit(this.UNGRAB_EVENT, { hand: this.el });
+	      this.state.get(this.GRAB_EVENT).emit(this.UNGRAB_EVENT, { hand: this.el, buttonEvent: evt });
 	      /* push to top of stack so a drop followed by re-grab gets the same
 	         target */
 	      this.promoteHoveredEl(this.state.get(this.GRAB_EVENT));
@@ -206,13 +206,23 @@
 	    this.grabbing = false;
 	  },
 	  onStretchStartButton: function onStretchStartButton(evt) {
+	    var stretched = this.state.get(this.STRETCH_EVENT);
 	    this.stretching = true;
-	    this.updateStretched();
+	    if (!stretched) {
+	      stretched = this.findTarget(this.STRETCH_EVENT, {
+	        hand: this.el,
+	        buttonEvent: evt
+	      });
+	      if (stretched) {
+	        this.state.set(this.STRETCH_EVENT, stretched);
+	        this._unHover(stretched);
+	      }
+	    }
 	  },
 	  onStretchEndButton: function onStretchEndButton(evt) {
 	    var stretched = this.state.get(this.STRETCH_EVENT);
 	    if (stretched) {
-	      stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+	      stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el, buttonEvent: evt });
 	      this.promoteHoveredEl(stretched);
 	      this.state.delete(this.STRETCH_EVENT);
 	      this.hover();
@@ -220,12 +230,30 @@
 	    this.stretching = false;
 	  },
 	  onDragDropStartButton: function onDragDropStartButton(evt) {
+	    var dragged = this.state.get(this.DRAG_EVENT);
 	    this.dragging = true;
 	    if (this.hoverEls.length) {
 	      this.gehDragged = new Set(this.hoverEls);
 	      this.dispatchMouseEventAll('dragstart', this.el);
 	    }
-	    this.updateDragged();
+	    if (!dragged) {
+	      /* prefer carried so that a drag started after a grab will work
+	       with carried element rather than a currently intersected drop target.
+	       fall back to queue in case a drag is initiated independent
+	       of a grab */
+	      if (this.state.get(this.GRAB_EVENT) && !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT, { hand: this.el, buttonEvent: evt })) {
+	        dragged = this.state.get(this.GRAB_EVENT);
+	      } else {
+	        dragged = this.findTarget(this.DRAG_EVENT, {
+	          hand: this.el,
+	          buttonEvent: evt
+	        });
+	      }
+	      if (dragged) {
+	        this.state.set(this.DRAG_EVENT, dragged);
+	        this._unHover(dragged);
+	      }
+	    }
 	  },
 	  onDragDropEndButton: function onDragDropEndButton(evt) {
 	    var _this2 = this;
@@ -249,7 +277,7 @@
 	        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
 	        this._unHover(dropTarget);
 	      }
-	      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
+	      carried.emit(this.UNDRAG_EVENT, { hand: this.el, buttonEvent: evt });
 	      this.promoteHoveredEl(carried);
 	      this.state.delete(this.DRAG_EVENT);
 	      this.hover();
@@ -276,34 +304,6 @@
 	        });
 	      }
 	      this.hover();
-	    }
-	  },
-	  updateStretched: function updateStretched() {
-	    var stretched = this.state.get(this.STRETCH_EVENT);
-	    if (this.stretching && !stretched) {
-	      stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
-	      if (stretched) {
-	        this.state.set(this.STRETCH_EVENT, stretched);
-	        this._unHover(stretched);
-	      }
-	    }
-	  },
-	  updateDragged: function updateDragged() {
-	    var dragged = this.state.get(this.DRAG_EVENT);
-	    if (this.dragging && !dragged) {
-	      /* prefer carried so that a drag started after a grab will work
-	       with carried element rather than a currently intersected drop target.
-	       fall back to queue in case a drag is initiated independent
-	       of a grab */
-	      if (this.state.get(this.GRAB_EVENT) && !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT, { hand: this.el })) {
-	        dragged = this.state.get(this.GRAB_EVENT);
-	      } else {
-	        dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
-	      }
-	      if (dragged) {
-	        this.state.set(this.DRAG_EVENT, dragged);
-	        this._unHover(dragged);
-	      }
 	    }
 	  },
 	  /* search collided entities for target to hover/dragover */
