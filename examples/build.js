@@ -1761,7 +1761,10 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
 'use strict';
 
 /* global AFRAME */
-AFRAME.registerComponent('drag-droppable', {
+var inherit = AFRAME.utils.extendDeep;
+var buttonCore = require('./buttons-proto.js');
+
+AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function init() {
     this.HOVERED_STATE = 'dragover';
     this.DRAGGED_STATE = 'dragged';
@@ -1797,6 +1800,9 @@ AFRAME.registerComponent('drag-droppable', {
     }
   },
   dragStart: function dragStart(evt) {
+    if (!this.startButtonOk(evt)) {
+      return;
+    }
     this.el.addState(this.DRAGGED_STATE);
     if (evt.preventDefault) {
       evt.preventDefault();
@@ -1806,19 +1812,25 @@ AFRAME.registerComponent('drag-droppable', {
     this.el.removeState(this.HOVERED_STATE);
   },
   dragEnd: function dragEnd(evt) {
+    if (!this.endButtonOk(evt)) {
+      return;
+    }
     this.el.removeState(this.DRAGGED_STATE);
     if (evt.preventDefault) {
       evt.preventDefault();
     }
   },
   dragDrop: function dragDrop(evt) {
+    if (!this.endButtonOk(evt)) {
+      return;
+    }
     if (evt.preventDefault) {
       evt.preventDefault();
     }
   }
-});
+}));
 
-},{}],14:[function(require,module,exports){
+},{"./buttons-proto.js":11}],14:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */

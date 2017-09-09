@@ -1034,12 +1034,15 @@
 
 /***/ },
 /* 8 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	/* global AFRAME */
-	AFRAME.registerComponent('drag-droppable', {
+	var inherit = AFRAME.utils.extendDeep;
+	var buttonCore = __webpack_require__(5);
+
+	AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
 	  init: function init() {
 	    this.HOVERED_STATE = 'dragover';
 	    this.DRAGGED_STATE = 'dragged';
@@ -1075,6 +1078,9 @@
 	    }
 	  },
 	  dragStart: function dragStart(evt) {
+	    if (!this.startButtonOk(evt)) {
+	      return;
+	    }
 	    this.el.addState(this.DRAGGED_STATE);
 	    if (evt.preventDefault) {
 	      evt.preventDefault();
@@ -1084,17 +1090,23 @@
 	    this.el.removeState(this.HOVERED_STATE);
 	  },
 	  dragEnd: function dragEnd(evt) {
+	    if (!this.endButtonOk(evt)) {
+	      return;
+	    }
 	    this.el.removeState(this.DRAGGED_STATE);
 	    if (evt.preventDefault) {
 	      evt.preventDefault();
 	    }
 	  },
 	  dragDrop: function dragDrop(evt) {
+	    if (!this.endButtonOk(evt)) {
+	      return;
+	    }
 	    if (evt.preventDefault) {
 	      evt.preventDefault();
 	    }
 	  }
-	});
+	}));
 
 /***/ },
 /* 9 */
