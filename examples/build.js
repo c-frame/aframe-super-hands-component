@@ -2262,7 +2262,9 @@ AFRAME.registerComponent('pointable', inherit({}, physicsCore, buttonsCore, {
 'use strict';
 
 /* global AFRAME, THREE */
-AFRAME.registerComponent('stretchable', {
+var inherit = AFRAME.utils.extendDeep;
+var buttonCore = require('./buttons-proto.js');
+AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false }
@@ -2322,9 +2324,9 @@ AFRAME.registerComponent('stretchable', {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function start(evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand)) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt)) {
       return;
-    } // already stretched or already captured this hand
+    } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
     if (this.stretchers.length === 2) {
       this.stretched = true;
@@ -2337,19 +2339,21 @@ AFRAME.registerComponent('stretchable', {
   },
   end: function end(evt) {
     var stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
-    if (stretcherIndex === -1) {
+    if (!this.endButtonOk(evt)) {
       return;
     }
-    this.stretchers.splice(stretcherIndex, 1);
-    this.stretched = false;
-    this.el.removeState(this.STRETCHED_STATE);
+    if (stretcherIndex !== -1) {
+      this.stretchers.splice(stretcherIndex, 1);
+      this.stretched = false;
+      this.el.removeState(this.STRETCHED_STATE);
+    }
     if (evt.preventDefault) {
       evt.preventDefault();
     }
   }
-});
+}));
 
-},{}],20:[function(require,module,exports){
+},{"./buttons-proto.js":11}],20:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
