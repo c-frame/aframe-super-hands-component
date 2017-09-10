@@ -17,6 +17,6 @@ window.playDemoRecording = function (spectate) {
   s.setAttribute('avatar-replayer', {
     src: './demo-recording.json',
     spectatorMode: spectate === undefined ? true : spectate,
-    spectatorPosition: '0 1.6 2'
+    spectatorPosition: {x: 0, y: 1.6, z: 2}
   });
 };
