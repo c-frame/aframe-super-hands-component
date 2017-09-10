@@ -5,14 +5,9 @@ AFRAME.registerComponent('locomotor-auto-config', {
     stretch: {default: true},
     move: {default: true}
   },
+  dependencies: ['grabbable', 'stretchable'],
   init: function () {
     let ready = true;
-    if (!this.data.stretch) {
-      this.el.removeComponent('stretchable');
-    }
-    if (!this.data.move) {
-      this.el.removeComponent('grabbable');
-    }
     // generate fake collision to be permanently in super-hands queue
     this.el.childNodes.forEach(el => {
       let sh = el.getAttribute && el.getAttribute('super-hands');
@@ -37,6 +32,22 @@ AFRAME.registerComponent('locomotor-auto-config', {
     }
     if (ready) {
       this.ready();
+    }
+  },
+  update: function () {
+    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
+      // store settings for resetting
+      this.stretchSet = this.el.getAttribute('stretchable');
+      this.el.removeAttribute('stretchable');
+    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
+      this.el.setAttribute('stretchable', this.stretchSet);
+    }
+    if (this.el.getAttribute('grabbable') && !this.data.move) {
+      // store settings for resetting
+      this.grabSet = this.el.getAttribute('grabbable');
+      this.el.removeAttribute('grabbable');
+    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
+      this.el.setAttribute('grabbable', this.grabSet);
     }
   },
   remove: function () {

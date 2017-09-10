@@ -1197,13 +1197,11 @@
 	    stretch: { default: true },
 	    move: { default: true }
 	  },
+	  dependencies: ['grabbable', 'stretchable'],
 	  init: function init() {
 	    var _this = this;
 
 	    var ready = true;
-	    // store default grab/stretch component settings for resetting
-	    this.grabSet = this.el.getAttribute('grabbable');
-	    this.stretchSet = this.el.setAttribute('stretchable');
 	    // generate fake collision to be permanently in super-hands queue
 	    this.el.childNodes.forEach(function (el) {
 	      var sh = el.getAttribute && el.getAttribute('super-hands');
@@ -1232,11 +1230,15 @@
 	  },
 	  update: function update() {
 	    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
+	      // store settings for resetting
+	      this.stretchSet = this.el.getAttribute('stretchable');
 	      this.el.removeAttribute('stretchable');
 	    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
 	      this.el.setAttribute('stretchable', this.stretchSet);
 	    }
 	    if (this.el.getAttribute('grabbable') && !this.data.move) {
+	      // store settings for resetting
+	      this.grabSet = this.el.getAttribute('grabbable');
 	      this.el.removeAttribute('grabbable');
 	    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
 	      this.el.setAttribute('grabbable', this.grabSet);
