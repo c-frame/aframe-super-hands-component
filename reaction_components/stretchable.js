@@ -51,11 +51,19 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
           physicsShape.halfExtents
               .scale(deltaStretch, physicsShape.halfExtents);
           physicsShape.updateConvexPolyhedronRepresentation();
-        } else {
-          if (!this.shapeWarned) {
-            console.warn('Unable to stretch physics body: unsupported shape');
-            this.shapeWarned = true;
-          }
+        } else if (physicsShape.radius) {
+          physicsShape.radius *= deltaStretch;
+          physicsShape.updateBoundingSphereRadius();
+        // This doesn't update the cone size - can't find right update function
+        // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
+        //     physicsShape.height) {
+        //   physicsShape.height *= deltaStretch;
+        //   physicsShape.radiusTop *= deltaStretch;
+        //   physicsShape.radiusBottom *= deltaStretch;
+        //   physicsShape.updateBoundingSphereRadius();
+        } else if (!this.shapeWarned) {
+          console.warn('Unable to stretch physics body: unsupported shape');
+          this.shapeWarned = true;
           // todo: suport more shapes
         }
         this.el.body.updateBoundingRadius();

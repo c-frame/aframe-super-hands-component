@@ -999,11 +999,19 @@
 	        if (physicsShape.halfExtents) {
 	          physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
 	          physicsShape.updateConvexPolyhedronRepresentation();
-	        } else {
-	          if (!this.shapeWarned) {
-	            console.warn('Unable to stretch physics body: unsupported shape');
-	            this.shapeWarned = true;
-	          }
+	        } else if (physicsShape.radius) {
+	          physicsShape.radius *= deltaStretch;
+	          physicsShape.updateBoundingSphereRadius();
+	          // This doesn't update the cone size - can't find right update function
+	          // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
+	          //     physicsShape.height) {
+	          //   physicsShape.height *= deltaStretch;
+	          //   physicsShape.radiusTop *= deltaStretch;
+	          //   physicsShape.radiusBottom *= deltaStretch;
+	          //   physicsShape.updateBoundingSphereRadius();
+	        } else if (!this.shapeWarned) {
+	          console.warn('Unable to stretch physics body: unsupported shape');
+	          this.shapeWarned = true;
 	          // todo: suport more shapes
 	        }
 	        this.el.body.updateBoundingRadius();
@@ -1193,12 +1201,9 @@
 	    var _this = this;
 
 	    var ready = true;
-	    if (!this.data.stretch) {
-	      this.el.removeComponent('stretchable');
-	    }
-	    if (!this.data.move) {
-	      this.el.removeComponent('grabbable');
-	    }
+	    // store default grab/stretch component settings for resetting
+	    this.grabSet = this.el.getAttribute('grabbable');
+	    this.stretchSet = this.el.setAttribute('stretchable');
 	    // generate fake collision to be permanently in super-hands queue
 	    this.el.childNodes.forEach(function (el) {
 	      var sh = el.getAttribute && el.getAttribute('super-hands');
@@ -1223,6 +1228,18 @@
 	    }
 	    if (ready) {
 	      this.ready();
+	    }
+	  },
+	  update: function update() {
+	    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
+	      this.el.removeAttribute('stretchable');
+	    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
+	      this.el.setAttribute('stretchable', this.stretchSet);
+	    }
+	    if (this.el.getAttribute('grabbable') && !this.data.move) {
+	      this.el.removeAttribute('grabbable');
+	    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
+	      this.el.setAttribute('grabbable', this.grabSet);
 	    }
 	  },
 	  remove: function remove() {
