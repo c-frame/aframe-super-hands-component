@@ -216,18 +216,15 @@
       provides a consistent experience across PC and mobile VR devices.
       Since it uses the <code>cursor</code> component for collision management,
       the same <code>super-hands</code> configuration used above in the
-      Mouse Controls example works here as well. This example also uses the
-      <code>pointable</code> reaction component which provides consistent
+      Mouse Controls example works here as well. The
+      <code>grabbable</code> reaction component also provides consistent
       grab-at-a-distance functionality across VR devices.
     </p>
-    <p>For scenes including
-      physics like this one, <code>pointable</code>
-      uses the same physics-based movement as <code>grabbable</code>.
-      For scenes without physics, <code>pointable</code>
+    <p>For scenes without physics, <code>grabbable</code> also
       provides fallback manual manipulations of entities at a distance
       that works well even with 3DOF controllers like Daydream and GearVR.
-      <a href="laser/">Here is an example using <code>pointable</code>
-      without physics</a>.
+      <a href="laser/">Here is an example using <code>laser-controls</code>
+        and <code>grabbable</code>without physics</a>.
     </p>
     <a id="oculus" class="example" href="touch/">Oculus Touch controllers
       <br />

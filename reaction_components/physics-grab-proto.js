@@ -1,4 +1,4 @@
-// common code used by grabbable and pointable r/t physics interactions
+// base code used by grabbable for physics interactions
 module.exports = {
   schema: {
     usePhysics: {default: 'ifavailable'}

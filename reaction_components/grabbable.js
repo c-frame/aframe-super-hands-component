@@ -14,45 +14,49 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.UNGRAB_EVENT = 'grab-end';
     this.grabbed = false;
     this.grabbers = [];
-    this.previousPositionIsValid = false;
+    this.constraints = new Map();
+    this.deltaPositionIsValid = false;
+    this.grabDistance = undefined;
+    this.grabDirection = {x: 0, y: 0, z: -1};
+    this.grabOffset = {x: 0, y: 0, z: 0};
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
     this.el.addEventListener('mouseout', e => this.lostGrabber(e));
   },
-  update: function (oldDat) {
+  update: function () {
     this.physicsUpdate();
     this.xFactor = (this.data.invert) ? -1 : 1;
     this.zFactor = (this.data.invert) ? -1 : 1;
     this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY;
   },
   tick: (function () {
-    // peristent objs for improved garbage collection and aframe type checking
-    const handPositionV3 = new THREE.Vector3();
-    const previousPositionV3 = new THREE.Vector3();
+    const deltaPosition = new THREE.Vector3();
+    const targetPosition = new THREE.Vector3();
     const destPosition = {x: 0, y: 0, z: 0};
     return function () {
-      if (this.grabber && !this.physicsIsGrabbing() &&
-          this.data.usePhysics !== 'only') {
-        if (this.grabber.object3D) {
-          this.grabber.object3D.getWorldPosition(handPositionV3);
-        } else {
-          handPositionV3.copy(this.grabber.getAttribute('position'));
-        }
-        if (this.previousPositionIsValid) {
-          const position = this.el.getAttribute('position');
-          destPosition.x = position.x +
-              (handPositionV3.x - previousPositionV3.x) * this.xFactor;
-          destPosition.y = position.y +
-              (handPositionV3.y - previousPositionV3.y) * this.yFactor;
-          destPosition.z = position.z +
-              (handPositionV3.z - previousPositionV3.z) * this.zFactor;
+      var entityPosition;
+      if (this.grabber) {
+        // reflect on z-axis to point in same direction as the laser
+        targetPosition.copy(this.grabDirection);
+        targetPosition
+            .applyQuaternion(this.grabber.object3D.getWorldQuaternion())
+            .setLength(this.grabDistance)
+            .add(this.grabber.object3D.getWorldPosition())
+            .add(this.grabOffset);
+        if (this.deltaPositionIsValid) {
+          // relative position changes work better with nested entities
+          deltaPosition.sub(targetPosition);
+          entityPosition = this.el.getAttribute('position');
+          destPosition.x = entityPosition.x - deltaPosition.x * this.xFactor;
+          destPosition.y = entityPosition.y - deltaPosition.y * this.yFactor;
+          destPosition.z = entityPosition.z - deltaPosition.z * this.zFactor;
           this.el.setAttribute('position', destPosition);
         } else {
-          this.previousPositionIsValid = true;
+          this.deltaPositionIsValid = true;
         }
-        previousPositionV3.copy(handPositionV3);
+        deltaPosition.copy(targetPosition);
       }
     };
   })(),
@@ -62,19 +66,21 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.physicsRemove();
   },
   start: function (evt) {
-    // right button?
     if (!this.startButtonOk(evt)) { return; }
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers;
 
     if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+      if (!evt.detail.hand.object3D) {
+        console.warn('grabbable entities must have an object3D');
+        return;
+      }
       this.grabbers.push(evt.detail.hand);
-      // initiate physics if available
+      // initiate physics if available, otherwise manual
       if (!this.physicsStart(evt) && !this.grabber) {
-        // otherwise, initiate manual grab if first grabber
         this.grabber = evt.detail.hand;
-        this.previousPositionIsValid = false;
+        this.resetGrabber();
       }
       // notify super-hands that the gesture was accepted
       if (evt.preventDefault) { evt.preventDefault(); }
@@ -83,19 +89,33 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     }
   },
   end: function (evt) {
-    if (!this.endButtonOk(evt)) { return; }
     const handIndex = this.grabbers.indexOf(evt.detail.hand);
+    if (!this.endButtonOk(evt)) { return; }
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
-      this.previousPositionIsValid = false;
     }
     this.physicsEnd(evt);
-    if (!this.grabber) {
+    if (!this.resetGrabber()) {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
     if (evt.preventDefault) { evt.preventDefault(); }
+  },
+  resetGrabber: function () {
+    let raycaster;
+    if (!this.grabber) {
+      return false;
+    }
+    raycaster = this.grabber.getAttribute('raycaster');
+    this.deltaPositionIsValid = false;
+    this.grabDistance = this.el.object3D.getWorldPosition()
+        .distanceTo(this.grabber.object3D.getWorldPosition());
+    if (raycaster) {
+      this.grabDirection = raycaster.direction;
+      this.grabOffset = raycaster.origin;
+    }
+    return true;
   },
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);
