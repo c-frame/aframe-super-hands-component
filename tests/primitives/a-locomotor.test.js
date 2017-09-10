@@ -56,8 +56,8 @@ suite('a-locomotor autoconfig options', function () {
     this.loco = document.createElement('a-locomotor');
     this.loco.setAttribute('fetch-camera', 'false');
     this.loco.setAttribute('add-to-colliders', 'false');
-    this.loco.setAttribute('allow-movement', 'false');
     this.loco.setAttribute('horizontal-only', 'false');
+    this.loco.setAttribute('allow-movement', 'false');
     this.loco.setAttribute('allow-scaling', 'false');
     el.sceneEl.appendChild(this.loco);
     this.hand1 = helpers.controllerFactory({
@@ -82,13 +82,28 @@ suite('a-locomotor autoconfig options', function () {
       done();
     });
   });
-  test('Not grabbable', function () {
-    const grab = this.loco.components['grabbable'];
-    process.nextTick(() => assert.isNotOk(grab));
+  test('Not grabbable', function (done) {
+    assert.isOk(this.loco.getAttribute('grabbable'));
+    process.nextTick(() => {
+      assert.isNotOk(this.loco.getAttribute('grabbable'));
+      done();
+    });
   });
-  test('not stretchable', function () {
-    const stretch = this.loco.components['stretchable'];
-    process.nextTick(() => assert.isNotOk(stretch));
+  test('not stretchable', function (done) {
+    assert.isOk(this.loco.getAttribute('stretchable'));
+    process.nextTick(() => {
+      assert.isNotOk(this.loco.getAttribute('stretchable'));
+      done();
+    });
+  });
+  test('resume grab/sretch', function (done) {
+    this.loco.setAttribute('allow-scaling', 'true');
+    this.loco.setAttribute('allow-movement', 'true');
+    process.nextTick(() => {
+      assert.isTrue(this.loco.getAttribute('grabbable').invert);
+      assert.isTrue(this.loco.getAttribute('stretchable').invert);
+      done();
+    });
   });
 });
 
