@@ -10,7 +10,7 @@ require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
-require('./reaction_components/locomotor-auto-config.js');
+require('./misc_components/locomotor-auto-config.js');
 require('./primitives/a-locomotor.js');
 
 /**

@@ -1,5 +1,5 @@
 /* global AFRAME */
-const buttonCore = require('./buttons-proto.js');
+const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: { type: 'string' }

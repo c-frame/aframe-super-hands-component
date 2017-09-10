@@ -24,7 +24,7 @@ window.playDemoRecording = function (spectate) {
   });
 };
 
-},{"../index.js":2,"aframe-motion-capture-components":8}],2:[function(require,module,exports){
+},{"../index.js":2,"aframe-motion-capture-components":9}],2:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -39,7 +39,7 @@ require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
-require('./reaction_components/locomotor-auto-config.js');
+require('./misc_components/locomotor-auto-config.js');
 require('./primitives/a-locomotor.js');
 
 /**
@@ -483,7 +483,72 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./primitives/a-locomotor.js":10,"./reaction_components/clickable.js":12,"./reaction_components/drag-droppable.js":13,"./reaction_components/grabbable.js":14,"./reaction_components/hoverable.js":15,"./reaction_components/locomotor-auto-config.js":16,"./reaction_components/stretchable.js":18,"./systems/super-hands-system.js":19}],3:[function(require,module,exports){
+},{"./misc_components/locomotor-auto-config.js":3,"./primitives/a-locomotor.js":11,"./reaction_components/clickable.js":12,"./reaction_components/drag-droppable.js":13,"./reaction_components/grabbable.js":14,"./reaction_components/hoverable.js":15,"./reaction_components/stretchable.js":18,"./systems/super-hands-system.js":19}],3:[function(require,module,exports){
+'use strict';
+
+/* global AFRAME */
+AFRAME.registerComponent('locomotor-auto-config', {
+  schema: {
+    camera: { default: true },
+    stretch: { default: true },
+    move: { default: true }
+  },
+  dependencies: ['grabbable', 'stretchable'],
+  init: function init() {
+    var _this = this;
+
+    var ready = true;
+    // generate fake collision to be permanently in super-hands queue
+    this.el.childNodes.forEach(function (el) {
+      var sh = el.getAttribute && el.getAttribute('super-hands');
+      if (sh) {
+        var evtDetails = {};
+        evtDetails[sh.colliderEventProperty] = _this.el;
+        el.emit(sh.colliderEvent, evtDetails);
+        _this.colliderState = sh.colliderState;
+        _this.el.addState(_this.colliderState);
+      }
+    });
+    if (this.data.camera) {
+      // this step has to be done asnychronously
+      ready = false;
+      this.el.addEventListener('loaded', function (e) {
+        if (!document.querySelector('a-camera, [camera]')) {
+          var cam = document.createElement('a-camera');
+          _this.el.appendChild(cam);
+        }
+        _this.ready();
+      });
+    }
+    if (ready) {
+      this.ready();
+    }
+  },
+  update: function update() {
+    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
+      // store settings for resetting
+      this.stretchSet = this.el.getAttribute('stretchable');
+      this.el.removeAttribute('stretchable');
+    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
+      this.el.setAttribute('stretchable', this.stretchSet);
+    }
+    if (this.el.getAttribute('grabbable') && !this.data.move) {
+      // store settings for resetting
+      this.grabSet = this.el.getAttribute('grabbable');
+      this.el.removeAttribute('grabbable');
+    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
+      this.el.setAttribute('grabbable', this.grabSet);
+    }
+  },
+  remove: function remove() {
+    this.el.removeState(this.colliderState);
+  },
+  ready: function ready() {
+    this.el.emit('locomotor-ready', {});
+  }
+});
+
+},{}],4:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:info');
 var warn = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:warn');
@@ -766,7 +831,7 @@ AFRAME.registerComponent('avatar-recorder', {
   }
 });
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var error = AFRAME.utils.debug('aframe-motion-capture:avatar-replayer:error');
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-replayer:info');
@@ -1011,7 +1076,7 @@ AFRAME.registerComponent('avatar-replayer', {
   }
 });
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /* global AFRAME, THREE */
 
 var EVENTS = {
@@ -1232,7 +1297,7 @@ AFRAME.registerComponent('motion-capture-recorder', {
   }
 });
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* global THREE, AFRAME  */
 AFRAME.registerComponent('motion-capture-replayer', {
   schema: {
@@ -1422,7 +1487,7 @@ function applyPose (el, pose) {
   el.setAttribute('rotation', pose.rotation);
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* global THREE AFRAME  */
 AFRAME.registerComponent('stroke', {
   schema: {
@@ -1603,7 +1668,7 @@ AFRAME.registerComponent('stroke', {
   }
 });
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -1618,7 +1683,7 @@ require('./components/stroke.js');
 // Systems
 require('./systems/motion-capture-replayer.js');
 
-},{"./components/avatar-recorder.js":3,"./components/avatar-replayer.js":4,"./components/motion-capture-recorder.js":5,"./components/motion-capture-replayer.js":6,"./components/stroke.js":7,"./systems/motion-capture-replayer.js":9}],9:[function(require,module,exports){
+},{"./components/avatar-recorder.js":4,"./components/avatar-replayer.js":5,"./components/motion-capture-recorder.js":6,"./components/motion-capture-replayer.js":7,"./components/stroke.js":8,"./systems/motion-capture-replayer.js":10}],10:[function(require,module,exports){
 AFRAME.registerSystem('motion-capture-replayer', {
   init: function () {
     var sceneEl = this.sceneEl;
@@ -1652,7 +1717,7 @@ AFRAME.registerSystem('motion-capture-replayer', {
     }
   }
 });
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1681,33 +1746,11 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   }
 }));
 
-},{}],11:[function(require,module,exports){
-'use strict';
-
-// common code used in customizing reaction components by button
-module.exports = function () {
-  function buttonIsValid(evt, buttonList) {
-    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
-  }
-  return {
-    schema: {
-      startButtons: { default: [] },
-      endButtons: { default: [] }
-    },
-    startButtonOk: function startButtonOk(evt) {
-      return buttonIsValid(evt, this.data['startButtons']);
-    },
-    endButtonOk: function endButtonOk(evt) {
-      return buttonIsValid(evt, this.data['endButtons']);
-    }
-  };
-}();
-
 },{}],12:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
-var buttonCore = require('./buttons-proto.js');
+var buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: { type: 'string' }
@@ -1756,12 +1799,12 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"./buttons-proto.js":11}],13:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":16}],13:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
 var inherit = AFRAME.utils.extendDeep;
-var buttonCore = require('./buttons-proto.js');
+var buttonCore = require('./prototypes/buttons-proto.js');
 
 AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function init() {
@@ -1829,13 +1872,13 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./buttons-proto.js":11}],14:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":16}],14:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 var inherit = AFRAME.utils.extendDeep;
-var physicsCore = require('./physics-grab-proto.js');
-var buttonsCore = require('./buttons-proto.js');
+var physicsCore = require('./prototypes/physics-grab-proto.js');
+var buttonsCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
@@ -1970,7 +2013,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"./buttons-proto.js":11,"./physics-grab-proto.js":17}],15:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":16,"./prototypes/physics-grab-proto.js":17}],15:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2015,67 +2058,24 @@ AFRAME.registerComponent('hoverable', {
 },{}],16:[function(require,module,exports){
 'use strict';
 
-/* global AFRAME */
-AFRAME.registerComponent('locomotor-auto-config', {
-  schema: {
-    camera: { default: true },
-    stretch: { default: true },
-    move: { default: true }
-  },
-  dependencies: ['grabbable', 'stretchable'],
-  init: function init() {
-    var _this = this;
-
-    var ready = true;
-    // generate fake collision to be permanently in super-hands queue
-    this.el.childNodes.forEach(function (el) {
-      var sh = el.getAttribute && el.getAttribute('super-hands');
-      if (sh) {
-        var evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = _this.el;
-        el.emit(sh.colliderEvent, evtDetails);
-        _this.colliderState = sh.colliderState;
-        _this.el.addState(_this.colliderState);
-      }
-    });
-    if (this.data.camera) {
-      // this step has to be done asnychronously
-      ready = false;
-      this.el.addEventListener('loaded', function (e) {
-        if (!document.querySelector('a-camera, [camera]')) {
-          var cam = document.createElement('a-camera');
-          _this.el.appendChild(cam);
-        }
-        _this.ready();
-      });
-    }
-    if (ready) {
-      this.ready();
-    }
-  },
-  update: function update() {
-    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
-      // store settings for resetting
-      this.stretchSet = this.el.getAttribute('stretchable');
-      this.el.removeAttribute('stretchable');
-    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
-      this.el.setAttribute('stretchable', this.stretchSet);
-    }
-    if (this.el.getAttribute('grabbable') && !this.data.move) {
-      // store settings for resetting
-      this.grabSet = this.el.getAttribute('grabbable');
-      this.el.removeAttribute('grabbable');
-    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
-      this.el.setAttribute('grabbable', this.grabSet);
-    }
-  },
-  remove: function remove() {
-    this.el.removeState(this.colliderState);
-  },
-  ready: function ready() {
-    this.el.emit('locomotor-ready', {});
+// common code used in customizing reaction components by button
+module.exports = function () {
+  function buttonIsValid(evt, buttonList) {
+    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
   }
-});
+  return {
+    schema: {
+      startButtons: { default: [] },
+      endButtons: { default: [] }
+    },
+    startButtonOk: function startButtonOk(evt) {
+      return buttonIsValid(evt, this.data['startButtons']);
+    },
+    endButtonOk: function endButtonOk(evt) {
+      return buttonIsValid(evt, this.data['endButtons']);
+    }
+  };
+}();
 
 },{}],17:[function(require,module,exports){
 'use strict';
@@ -2155,7 +2155,7 @@ module.exports = {
 
 /* global AFRAME, THREE */
 var inherit = AFRAME.utils.extendDeep;
-var buttonCore = require('./buttons-proto.js');
+var buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   schema: {
     usePhysics: { default: 'ifavailable' },
@@ -2253,7 +2253,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./buttons-proto.js":11}],19:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":16}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

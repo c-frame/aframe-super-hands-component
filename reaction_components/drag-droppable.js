@@ -1,6 +1,6 @@
 /* global AFRAME */
 const inherit = AFRAME.utils.extendDeep;
-const buttonCore = require('./buttons-proto.js');
+const buttonCore = require('./prototypes/buttons-proto.js');
 
 AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function () {
