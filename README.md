@@ -43,9 +43,41 @@ See
 [the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
 for more info.
 
+Readme contents:
+
+* [Examples](#examples)
+* [Installation](#installation)
+  * [HTML usage](#browser)
+  * [News](#news)
+  * [Compatibility](#compatibility)
+* [Core, primitives, and meta-components](#core--primitives--and-meta-components)
+  * [`super-hands` gesture interpretation component](#super-hands-component)
+  * [`progressive-controls` universal controller component](#progressive-controls)
+  * ['a-locomotor' free movement primitive](#a-locomotor)
+* [Reaction components](#reaction-components)
+  * [`hoverable`](#hoverable)
+  * [`grabbable`](#grabbable)
+    * [`clickable`](#clickable)
+  * [`stretchable`](#stretchable)
+  * ['drag-droppable'](#drag-droppable)
+* [Customizing interactivity](#sustomizing-interactivity)
+
+## Examples
+
+The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
+
+| Example Scene | Description | Target VR Devices | MoCap preview |
+| --- | --- | --- | --- |
+| [Progressive controls with physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior on any VR platform | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift  | Yes |
+| [Gaze and laser pointer controls without physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | No |
+| [Global Event Handler integration](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events) | An alternative way to customize interactions using familiar HTML event handler properties like `onclick` | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | Yes |
+| [Link Portals](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#portals) | Travel the metaverse with A-Frame link portals | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | No |
+| [Grab-based locomotion](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion) | Explore a scene by dragging or stretching the world around you | Vive, Rift | Yes |
+| [Custom button mapping](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky) | Configuring schema properties to change button functions | Vive, Rift | No |
+
 ## Installation
 
-### Browser  
+### Browser
 
 Install and use by directly including the [browser files](dist):
 
@@ -86,47 +118,7 @@ Then require and use.
 require('aframe');
 require('super-hands');
 ```
-
-
-## Examples
-
-The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
-
-| Example Scene | Description | Target VR Devices | MoCap preview |
-| --- | --- | --- | --- |
-| [Basic hand controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#hands) | Simple setup for grab, stretch, and drag-drop | Vive, Rift | Yes |
-| [Grab-based locomotion](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion) | Explore a scene by dragging or stretching the world around you | Vive, Rift | Yes |
-| [Global Event Handler integration](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events) | An easy way to customize  interactions using familiar HTML event handler properties like `onclick` | Vive, Rift | Yes |
-| [Hand controls with physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior | Vive | Yes |
-| [Custom button mapping](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky) | Configuring the `super-hands` schema to change button functions | Vive | No |
-| [Link Portals](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#portals) | Using `super-hands` with A-Frame link portals | Vive, Rift | No |
-| [Gaze-based interactivity](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Using `super-hands` with `cursor` to add grab and drag-drop interactivity for simpler VR setups | Desktop, mobile, cardboard | No |
-| [Laser pointer controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#laser) | Using the A-Frame `laser-controls` to support a variety of VR controllers | Gear VR, Daydream, Vive, Rift | Yes |
-
-## Concepts
-
-![Separation of Gesture and Response API](readme_files/super-hands-api.png)
-
-Separating the reaction to be the responsibility of the entity affected allows for extensibility.
-In response to a grab, you may want some entities to lock to the controller and move,
-others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged.
-With this API schema, these options can be handled by adding or creating different reaction
-components to the entities in your scene, and `super-hands` can work with all of them.
-
-### Interactivity
-
-There are two pathways to adding additional interactivity.
-
-1. A-Frame style: Each component's API documentation describes the A-Frame
-custom events and states it uses.
-These are best processed by creating new A-Frame components that register
-event listeners and react accordingly.
-1. HTML style: The `super-hands` component also integrates with the
-Global Event Handlers Web API to trigger standard mouse events analogous
-to the VR interactions that can easily be handled through
-properties like `onclick`.
-
-## News
+### News
 
 Master branch
 
@@ -134,6 +126,8 @@ Master branch
   for all levels of VR controls: desktop mouse, mobile touch ("magic window"),
   cardboard button,
   3DOF (GearVR and Daydram), and 6DOF (Vive and Oculus Touch)
+  * `progressive-controls` meta-component to automatically setup interactive
+    controls on **any** device from desktop to Vive
   * Upgraded `grabbable` reaction component.
     * Now works with pointing and moving at a distance, e.g. with
       3DOF controllers and `laser-controls`, using controller orientation
@@ -167,38 +161,7 @@ v1.1.0
 * Select examples now have `avatar-replayer` to preview actions without needing
   VR equipment
 
-v1.0.1
-
-* A-Frame v0.6.0 compatibility: fixed issue with camera freezing when using
-  `a-locomotor`'s automatic camera config
-* Updated documentation and examples with latest versions of `aframe-extras` and
-  `aframe-physics-system`.
-
-v1.0.0
-
-* `a-locomotor`: drop-in freedom of motion for WebVR experiences
-  with this new primitive
-* Maturation of A-Frame style API: Reaction components now need to cancel
-  gesture events in order to communicate acceptance of the gesture to `super-hands`.
-  This improves state tracking and handling of overlapping/nested
-  entities
-* Improved Global Event Handlers integration:
-    * When overlapping entities create multiple potential targets for GEH
-      events, the events fire on all potential targets
-    * `click` now functions more like its mouse counterpart, only firing
-      if a mouseup occurs after a mousedown and without losing collision
-      with the target entity
-* Two-handed grabbing: `grabbable` can now process grabs from multiple
-  `super-hands` entities. In non-physics interactions, this makes passing
-  entities between hands much easier. In physics-based interactions, this
-  creates multiple constraints for advanced handling
-* `strechable` flexibility: state tracking of hands attempting to
-  stretch moved from `super-hands` to `strechable`. This should allow for
-  different avatars in a multi-user setting to stretch a single entity
-  cooperatively
-* Added [machinima testing](https://github.com/wmurphyrd/aframe-machinima-testing)
-  for automated testing based on motion-captured user input to improve
-  regression detection
+[Previous news](news.md)
 
 ### Known Issues
 
@@ -212,19 +175,28 @@ v1.0.0
 
 ### Compatibility
 
+With `progressive-controls`, `super-hands` can provide interactive controls
+for any device: desktop, mobile ("magic window"), cardboard viewer + button,
+Daydream, GearVR, Vive, and Rift + Touch.
+
+`super-hands` dependency version compatibility:
+
 | super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
 | ^v1.0.1 | v0.6.x |^v3.8.6 | ^v1.4.2 |
 | v1.0.0 | v0.5.x |v3.8.5 | v1.4.1 |
 | v0.2.4 | v0.4.x | v3.7.0 | v1.3.0 |
 
-## API
+## Core, primitives, and meta-components
 
 ### super-hands component
 
-`super-hands` should be added to same entities as your controller
-component and collision detector (e.g. [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc)
-or the in-development, physics system-based [physics-collider](https://github.com/donmccurdy/aframe-physics-system/pull/14)).
+The `super-hands` component is the core of the library.
+It communicates gesture events to entities based on
+user-input and entity collisions. The component is generally placed on
+the controller entities (or the camera for gaze interaction) and depends on
+a collision detection component (e.g. `cursor` or [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc))
+which needs to be placed on the same entity or a child entity of `super-hands`.
 
 #### Component Schema
 
@@ -249,7 +221,7 @@ Default start events: 'gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
 Default end events: 'gripup', 'trackpadup', 'triggerup', 'gripopen',
 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup'
 
-#### Events
+#### Gesture Events
 
 Events will be emitted by the entity being interacted with.
 The entity that `super-hands` is attached to is sent in the event `details` as the property `hand`.
@@ -271,18 +243,23 @@ The entity that `super-hands` is attached to is sent in the event `details` as t
 Notes:
 
 * References to buttons being "released" and "pressed" are dependent on the schema settings.
-For example, to make grab 'sticky', you could set grabStartButtons to
-'triggerdown' and grabEndButtons to 'gripdown' (as in the
-[sticky example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)).
-This way the grab-end event would not fire until the grip button was *pressed*,
-even if the trigger was *released* earlier.
 * Only one entity at a time will be targeted for each event type,
 even if multiple overlapping collision zones exist. `super-hands` tracks a
 LIFO stack of collided entities to determine which will be affected.
 * drag-drop: For the receiving entity, `on` entry in the details is `null`.
 If needed, use `event.target` instead.
+* For events triggered by buttons, the triggering button event is passed
+  along in `details.buttonEvent`
 
 #### Global Event Handler Integration
+
+In addition to the A-Frame style gesture events,
+`super-hands` also causes standard HTML events analogous to VR
+interactions to be emitted by the target entities. This allows the use of these
+common Global Event Handler properties on entities to add reaction directly
+in the HTML. View the
+[related example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events)
+to see this in use.
 
 | entity HTML attribute | conditions | event.relatedTarget |
 | --- | --- | --- |
@@ -300,6 +277,53 @@ If needed, use `event.target` instead.
 The event passed to the handler will be a `MouseEvent`. At present the only property implemented
 is `relatedTarget`, which is set as
 listed in the table. Drag-dropping events will be dispatched on both the entity being dragged and the drop target, and the `relatedTarget` property for each will point to the other entity in the interaction.
+
+### progressive-controls
+
+The `progressive-controls` component makes it easy to design an interactive
+A-Frame scene that will work on any device. It automatically detects the viewing
+device, creates appropriate controller entities, and configures `super-hands`
+to work with the device. It is progressive because the degree of interactivity
+increases from gaze-based cursors (desktop, mobile, cardboard), to laser pointer
+controls (GearVR, Daydream), to natural hand interaction (Vive, Oculus).
+
+#### Usage
+
+Add `progressive-controls` to an entity, and it will create appropriate
+controller and camera entities as children automatically.
+
+```html
+<a-entity progressive-controls></a-entity>
+```
+
+To add additional properties or override defaults, include the entities
+as children of the `progressive-controls` entity. Controllers must be given
+class names `'right-controller'` and `'left-controller'` to help
+`progressive-controls` identify them.
+
+```html
+<a-entity progressive-controls>
+  <!-- controllers need ids if you're going to do motion capture -->
+  <a-entity id="rhand" class="right-controller"></a-entity>
+  <a-entity id="lhand" class="left-controller"></a-entity>
+</a-entity>
+```
+
+#### Component Schema
+
+| Property | Description | Default Value |
+| -------- | ----------- | ------------- |
+| maxLevel | Limit the highest interactivity level that will be activated: `'gaze'`, `'point'`, or `'touch'`. | `'touch'` |
+| objects | CSS selector string to be used by any automatically generated collision detectors | `''` (all entities) |
+| physicsBody | Properties to use when adding `static-body` to automatically generated controllers. Ignored if physics not added to the scene. | 'shape: sphere; sphereRadius: 0.02' |
+| touchCollider | Name of collider component to use with touch-level controls | 'sphere-collider' |
+
+#### Events
+
+| Type | Description |  details object |
+| --- | --- | --- |
+|'controller-progressed' | The detected controller type has changed | `level` new control type, : `'gaze'`, `'point'`, or `'touch'` |
+
 
 ### a-locomotor primitive
 
@@ -482,3 +506,28 @@ recognized by `super-hands` `dragDropStartButtons` and `dragDropEndButtons`.
 
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to
 receive the dragover state.
+
+## Customizing interactivity
+
+### Gesture and Response Concept
+
+![Separation of Gesture and Response API](readme_files/super-hands-api.png)
+
+Separating the reaction to be the responsibility of the entity affected allows for extensibility.
+In response to a grab, you may want some entities to lock to the controller and move,
+others to rotate around a fixed point, and others still to spawn a new entity but remain unchanged.
+With this API schema, these options can be handled by adding or creating different reaction
+components to the entities in your scene, and `super-hands` can work with all of them.
+
+### Interactivity
+
+There are two pathways to adding additional interactivity.
+
+1. A-Frame style: Each component's API documentation describes the A-Frame
+custom events and states it uses.
+These are best processed by creating new A-Frame components that register
+event listeners and react accordingly.
+1. HTML style: The `super-hands` component also integrates with the
+Global Event Handlers Web API to trigger standard mouse events analogous
+to the VR interactions that can easily be handled through
+properties like `onclick`.
