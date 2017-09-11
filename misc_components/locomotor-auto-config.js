@@ -8,29 +8,16 @@ AFRAME.registerComponent('locomotor-auto-config', {
   dependencies: ['grabbable', 'stretchable'],
   init: function () {
     this.ready = false;
-    const fakeCollision = evt => {
-      let collided = false;
-      this.el.getChildEntities().forEach(el => {
-        let sh = el.getAttribute('super-hands');
-        if (sh) {
-          // generate fake collision to be permanently in super-hands queue
-          let evtDetails = {};
-          evtDetails[sh.colliderEventProperty] = this.el;
-          el.emit(sh.colliderEvent, evtDetails);
-          this.colliderState = sh.colliderState;
-          this.el.addState(this.colliderState);
-          collided = true;
-        }
-        if (collided) this.accounceReady();
-      });
-    };
-    this.el.addEventListener('loaded', fakeCollision);
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         let cam = document.createElement('a-camera');
         this.el.appendChild(cam);
       }
     }
+    this.fakeCollisions();
+    // for controllers added later
+    this.fakeCollisionsB = this.fakeCollisions.bind(this);
+    this.el.addEventListener('controllerconnected', this.fakeCollisionsB);
   },
   update: function () {
     if (this.el.getAttribute('stretchable') && !this.data.stretch) {
@@ -50,11 +37,26 @@ AFRAME.registerComponent('locomotor-auto-config', {
   },
   remove: function () {
     this.el.removeState(this.colliderState);
+    this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
   },
-  accounceReady: function () {
+  announceReady: function () {
     if (!this.ready) {
       this.ready = true;
       this.el.emit('locomotor-ready', {});
     }
+  },
+  fakeCollisions: function () {
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands');
+      if (sh) {
+        // generate fake collision to be permanently in super-hands queue
+        let evtDetails = {};
+        evtDetails[sh.colliderEventProperty] = this.el;
+        el.emit(sh.colliderEvent, evtDetails);
+        this.colliderState = sh.colliderState;
+        this.el.addState(this.colliderState);
+      }
+      this.announceReady();
+    });
   }
 });

@@ -495,32 +495,17 @@ AFRAME.registerComponent('locomotor-auto-config', {
   },
   dependencies: ['grabbable', 'stretchable'],
   init: function init() {
-    var _this = this;
-
     this.ready = false;
-    var fakeCollision = function fakeCollision(evt) {
-      var collided = false;
-      _this.el.getChildEntities().forEach(function (el) {
-        var sh = el.getAttribute('super-hands');
-        if (sh) {
-          // generate fake collision to be permanently in super-hands queue
-          var evtDetails = {};
-          evtDetails[sh.colliderEventProperty] = _this.el;
-          el.emit(sh.colliderEvent, evtDetails);
-          _this.colliderState = sh.colliderState;
-          _this.el.addState(_this.colliderState);
-          collided = true;
-        }
-        if (collided) _this.accounceReady();
-      });
-    };
-    this.el.addEventListener('loaded', fakeCollision);
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         var cam = document.createElement('a-camera');
         this.el.appendChild(cam);
       }
     }
+    this.fakeCollisions();
+    // for controllers added later
+    this.fakeCollisionsB = this.fakeCollisions.bind(this);
+    this.el.addEventListener('controllerconnected', this.fakeCollisionsB);
   },
   update: function update() {
     if (this.el.getAttribute('stretchable') && !this.data.stretch) {
@@ -540,12 +525,29 @@ AFRAME.registerComponent('locomotor-auto-config', {
   },
   remove: function remove() {
     this.el.removeState(this.colliderState);
+    this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
   },
-  accounceReady: function accounceReady() {
+  announceReady: function announceReady() {
     if (!this.ready) {
       this.ready = true;
       this.el.emit('locomotor-ready', {});
     }
+  },
+  fakeCollisions: function fakeCollisions() {
+    var _this = this;
+
+    this.el.getChildEntities().forEach(function (el) {
+      var sh = el.getAttribute('super-hands');
+      if (sh) {
+        // generate fake collision to be permanently in super-hands queue
+        var evtDetails = {};
+        evtDetails[sh.colliderEventProperty] = _this.el;
+        el.emit(sh.colliderEvent, evtDetails);
+        _this.colliderState = sh.colliderState;
+        _this.el.addState(_this.colliderState);
+      }
+      _this.announceReady();
+    });
   }
 });
 
