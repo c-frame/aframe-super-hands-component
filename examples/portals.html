@@ -8,6 +8,12 @@
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js" -->
     <script src="./build.js"></script>
+    <script>
+      // cursor seems to ignore trying to set position in the dom
+      window.addEventListener('renderstart', function (e) {
+        document.querySelector('a-cursor').setAttribute('position', '0 0 -0.6');
+      });
+    </script>
   </head>
   <body>
     <a-scene environment="preset: checkerboard; shadow: true">
@@ -15,7 +21,6 @@
         <!-- by default, sphere-collider will collide with all entities.
              If you set specific objects for the collider, be sure to
              include a-link and/or [link] to keep the portals active -->
-        <a-mixin id="controller" super-hands sphere-collider></a-mixin>
         <a-mixin id="portal" scale="0.25 0.25 0.25">
         </a-mixin>
         <a-mixin id="portal-hovered" link="highlighted: true"></a-mixin>
@@ -26,11 +31,11 @@
         <img id="events-preview" src="./assets/events.jpg"></img>
         <img id="hands-preview" src="./assets/hand-controls.jpg"></img>
       </a-assets>
-      <a-entity hand-controls="left" mixin="controller"></a-entity>
-      <a-entity hand-controls="right" mixin="controller"></a-entity>
+      <a-entity progressive-controls="objects: a-link">
+      </a-entity>
       <!-- The first few use the hoverable component and the
            portal-hovered mixin to highlight active portals -->
-      <a-link href="./hands/index.html" title="Basic Hand Controls"
+      <a-link href="./mouse/index.html" title="Laser Controls"
               image="#hands-preview"
               mixin="portal" hoverable
               position="0 1.6 -0.7" rotation="0 0 0">

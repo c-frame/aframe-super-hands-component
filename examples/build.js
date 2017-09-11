@@ -12,7 +12,6 @@ window.playDemoRecording = function (spectate) {
   s.addEventListener('replayingstopped', function (e) {
     var c = document.querySelector('[camera]');
     window.setTimeout(function () {
-      console.log('reset camera');
       c.setAttribute('position', '0 1.6 2');
       c.setAttribute('rotation', '0 0 0');
     });
