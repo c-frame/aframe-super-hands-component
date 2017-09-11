@@ -70,6 +70,8 @@
 	    colliderState: { default: 'collided' },
 	    colliderEvent: { default: 'hit' },
 	    colliderEventProperty: { default: 'el' },
+	    colliderEndEvent: { default: '' },
+	    colliderEndEventProperty: { default: '' },
 	    grabStartButtons: {
 	      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown']
 	    },
@@ -290,23 +292,31 @@
 	    var _this3 = this;
 
 	    var hitEl = evt.detail[this.data.colliderEventProperty];
-	    var hitElIndex;
+	    var processHitEl = function processHitEl(hitEl) {
+	      console.log(hitEl);
+	      var hitElIndex = void 0;
+	      hitElIndex = _this3.hoverEls.indexOf(hitEl);
+	      if (hitElIndex === -1) {
+	        _this3.hoverEls.push(hitEl);
+	        // later loss of collision will remove from hoverEls
+	        hitEl.addEventListener('stateremoved', _this3.unWatch);
+	        _this3.dispatchMouseEvent(hitEl, 'mouseover', _this3.el);
+	        if (_this3.dragging && _this3.gehDragged.size) {
+	          // events on targets and on dragged
+	          _this3.gehDragged.forEach(function (dragged) {
+	            _this3.dispatchMouseEventAll('dragenter', dragged, true, true);
+	          });
+	        }
+	        _this3.hover();
+	      }
+	    };
 	    if (!hitEl) {
 	      return;
 	    }
-	    hitElIndex = this.hoverEls.indexOf(hitEl);
-	    if (hitElIndex === -1) {
-	      this.hoverEls.push(hitEl);
-	      // later loss of collision will remove from hoverEls
-	      hitEl.addEventListener('stateremoved', this.unWatch);
-	      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-	      if (this.dragging && this.gehDragged.size) {
-	        // events on targets and on dragged
-	        this.gehDragged.forEach(function (dragged) {
-	          _this3.dispatchMouseEventAll('dragenter', dragged, true, true);
-	        });
-	      }
-	      this.hover();
+	    if (Array.isArray(hitEl)) {
+	      hitEl.forEach(processHitEl);
+	    } else {
+	      processHitEl(hitEl);
 	    }
 	  },
 	  /* search collided entities for target to hover/dragover */
@@ -344,16 +354,21 @@
 	  /* tied to 'stateremoved' event for hovered entities,
 	     called when controller moves out of collision range of entity */
 	  unHover: function unHover(evt) {
-	    if (evt.detail.state === this.data.colliderState) {
+	    var target = evt.detail[this.data.colliderEndEventProperty];
+	    if (target) {
+	      this._unHover(target);
+	    } else if (evt.detail.state === this.data.colliderState) {
 	      this._unHover(evt.target);
 	    }
 	  },
 	  /* inner unHover steps needed regardless of cause of unHover */
 	  _unHover: function _unHover(el, skipNextHover) {
-	    var evt;
+	    var unHovered = false;
+	    var evt = void 0;
 	    el.removeEventListener('stateremoved', this.unHover);
 	    if (el === this.state.get(this.DRAGOVER_EVENT)) {
 	      this.state.delete(this.DRAGOVER_EVENT);
+	      unHovered = true;
 	      evt = {
 	        hand: this.el,
 	        hovered: el,
@@ -366,15 +381,19 @@
 	    }
 	    if (el === this.state.get(this.HOVER_EVENT)) {
 	      this.state.delete(this.HOVER_EVENT);
+	      unHovered = true;
 	      this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
 	    }
 	    // activate next target, if present
-	    if (!skipNextHover) {
+	    if (unHovered && !skipNextHover) {
 	      this.hover();
 	    }
 	  },
 	  unWatch: function unWatch(evt) {
-	    if (evt.detail.state === this.data.colliderState) {
+	    var target = evt.detail[this.data.colliderEndEventProperty];
+	    if (target) {
+	      this._unWatch(target);
+	    } else if (evt.detail.state === this.data.colliderState) {
 	      this._unWatch(evt.target);
 	    }
 	  },
@@ -396,6 +415,8 @@
 	    var _this5 = this;
 
 	    this.el.addEventListener(this.data.colliderEvent, this.onHit);
+	    this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
+	    this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
 
 	    this.data.grabStartButtons.forEach(function (b) {
 	      _this5.el.addEventListener(b, _this5.onGrabStartButton);
@@ -425,6 +446,8 @@
 	      return;
 	    }
 	    this.el.removeEventListener(data.colliderEvent, this.onHit);
+	    this.el.removeEventListener(data.colliderEndEvent, this.unHover);
+	    this.el.removeEventListener(data.colliderEndEvent, this.unWatch);
 
 	    data.grabStartButtons.forEach(function (b) {
 	      _this6.el.removeEventListener(b, _this6.onGrabStartButton);
@@ -728,102 +751,83 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	'use strict';
-
 	// base code used by grabbable for physics interactions
 	module.exports = {
 	  schema: {
-	    usePhysics: { default: 'ifavailable' }
+	    usePhysics: {default: 'ifavailable'}
 	  },
-	  physicsInit: function physicsInit() {
+	  physicsInit: function () {
 	    this.constraints = new Map();
 	  },
-	  physicsUpdate: function physicsUpdate() {
+	  physicsUpdate: function () {
 	    if (this.data.usePhysics === 'never' && this.constraints.size) {
 	      this.physicsClear();
 	    }
 	  },
-	  physicsRemove: function physicsRemove() {
+	  physicsRemove: function () {
 	    this.physicsClear();
 	  },
-	  physicsStart: function physicsStart(evt) {
+	  physicsStart: function (evt) {
 	    // initiate physics constraint if available and not already existing
-	    if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-	      var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
+	    if (this.data.usePhysics !== 'never' && this.el.body &&
+	        evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+	      let newCon = new window.CANNON.LockConstraint(
+	        this.el.body, evt.detail.hand.body
+	      );
 	      this.el.body.world.addConstraint(newCon);
 	      this.constraints.set(evt.detail.hand, newCon);
 	      return true;
 	    }
 	    return false;
 	  },
-	  physicsEnd: function physicsEnd(evt) {
-	    var constraint = this.constraints.get(evt.detail.hand);
+	  physicsEnd: function (evt) {
+	    let constraint = this.constraints.get(evt.detail.hand);
 	    if (constraint) {
 	      this.el.body.world.removeConstraint(constraint);
 	      this.constraints.delete(evt.detail.hand);
 	    }
 	  },
-	  physicsClear: function physicsClear() {
+	  physicsClear: function () {
 	    if (this.el.body) {
-	      var _iteratorNormalCompletion = true;
-	      var _didIteratorError = false;
-	      var _iteratorError = undefined;
-
-	      try {
-	        for (var _iterator = this.constraints.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	          var c = _step.value;
-
-	          this.el.body.world.removeConstraint(c);
-	        }
-	      } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion && _iterator.return) {
-	            _iterator.return();
-	          }
-	        } finally {
-	          if (_didIteratorError) {
-	            throw _iteratorError;
-	          }
-	        }
+	      for (let c of this.constraints.values()) {
+	        this.el.body.world.removeConstraint(c);
 	      }
 	    }
 	    this.constraints.clear();
 	  },
-	  physicsIsConstrained: function physicsIsConstrained(el) {
+	  physicsIsConstrained: function (el) {
 	    return this.constraints.has(el);
 	  },
-	  physicsIsGrabbing: function physicsIsGrabbing() {
+	  physicsIsGrabbing () {
 	    return this.constraints.size > 0;
 	  }
 	};
+
 
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
 
-	'use strict';
-
 	// common code used in customizing reaction components by button
-	module.exports = function () {
-	  function buttonIsValid(evt, buttonList) {
-	    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+	module.exports = (function () {
+	  function buttonIsValid (evt, buttonList) {
+	    return buttonList.length === 0 ||
+	        buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
 	  }
 	  return {
 	    schema: {
-	      startButtons: { default: [] },
-	      endButtons: { default: [] }
+	      startButtons: {default: []},
+	      endButtons: {default: []}
 	    },
-	    startButtonOk: function startButtonOk(evt) {
+	    startButtonOk: function (evt) {
 	      return buttonIsValid(evt, this.data['startButtons']);
 	    },
-	    endButtonOk: function endButtonOk(evt) {
+	    endButtonOk: function (evt) {
 	      return buttonIsValid(evt, this.data['endButtons']);
 	    }
 	  };
-	}();
+	})();
+
 
 /***/ },
 /* 6 */

@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-const physicsCore = require('./prototypes/physics-grab-proto.js');
-const buttonsCore = require('./prototypes/buttons-proto.js');
+const physicsCore = require('physics-grab-proto.js');
+const buttonsCore = require('buttons-proto.js');
 AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN},
