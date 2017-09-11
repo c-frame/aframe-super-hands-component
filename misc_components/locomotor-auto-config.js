@@ -7,31 +7,29 @@ AFRAME.registerComponent('locomotor-auto-config', {
   },
   dependencies: ['grabbable', 'stretchable'],
   init: function () {
-    let ready = true;
-    // generate fake collision to be permanently in super-hands queue
-    this.el.childNodes.forEach(el => {
-      let sh = el.getAttribute && el.getAttribute('super-hands');
-      if (sh) {
-        let evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = this.el;
-        el.emit(sh.colliderEvent, evtDetails);
-        this.colliderState = sh.colliderState;
-        this.el.addState(this.colliderState);
-      }
-    });
-    if (this.data.camera) {
-      // this step has to be done asnychronously
-      ready = false;
-      this.el.addEventListener('loaded', e => {
-        if (!document.querySelector('a-camera, [camera]')) {
-          let cam = document.createElement('a-camera');
-          this.el.appendChild(cam);
+    this.ready = false;
+    const fakeCollision = evt => {
+      let collided = false;
+      this.el.getChildEntities().forEach(el => {
+        let sh = el.getAttribute('super-hands');
+        if (sh) {
+          // generate fake collision to be permanently in super-hands queue
+          let evtDetails = {};
+          evtDetails[sh.colliderEventProperty] = this.el;
+          el.emit(sh.colliderEvent, evtDetails);
+          this.colliderState = sh.colliderState;
+          this.el.addState(this.colliderState);
+          collided = true;
         }
-        this.ready();
+        if (collided) this.accounceReady();
       });
-    }
-    if (ready) {
-      this.ready();
+    };
+    this.el.addEventListener('loaded', fakeCollision);
+    if (this.data.camera) {
+      if (!document.querySelector('a-camera, [camera]')) {
+        let cam = document.createElement('a-camera');
+        this.el.appendChild(cam);
+      }
     }
   },
   update: function () {
@@ -53,7 +51,10 @@ AFRAME.registerComponent('locomotor-auto-config', {
   remove: function () {
     this.el.removeState(this.colliderState);
   },
-  ready: function () {
-    this.el.emit('locomotor-ready', {});
+  accounceReady: function () {
+    if (!this.ready) {
+      this.ready = true;
+      this.el.emit('locomotor-ready', {});
+    }
   }
 });

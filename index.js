@@ -11,6 +11,7 @@ require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
 require('./misc_components/locomotor-auto-config.js');
+require('./misc_components/progressive-controls.js');
 require('./primitives/a-locomotor.js');
 
 /**

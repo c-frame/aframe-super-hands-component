@@ -8,7 +8,7 @@ require('aframe-motion-capture-components');
 window.playDemoRecording = function (spectate) {
   var l = document.querySelector('a-link, a-entity[link]');
   var s = document.querySelector('a-scene');
-  l.setAttribute('visible', 'false');
+  l && l.setAttribute('visible', 'false');
   s.addEventListener('replayingstopped', function (e) {
     var c = document.querySelector('[camera]');
     window.setTimeout(function () {
@@ -24,7 +24,7 @@ window.playDemoRecording = function (spectate) {
   });
 };
 
-},{"../index.js":2,"aframe-motion-capture-components":9}],2:[function(require,module,exports){
+},{"../index.js":2,"aframe-motion-capture-components":10}],2:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -40,6 +40,7 @@ require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
 require('./misc_components/locomotor-auto-config.js');
+require('./misc_components/progressive-controls.js');
 require('./primitives/a-locomotor.js');
 
 /**
@@ -483,7 +484,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":3,"./primitives/a-locomotor.js":11,"./reaction_components/clickable.js":12,"./reaction_components/drag-droppable.js":13,"./reaction_components/grabbable.js":14,"./reaction_components/hoverable.js":15,"./reaction_components/stretchable.js":18,"./systems/super-hands-system.js":19}],3:[function(require,module,exports){
+},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":12,"./reaction_components/clickable.js":13,"./reaction_components/drag-droppable.js":14,"./reaction_components/grabbable.js":15,"./reaction_components/hoverable.js":16,"./reaction_components/stretchable.js":19,"./systems/super-hands-system.js":20}],3:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -497,31 +498,29 @@ AFRAME.registerComponent('locomotor-auto-config', {
   init: function init() {
     var _this = this;
 
-    var ready = true;
-    // generate fake collision to be permanently in super-hands queue
-    this.el.childNodes.forEach(function (el) {
-      var sh = el.getAttribute && el.getAttribute('super-hands');
-      if (sh) {
-        var evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = _this.el;
-        el.emit(sh.colliderEvent, evtDetails);
-        _this.colliderState = sh.colliderState;
-        _this.el.addState(_this.colliderState);
-      }
-    });
-    if (this.data.camera) {
-      // this step has to be done asnychronously
-      ready = false;
-      this.el.addEventListener('loaded', function (e) {
-        if (!document.querySelector('a-camera, [camera]')) {
-          var cam = document.createElement('a-camera');
-          _this.el.appendChild(cam);
+    this.ready = false;
+    var fakeCollision = function fakeCollision(evt) {
+      var collided = false;
+      _this.el.getChildEntities().forEach(function (el) {
+        var sh = el.getAttribute('super-hands');
+        if (sh) {
+          // generate fake collision to be permanently in super-hands queue
+          var evtDetails = {};
+          evtDetails[sh.colliderEventProperty] = _this.el;
+          el.emit(sh.colliderEvent, evtDetails);
+          _this.colliderState = sh.colliderState;
+          _this.el.addState(_this.colliderState);
+          collided = true;
         }
-        _this.ready();
+        if (collided) _this.accounceReady();
       });
-    }
-    if (ready) {
-      this.ready();
+    };
+    this.el.addEventListener('loaded', fakeCollision);
+    if (this.data.camera) {
+      if (!document.querySelector('a-camera, [camera]')) {
+        var cam = document.createElement('a-camera');
+        this.el.appendChild(cam);
+      }
     }
   },
   update: function update() {
@@ -543,12 +542,121 @@ AFRAME.registerComponent('locomotor-auto-config', {
   remove: function remove() {
     this.el.removeState(this.colliderState);
   },
-  ready: function ready() {
-    this.el.emit('locomotor-ready', {});
+  accounceReady: function accounceReady() {
+    if (!this.ready) {
+      this.ready = true;
+      this.el.emit('locomotor-ready', {});
+    }
   }
 });
 
 },{}],4:[function(require,module,exports){
+'use strict';
+
+/* global AFRAME */
+AFRAME.registerComponent('progressive-controls', {
+  schema: {
+    maxLevel: { default: 'touch' },
+    objects: { default: '' },
+    physicsBody: { default: 'shape: sphere; sphereRadius: 0.02' },
+    touchCollider: { default: 'sphere-collider' }
+  },
+  init: function init() {
+    var _this = this;
+
+    this.levels = ['gaze', 'point', 'touch'];
+    this.currentLevel = 0;
+    this.superHandsCursorConfig = 'colliderEvent: mouseenter;' + 'colliderEventProperty: intersectedEl;' + 'colliderState: cursor-hovered;' + 'grabStartButtons: mousedown;' + 'grabEndButtons: mouseup;' + 'dragDropStartButtons: mousedown;' + 'dragDropEndButtons: mouseup;';
+    this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
+    ['left', 'right'].forEach(function (hand) {
+      // find controller by left-controller/right-controller class or create one
+      _this[hand] = _this.el.querySelector('.' + hand + '-controller') || _this.el.appendChild(document.createElement('a-entity'));
+      // add class on newly created entities
+      _this[hand].classList && _this[hand].classList.add(hand + '-controller');
+      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(function (ctrlr) {
+        return _this[hand].setAttribute(ctrlr, 'hand: ' + hand);
+      });
+    });
+    this.el.addEventListener('controllerconnected', function (e) {
+      return _this.detectLevel(e);
+    });
+  },
+  update: function update(oldData) {
+    var level = this.currentLevel;
+    // force setLevel refresh with new params
+    this.currentLevel = -1;
+    this.setLevel(level);
+  },
+  setLevel: function setLevel(newLevel) {
+    var _this2 = this;
+
+    var maxLevel = this.levels.indexOf(this.data.maxLevel);
+    var physicsAvail = !!this.el.sceneEl.getAttribute('physics');
+    var hands = [this.right, this.left];
+    newLevel = newLevel > maxLevel ? maxLevel : newLevel;
+    if (newLevel === this.currentLevel) {
+      return;
+    }
+    if (newLevel !== 0 && this.cursor) {
+      this.camera.removeChild(this.cursor);
+      this.cursor = null;
+    }
+
+    (function () {
+      switch (newLevel) {
+        case 0:
+          _this2.cursor = _this2.camera.querySelector('a-cursor,[cursor]') || _this2.camera.appendChild(document.createElement('a-cursor'));
+          _this2.camera.setAttribute('super-hands', _this2.superHandsCursorConfig);
+          if (physicsAvail) {
+            _this2.camera.setAttribute('static-body', _this2.data.physicsBody);
+          }
+          _this2.cursor.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
+          break;
+        case 1:
+          // same setup as laser-controls, but without the dependence on
+          // controllerconnected event happening after init
+          var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[_this2.controllerName] || {};
+          var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: _this2.data.objects, showLine: true }, laserConfig.raycaster || {}));
+          var cursorConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ fuse: false }, laserConfig.cursor || {}));
+          hands.forEach(function (h) {
+            h.setAttribute('super-hands', _this2.superHandsCursorConfig);
+            h.setAttribute('raycaster', rayConfig);
+            h.setAttribute('cursor', cursorConfig);
+            if (physicsAvail) {
+              h.setAttribute('static-body', _this2.data.physicsBody);
+            }
+          });
+          break;
+        case 2:
+          [_this2.right, _this2.left].forEach(function (h) {
+            h.setAttribute('super-hands', {}, true);
+            h.setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
+            physicsAvail && h.setAttribute('static-body', _this2.data.physicsBody);
+          });
+          break;
+      }
+    })();
+
+    this.currentLevel = newLevel;
+    this.el.emit('controller-progressed', {
+      level: this.levels[this.currentLevel]
+    });
+  },
+  detectLevel: function detectLevel(evt) {
+    var DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
+    var DOF3 = ['gearvr-controls', 'daydream-controls'];
+    this.controllerName = evt.detail.name;
+    if (DOF6.indexOf(evt.detail.name) !== -1) {
+      this.setLevel(this.levels.indexOf('touch'));
+    } else if (DOF3.indexOf(evt.detail.name) !== -1) {
+      this.setLevel(this.levels.indexOf('point'));
+    } else {
+      this.setLevel(this.levels.indexOf('gaze'));
+    }
+  }
+});
+
+},{}],5:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:info');
 var warn = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:warn');
@@ -831,7 +939,7 @@ AFRAME.registerComponent('avatar-recorder', {
   }
 });
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var error = AFRAME.utils.debug('aframe-motion-capture:avatar-replayer:error');
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-replayer:info');
@@ -1076,7 +1184,7 @@ AFRAME.registerComponent('avatar-replayer', {
   }
 });
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* global AFRAME, THREE */
 
 var EVENTS = {
@@ -1297,7 +1405,7 @@ AFRAME.registerComponent('motion-capture-recorder', {
   }
 });
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* global THREE, AFRAME  */
 AFRAME.registerComponent('motion-capture-replayer', {
   schema: {
@@ -1487,7 +1595,7 @@ function applyPose (el, pose) {
   el.setAttribute('rotation', pose.rotation);
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* global THREE AFRAME  */
 AFRAME.registerComponent('stroke', {
   schema: {
@@ -1668,7 +1776,7 @@ AFRAME.registerComponent('stroke', {
   }
 });
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -1683,7 +1791,7 @@ require('./components/stroke.js');
 // Systems
 require('./systems/motion-capture-replayer.js');
 
-},{"./components/avatar-recorder.js":4,"./components/avatar-replayer.js":5,"./components/motion-capture-recorder.js":6,"./components/motion-capture-replayer.js":7,"./components/stroke.js":8,"./systems/motion-capture-replayer.js":10}],10:[function(require,module,exports){
+},{"./components/avatar-recorder.js":5,"./components/avatar-replayer.js":6,"./components/motion-capture-recorder.js":7,"./components/motion-capture-replayer.js":8,"./components/stroke.js":9,"./systems/motion-capture-replayer.js":11}],11:[function(require,module,exports){
 AFRAME.registerSystem('motion-capture-replayer', {
   init: function () {
     var sceneEl = this.sceneEl;
@@ -1717,7 +1825,7 @@ AFRAME.registerSystem('motion-capture-replayer', {
     }
   }
 });
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1746,7 +1854,7 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
   }
 }));
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1799,7 +1907,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":16}],13:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":17}],14:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1872,7 +1980,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":16}],14:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":17}],15:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2013,7 +2121,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":16,"./prototypes/physics-grab-proto.js":17}],15:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":17,"./prototypes/physics-grab-proto.js":18}],16:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2055,7 +2163,7 @@ AFRAME.registerComponent('hoverable', {
   }
 });
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 // common code used in customizing reaction components by button
@@ -2077,7 +2185,7 @@ module.exports = function () {
   };
 }();
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -2150,7 +2258,7 @@ module.exports = {
   }
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2253,7 +2361,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":16}],19:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":17}],20:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

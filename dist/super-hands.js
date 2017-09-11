@@ -60,6 +60,7 @@
 	__webpack_require__(8);
 	__webpack_require__(9);
 	__webpack_require__(10);
+	__webpack_require__(11);
 
 	/**
 	 * Super Hands component for A-Frame.
@@ -1079,31 +1080,29 @@
 	  init: function init() {
 	    var _this = this;
 
-	    var ready = true;
-	    // generate fake collision to be permanently in super-hands queue
-	    this.el.childNodes.forEach(function (el) {
-	      var sh = el.getAttribute && el.getAttribute('super-hands');
-	      if (sh) {
-	        var evtDetails = {};
-	        evtDetails[sh.colliderEventProperty] = _this.el;
-	        el.emit(sh.colliderEvent, evtDetails);
-	        _this.colliderState = sh.colliderState;
-	        _this.el.addState(_this.colliderState);
-	      }
-	    });
-	    if (this.data.camera) {
-	      // this step has to be done asnychronously
-	      ready = false;
-	      this.el.addEventListener('loaded', function (e) {
-	        if (!document.querySelector('a-camera, [camera]')) {
-	          var cam = document.createElement('a-camera');
-	          _this.el.appendChild(cam);
+	    this.ready = false;
+	    var fakeCollision = function fakeCollision(evt) {
+	      var collided = false;
+	      _this.el.getChildEntities().forEach(function (el) {
+	        var sh = el.getAttribute('super-hands');
+	        if (sh) {
+	          // generate fake collision to be permanently in super-hands queue
+	          var evtDetails = {};
+	          evtDetails[sh.colliderEventProperty] = _this.el;
+	          el.emit(sh.colliderEvent, evtDetails);
+	          _this.colliderState = sh.colliderState;
+	          _this.el.addState(_this.colliderState);
+	          collided = true;
 	        }
-	        _this.ready();
+	        if (collided) _this.accounceReady();
 	      });
-	    }
-	    if (ready) {
-	      this.ready();
+	    };
+	    this.el.addEventListener('loaded', fakeCollision);
+	    if (this.data.camera) {
+	      if (!document.querySelector('a-camera, [camera]')) {
+	        var cam = document.createElement('a-camera');
+	        this.el.appendChild(cam);
+	      }
 	    }
 	  },
 	  update: function update() {
@@ -1125,13 +1124,125 @@
 	  remove: function remove() {
 	    this.el.removeState(this.colliderState);
 	  },
-	  ready: function ready() {
-	    this.el.emit('locomotor-ready', {});
+	  accounceReady: function accounceReady() {
+	    if (!this.ready) {
+	      this.ready = true;
+	      this.el.emit('locomotor-ready', {});
+	    }
 	  }
 	});
 
 /***/ },
 /* 10 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/* global AFRAME */
+	AFRAME.registerComponent('progressive-controls', {
+	  schema: {
+	    maxLevel: { default: 'touch' },
+	    objects: { default: '' },
+	    physicsBody: { default: 'shape: sphere; sphereRadius: 0.02' },
+	    touchCollider: { default: 'sphere-collider' }
+	  },
+	  init: function init() {
+	    var _this = this;
+
+	    this.levels = ['gaze', 'point', 'touch'];
+	    this.currentLevel = 0;
+	    this.superHandsCursorConfig = 'colliderEvent: mouseenter;' + 'colliderEventProperty: intersectedEl;' + 'colliderState: cursor-hovered;' + 'grabStartButtons: mousedown;' + 'grabEndButtons: mouseup;' + 'dragDropStartButtons: mousedown;' + 'dragDropEndButtons: mouseup;';
+	    this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
+	    ['left', 'right'].forEach(function (hand) {
+	      // find controller by left-controller/right-controller class or create one
+	      _this[hand] = _this.el.querySelector('.' + hand + '-controller') || _this.el.appendChild(document.createElement('a-entity'));
+	      // add class on newly created entities
+	      _this[hand].classList && _this[hand].classList.add(hand + '-controller');
+	      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(function (ctrlr) {
+	        return _this[hand].setAttribute(ctrlr, 'hand: ' + hand);
+	      });
+	    });
+	    this.el.addEventListener('controllerconnected', function (e) {
+	      return _this.detectLevel(e);
+	    });
+	  },
+	  update: function update(oldData) {
+	    var level = this.currentLevel;
+	    // force setLevel refresh with new params
+	    this.currentLevel = -1;
+	    this.setLevel(level);
+	  },
+	  setLevel: function setLevel(newLevel) {
+	    var _this2 = this;
+
+	    var maxLevel = this.levels.indexOf(this.data.maxLevel);
+	    var physicsAvail = !!this.el.sceneEl.getAttribute('physics');
+	    var hands = [this.right, this.left];
+	    newLevel = newLevel > maxLevel ? maxLevel : newLevel;
+	    if (newLevel === this.currentLevel) {
+	      return;
+	    }
+	    if (newLevel !== 0 && this.cursor) {
+	      this.camera.removeChild(this.cursor);
+	      this.cursor = null;
+	    }
+
+	    (function () {
+	      switch (newLevel) {
+	        case 0:
+	          _this2.cursor = _this2.camera.querySelector('a-cursor,[cursor]') || _this2.camera.appendChild(document.createElement('a-cursor'));
+	          _this2.camera.setAttribute('super-hands', _this2.superHandsCursorConfig);
+	          if (physicsAvail) {
+	            _this2.camera.setAttribute('static-body', _this2.data.physicsBody);
+	          }
+	          _this2.cursor.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
+	          break;
+	        case 1:
+	          // same setup as laser-controls, but without the dependence on
+	          // controllerconnected event happening after init
+	          var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[_this2.controllerName] || {};
+	          var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: _this2.data.objects, showLine: true }, laserConfig.raycaster || {}));
+	          var cursorConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ fuse: false }, laserConfig.cursor || {}));
+	          hands.forEach(function (h) {
+	            h.setAttribute('super-hands', _this2.superHandsCursorConfig);
+	            h.setAttribute('raycaster', rayConfig);
+	            h.setAttribute('cursor', cursorConfig);
+	            if (physicsAvail) {
+	              h.setAttribute('static-body', _this2.data.physicsBody);
+	            }
+	          });
+	          break;
+	        case 2:
+	          [_this2.right, _this2.left].forEach(function (h) {
+	            h.setAttribute('super-hands', {}, true);
+	            h.setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
+	            physicsAvail && h.setAttribute('static-body', _this2.data.physicsBody);
+	          });
+	          break;
+	      }
+	    })();
+
+	    this.currentLevel = newLevel;
+	    this.el.emit('controller-progressed', {
+	      level: this.levels[this.currentLevel]
+	    });
+	  },
+	  detectLevel: function detectLevel(evt) {
+	    var DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
+	    var DOF3 = ['gearvr-controls', 'daydream-controls'];
+	    this.controllerName = evt.detail.name;
+	    if (DOF6.indexOf(evt.detail.name) !== -1) {
+	      this.setLevel(this.levels.indexOf('touch'));
+	    } else if (DOF3.indexOf(evt.detail.name) !== -1) {
+	      this.setLevel(this.levels.indexOf('point'));
+	    } else {
+	      this.setLevel(this.levels.indexOf('gaze'));
+	    }
+	  }
+	});
+
+/***/ },
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';
