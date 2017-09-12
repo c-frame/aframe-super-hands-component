@@ -14,13 +14,13 @@
       }
       function paintBall (evt) {
         var col = evt.target.getAttribute('color');
-        evt.relatedTarget.children[0]
+        evt.relatedTarget.querySelector('a-sphere')
             .setAttribute('color', col);
-        evt.relatedTarget.children[0]
+        evt.relatedTarget.querySelector('a-sphere')
             .setAttribute('visible', true);
       }
       function unPaintBall (evt) {
-        evt.relatedTarget.children[0]
+        evt.relatedTarget.querySelector('a-sphere')
             .setAttribute('visible', false);
       }
     </script>
@@ -36,7 +36,7 @@
       </a-assets>
       <a-entity progressive-controls="objects: a-box, a-torus-knot, a-link">
         <a-camera>
-          <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
+          <a-sphere radius="0.02" position="-0 0 -0.5" visible="false"
                     shadow>
           </a-sphere>
         </a-camera>
