@@ -128,7 +128,7 @@ v2.0.0
 * Button mapping for reaction components: each reaction component now has
   `startButtons` and `endButtons` schema properties to specify acceptable
   buttons. This allows different entities to react to different buttons.
-  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion)
+  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)
   `a-locomotor`'s `grabbable` can be set to respond to different
   buttons than other `grabbable` entities so that
   grabbing entities and locomotion are separate gestures for the user.
@@ -181,9 +181,10 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
+| colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| colliderEventProperty | Name of property in event `details` object which contains the collided entity | colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
+| colliderEventProperty | Name of property in event `details` object which contains the collided entity | `'el'` |
+| colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
 | colliderEndEventProperty | Name of property in event `details` object which contains the un-collided entity | `''` |
 | grabStartButtons | Array of button event types that can initiate grab | Button press, touch start, and mouse down events |
 | grabEndButtons | Array of button event types that can terminate grab | Button release, touch end, and mouse up events |

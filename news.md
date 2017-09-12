@@ -15,7 +15,7 @@ v2.0.0
 * Button mapping for reaction components: each reaction component now has
   `startButtons` and `endButtons` schema properties to specify acceptable
   buttons. This allows different entities to react to different buttons.
-  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion)
+  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)
   `a-locomotor`'s `grabbable` can be set to respond to different
   buttons than other `grabbable` entities so that
   grabbing entities and locomotion are separate gestures for the user.
