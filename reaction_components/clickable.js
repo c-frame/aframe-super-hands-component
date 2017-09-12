@@ -1,5 +1,6 @@
 /* global AFRAME */
-AFRAME.registerComponent('clickable', {
+const buttonCore = require('buttons-proto.js');
+AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: { type: 'string' }
   },
@@ -19,6 +20,7 @@ AFRAME.registerComponent('clickable', {
     this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
   },
   start: function (evt) {
+    if (!this.startButtonOk(evt)) { return; }
     this.el.addState(this.CLICKED_STATE);
     if (this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
@@ -26,12 +28,14 @@ AFRAME.registerComponent('clickable', {
     }
   },
   end: function (evt) {
-    var handIndex = this.clickers.indexOf(evt.detail.hand);
+    const handIndex = this.clickers.indexOf(evt.detail.hand);
+    if (!this.endButtonOk(evt)) { return; }
     if (handIndex !== -1) {
       this.clickers.splice(handIndex, 1);
     }
     if (this.clickers.length < 1) {
       this.el.removeState(this.CLICKED_STATE);
     }
+    if (evt.preventDefault) { evt.preventDefault(); }
   }
-});
+}));

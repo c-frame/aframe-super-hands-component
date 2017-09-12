@@ -221,7 +221,7 @@ suite('Locomotion', function () {
     this.scene.addEventListener('replayingstopped', e => {
       let z = document.querySelector('[camera]')
         .object3DMap.camera.getWorldPosition().z;
-      assert.isBelow(z, 0.25, 'camera ending z position');
+      assert.isBelow(z, 0.6, 'camera ending z position');
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });
@@ -247,23 +247,19 @@ suite('Locomotion', function () {
   });
   test('locomotor does not interfere with normal interactions', function (done) {
     const boxGreenTop = document.getElementById('greenHigh');
-    const boxGreenBottom = document.getElementById('greenLow');
     const redBox = document.getElementById('redHigh');
     const startPos = redBox.getAttribute('position');
     const startScale = redBox.getAttribute('scale');
     this.scene.setAttribute('avatar-replayer', {
-      src: 'base/recordings/handsRecording.json'
+      src: 'base/recordings/loco-hands2.json'
     });
-    assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'box');
-    assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'box');
     this.scene.addEventListener('replayingstopped', e => {
       var endScale = redBox.getAttribute('scale');
       assert.notDeepEqual(redBox.getAttribute('position'), startPos, 'moved');
       assert.isTrue(endScale.x > startScale.x, 'grew-x');
       assert.isTrue(endScale.y > startScale.y, 'grew-y');
       assert.isTrue(endScale.z > startScale.z, 'grew-z');
-      assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'sphere');
-      assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'sphere');
+      assert.isAbove(boxGreenTop.getAttribute('position').z, -1);
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });
@@ -292,7 +288,7 @@ suite('camera userHeight', function () {
   });
 });
 
-suite('laser-controls pointable', function () {
+suite('laser-controls grabbable', function () {
   this.timeout(0); // disable Mocha timeout within tests
   setup(function (done) {
     /* inject the scene html into the testing docoument */

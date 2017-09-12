@@ -1,5 +1,8 @@
 /* global AFRAME */
-AFRAME.registerComponent('drag-droppable', {
+const inherit = AFRAME.utils.extendDeep;
+const buttonCore = require('buttons-proto.js');
+
+AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function () {
     this.HOVERED_STATE = 'dragover';
     this.DRAGGED_STATE = 'dragged';
@@ -33,6 +36,7 @@ AFRAME.registerComponent('drag-droppable', {
     if (evt.preventDefault) { evt.preventDefault(); }
   },
   dragStart: function (evt) {
+    if (!this.startButtonOk(evt)) { return; }
     this.el.addState(this.DRAGGED_STATE);
     if (evt.preventDefault) { evt.preventDefault(); }
   },
@@ -40,9 +44,12 @@ AFRAME.registerComponent('drag-droppable', {
     this.el.removeState(this.HOVERED_STATE);
   },
   dragEnd: function (evt) {
+    if (!this.endButtonOk(evt)) { return; }
     this.el.removeState(this.DRAGGED_STATE);
+    if (evt.preventDefault) { evt.preventDefault(); }
   },
   dragDrop: function (evt) {
+    if (!this.endButtonOk(evt)) { return; }
     if (evt.preventDefault) { evt.preventDefault(); }
   }
-});
+}));

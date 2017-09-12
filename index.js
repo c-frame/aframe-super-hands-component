@@ -7,11 +7,11 @@ if (typeof AFRAME === 'undefined') {
 require('./systems/super-hands-system.js');
 require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
-require('./reaction_components/pointable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
 require('./reaction_components/clickable.js');
-require('./reaction_components/locomotor-auto-config.js');
+require('./misc_components/locomotor-auto-config.js');
+require('./misc_components/progressive-controls.js');
 require('./primitives/a-locomotor.js');
 
 /**
@@ -22,35 +22,37 @@ AFRAME.registerComponent('super-hands', {
     colliderState: {default: 'collided'},
     colliderEvent: {default: 'hit'},
     colliderEventProperty: {default: 'el'},
+    colliderEndEvent: {default: ''},
+    colliderEndEventProperty: {default: ''},
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
-        'thumbstickdown']
+        'thumbstickdown', 'mousedown', 'touchstart']
     },
     grabEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
-        'thumbstickup']
+        'thumbstickup', 'mouseup', 'touchend']
     },
     stretchStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
-        'thumbstickdown']
+        'thumbstickdown', 'mousedown', 'touchstart']
     },
     stretchEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
-        'thumbstickup']
+        'thumbstickup', 'mouseup', 'touchend']
     },
     dragDropStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
-        'thumbstickdown']
+        'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
-        'thumbstickup']
+        'thumbstickup', 'mouseup', 'touchend']
     }
   },
 
@@ -86,8 +88,6 @@ AFRAME.registerComponent('super-hands', {
     // state tracking - reaction components
     this.hoverEls = [];
     this.state = new Map();
-    this.grabbing = false;
-    this.stretching = false;
     this.dragging = false;
 
     this.unHover = this.unHover.bind(this);
@@ -137,54 +137,91 @@ AFRAME.registerComponent('super-hands', {
 
   },
   onGrabStartButton: function (evt) {
-    this.grabbing = true;
+    let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
-    this.updateGrabbed();
+    if (!carried) {
+      carried = this.findTarget(this.GRAB_EVENT, {
+        hand: this.el,
+        buttonEvent: evt
+      });
+      if (carried) {
+        this.state.set(this.GRAB_EVENT, carried);
+        this._unHover(carried);
+      }
+    }
   },
   onGrabEndButton: function (evt) {
     const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
+    const grabbed = this.state.get(this.GRAB_EVENT);
+    const endEvt = {hand: this.el, buttonEvent: evt};
     this.dispatchMouseEventAll('mouseup', this.el, true);
     for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
-    if (this.state.has(this.GRAB_EVENT)) {
-      this.state.get(this.GRAB_EVENT)
-        .emit(this.UNGRAB_EVENT, { hand: this.el });
+    // check if grabbed entity accepts ungrab event
+    if (grabbed && !this.emitCancelable(grabbed, this.UNGRAB_EVENT, endEvt)) {
       /* push to top of stack so a drop followed by re-grab gets the same
          target */
       this.promoteHoveredEl(this.state.get(this.GRAB_EVENT));
       this.state.delete(this.GRAB_EVENT);
       this.hover();
     }
-    this.grabbing = false;
   },
   onStretchStartButton: function (evt) {
-    this.stretching = true;
-    this.updateStretched();
+    let stretched = this.state.get(this.STRETCH_EVENT);
+    if (!stretched) {
+      stretched = this.findTarget(this.STRETCH_EVENT, {
+        hand: this.el,
+        buttonEvent: evt
+      });
+      if (stretched) {
+        this.state.set(this.STRETCH_EVENT, stretched);
+        this._unHover(stretched);
+      }
+    }
   },
   onStretchEndButton: function (evt) {
-    var stretched = this.state.get(this.STRETCH_EVENT);
-    if (stretched) {
-      stretched.emit(this.UNSTRETCH_EVENT, { hand: this.el });
+    const stretched = this.state.get(this.STRETCH_EVENT);
+    const endEvt = {hand: this.el, buttonEvent: evt};
+    // check if end event accepted
+    if (stretched &&
+        !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
     }
-    this.stretching = false;
   },
   onDragDropStartButton: function (evt) {
+    let dragged = this.state.get(this.DRAG_EVENT);
     this.dragging = true;
     if (this.hoverEls.length) {
       this.gehDragged = new Set(this.hoverEls);
       this.dispatchMouseEventAll('dragstart', this.el);
     }
-    this.updateDragged();
+    if (!dragged) {
+      /* prefer carried so that a drag started after a grab will work
+       with carried element rather than a currently intersected drop target.
+       fall back to queue in case a drag is initiated independent
+       of a grab */
+      if (this.state.get(this.GRAB_EVENT) &&
+          !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT,
+              {hand: this.el, buttonEvent: evt})) {
+        dragged = this.state.get(this.GRAB_EVENT);
+      } else {
+        dragged = this.findTarget(this.DRAG_EVENT, {
+          hand: this.el,
+          buttonEvent: evt
+        });
+      }
+      if (dragged) {
+        this.state.set(this.DRAG_EVENT, dragged);
+        this._unHover(dragged);
+      }
+    }
   },
   onDragDropEndButton: function (evt) {
-    var ddevt;
-    var dropTarget;
     const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
     this.gehDragged.forEach(carried => {
@@ -195,78 +232,51 @@ AFRAME.registerComponent('super-hands', {
     });
     this.gehDragged.clear();
     if (carried) {
-      ddevt = { hand: this.el, dropped: carried, on: null };
-      dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddevt, true);
+      const ddEvt = {
+        hand: this.el,
+        dropped: carried,
+        on: null,
+        buttonEvent: evt
+      };
+      const endEvt = {hand: this.el, buttonEvent: evt};
+      const dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
       if (dropTarget) {
-        ddevt.on = dropTarget;
-        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddevt);
+        ddEvt.on = dropTarget;
+        this.emitCancelable(carried, this.DRAGDROP_EVENT, ddEvt);
         this._unHover(dropTarget);
       }
-      carried.emit(this.UNDRAG_EVENT, { hand: this.el });
-      this.promoteHoveredEl(carried);
-      this.state.delete(this.DRAG_EVENT);
-      this.hover();
+      // check if end event accepted
+      if (!this.emitCancelable(carried, this.UNDRAG_EVENT, endEvt)) {
+        this.promoteHoveredEl(carried);
+        this.state.delete(this.DRAG_EVENT);
+        this.hover();
+      }
     }
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
-    var hitElIndex;
+    var processHitEl = (hitEl) => {
+      let hitElIndex;
+      hitElIndex = this.hoverEls.indexOf(hitEl);
+      if (hitElIndex === -1) {
+        this.hoverEls.push(hitEl);
+        // later loss of collision will remove from hoverEls
+        hitEl.addEventListener('stateremoved', this.unWatch);
+        this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
+        if (this.dragging && this.gehDragged.size) {
+          // events on targets and on dragged
+          this.gehDragged.forEach(dragged => {
+            this.dispatchMouseEventAll('dragenter', dragged, true, true);
+          });
+        }
+        this.hover();
+      }
+    };
     if (!hitEl) { return; }
-    hitElIndex = this.hoverEls.indexOf(hitEl);
-    if (hitElIndex === -1) {
-      this.hoverEls.push(hitEl);
-      // later loss of collision will remove from hoverEls
-      hitEl.addEventListener('stateremoved', this.unWatch);
-      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-      if (this.dragging && this.gehDragged.size) {
-        // events on targets and on dragged
-        this.gehDragged.forEach(dragged => {
-          this.dispatchMouseEventAll('dragenter', dragged, true, true);
-        });
-      }
-      this.updateGrabbed();
-      this.updateStretched();
-      this.updateDragged();
-      this.hover();
-    }
-  },
-  updateGrabbed: function () {
-    var carried = this.state.get(this.GRAB_EVENT);
-    if (this.grabbing && !carried) {
-      carried = this.findTarget(this.GRAB_EVENT, { hand: this.el });
-      if (carried) {
-        this.state.set(this.GRAB_EVENT, carried);
-        this._unHover(carried);
-      }
-    }
-  },
-  updateStretched: function () {
-    var stretched = this.state.get(this.STRETCH_EVENT);
-    if (this.stretching && !stretched) {
-      stretched = this.findTarget(this.STRETCH_EVENT, { hand: this.el });
-      if (stretched) {
-        this.state.set(this.STRETCH_EVENT, stretched);
-        this._unHover(stretched);
-      }
-    }
-  },
-  updateDragged: function () {
-    var dragged = this.state.get(this.DRAG_EVENT);
-    if (this.dragging && !dragged) {
-      /* prefer carried so that a drag started after a grab will work
-       with carried element rather than a currently intersected drop target.
-       fall back to queue in case a drag is initiated independent
-       of a grab */
-      if (this.state.get(this.GRAB_EVENT) &&
-          !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT, { hand: this.el })) {
-        dragged = this.state.get(this.GRAB_EVENT);
-      } else {
-        dragged = this.findTarget(this.DRAG_EVENT, { hand: this.el });
-      }
-      if (dragged) {
-        this.state.set(this.DRAG_EVENT, dragged);
-        this._unHover(dragged);
-      }
+    if (Array.isArray(hitEl)) {
+      hitEl.forEach(processHitEl);
+    } else {
+      processHitEl(hitEl);
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -304,16 +314,21 @@ AFRAME.registerComponent('super-hands', {
   /* tied to 'stateremoved' event for hovered entities,
      called when controller moves out of collision range of entity */
   unHover: function (evt) {
-    if (evt.detail.state === this.data.colliderState) {
+    let target = evt.detail[this.data.colliderEndEventProperty];
+    if (target) {
+      this._unHover(target);
+    } else if (evt.detail.state === this.data.colliderState) {
       this._unHover(evt.target);
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function (el, skipNextHover) {
-    var evt;
+    let unHovered = false;
+    let evt;
     el.removeEventListener('stateremoved', this.unHover);
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT);
+      unHovered = true;
       evt = {
         hand: this.el,
         hovered: el,
@@ -330,15 +345,19 @@ AFRAME.registerComponent('super-hands', {
     }
     if (el === this.state.get(this.HOVER_EVENT)) {
       this.state.delete(this.HOVER_EVENT);
+      unHovered = true;
       this.emitCancelable(el, this.UNHOVER_EVENT, { hand: this.el });
     }
     // activate next target, if present
-    if (!skipNextHover) {
+    if (unHovered && !skipNextHover) {
       this.hover();
     }
   },
   unWatch: function (evt) {
-    if (evt.detail.state === this.data.colliderState) {
+    let target = evt.detail[this.data.colliderEndEventProperty];
+    if (target) {
+      this._unWatch(target);
+    } else if (evt.detail.state === this.data.colliderState) {
       this._unWatch(evt.target);
     }
   },
@@ -354,6 +373,8 @@ AFRAME.registerComponent('super-hands', {
   },
   registerListeners: function () {
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
+    this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
+    this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
 
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton);
@@ -381,6 +402,8 @@ AFRAME.registerComponent('super-hands', {
       return;
     }
     this.el.removeEventListener(data.colliderEvent, this.onHit);
+    this.el.removeEventListener(data.colliderEndEvent, this.unHover);
+    this.el.removeEventListener(data.colliderEndEvent, this.unWatch);
 
     data.grabStartButtons.forEach(b => {
       this.el.removeEventListener(b, this.onGrabStartButton);

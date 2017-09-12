@@ -10,34 +10,40 @@
     <script src="../build.js"></script>
   </head>
   <body>
-    <a-scene physics environment="preset: contact; shadow: true">
+    <a-scene physics="debug: true" environment="preset: contact; shadow: true">
       <a-assets>
-        <img id="grid" src="grid.png"/>
         <a-mixin id="controller"
-                 super-hands="grabStartButtons: triggerdown; grabEndButtons: gripdown; stretchStartButtons: trackpaddown; stretchEndButtons: trackpadup"
+                 super-hands
                  static-body="shape: sphere; sphereRadius: 0.02;"
-                 sphere-collider="objects: #stick, [link]"></a-mixin>
+                 sphere-collider="objects: #stick, [link], .ball;"></a-mixin>
         <a-mixin id="ball" geometry="primitive: sphere; radius: 0.33"
+                 stretchable="startButtons: trackpaddown; endButtons: trackpadup"
+                 hoverable
                  dynamic-body shadow></a-mixin>
-        <a-mixin id="floor" material="src: #grid; repeat: 50 50" static-body
+        <a-mixin id="floor" static-body
                  geometry="width: 50; height: 50; depth: 0.01"
                  shadow="cast: false"></a-mixin>
-        <a-mixin id="bat" grabbable hoverable stretchable
+        <a-mixin id="bat" hoverable
+                 grabbable="startButtons: triggerdown; endButtons: trackpadup"
                  material="color: brown" shadow></a-mixin>
         <a-mixin id="bat-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
+        <a-mixin id="ball-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
         <a-mixin id="bat-stretched" material="wireframe: true"></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity vive-controls="hand: left" mixin="controller"></a-entity>
-      <a-entity vive-controls="hand: right" mixin="controller"></a-entity>
+      <a-locomotor allow-scaling="false"
+                   grabbable="startButtons: gripdown; endButtons: gripup">
+        <a-entity hand-controls="left" mixin="controller"></a-entity>
+        <a-entity hand-controls="right" mixin="controller"></a-entity>
+      </a-locomotor>
       <a-entity class="ball" mixin="ball" position="0 0.45 -1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.45 1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="-1 0.45 -1" material="color: blue"></a-entity>
       <a-entity class="ball" mixin="ball" position="-1 0.45 1" material="color: blue"></a-entity>
       <a-entity class="ball" mixin="ball" position="1 0.45 -1" material="color: green"></a-entity>
       <a-entity class="ball" mixin="ball" position="1 0.45 1" material="color: green"></a-entity>
-      <a-cone id="stick" mixin="bat" position="0 2 0" height="1" dynamic-body
-              radius-top="0.03" radius-bottom="0.02" >
+      <a-cone id="stick" mixin="bat" position="0 0.5 0" height="1" dynamic-body
+              rotation="0 0 -90" radius-top="0.03" radius-bottom="0.02" >
       </a-cone>
       <a-box mixin="floor" rotation="-90 0 0" position="0 0.01 0"></a-box>
       <a-box mixin="floor" position="0 0 -1.5" rotation="-85 0 0"></a-box>

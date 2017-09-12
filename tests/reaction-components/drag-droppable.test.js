@@ -1,6 +1,6 @@
 /* global assert, process, setup, suite, test */
-
-var entityFactory = require('../helpers').entityFactory;
+const helpers = require('../helpers');
+const entityFactory = helpers.entityFactory;
 
 suite('drag-droppable', function () {
   setup(function (done) {
@@ -33,5 +33,34 @@ suite('drag-droppable', function () {
     assert.isTrue(this.el.is('dragged'));
     this.el.emit('drag-end', { hand: this.hand });
     assert.isFalse(this.el.is('dragged'));
+  });
+});
+suite('drag-droppable button mapping', function () {
+  setup(function (done) {
+    var el = this.el = entityFactory();
+    this.hand = helpers.controllerFactory({'super-hands': ''});
+    el.setAttribute('drag-droppable',
+        'startButtons: triggerdown; endButtons: triggerup');
+    el.addEventListener('loaded', () => {
+      this.comp = el.components['drag-droppable'];
+      done();
+    });
+  });
+  test('responds to correct buttons', function () {
+    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}};
+    // reject wrong button start
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.DRAG_EVENT, dtl));
+    assert.isNotOk(this.el.is(this.comp.DRAGGED_STATE));
+    // accept correct button start
+    dtl.buttonEvent.type = 'triggerdown';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.DRAG_EVENT, dtl));
+    assert.isOk(this.el.is(this.comp.DRAGGED_STATE));
+    // reject wrong button end
+    assert.isOk(helpers.emitCancelable(this.el, this.comp.UNDRAG_EVENT, dtl));
+    assert.isOk(this.el.is(this.comp.DRAGGED_STATE));
+    // accpect correct button end
+    dtl.buttonEvent.type = 'triggerup';
+    assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNDRAG_EVENT, dtl));
+    assert.isNotOk(this.el.is(this.comp.DRAGGED_STATE));
   });
 });

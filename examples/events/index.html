@@ -14,11 +14,14 @@
       }
       function paintBall (evt) {
         var col = evt.target.getAttribute('color');
-        evt.relatedTarget.children[0].setAttribute('color', col);
-        evt.relatedTarget.children[0].setAttribute('visible', true);
+        evt.relatedTarget.querySelector('a-sphere')
+            .setAttribute('color', col);
+        evt.relatedTarget.querySelector('a-sphere')
+            .setAttribute('visible', true);
       }
       function unPaintBall (evt) {
-        evt.relatedTarget.children[0].setAttribute('visible', false);
+        evt.relatedTarget.querySelector('a-sphere')
+            .setAttribute('visible', false);
       }
     </script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
@@ -29,20 +32,24 @@
     </button>
     <a-scene environment="preset: japan; shadow: true">
       <a-assets>
-        <a-mixin id="controller" super-hands
-                 sphere-collider="objects: a-box, a-torus-knot, a-link">
-        </a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity id="lhand" hand-controls="left" mixin="controller">
-        <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
-         shadow>
-        </a-sphere>
-      </a-entity>
-      <a-entity id="rhand" hand-controls="right" mixin="controller">
-        <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
-         shadow>
-        </a-sphere>
+      <a-entity progressive-controls="objects: a-box, a-torus-knot, a-link">
+        <a-camera>
+          <a-sphere radius="0.02" position="-0 0 -0.5" visible="false"
+                    shadow>
+          </a-sphere>
+        </a-camera>
+        <a-entity id="lhand" class="left-controller">
+          <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
+                    shadow>
+          </a-sphere>
+        </a-entity>
+        <a-entity id="rhand" class="right-controller">
+          <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
+                    shadow>
+          </a-sphere>
+        </a-entity>
       </a-entity>
       <a-box position="0 1 -1" color="red"
              onclick="randomizeColor(this)"

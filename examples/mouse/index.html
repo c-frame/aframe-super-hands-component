@@ -23,38 +23,41 @@
         }
       });
     </script>
+    <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
-    <a-scene environment="preset: default; shadow: true"
-             touch-to-click-converter physics="gravity: 0">
+    <button id="replayer-button" type="button" onclick="playDemoRecording()">
+      Don't have a Vive, Rift, Daydream, or GearVR handy? Click here for a preview.
+    </button>
+    <a-scene environment="preset: default; shadow: true" avatar-recorder
+             touch-to-click-converter>
       <a-assets>
+        <img id="portals-preview" src="../assets/portals.jpg"></img>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable pointable drag-droppable
+                 hoverable grabbable stretchable drag-droppable
                  shadow
-                 dynamic-body
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
-      <a-camera super-hands="colliderEvent: mouseenter;
-                             colliderEventProperty: intersectedEl;
-                             colliderState: cursor-hovered;
-                             grabStartButtons: mousedown;
-                             grabEndButtons: mouseup;
-                             dragDropStartButtons: mousedown;
-                             dragDropEndButtons: mouseup;"
-                 static-body="shape: sphere; sphereRadius: 0.02;">
-        <a-cursor></a-cursor>
-      </a-camera>
+      <a-entity progressive-controls="objects: .cube, a-link; maxLevel: point">
+          <a-entity id="rhand" class="right-controller"></a-entity>
+          <a-entity id="lhand" class="left-controller"></a-entity>
+      </a-entity>
       <a-entity class="cube" mixin="cube" position="0 1 -1.25" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1.5" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="-0.9 1 -0.9" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
       <a-entity class="cube" mixin="cube" position="0.9 1 -0.9" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
+      <a-link href="../portals.html" title="Other Examples"
+              image="#portals-preview"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
     </a-scene>
-
     <!-- GitHub Corner. -->
     <a href="https://github.com/wmurphyrd/aframe-super-hands-component" class="github-corner">
       <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#222; color:#fff; position: absolute; top: 0; border: 0; right: 0;">

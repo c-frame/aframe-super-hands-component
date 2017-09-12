@@ -30,9 +30,6 @@
     <a-scene physics environment="preset: tron; shadow: true">
       <a-assets>
         <img id="colortransform" src="./colortransform.png" />
-        <a-mixin id="controller" super-hands
-                 sphere-collider="objects: .cube, .transformer, a-link"
-                 static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  hoverable grabbable stretchable drag-droppable
                  dynamic-body shadow></a-mixin>
@@ -43,9 +40,16 @@
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity id="lhand" vive-controls="hand: left" mixin="controller">
-      </a-entity>
-      <a-entity id="rhand" vive-controls="hand: right" mixin="controller">
+      <a-entity progressive-controls="objects: .cube, .transformer, a-link">
+        <a-entity id="lhand" class="left-controller"></a-entity>
+        <a-entity id="rhand" class="right-controller"></a-entity>
+        <!-- customize the mouse/gaze cursor -->
+        <a-camera>
+          <a-entity raycaster position="0 0 -0.5"
+                    geometry="primitive: ring; radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+                    material="color: white; shader: flat">
+          </a-entity>
+        </a-camera>
       </a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -0.5" material="color: red"></a-entity>
