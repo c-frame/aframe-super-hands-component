@@ -70,9 +70,9 @@ AFRAME.registerComponent('progressive-controls', {
           this.caster = document.createElement('a-entity');
           this.camera.appendChild(this.caster);
           this.caster.setAttribute('geometry', 'primitive: ring;' +
-              'radiusOuter: 0.0016; radiusInner: 0.001; segmentsTheta: 32');
+              'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
           this.caster.setAttribute('material', 'color: #000; shader: flat;');
-          this.caster.setAttribute('position', '0 0 -0.1');
+          this.caster.setAttribute('position', '0 0 -0.5');
         }
         this.caster.setAttribute('raycaster', 'objects: ' + this.data.objects);
         this.camera.setAttribute('super-hands', this.superHandsRaycasterConfig);

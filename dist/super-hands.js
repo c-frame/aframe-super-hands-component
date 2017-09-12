@@ -1223,9 +1223,9 @@
 	          if (!_this2.caster) {
 	            _this2.caster = document.createElement('a-entity');
 	            _this2.camera.appendChild(_this2.caster);
-	            _this2.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.0016; radiusInner: 0.001; segmentsTheta: 32');
+	            _this2.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
 	            _this2.caster.setAttribute('material', 'color: #000; shader: flat;');
-	            _this2.caster.setAttribute('position', '0 0 -0.1');
+	            _this2.caster.setAttribute('position', '0 0 -0.5');
 	          }
 	          _this2.caster.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
 	          _this2.camera.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
