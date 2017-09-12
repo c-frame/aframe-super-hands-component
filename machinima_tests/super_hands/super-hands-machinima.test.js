@@ -247,23 +247,19 @@ suite('Locomotion', function () {
   });
   test('locomotor does not interfere with normal interactions', function (done) {
     const boxGreenTop = document.getElementById('greenHigh');
-    const boxGreenBottom = document.getElementById('greenLow');
     const redBox = document.getElementById('redHigh');
     const startPos = redBox.getAttribute('position');
     const startScale = redBox.getAttribute('scale');
     this.scene.setAttribute('avatar-replayer', {
-      src: 'base/recordings/handsRecording.json'
+      src: 'base/recordings/loco-hands2.json'
     });
-    assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'box');
-    assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'box');
     this.scene.addEventListener('replayingstopped', e => {
       var endScale = redBox.getAttribute('scale');
       assert.notDeepEqual(redBox.getAttribute('position'), startPos, 'moved');
       assert.isTrue(endScale.x > startScale.x, 'grew-x');
       assert.isTrue(endScale.y > startScale.y, 'grew-y');
       assert.isTrue(endScale.z > startScale.z, 'grew-z');
-      assert.equal(boxGreenTop.getAttribute('geometry').primitive, 'sphere');
-      assert.equal(boxGreenBottom.getAttribute('geometry').primitive, 'sphere');
+      assert.isAbove(boxGreenTop.getAttribute('position').z, -1);
       done();
     }, { once: true }); // once flag because this event emitted multiple times
   });
