@@ -40,13 +40,6 @@ grab and stretch gestures can also serve as a comfortable locomotion system
 by moving and scaling the world around the player. Use the `a-locomotor` primitive
 to provide intuitive freedom of motion in your WebVR experiences.
 
-**Mouse and Mobile VR Support**: With valuable input from [@milan-rusev](https://github.com/milan-rusev),
-we were able to integrate mouse and other controller input via
-the `cursor` component to support a wider variety of controllers.
-See
-[the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
-for more info.
-
 Readme contents:
 
 * [Examples](#examples)
@@ -90,17 +83,13 @@ Install and use by directly including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@2.0.0/dist/super-hands.min.js"></script>
 </head>
 
 <body>
   <a-scene>
     <a-assets></a-assets>
-    <a-locomotor>
-      <!-- Make sure your super-hands entities also have controller and collider components -->
-      <a-entity hand-controls="left" super-hands sphere-collider="objects: a-box"></a-entity>
-      <a-entity hand-controls="right" super-hands sphere-collider="objects: a-box"></a-entity>
-    </a-locomotor>
+    <a-entity progressive-controls="objects: a-box"></a-entity>
     <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
     <a-box hoverable grabbable stretchable drag-droppable
     color="blue" position="0 0 -1"></a-box>
@@ -124,7 +113,7 @@ require('super-hands');
 ```
 ### News
 
-Master branch
+v2.0.0
 
 * Consistent experience across devices: `super-hands` now provides interactivity
   for all levels of VR controls: desktop mouse, mobile touch ("magic window"),
@@ -150,21 +139,6 @@ Master branch
   button press and collision. Pressing a button in empty space and then
   moving into an object will no long scoop it up in a grab.
 
-To test out master branch features, use this script tag:
-
-```html
-<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
-```
-
-v1.1.0
-
-* Compatibility with desktop mouse control via A-Frame `cursor` component
-  * Added new schema property `colliderEventProperty` to configure
-    where in the `event.details` to look for the collision target
-  * Requires some configuration of schema properties, see new example: [Mouse Controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
-* Select examples now have `avatar-replayer` to preview actions without needing
-  VR equipment
-
 [Previous news](news.md)
 
 ### Known Issues
@@ -187,8 +161,9 @@ Daydream, GearVR, Vive, and Rift + Touch.
 
 | super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
-| ^v1.0.1 | v0.6.x |^v3.8.6 | ^v1.4.2 |
-| v1.0.0 | v0.5.x |v3.8.5 | v1.4.1 |
+| ^v2.0.0 | v0.6.x | ^v3.11.4 | ^v2.0.0 |
+| v1.1.0 | v0.6.x | v3.8.6 | v1.4.2 |
+| v1.0.0 | v0.5.x | v3.8.5 | v1.4.1 |
 | v0.2.4 | v0.4.x | v3.7.0 | v1.3.0 |
 
 ## Core, primitives, and meta-components
@@ -208,7 +183,8 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider` and `physics-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| colliderEventProperty | Name of property in event `details` object which contains the collided entity | `'el'` (default for `sphere-collider` and `physics-collider`) |
+| colliderEventProperty | Name of property in event `details` object which contains the collided entity | colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
+| colliderEndEventProperty | Name of property in event `details` object which contains the un-collided entity | `''` |
 | grabStartButtons | Array of button event types that can initiate grab | Button press, touch start, and mouse down events |
 | grabEndButtons | Array of button event types that can terminate grab | Button release, touch end, and mouse up events |
 | stretchStartButtons | Array of button event types that can initiate stretch | Button press, touch start, and mouse down events |
@@ -218,13 +194,9 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 
 Default button events include specific events for `vive-controls`,
 `hand-controls`, `oculus-touch-controls`, `daydream-controls`,
-`gearvr-controls`, mouse, and touch.
-
-Default start events: 'gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
-'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown'
-
-Default end events: 'gripup', 'trackpadup', 'triggerup', 'gripopen',
-'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup'
+`gearvr-controls`, mouse, and touch. For detecting when collisions end,
+either `colliderState` or `colliderEndEvent`/`colliderEndEventProperty` can be
+used, depending on the API of the collider in use.
 
 #### Gesture Events
 

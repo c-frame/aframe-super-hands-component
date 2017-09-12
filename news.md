@@ -1,5 +1,31 @@
 ## News
 
+v2.0.0
+
+* Consistent experience across devices: `super-hands` now provides interactivity
+  for all levels of VR controls: desktop mouse, mobile touch ("magic window"),
+  cardboard button,
+  3DOF (GearVR and Daydram), and 6DOF (Vive and Oculus Touch)
+  * `progressive-controls` meta-component to automatically setup interactive
+    controls on **any** device from desktop to Vive
+  * Upgraded `grabbable` reaction component.
+    * Now works with pointing and moving at a distance, e.g. with
+      3DOF controllers and `laser-controls`, using controller orientation
+      and position to move grabbed entities
+* Button mapping for reaction components: each reaction component now has
+  `startButtons` and `endButtons` schema properties to specify acceptable
+  buttons. This allows different entities to react to different buttons.
+  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion)
+  `a-locomotor`'s `grabbable` can be set to respond to different
+  buttons than other `grabbable` entities so that
+  grabbing entities and locomotion are separate gestures for the user.
+* `a-locomotor` now functions independently from colliders;
+  removed `add-to-colliders` attribute.
+* Performance improvements in `grabbable` and `stretchable`
+* Gesture initiation changed to occur only on button press rather than
+  button press and collision. Pressing a button in empty space and then
+  moving into an object will no long scoop it up in a grab.
+
 v1.1.0
 
 * Compatibility with desktop mouse control via A-Frame `cursor` component
