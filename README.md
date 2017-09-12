@@ -31,6 +31,10 @@ components attached to translate the gestures into actions. `super-hands`
 includes components for typical reactions to the implemented gestures:
 `hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
 
+**Universal Progressive Controls**: The `progressive-controls` component
+provides consistent interactivity on any viewer from desktop to full
+6-DOF virtual reality by auto-detecting viewer capabilities.
+
 **Avatar Locomotion**: Inspired by a demo from [@caseyyee](https://github.com/caseyyee), the `super-hands`
 grab and stretch gestures can also serve as a comfortable locomotion system
 by moving and scaling the world around the player. Use the `a-locomotor` primitive
@@ -50,17 +54,17 @@ Readme contents:
   * [HTML usage](#browser)
   * [News](#news)
   * [Compatibility](#compatibility)
-* [Core, primitives, and meta-components](#core--primitives--and-meta-components)
+* [Core, primitives, and meta-components](#core-primitives-and-meta-components)
   * [`super-hands` gesture interpretation component](#super-hands-component)
-  * [`progressive-controls` universal controller component](#progressive-controls)
-  * ['a-locomotor' free movement primitive](#a-locomotor)
+  * [`progressive-controls` universal controller component](#progressive-controls-component)
+  * ['a-locomotor' free movement primitive](#a-locomotor-primitive)
 * [Reaction components](#reaction-components)
-  * [`hoverable`](#hoverable)
-  * [`grabbable`](#grabbable)
-    * [`clickable`](#clickable)
-  * [`stretchable`](#stretchable)
-  * ['drag-droppable'](#drag-droppable)
-* [Customizing interactivity](#sustomizing-interactivity)
+  * [`hoverable`](#hoverable-component)
+  * [`grabbable`](#grabbable-component)
+    * [`clickable`](#clickable-component)
+  * [`stretchable`](#stretchable-component)
+  * ['drag-droppable'](#drag-droppable-component)
+* [Customizing interactivity](#customizing-interactivity)
 
 ## Examples
 
@@ -279,7 +283,7 @@ The event passed to the handler will be a `MouseEvent`. At present the only prop
 is `relatedTarget`, which is set as
 listed in the table. Drag-dropping events will be dispatched on both the entity being dragged and the drop target, and the `relatedTarget` property for each will point to the other entity in the interaction.
 
-### progressive-controls
+### progressive-controls component
 
 The `progressive-controls` component makes it easy to design an interactive
 A-Frame scene that will work on any device. It automatically detects the viewing
@@ -323,7 +327,7 @@ class names `'right-controller'` and `'left-controller'` to help
 
 | Type | Description |  details object |
 | --- | --- | --- |
-|'controller-progressed' | The detected controller type has changed | `level` new control type, : `'gaze'`, `'point'`, or `'touch'` |
+|'controller-progressed' | The detected controller type has changed | `level`: new control type, : `'gaze'`, `'point'`, or `'touch'` |
 
 
 ### a-locomotor primitive
@@ -376,6 +380,11 @@ entity.
 | Type | Description | Target | Bubbles |
 | --- | --- | --- | --- |
 | 'locomotor-ready' | All auto-configuration steps complete | `a-locomotor` | yes |
+
+## Reaction Components
+
+Add these components to entities in your scene to make them react to
+super-hands gestures.
 
 ### hoverable component
 
