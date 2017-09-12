@@ -9,13 +9,13 @@ AFRAME.registerComponent('progressive-controls', {
   init: function () {
     this.levels = ['gaze', 'point', 'touch'];
     this.currentLevel = 0;
-    this.superHandsCursorConfig = 'colliderEvent: mouseenter;' +
-        'colliderEventProperty: intersectedEl;' +
-        'colliderState: cursor-hovered;' +
-        'grabStartButtons: mousedown;' +
-        'grabEndButtons: mouseup;' +
-        'dragDropStartButtons: mousedown;' +
-        'dragDropEndButtons: mouseup;';
+    this.superHandsRaycasterConfig = {
+      colliderEvent: 'raycaster-intersection',
+      colliderEventProperty: 'els',
+      colliderEndEvent: 'raycaster-intersection-cleared',
+      colliderEndEventProperty: 'el',
+      colliderState: ''
+    };
     this.camera = this.el.querySelector('a-camera,[camera]') ||
         this.el.appendChild(document.createElement('a-camera'));
     ['left', 'right'].forEach(hand => {
@@ -27,8 +27,17 @@ AFRAME.registerComponent('progressive-controls', {
       ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls',
           'vive-controls', 'windows-motion-controls']
           .forEach(ctrlr => this[hand].setAttribute(ctrlr, 'hand: ' + hand));
+      // save initial config
+      this[hand + 'shOriginal'] = this[hand].getAttribute('super-hands') || {};
+      if (typeof this[hand + 'shOriginal'] === 'string') {
+        this[hand + 'shOriginal'] = AFRAME.utils.styleParser
+            .parse(this[hand + 'shOriginal']);
+      }
     });
     this.el.addEventListener('controllerconnected', e => this.detectLevel(e));
+    this.eventRepeaterB = this.eventRepeater.bind(this);
+    // pass mouse and touch events into the scene
+    this.addEventListeners();
   },
   update: function (oldData) {
     const level = this.currentLevel;
@@ -36,51 +45,65 @@ AFRAME.registerComponent('progressive-controls', {
     this.currentLevel = -1;
     this.setLevel(level);
   },
+  remove: function () {
+    if (!this.eventsRegistered) { return; }
+    const canv = this.el.sceneEl.canvas;
+    canv.removeEventListener('mousedown', this.eventRepeaterB);
+    canv.removeEventListener('mouseup', this.eventRepeaterB);
+    canv.removeEventListener('touchstart', this.eventRepeaterB);
+    canv.removeEventListener('touchend', this.eventRepeaterB);
+  },
   setLevel: function (newLevel) {
     const maxLevel = this.levels.indexOf(this.data.maxLevel);
     const physicsAvail = !!this.el.sceneEl.getAttribute('physics');
     const hands = [this.right, this.left];
     newLevel = newLevel > maxLevel ? maxLevel : newLevel;
     if (newLevel === this.currentLevel) { return; }
-    if (newLevel !== 0 && this.cursor) {
-      this.camera.removeChild(this.cursor);
-      this.cursor = null;
+    if (newLevel !== 0 && this.caster) {
+      this.camera.removeChild(this.caster);
+      this.caster = null;
     }
     switch (newLevel) {
       case 0:
-        this.cursor = this.camera.querySelector('a-cursor,[cursor]') ||
-          this.camera.appendChild(document.createElement('a-cursor'));
-        this.camera.setAttribute('super-hands', this.superHandsCursorConfig);
+        this.caster = this.camera.querySelector('[raycaster]');
+        if (!this.caster) {
+          this.caster = document.createElement('a-entity');
+          this.camera.appendChild(this.caster);
+          this.caster.setAttribute('geometry', 'primitive: ring;' +
+              'radiusOuter: 0.0016; radiusInner: 0.001; segmentsTheta: 32');
+          this.caster.setAttribute('material', 'color: #000; shader: flat;');
+          this.caster.setAttribute('position', '0 0 -0.1');
+        }
+        this.caster.setAttribute('raycaster', 'objects: ' + this.data.objects);
+        this.camera.setAttribute('super-hands', this.superHandsRaycasterConfig);
         if (physicsAvail) {
           this.camera.setAttribute('static-body', this.data.physicsBody);
         }
-        this.cursor.setAttribute('raycaster', 'objects: ' + this.data.objects);
         break;
       case 1:
-        // same setup as laser-controls, but without the dependence on
-        // controllerconnected event happening after init
+        // borrow raycaster config from laser-controls
         const laserConfig = AFRAME.components['laser-controls']
             .Component.prototype.config[this.controllerName] || {};
         const rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils
             .extend({objects: this.data.objects, showLine: true},
             laserConfig.raycaster || {}));
-        const cursorConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils
-            .extend({fuse: false}, laserConfig.cursor || {}));
         hands.forEach(h => {
-          h.setAttribute('super-hands', this.superHandsCursorConfig);
+          h.setAttribute('super-hands', this.superHandsRaycasterConfig);
           h.setAttribute('raycaster', rayConfig);
-          h.setAttribute('cursor', cursorConfig);
           if (physicsAvail) {
             h.setAttribute('static-body', this.data.physicsBody);
           }
         });
         break;
       case 2:
-        [this.right, this.left].forEach(h => {
-          h.setAttribute('super-hands', {}, true);
-          h.setAttribute(this.data.touchCollider,
+        ['right', 'left'].forEach(h => {
+          // clobber flag to restore defaults
+          this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
+          this[h].setAttribute(this.data.touchCollider,
               'objects: ' + this.data.objects);
-          physicsAvail && h.setAttribute('static-body', this.data.physicsBody);
+          if (physicsAvail) {
+            this[h].setAttribute('static-body', this.data.physicsBody);
+          }
         });
         break;
     }
@@ -101,5 +124,20 @@ AFRAME.registerComponent('progressive-controls', {
     } else {
       this.setLevel(this.levels.indexOf('gaze'));
     }
+  },
+  eventRepeater: function (evt) {
+    this.camera.emit(evt.type, evt.detail);
+  },
+  addEventListeners: function () {
+    if (!this.el.sceneEl.canvas) {
+      this.el.sceneEl
+          .addEventListener('loaded', this.addEventListeners.bind(this));
+      return;
+    }
+    this.el.sceneEl.canvas.addEventListener('mousedown', this.eventRepeaterB);
+    this.el.sceneEl.canvas.addEventListener('mouseup', this.eventRepeaterB);
+    this.el.sceneEl.canvas.addEventListener('touchstart', this.eventRepeaterB);
+    this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
+    this.eventsRegistered = true;
   }
 });

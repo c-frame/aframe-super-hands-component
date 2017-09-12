@@ -8,12 +8,6 @@
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@1.1.0/dist/super-hands.min.js" -->
     <script src="./build.js"></script>
-    <script>
-      // cursor seems to ignore trying to set position in the dom
-      window.addEventListener('renderstart', function (e) {
-        document.querySelector('a-cursor').setAttribute('position', '0 0 -0.6');
-      });
-    </script>
   </head>
   <body>
     <a-scene environment="preset: checkerboard; shadow: true">
@@ -21,8 +15,7 @@
         <!-- by default, sphere-collider will collide with all entities.
              If you set specific objects for the collider, be sure to
              include a-link and/or [link] to keep the portals active -->
-        <a-mixin id="portal" scale="0.25 0.25 0.25">
-        </a-mixin>
+        <a-mixin id="portal" scale="0.25 0.25 0.25"></a-mixin>
         <a-mixin id="portal-hovered" link="highlighted: true"></a-mixin>
         <img id="basic-preview" src="assets/hand-controls.jpg"></img>
         <img id="locomotion-preview" src="./assets/locomotion.jpg"></img>

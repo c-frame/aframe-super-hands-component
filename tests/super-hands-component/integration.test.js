@@ -282,3 +282,43 @@ suite('super-hands & clickable component integration', function () {
     assert.notEqual(this.sh1.hoverEls.indexOf(this.target1), -1, 'still watched');
   });
 });
+suite('super-hands raycaster integration', function () {
+  setup(function (done) {
+    this.target1 = entityFactory();
+    this.target1.id = 'target1';
+    this.target1.setAttribute('geometry', 'primitive: box');
+    this.target1.setAttribute('position', '0 0 -1');
+    this.target2 = document.createElement('a-entity');
+    this.target2.id = 'target2';
+    this.target2.setAttribute('geometry', 'primitive: sphere');
+    this.target2.setAttribute('position', '0 0 -2');
+    this.target1.parentNode.appendChild(this.target2);
+    this.hand1 = helpers.controllerFactory({
+      'vive-controls': 'hand: right; model: false',
+      geometry: 'primitive: sphere',
+      'super-hands': 'colliderEvent: raycaster-intersection;' +
+          'colliderEventProperty: els;' +
+          'colliderEndEvent: raycaster-intersection-cleared;' +
+          'colliderEndEventProperty: el',
+      'raycaster': 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
+    }, true);
+    this.hand1.setAttribute('position', '0 0 1');
+    this.hand1.parentNode.addEventListener('loaded', () => {
+      this.sh1 = this.hand1.components['super-hands'];
+      this.ray1 = this.hand1.components['raycaster'];
+      done();
+    });
+  });
+  test('sees raycaster collisions', function () {
+    this.target1.object3D.updateMatrixWorld();
+    this.target2.object3D.updateMatrixWorld();
+    this.ray1.tick();
+    assert.sameMembers(this.sh1.hoverEls, [this.target1, this.target2]);
+    this.target1.setAttribute('position', '0 -1 4');
+    this.target1.object3D.updateMatrixWorld();
+    this.target2.setAttribute('position', '0 -1 4');
+    this.target2.object3D.updateMatrixWorld();
+    this.ray1.tick();
+    assert.strictEqual(this.sh1.hoverEls.length, 0);
+  });
+});
