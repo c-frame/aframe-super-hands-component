@@ -83,7 +83,7 @@ Install and use by directly including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.11.4/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@2.0.0/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@2.0.1/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -112,6 +112,14 @@ require('aframe');
 require('super-hands');
 ```
 ### News
+
+v2.0.1
+
+* Bug fixes:
+  * `'mouseup'` now fires correctly on target entities
+  * Fixed lingering hover when `progressive-controls` advances from gaze mode
+  * Fixed lingering hovers when `progressive-controls` in point mode
+  * Fixed some new files being excluded from babelify & breaking uglify
 
 v2.0.0
 
