@@ -4,25 +4,9 @@
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@2.0.0/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
-    <script>
-      // This component enables "carboard" viewer button interactions
-      // when using A-Frame v0.6.1 or below. After the next
-      // A-Frame release, it will no longer be necessary
-      AFRAME.registerComponent('touch-to-click-converter', {
-        init: function () {
-          this.el.canvas.addEventListener('touchstart', function (e) {
-            e.target.dispatchEvent(new CustomEvent('mousedown'));
-          });
-          this.el.canvas.addEventListener('touchend', function (e) {
-            e.target.dispatchEvent(new CustomEvent('mouseup'));
-          });
-        }
-      });
-    </script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
