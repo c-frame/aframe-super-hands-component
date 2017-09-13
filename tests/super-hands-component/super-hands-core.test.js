@@ -351,13 +351,13 @@ suite('super-hands hit processing & event emission', function () {
     });
     this.target1.addEventListener('grab-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'triggerup', 'grab end');
-    });
+    }, {once: true}); // avoid running this test during cleanup
     this.target1.addEventListener('stretch-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'trackpadup', 'stretch end');
-    });
+    }, {once: true});
     this.target1.addEventListener('drag-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'gripup', 'drag end');
-    });
+    }, {once: true});
     this.target2.addEventListener('drag-drop', e => {
       assert.equal(e.detail.buttonEvent.type, 'gripup', 'dragdrop');
       e.preventDefault();
@@ -391,15 +391,31 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh1.state.get('stretch-start'), this.target1);
   });
   test('removal cleanup: hover', function (done) {
-    var hoverEndSpy = this.sinon.spy(this.hand1, 'emit');
+    var hoverEndSpy = this.sinon.spy();
+    this.target1.addEventListener('hover-end', hoverEndSpy);
     this.target1.addEventListener('hover-start', e => e.preventDefault());
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT), this.target1);
-    assert.isFalse(hoverEndSpy.calledWith('hover-end'));
+    assert.isFalse(hoverEndSpy.called);
     this.hand1.removeAttribute('super-hands');
     process.nextTick(() => {
       assert.isNotOk(this.hand1.getAttribute('super-hands'));
-      assert.isTrue(hoverEndSpy.calledWith('hover-end'));
+      assert.isTrue(hoverEndSpy.called);
+      done();
+    });
+  });
+  test('removal cleanup: grab', function (done) {
+    var grabEndSpy = this.sinon.spy();
+    this.target1.addEventListener('grab-end', grabEndSpy);
+    this.target1.addEventListener('grab-start', e => e.preventDefault());
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    this.sh1.onGrabStartButton();
+    assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target1);
+    assert.isFalse(grabEndSpy.called);
+    this.hand1.removeAttribute('super-hands');
+    process.nextTick(() => {
+      assert.isNotOk(this.hand1.getAttribute('super-hands'));
+      assert.isTrue(grabEndSpy.called);
       done();
     });
   });

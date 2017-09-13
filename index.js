@@ -117,9 +117,18 @@ AFRAME.registerComponent('super-hands', {
    */
   remove: function () {
     this.system.unregisterMe(this);
-    // move listener registration to init/remove
-    // as described in according to AFRAME 0.5.0 component guide
     this.unRegisterListeners();
+    // cleanup states
+    this.hoverEls.forEach(h => {
+      h.removeEventListener('stateremoved', this.unWatch);
+    });
+    this.hoverEls.length = 0;
+    if (this.state.get(this.HOVER_EVENT)) {
+      this._unHover(this.state.get(this.HOVER_EVENT));
+    }
+    this.onGrabEndButton();
+    this.onStretchEndButton();
+    this.onDragDropEndButton();
   },
   /**
    * Called when entity pauses.
