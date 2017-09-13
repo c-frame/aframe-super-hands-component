@@ -373,8 +373,8 @@ AFRAME.registerComponent('super-hands', {
   },
   registerListeners: function () {
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
-    this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
+    this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
 
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton);

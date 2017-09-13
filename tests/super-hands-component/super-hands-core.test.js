@@ -211,7 +211,6 @@ suite('super-hands hit processing & event emission', function () {
     }}));
     assert.isNotOk(this.sh1.state.get(this.sh1.DRAG_EVENT));
   });
-
   test('drag events', function () {
     const emitSpy1 = this.sinon.spy(this.sh1, 'emitCancelable');
     const dragOverSpy1 = emitSpy1.withArgs(this.target1, 'dragover-start');
@@ -390,6 +389,19 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh1.state.get('grab-start'), this.target1);
     assert.strictEqual(this.sh1.state.get('drag-start'), this.target1);
     assert.strictEqual(this.sh1.state.get('stretch-start'), this.target1);
+  });
+  test('removal cleanup: hover', function (done) {
+    var hoverEndSpy = this.sinon.spy(this.hand1, 'emit');
+    this.target1.addEventListener('hover-start', e => e.preventDefault());
+    this.sh1.onHit({ detail: { el: this.target1 } });
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT), this.target1);
+    assert.isFalse(hoverEndSpy.calledWith('hover-end'));
+    this.hand1.removeAttribute('super-hands');
+    process.nextTick(() => {
+      assert.isNotOk(this.hand1.getAttribute('super-hands'));
+      assert.isTrue(hoverEndSpy.calledWith('hover-end'));
+      done();
+    });
   });
 });
 

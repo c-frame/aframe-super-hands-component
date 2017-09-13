@@ -321,4 +321,20 @@ suite('super-hands raycaster integration', function () {
     this.ray1.tick();
     assert.strictEqual(this.sh1.hoverEls.length, 0);
   });
+  // this test didn't actually fail as expected while #68 remained
+  test('raycaster collisions clear', function () {
+    assert.equal(this.sh1.state.get('hover-start'), undefined);
+    // take t2 out of the picture
+    this.target2.setAttribute('position', '0 -1 4');
+    this.target2.object3D.updateMatrixWorld();
+    this.target1.setAttribute('hoverable', '');
+    this.target1.object3D.updateMatrixWorld();
+    this.ray1.tick();
+    assert.sameMembers(this.sh1.hoverEls, [this.target1]);
+    assert.strictEqual(this.sh1.state.get('hover-start'), this.target1);
+    this.target1.setAttribute('position', '0 -1 4');
+    this.target1.object3D.updateMatrixWorld();
+    this.ray1.tick();
+    assert.equal(this.sh1.state.get('hover-start'), undefined);
+  });
 });
