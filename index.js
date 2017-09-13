@@ -155,7 +155,7 @@ AFRAME.registerComponent('super-hands', {
     const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
     const grabbed = this.state.get(this.GRAB_EVENT);
     const endEvt = {hand: this.el, buttonEvent: evt};
-    this.dispatchMouseEventAll('mouseup', this.el, true);
+    this.dispatchMouseEventAll('mouseup', this.el);
     for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }

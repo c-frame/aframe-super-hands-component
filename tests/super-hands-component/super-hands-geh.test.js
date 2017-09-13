@@ -13,11 +13,16 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
     });
+    // add reaction components to ensure no conflicts
+    [this.target1, this.target2].forEach(t => {
+      ['grabbable', 'hoverable', 'drag-droppable', 'stretchable']
+        .forEach(c => t.setAttribute(c, ''));
+    });
     this.hand2 = helpers.controllerFactory({
       'vive-controls': 'hand: left',
       'super-hands': ''
     }, true);
-    this.hand1.parentNode.addEventListener('loaded', () => {
+    this.target1.sceneEl.addEventListener('loaded', () => {
       this.sh1 = this.hand1.components['super-hands'];
       this.sh2 = this.hand2.components['super-hands'];
       done();
