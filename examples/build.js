@@ -171,7 +171,7 @@ AFRAME.registerComponent('super-hands', {
     });
     var grabbed = this.state.get(this.GRAB_EVENT);
     var endEvt = { hand: this.el, buttonEvent: evt };
-    this.dispatchMouseEventAll('mouseup', this.el, true);
+    this.dispatchMouseEventAll('mouseup', this.el);
     for (var i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
@@ -579,7 +579,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
 /* global AFRAME */
 AFRAME.registerComponent('progressive-controls', {
   schema: {
-    maxLevel: { default: 'touch' },
+    maxLevel: { default: 'touch', oneOf: ['gaze', 'point', 'touch'] },
     objects: { default: '' },
     physicsBody: { default: 'shape: sphere; sphereRadius: 0.02' },
     touchCollider: { default: 'sphere-collider' }

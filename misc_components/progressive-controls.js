@@ -1,7 +1,7 @@
 /* global AFRAME */
 AFRAME.registerComponent('progressive-controls', {
   schema: {
-    maxLevel: {default: 'touch'},
+    maxLevel: {default: 'touch', oneOf: ['gaze', 'point', 'touch']},
     objects: {default: ''},
     physicsBody: {default: 'shape: sphere; sphereRadius: 0.02'},
     touchCollider: {default: 'sphere-collider'}

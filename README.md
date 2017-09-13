@@ -66,7 +66,7 @@ The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/exa
 | Example Scene | Description | Target VR Devices | MoCap preview |
 | --- | --- | --- | --- |
 | [Progressive controls with physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior on any VR platform | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift  | Yes |
-| [Gaze and laser pointer controls without physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | No |
+| [Gaze and laser pointer controls without physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | Yes |
 | [Global Event Handler integration](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events) | An alternative way to customize interactions using familiar HTML event handler properties like `onclick` | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | Yes |
 | [Link Portals](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#portals) | Travel the metaverse with A-Frame link portals | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift | No |
 | [Grab-based locomotion](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#locomotion) | Explore a scene by dragging or stretching the world around you | Vive, Rift | Yes |
@@ -274,16 +274,19 @@ controller and camera entities as children automatically.
 <a-entity progressive-controls></a-entity>
 ```
 
-To add additional properties or override defaults, include the entities
-as children of the `progressive-controls` entity. Controllers must be given
+To add additional properties or override defaults, specify the entities
+you want to modify as children of the `progressive-controls` entity, following
+the pattern below. Controllers must be given
 class names `'right-controller'` and `'left-controller'` to help
 `progressive-controls` identify them.
 
 ```html
 <a-entity progressive-controls>
-  <!-- controllers need ids if you're going to do motion capture -->
-  <a-entity id="rhand" class="right-controller"></a-entity>
-  <a-entity id="lhand" class="left-controller"></a-entity>
+  <a-camera super-hands>
+    <a-entity raycaster></a-entity>
+  </a-camera>
+  <a-entity class="right-controller" super-hands></a-entity>
+  <a-entity class="left-controller" super-hands></a-entity>
 </a-entity>
 ```
 
@@ -343,10 +346,10 @@ entity.
 
 | Attribute | Description | Default Value |
 | -------- | ----------- | ------------- |
-| fetch-camera | Make the default camera a child of `a-locomotor` so it can be moved with the player | "true" |
-| allow-movement | Allow grabbing gestures to reposition the player | "true" |
-| horizontal-only | Restrict movement to the X-Z plane | "true" |
-| allow-scaling | Allow stretching gestures to rescale the player | "true" |
+| fetch-camera | Make the default camera a child of `a-locomotor` so it can be moved with the player | `true` |
+| allow-movement | Allow grabbing gestures to reposition the player | `true` |
+| horizontal-only | Restrict movement to the X-Z plane | `true` |
+| allow-scaling | Allow stretching gestures to rescale the player | `true` |
 
 #### Events
 
