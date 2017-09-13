@@ -761,83 +761,102 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	'use strict';
+
 	// base code used by grabbable for physics interactions
 	module.exports = {
 	  schema: {
-	    usePhysics: {default: 'ifavailable'}
+	    usePhysics: { default: 'ifavailable' }
 	  },
-	  physicsInit: function () {
+	  physicsInit: function physicsInit() {
 	    this.constraints = new Map();
 	  },
-	  physicsUpdate: function () {
+	  physicsUpdate: function physicsUpdate() {
 	    if (this.data.usePhysics === 'never' && this.constraints.size) {
 	      this.physicsClear();
 	    }
 	  },
-	  physicsRemove: function () {
+	  physicsRemove: function physicsRemove() {
 	    this.physicsClear();
 	  },
-	  physicsStart: function (evt) {
+	  physicsStart: function physicsStart(evt) {
 	    // initiate physics constraint if available and not already existing
-	    if (this.data.usePhysics !== 'never' && this.el.body &&
-	        evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-	      let newCon = new window.CANNON.LockConstraint(
-	        this.el.body, evt.detail.hand.body
-	      );
+	    if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+	      var newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
 	      this.el.body.world.addConstraint(newCon);
 	      this.constraints.set(evt.detail.hand, newCon);
 	      return true;
 	    }
 	    return false;
 	  },
-	  physicsEnd: function (evt) {
-	    let constraint = this.constraints.get(evt.detail.hand);
+	  physicsEnd: function physicsEnd(evt) {
+	    var constraint = this.constraints.get(evt.detail.hand);
 	    if (constraint) {
 	      this.el.body.world.removeConstraint(constraint);
 	      this.constraints.delete(evt.detail.hand);
 	    }
 	  },
-	  physicsClear: function () {
+	  physicsClear: function physicsClear() {
 	    if (this.el.body) {
-	      for (let c of this.constraints.values()) {
-	        this.el.body.world.removeConstraint(c);
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = this.constraints.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var c = _step.value;
+
+	          this.el.body.world.removeConstraint(c);
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
 	      }
 	    }
 	    this.constraints.clear();
 	  },
-	  physicsIsConstrained: function (el) {
+	  physicsIsConstrained: function physicsIsConstrained(el) {
 	    return this.constraints.has(el);
 	  },
-	  physicsIsGrabbing () {
+	  physicsIsGrabbing: function physicsIsGrabbing() {
 	    return this.constraints.size > 0;
 	  }
 	};
-
 
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
 
+	'use strict';
+
 	// common code used in customizing reaction components by button
-	module.exports = (function () {
-	  function buttonIsValid (evt, buttonList) {
-	    return buttonList.length === 0 ||
-	        buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+	module.exports = function () {
+	  function buttonIsValid(evt, buttonList) {
+	    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
 	  }
 	  return {
 	    schema: {
-	      startButtons: {default: []},
-	      endButtons: {default: []}
+	      startButtons: { default: [] },
+	      endButtons: { default: [] }
 	    },
-	    startButtonOk: function (evt) {
+	    startButtonOk: function startButtonOk(evt) {
 	      return buttonIsValid(evt, this.data['startButtons']);
 	    },
-	    endButtonOk: function (evt) {
+	    endButtonOk: function endButtonOk(evt) {
 	      return buttonIsValid(evt, this.data['endButtons']);
 	    }
 	  };
-	})();
-
+	}();
 
 /***/ },
 /* 6 */
@@ -1226,49 +1245,45 @@
 	      this.camera.removeChild(this.caster);
 	      this.caster = null;
 	    }
-
-	    (function () {
-	      switch (newLevel) {
-	        case 0:
-	          _this2.caster = _this2.camera.querySelector('[raycaster]');
-	          if (!_this2.caster) {
-	            _this2.caster = document.createElement('a-entity');
-	            _this2.camera.appendChild(_this2.caster);
-	            _this2.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
-	            _this2.caster.setAttribute('material', 'color: #000; shader: flat;');
-	            _this2.caster.setAttribute('position', '0 0 -0.5');
-	          }
-	          _this2.caster.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
-	          _this2.camera.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
+	    switch (newLevel) {
+	      case 0:
+	        this.caster = this.camera.querySelector('[raycaster]');
+	        if (!this.caster) {
+	          this.caster = document.createElement('a-entity');
+	          this.camera.appendChild(this.caster);
+	          this.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
+	          this.caster.setAttribute('material', 'color: #000; shader: flat;');
+	          this.caster.setAttribute('position', '0 0 -0.5');
+	        }
+	        this.caster.setAttribute('raycaster', 'objects: ' + this.data.objects);
+	        this.camera.setAttribute('super-hands', this.superHandsRaycasterConfig);
+	        if (physicsAvail) {
+	          this.camera.setAttribute('static-body', this.data.physicsBody);
+	        }
+	        break;
+	      case 1:
+	        // borrow raycaster config from laser-controls
+	        var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[this.controllerName] || {};
+	        var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, laserConfig.raycaster || {}));
+	        hands.forEach(function (h) {
+	          h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
+	          h.setAttribute('raycaster', rayConfig);
 	          if (physicsAvail) {
-	            _this2.camera.setAttribute('static-body', _this2.data.physicsBody);
+	            h.setAttribute('static-body', _this2.data.physicsBody);
 	          }
-	          break;
-	        case 1:
-	          // borrow raycaster config from laser-controls
-	          var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[_this2.controllerName] || {};
-	          var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: _this2.data.objects, showLine: true }, laserConfig.raycaster || {}));
-	          hands.forEach(function (h) {
-	            h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
-	            h.setAttribute('raycaster', rayConfig);
-	            if (physicsAvail) {
-	              h.setAttribute('static-body', _this2.data.physicsBody);
-	            }
-	          });
-	          break;
-	        case 2:
-	          ['right', 'left'].forEach(function (h) {
-	            // clobber flag to restore defaults
-	            _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
-	            _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
-	            if (physicsAvail) {
-	              _this2[h].setAttribute('static-body', _this2.data.physicsBody);
-	            }
-	          });
-	          break;
-	      }
-	    })();
-
+	        });
+	        break;
+	      case 2:
+	        ['right', 'left'].forEach(function (h) {
+	          // clobber flag to restore defaults
+	          _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
+	          _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
+	          if (physicsAvail) {
+	            _this2[h].setAttribute('static-body', _this2.data.physicsBody);
+	          }
+	        });
+	        break;
+	    }
 	    this.currentLevel = newLevel;
 	    this.el.emit('controller-progressed', {
 	      level: this.levels[this.currentLevel]

@@ -659,49 +659,45 @@ AFRAME.registerComponent('progressive-controls', {
       this.camera.removeChild(this.caster);
       this.caster = null;
     }
-
-    (function () {
-      switch (newLevel) {
-        case 0:
-          _this2.caster = _this2.camera.querySelector('[raycaster]');
-          if (!_this2.caster) {
-            _this2.caster = document.createElement('a-entity');
-            _this2.camera.appendChild(_this2.caster);
-            _this2.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
-            _this2.caster.setAttribute('material', 'color: #000; shader: flat;');
-            _this2.caster.setAttribute('position', '0 0 -0.5');
-          }
-          _this2.caster.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
-          _this2.camera.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
+    switch (newLevel) {
+      case 0:
+        this.caster = this.camera.querySelector('[raycaster]');
+        if (!this.caster) {
+          this.caster = document.createElement('a-entity');
+          this.camera.appendChild(this.caster);
+          this.caster.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
+          this.caster.setAttribute('material', 'color: #000; shader: flat;');
+          this.caster.setAttribute('position', '0 0 -0.5');
+        }
+        this.caster.setAttribute('raycaster', 'objects: ' + this.data.objects);
+        this.camera.setAttribute('super-hands', this.superHandsRaycasterConfig);
+        if (physicsAvail) {
+          this.camera.setAttribute('static-body', this.data.physicsBody);
+        }
+        break;
+      case 1:
+        // borrow raycaster config from laser-controls
+        var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[this.controllerName] || {};
+        var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, laserConfig.raycaster || {}));
+        hands.forEach(function (h) {
+          h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
+          h.setAttribute('raycaster', rayConfig);
           if (physicsAvail) {
-            _this2.camera.setAttribute('static-body', _this2.data.physicsBody);
+            h.setAttribute('static-body', _this2.data.physicsBody);
           }
-          break;
-        case 1:
-          // borrow raycaster config from laser-controls
-          var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[_this2.controllerName] || {};
-          var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: _this2.data.objects, showLine: true }, laserConfig.raycaster || {}));
-          hands.forEach(function (h) {
-            h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
-            h.setAttribute('raycaster', rayConfig);
-            if (physicsAvail) {
-              h.setAttribute('static-body', _this2.data.physicsBody);
-            }
-          });
-          break;
-        case 2:
-          ['right', 'left'].forEach(function (h) {
-            // clobber flag to restore defaults
-            _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
-            _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
-            if (physicsAvail) {
-              _this2[h].setAttribute('static-body', _this2.data.physicsBody);
-            }
-          });
-          break;
-      }
-    })();
-
+        });
+        break;
+      case 2:
+        ['right', 'left'].forEach(function (h) {
+          // clobber flag to restore defaults
+          _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
+          _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
+          if (physicsAvail) {
+            _this2[h].setAttribute('static-body', _this2.data.physicsBody);
+          }
+        });
+        break;
+    }
     this.currentLevel = newLevel;
     this.el.emit('controller-progressed', {
       level: this.levels[this.currentLevel]
