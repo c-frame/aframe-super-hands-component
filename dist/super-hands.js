@@ -1244,6 +1244,7 @@
 	    if (newLevel !== 0 && this.caster) {
 	      this.camera.removeChild(this.caster);
 	      this.caster = null;
+	      this.camera.removeAttribute('super-hands');
 	    }
 	    switch (newLevel) {
 	      case 0:
