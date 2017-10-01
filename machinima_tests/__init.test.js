@@ -1,5 +1,5 @@
 /* global sinon, setup, teardown */
-
+var machinima = require('aframe-machinima-testing');
 /**
  * __init.test.js is run before every test case.
  */
@@ -10,12 +10,9 @@ setup(function () {
 });
 
 teardown(function () {
+  machinima.teardownReplayer();
   // Clean up any attached elements.
   const attachedEls = ['canvas', 'a-assets', 'a-scene'];
-  const replayer = document.querySelector('a-scene') &&
-      document.querySelector('a-scene').components &&
-      document.querySelector('a-scene').components['avatar-replayer'];
-  if (replayer) { replayer.isReplaying = false; }
   var els = document.querySelectorAll(attachedEls.join(','));
 
   for (var i = 0; i < els.length; i++) {

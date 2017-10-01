@@ -113,6 +113,11 @@ require('super-hands');
 ```
 ### News
 
+Master branch
+
+* Implement new [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
+  package for machinima test management
+
 v2.0.1
 
 * Bug fixes:
