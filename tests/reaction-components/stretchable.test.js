@@ -3,6 +3,7 @@
 var helpers = require('../helpers');
 var entityFactory = helpers.entityFactory;
 var coord = AFRAME.utils.coordinates.parse;
+var uncoord = AFRAME.utils.coordinates.stringify;
 
 suite('stretchable', function () {
   setup(function (done) {
@@ -54,14 +55,14 @@ suite('stretchable', function () {
     this.comp.start({ detail: { hand: this.hand1 } });
     this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
-    assert.deepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
+    assert.strictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1');
     this.comp.tick();
-    assert.notDeepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
+    assert.notStrictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1');
     assert.isAbove(this.el.getAttribute('scale').x, 1);
     lastScale = this.el.getAttribute('scale');
     this.comp.end({ detail: { hand: this.hand1 } });
     this.comp.tick();
-    assert.deepEqual(this.el.getAttribute('scale'), lastScale);
+    assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale));
   });
   test('scale updates are invertable', function () {
     const posStub1 = this.sinon.stub(this.hand1, 'getAttribute');
@@ -76,13 +77,13 @@ suite('stretchable', function () {
     this.comp.start({ detail: { hand: this.hand1 } });
     this.comp.start({ detail: { hand: this.hand2 } });
     this.comp.tick();
-    assert.deepEqual(this.el.getAttribute('scale'), coord('1 1 1'));
+    assert.strictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1');
     this.comp.tick();
     assert.isBelow(this.el.getAttribute('scale').x, 1);
     lastScale = this.el.getAttribute('scale');
     this.comp.end({ detail: { hand: this.hand1 } });
     this.comp.tick();
-    assert.deepEqual(this.el.getAttribute('scale'), lastScale);
+    assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale));
   });
 });
 
