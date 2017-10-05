@@ -1303,6 +1303,13 @@
 	    }
 	  },
 	  eventRepeater: function eventRepeater(evt) {
+	    if (evt.type.startsWith('touch') && evt.preventDefault) {
+	      evt.preventDefault();
+	      // avoid repeating touchmove because it interferes with look-controls
+	      if (evt.type === 'touchmove') {
+	        return;
+	      }
+	    }
 	    this.camera.emit(evt.type, evt.detail);
 	  },
 	  addEventListeners: function addEventListeners() {
@@ -1313,6 +1320,7 @@
 	    this.el.sceneEl.canvas.addEventListener('mousedown', this.eventRepeaterB);
 	    this.el.sceneEl.canvas.addEventListener('mouseup', this.eventRepeaterB);
 	    this.el.sceneEl.canvas.addEventListener('touchstart', this.eventRepeaterB);
+	    this.el.sceneEl.canvas.addEventListener('touchmove', this.eventRepeaterB);
 	    this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
 	    this.eventsRegistered = true;
 	  }

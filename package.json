@@ -45,11 +45,11 @@
   },
   "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
   "devDependencies": {
-    "aframe": "^0.6.1",
+    "aframe": "^0.7.0",
     "aframe-event-set-component": "^3.0.2",
     "aframe-extras": "^3.11.4",
     "aframe-machinima-testing": "^0.1.1",
-    "aframe-motion-capture-components": "^0.1.6",
+    "aframe-motion-capture-components": "0.2.7",
     "aframe-physics-system": "^2.0.0",
     "babel-loader": "^6.2.10",
     "babelify": "^7.3.0",
