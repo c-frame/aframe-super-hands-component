@@ -115,8 +115,16 @@ require('super-hands');
 
 Master branch
 
+* Fix duplicate grab/click events with touch input
+* Update to A-Frame v0.7.0
 * Implement new [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
   package for machinima test management
+
+Master branch features can be tested using:
+
+```html
+<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
+```
 
 v2.0.1
 
