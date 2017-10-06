@@ -13,7 +13,7 @@ AFRAME.registerComponent('progressive-controls', {
       colliderEvent: 'raycaster-intersection',
       colliderEventProperty: 'els',
       colliderEndEvent: 'raycaster-intersection-cleared',
-      colliderEndEventProperty: 'el',
+      colliderEndEventProperty: 'clearedEls',
       colliderState: ''
     };
     this.camera = this.el.querySelector('a-camera,[camera]') ||

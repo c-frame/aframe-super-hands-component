@@ -323,9 +323,9 @@ AFRAME.registerComponent('super-hands', {
   /* tied to 'stateremoved' event for hovered entities,
      called when controller moves out of collision range of entity */
   unHover: function (evt) {
-    let target = evt.detail[this.data.colliderEndEventProperty];
-    if (target) {
-      this._unHover(target);
+    const clearedEls = evt.detail[this.data.colliderEndEventProperty];
+    if (clearedEls) {
+      clearedEls.forEach(el => this._unHover(el));
     } else if (evt.detail.state === this.data.colliderState) {
       this._unHover(evt.target);
     }
@@ -363,9 +363,9 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   unWatch: function (evt) {
-    let target = evt.detail[this.data.colliderEndEventProperty];
-    if (target) {
-      this._unWatch(target);
+    const clearedEls = evt.detail[this.data.colliderEndEventProperty];
+    if (clearedEls) {
+      clearedEls.forEach(el => this._unWatch(el));
     } else if (evt.detail.state === this.data.colliderState) {
       this._unWatch(evt.target);
     }
