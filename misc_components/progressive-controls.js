@@ -38,7 +38,7 @@ AFRAME.registerComponent('progressive-controls', {
     this.eventRepeaterB = this.eventRepeater.bind(this);
     // pass mouse and touch events into the scene
     this.addEventListeners();
-    this.oldStaticBodies=[];
+    this.oldStaticBodies = [];
   },
   update: function (oldData) {
     const level = this.currentLevel;
@@ -54,7 +54,7 @@ AFRAME.registerComponent('progressive-controls', {
     canv.removeEventListener('touchstart', this.eventRepeaterB);
     canv.removeEventListener('touchend', this.eventRepeaterB);
   },
-  assignPhysicsTo:function(e){
+  assignPhysicsTo: function (e) {
     e.setAttribute('static-body', this.data.physicsBody);
     this.oldStaticBodies.push(e);
   },
@@ -69,7 +69,7 @@ AFRAME.registerComponent('progressive-controls', {
       this.caster = null;
       this.camera.removeAttribute('super-hands');
     }
-    while(this.oldStaticBodies.length) this.oldStaticBodies.pop().removeAttribute('static-body');
+    while (this.oldStaticBodies.length) this.oldStaticBodies.pop().removeAttribute('static-body');
     switch (newLevel) {
       case 0:
         this.caster = this.camera.querySelector('[raycaster]');
