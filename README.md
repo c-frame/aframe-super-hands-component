@@ -319,6 +319,7 @@ class names `'right-controller'` and `'left-controller'` to help
 | objects | CSS selector string to be used by any automatically generated collision detectors | `''` (all entities) |
 | physicsBody | Properties to use when adding `static-body` to automatically generated controllers. Ignored if physics not added to the scene. | 'shape: sphere; sphereRadius: 0.02' |
 | touchCollider | Name of collider component to use with touch-level controls | 'sphere-collider' |
+| touchColliderRadius | Distance from touch-level controller within which grabbable objects can be touched | 0.05 |
 
 #### Events
 
