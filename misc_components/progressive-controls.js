@@ -38,6 +38,7 @@ AFRAME.registerComponent('progressive-controls', {
     this.eventRepeaterB = this.eventRepeater.bind(this);
     // pass mouse and touch events into the scene
     this.addEventListeners();
+    this.oldStaticBodies=[];
   },
   update: function (oldData) {
     const level = this.currentLevel;
@@ -53,6 +54,10 @@ AFRAME.registerComponent('progressive-controls', {
     canv.removeEventListener('touchstart', this.eventRepeaterB);
     canv.removeEventListener('touchend', this.eventRepeaterB);
   },
+  assignPhysicsTo:function(e){
+    e.setAttribute('static-body', this.data.physicsBody);
+    this.oldStaticBodies.push(e);
+  },
   setLevel: function (newLevel) {
     const maxLevel = this.levels.indexOf(this.data.maxLevel);
     const physicsAvail = !!this.el.sceneEl.getAttribute('physics');
@@ -64,6 +69,7 @@ AFRAME.registerComponent('progressive-controls', {
       this.caster = null;
       this.camera.removeAttribute('super-hands');
     }
+    while(this.oldStaticBodies.length) this.oldStaticBodies.pop().removeAttribute('static-body');
     switch (newLevel) {
       case 0:
         this.caster = this.camera.querySelector('[raycaster]');
@@ -78,7 +84,7 @@ AFRAME.registerComponent('progressive-controls', {
         this.caster.setAttribute('raycaster', 'objects: ' + this.data.objects);
         this.camera.setAttribute('super-hands', this.superHandsRaycasterConfig);
         if (physicsAvail) {
-          this.camera.setAttribute('static-body', this.data.physicsBody);
+          this.assignPhysicsTo(this.camera);
         }
         break;
       case 1:
@@ -92,7 +98,7 @@ AFRAME.registerComponent('progressive-controls', {
           h.setAttribute('super-hands', this.superHandsRaycasterConfig);
           h.setAttribute('raycaster', rayConfig);
           if (physicsAvail) {
-            h.setAttribute('static-body', this.data.physicsBody);
+            this.assignPhysicsTo(h);
           }
         });
         break;
@@ -103,7 +109,7 @@ AFRAME.registerComponent('progressive-controls', {
           this[h].setAttribute(this.data.touchCollider,
               'objects: ' + this.data.objects);
           if (physicsAvail) {
-            this[h].setAttribute('static-body', this.data.physicsBody);
+            this.assignPhysicsTo(this[h]);
           }
         });
         break;
