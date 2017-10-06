@@ -299,7 +299,7 @@ suite('super-hands raycaster integration', function () {
       'super-hands': 'colliderEvent: raycaster-intersection;' +
           'colliderEventProperty: els;' +
           'colliderEndEvent: raycaster-intersection-cleared;' +
-          'colliderEndEventProperty: el',
+          'colliderEndEventProperty: clearedEls',
       'raycaster': 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
     }, true);
     this.hand1.setAttribute('position', '0 0 1');
