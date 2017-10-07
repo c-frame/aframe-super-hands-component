@@ -24,9 +24,7 @@ AFRAME.registerComponent('progressive-controls', {
           this.el.appendChild(document.createElement('a-entity'));
       // add class on newly created entities
       this[hand].classList && this[hand].classList.add(hand + '-controller');
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls',
-          'vive-controls', 'windows-motion-controls']
-          .forEach(ctrlr => this[hand].setAttribute(ctrlr, 'hand: ' + hand));
+      this[hand].setAttribute('laser-controls', 'hand: ' + hand);
       // save initial config
       this[hand + 'shOriginal'] = this[hand].getAttribute('super-hands') || {};
       if (typeof this[hand + 'shOriginal'] === 'string') {
@@ -82,15 +80,9 @@ AFRAME.registerComponent('progressive-controls', {
         }
         break;
       case 1:
-        // borrow raycaster config from laser-controls
-        const laserConfig = AFRAME.components['laser-controls']
-            .Component.prototype.config[this.controllerName] || {};
-        const rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils
-            .extend({objects: this.data.objects, showLine: true},
-            laserConfig.raycaster || {}));
         hands.forEach(h => {
           h.setAttribute('super-hands', this.superHandsRaycasterConfig);
-          h.setAttribute('raycaster', rayConfig);
+          h.setAttribute('raycaster', 'objects: ' + this.data.objects);
           if (physicsAvail) {
             h.setAttribute('static-body', this.data.physicsBody);
           }
