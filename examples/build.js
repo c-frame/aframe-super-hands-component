@@ -2004,10 +2004,12 @@ AFRAME.registerSystem('motion-capture-replayer', {
   },
 
   remove: function () {
+    // restore modified objects
     var trackedControlsComponent = AFRAME.components['tracked-controls'].Component.prototype;
+    var trackedControlsSystem = this.sceneEl.systems['tracked-controls'];
     trackedControlsComponent.tick = trackedControlsComponent.trackedControlsTick;
     delete trackedControlsComponent.trackedControlsTick;
-    this.sceneEl.systems['tracked-controls'].updateControllerList = this.updateControllerListOriginal;
+    trackedControlsSystem.updateControllerList = this.updateControllerListOriginal;
   },
 
   trackedControlsTickWrapper: function (time, delta) {
