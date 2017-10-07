@@ -4,7 +4,8 @@ AFRAME.registerComponent('progressive-controls', {
     maxLevel: {default: 'touch', oneOf: ['gaze', 'point', 'touch']},
     objects: {default: ''},
     physicsBody: {default: 'shape: sphere; sphereRadius: 0.02'},
-    touchCollider: {default: 'sphere-collider'}
+    touchCollider: {default: 'sphere-collider'},
+    touchColliderRadius: {default: 0.05}
   },
   init: function () {
     this.levels = ['gaze', 'point', 'touch'];
@@ -93,7 +94,7 @@ AFRAME.registerComponent('progressive-controls', {
           // clobber flag to restore defaults
           this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
           this[h].setAttribute(this.data.touchCollider,
-              'objects: ' + this.data.objects);
+              'objects: ' + this.data.objects + '; radius: ' + this.data.touchColliderRadius);
           if (physicsAvail) {
             this[h].setAttribute('static-body', this.data.physicsBody);
           }
