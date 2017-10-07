@@ -60,4 +60,20 @@ suite('progressive pointer controls', function () {
       assert.isBelow(this.boxRedDn.getAttribute('position').x, -1, 'Red left');
     }
   );
+  machinima.test(
+    'button filtering',
+    'base/recordings/laserhands.json',
+    function () {
+      assert.isAbove(this.boxGrnUp.getAttribute('position').z, 2, 'Green behind');
+      assert.strictEqual(this.boxRedUp.getAttribute('position').y, 1.6, 'Red unmoved');
+      assert.isAbove(this.boxBlueUp.getAttribute('position').y, 3, 'Blue above');
+      assert.strictEqual(this.boxRedDn.getAttribute('position').x, 0, 'Red unmoved');
+    },
+    function () {
+      this.boxRedUp.setAttribute('grabbable', 'startButtons: trackpaddown; endButtons: trackpadup');
+      this.boxRedDn.setAttribute('grabbable', 'startButtons: trackpaddown; endButtons: trackpadup');
+      this.boxGrnUp.setAttribute('grabbable', 'startButtons: triggerdown; endButtons: triggerup');
+      this.boxBlueUp.setAttribute('grabbable', 'startButtons: triggerdown; endButtons: triggerup');
+    }
+  );
 });
