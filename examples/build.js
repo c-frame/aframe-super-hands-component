@@ -613,9 +613,7 @@ AFRAME.registerComponent('progressive-controls', {
       _this[hand] = _this.el.querySelector('.' + hand + '-controller') || _this.el.appendChild(document.createElement('a-entity'));
       // add class on newly created entities
       _this[hand].classList && _this[hand].classList.add(hand + '-controller');
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(function (ctrlr) {
-        return _this[hand].setAttribute(ctrlr, 'hand: ' + hand);
-      });
+      _this[hand].setAttribute('laser-controls', 'hand: ' + hand);
       // save initial config
       _this[hand + 'shOriginal'] = _this[hand].getAttribute('super-hands') || {};
       if (typeof _this[hand + 'shOriginal'] === 'string') {
@@ -677,12 +675,9 @@ AFRAME.registerComponent('progressive-controls', {
         }
         break;
       case 1:
-        // borrow raycaster config from laser-controls
-        var laserConfig = AFRAME.components['laser-controls'].Component.prototype.config[this.controllerName] || {};
-        var rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, laserConfig.raycaster || {}));
         hands.forEach(function (h) {
           h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
-          h.setAttribute('raycaster', rayConfig);
+          h.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
           if (physicsAvail) {
             h.setAttribute('static-body', _this2.data.physicsBody);
           }
@@ -2004,10 +1999,12 @@ AFRAME.registerSystem('motion-capture-replayer', {
   },
 
   remove: function () {
+    // restore modified objects
     var trackedControlsComponent = AFRAME.components['tracked-controls'].Component.prototype;
+    var trackedControlsSystem = this.sceneEl.systems['tracked-controls'];
     trackedControlsComponent.tick = trackedControlsComponent.trackedControlsTick;
     delete trackedControlsComponent.trackedControlsTick;
-    this.sceneEl.systems['tracked-controls'].updateControllerList = this.updateControllerListOriginal;
+    trackedControlsSystem.updateControllerList = this.updateControllerListOriginal;
   },
 
   trackedControlsTickWrapper: function (time, delta) {
@@ -2343,6 +2340,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.grabDistance = undefined;
     this.grabDirection = { x: 0, y: 0, z: -1 };
     this.grabOffset = { x: 0, y: 0, z: 0 };
+    // persistent object speeds up repeat setAttribute calls
+    this.destPosition = { x: 0, y: 0, z: 0 };
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, function (e) {
@@ -2364,7 +2363,6 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   tick: function () {
     var deltaPosition = new THREE.Vector3();
     var targetPosition = new THREE.Vector3();
-    var destPosition = { x: 0, y: 0, z: 0 };
     return function () {
       var entityPosition;
       if (this.grabber) {
@@ -2375,10 +2373,10 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
           // relative position changes work better with nested entities
           deltaPosition.sub(targetPosition);
           entityPosition = this.el.getAttribute('position');
-          destPosition.x = entityPosition.x - deltaPosition.x * this.xFactor;
-          destPosition.y = entityPosition.y - deltaPosition.y * this.yFactor;
-          destPosition.z = entityPosition.z - deltaPosition.z * this.zFactor;
-          this.el.setAttribute('position', destPosition);
+          this.destPosition.x = entityPosition.x - deltaPosition.x * this.xFactor;
+          this.destPosition.y = entityPosition.y - deltaPosition.y * this.yFactor;
+          this.destPosition.z = entityPosition.z - deltaPosition.z * this.zFactor;
+          this.el.setAttribute('position', this.destPosition);
         } else {
           this.deltaPositionIsValid = true;
         }

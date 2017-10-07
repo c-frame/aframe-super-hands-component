@@ -19,6 +19,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.grabDistance = undefined;
     this.grabDirection = {x: 0, y: 0, z: -1};
     this.grabOffset = {x: 0, y: 0, z: 0};
+    // persistent object speeds up repeat setAttribute calls
+    this.destPosition = {x: 0, y: 0, z: 0};
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
@@ -34,7 +36,6 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   tick: (function () {
     const deltaPosition = new THREE.Vector3();
     const targetPosition = new THREE.Vector3();
-    const destPosition = {x: 0, y: 0, z: 0};
     return function () {
       var entityPosition;
       if (this.grabber) {
@@ -49,10 +50,13 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
           // relative position changes work better with nested entities
           deltaPosition.sub(targetPosition);
           entityPosition = this.el.getAttribute('position');
-          destPosition.x = entityPosition.x - deltaPosition.x * this.xFactor;
-          destPosition.y = entityPosition.y - deltaPosition.y * this.yFactor;
-          destPosition.z = entityPosition.z - deltaPosition.z * this.zFactor;
-          this.el.setAttribute('position', destPosition);
+          this.destPosition.x =
+              entityPosition.x - deltaPosition.x * this.xFactor;
+          this.destPosition.y =
+              entityPosition.y - deltaPosition.y * this.yFactor;
+          this.destPosition.z =
+              entityPosition.z - deltaPosition.z * this.zFactor;
+          this.el.setAttribute('position', this.destPosition);
         } else {
           this.deltaPositionIsValid = true;
         }
