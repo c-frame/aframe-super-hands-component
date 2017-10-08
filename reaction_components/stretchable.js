@@ -13,6 +13,10 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.stretched = false;
     this.stretchers = [];
 
+    this.scale = new THREE.Vector3();
+    this.handPos = new THREE.Vector3();
+    this.otherHandPos = new THREE.Vector3();
+
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
 
@@ -22,54 +26,49 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   update: function (oldDat) {
 
   },
-  tick: (function () {
-    const scale = new THREE.Vector3();
-    const handPos = new THREE.Vector3();
-    const otherHandPos = new THREE.Vector3();
-    return function () {
-      if (!this.stretched) { return; }
-      scale.copy(this.el.getAttribute('scale'));
-      handPos.copy(this.stretchers[0].getAttribute('position'));
-      otherHandPos.copy(this.stretchers[1].getAttribute('position'));
-      const currentStretch = handPos.distanceTo(otherHandPos);
-      let deltaStretch = 1;
-      if (this.previousStretch !== null && currentStretch !== 0) {
-        deltaStretch = Math.pow(
-            currentStretch / this.previousStretch,
-            (this.data.invert)
-              ? -1
-              : 1
-        );
+  tick: function () {
+    if (!this.stretched) { return; }
+    this.scale.copy(this.el.getAttribute('scale'));
+    this.handPos.copy(this.stretchers[0].getAttribute('position'));
+    this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    const currentStretch = this.handPos.distanceTo(this.otherHandPos);
+    let deltaStretch = 1;
+    if (this.previousStretch !== null && currentStretch !== 0) {
+      deltaStretch = Math.pow(
+          currentStretch / this.previousStretch,
+          (this.data.invert)
+            ? -1
+            : 1
+      );
+    }
+    this.previousStretch = currentStretch;
+    this.scale.multiplyScalar(deltaStretch);
+    this.el.setAttribute('scale', this.scale);
+    // force scale update for physics body
+    if (this.el.body && this.data.usePhysics !== 'never') {
+      var physicsShape = this.el.body.shapes[0];
+      if (physicsShape.halfExtents) {
+        physicsShape.halfExtents
+            .scale(deltaStretch, physicsShape.halfExtents);
+        physicsShape.updateConvexPolyhedronRepresentation();
+      } else if (physicsShape.radius) {
+        physicsShape.radius *= deltaStretch;
+        physicsShape.updateBoundingSphereRadius();
+      // This doesn't update the cone size - can't find right update function
+      // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
+      //     physicsShape.height) {
+      //   physicsShape.height *= deltaStretch;
+      //   physicsShape.radiusTop *= deltaStretch;
+      //   physicsShape.radiusBottom *= deltaStretch;
+      //   physicsShape.updateBoundingSphereRadius();
+      } else if (!this.shapeWarned) {
+        console.warn('Unable to stretch physics body: unsupported shape');
+        this.shapeWarned = true;
+        // todo: suport more shapes
       }
-      this.previousStretch = currentStretch;
-      scale.multiplyScalar(deltaStretch);
-      this.el.setAttribute('scale', scale);
-      // force scale update for physics body
-      if (this.el.body && this.data.usePhysics !== 'never') {
-        var physicsShape = this.el.body.shapes[0];
-        if (physicsShape.halfExtents) {
-          physicsShape.halfExtents
-              .scale(deltaStretch, physicsShape.halfExtents);
-          physicsShape.updateConvexPolyhedronRepresentation();
-        } else if (physicsShape.radius) {
-          physicsShape.radius *= deltaStretch;
-          physicsShape.updateBoundingSphereRadius();
-        // This doesn't update the cone size - can't find right update function
-        // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
-        //     physicsShape.height) {
-        //   physicsShape.height *= deltaStretch;
-        //   physicsShape.radiusTop *= deltaStretch;
-        //   physicsShape.radiusBottom *= deltaStretch;
-        //   physicsShape.updateBoundingSphereRadius();
-        } else if (!this.shapeWarned) {
-          console.warn('Unable to stretch physics body: unsupported shape');
-          this.shapeWarned = true;
-          // todo: suport more shapes
-        }
-        this.el.body.updateBoundingRadius();
-      }
-    };
-  })(),
+      this.el.body.updateBoundingRadius();
+    }
+  },
   remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
