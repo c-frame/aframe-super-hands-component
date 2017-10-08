@@ -67,7 +67,15 @@ AFRAME.registerComponent('progressive-controls', {
       this.caster = null;
       this.camera.removeAttribute('super-hands');
     }
-    while (this.oldStaticBodies.length) this.oldStaticBodies.pop().removeAttribute('static-body');
+    function removePhysics (oldEl) {
+      function reallyRemovePhysics () { oldEl.removeAttribute('static-body'); }
+      if (oldEl.body) {
+        reallyRemovePhysics();
+      } else {
+        oldEl.addEventListener('body-loaded', reallyRemovePhysics);
+      }
+    }
+    while (this.oldStaticBodies.length) removePhysics(this.oldStaticBodies.pop());
     switch (newLevel) {
       case 0:
         this.caster = this.camera.querySelector('[raycaster]');
