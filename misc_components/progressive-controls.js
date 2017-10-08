@@ -90,6 +90,7 @@ AFRAME.registerComponent('progressive-controls', {
         break;
       case 2:
         ['right', 'left'].forEach(h => {
+          laserCleanup(this[h]);
           // clobber flag to restore defaults
           this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
           this[h].setAttribute(this.data.touchCollider,
@@ -140,3 +141,14 @@ AFRAME.registerComponent('progressive-controls', {
     this.eventsRegistered = true;
   }
 });
+function laserCleanup (el) {
+  const removeRay = e => {
+    el.removeAttribute('raycaster');
+    el.removeAttribute('line');
+  };
+  el.removeAttribute('cursor');
+  // callbacks are a temp workaround until laser-controls cleanup improved
+  el.addEventListener('controllerconnected', removeRay);
+  el.addEventListener('controllerdisconnected', removeRay);
+  el.addEventListener('controllermodelready', removeRay);
+}

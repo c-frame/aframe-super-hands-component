@@ -21,6 +21,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.grabOffset = {x: 0, y: 0, z: 0};
     // persistent object speeds up repeat setAttribute calls
     this.destPosition = {x: 0, y: 0, z: 0};
+    this.deltaPosition = new THREE.Vector3();
+    this.targetPosition = new THREE.Vector3();
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
@@ -33,37 +35,33 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.zFactor = (this.data.invert) ? -1 : 1;
     this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY;
   },
-  tick: (function () {
-    const deltaPosition = new THREE.Vector3();
-    const targetPosition = new THREE.Vector3();
-    return function () {
-      var entityPosition;
-      if (this.grabber) {
-        // reflect on z-axis to point in same direction as the laser
-        targetPosition.copy(this.grabDirection);
-        targetPosition
-            .applyQuaternion(this.grabber.object3D.getWorldQuaternion())
-            .setLength(this.grabDistance)
-            .add(this.grabber.object3D.getWorldPosition())
-            .add(this.grabOffset);
-        if (this.deltaPositionIsValid) {
-          // relative position changes work better with nested entities
-          deltaPosition.sub(targetPosition);
-          entityPosition = this.el.getAttribute('position');
-          this.destPosition.x =
-              entityPosition.x - deltaPosition.x * this.xFactor;
-          this.destPosition.y =
-              entityPosition.y - deltaPosition.y * this.yFactor;
-          this.destPosition.z =
-              entityPosition.z - deltaPosition.z * this.zFactor;
-          this.el.setAttribute('position', this.destPosition);
-        } else {
-          this.deltaPositionIsValid = true;
-        }
-        deltaPosition.copy(targetPosition);
+  tick: function () {
+    var entityPosition;
+    if (this.grabber) {
+      // reflect on z-axis to point in same direction as the laser
+      this.targetPosition.copy(this.grabDirection);
+      this.targetPosition
+          .applyQuaternion(this.grabber.object3D.getWorldQuaternion())
+          .setLength(this.grabDistance)
+          .add(this.grabber.object3D.getWorldPosition())
+          .add(this.grabOffset);
+      if (this.deltaPositionIsValid) {
+        // relative position changes work better with nested entities
+        this.deltaPosition.sub(this.targetPosition);
+        entityPosition = this.el.getAttribute('position');
+        this.destPosition.x =
+            entityPosition.x - this.deltaPosition.x * this.xFactor;
+        this.destPosition.y =
+            entityPosition.y - this.deltaPosition.y * this.yFactor;
+        this.destPosition.z =
+            entityPosition.z - this.deltaPosition.z * this.zFactor;
+        this.el.setAttribute('position', this.destPosition);
+      } else {
+        this.deltaPositionIsValid = true;
       }
-    };
-  })(),
+      this.deltaPosition.copy(this.targetPosition);
+    }
+  },
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);

@@ -4,12 +4,14 @@ const machinima = require('aframe-machinima-testing');
 
 suite('progressive-controls touch interactions', function () {
   setup(function (done) {
-    machinima.setupScene('hands.html');
+    machinima.setupScene('progressive-hands.html');
     this.scene = document.querySelector('a-scene');
     this.scene.addEventListener('loaded', e => {
       this.boxGrnUp = document.getElementById('greenHigh');
       this.boxGrnDn = document.getElementById('greenLow');
       this.boxRedUp = document.getElementById('redHigh');
+      this.boxBlueUp = document.getElementById('blueHigh');
+      this.boxRedDn = document.getElementById('redLow');
       done();
     });
   });
@@ -35,6 +37,33 @@ suite('progressive-controls touch interactions', function () {
       this.startScale = this.boxRedUp.getAttribute('scale');
       assert.equal(this.boxGrnUp.getAttribute('geometry').primitive, 'box');
       assert.equal(this.boxGrnDn.getAttribute('geometry').primitive, 'box');
+    }
+  );
+  machinima.test(
+    'lasers disabled in touch mode',
+    'base/recordings/laserhands.json',
+    function () {
+      const lhand = document.querySelector('.left-controller');
+      const rhand = document.querySelector('.right-controller');
+      assert.strictEqual(this.boxGrnUp.getAttribute('position').z, -1, 'Green unmoved');
+      assert.strictEqual(this.boxRedUp.getAttribute('position').y, 1.6, 'Red unmoved');
+      assert.strictEqual(this.boxBlueUp.getAttribute('position').y, 1.6, 'Blue unmoved');
+      assert.strictEqual(this.boxRedDn.getAttribute('position').x, 0, 'Red unmoved');
+      assert.isNotOk(rhand.getAttribute('line'));
+      assert.isNotOk(lhand.getAttribute('line'));
+      assert.isNotOk(rhand.getAttribute('raycaster'));
+      assert.isNotOk(lhand.getAttribute('raycaster'));
+    }
+  );
+  machinima.test(
+    'no state bleed between reaction component instances',
+    'base/recordings/doublegrab.json',
+    function () {
+      assert.strictEqual(this.boxRedUp.getAttribute('position').y, 1.6, 'Red unmoved');
+      assert.isAbove(this.boxRedDn.getAttribute('position').x, 0, 'Red still around');
+      assert.isBelow(this.boxRedDn.getAttribute('position').x, 0.75, 'Red still around');
+      assert.isAbove(this.boxGrnDn.getAttribute('position').z, -1, 'Green still around');
+      assert.isBelow(this.boxGrnDn.getAttribute('position').z, 0, 'Green still around');
     }
   );
 });
