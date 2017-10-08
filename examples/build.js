@@ -685,6 +685,7 @@ AFRAME.registerComponent('progressive-controls', {
         break;
       case 2:
         ['right', 'left'].forEach(function (h) {
+          laserCleanup(_this2[h]);
           // clobber flag to restore defaults
           _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
           _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
@@ -734,6 +735,17 @@ AFRAME.registerComponent('progressive-controls', {
     this.eventsRegistered = true;
   }
 });
+function laserCleanup(el) {
+  var removeRay = function removeRay(e) {
+    el.removeAttribute('raycaster');
+    el.removeAttribute('line');
+  };
+  el.removeAttribute('cursor');
+  // callbacks are a temp workaround until laser-controls cleanup improved
+  el.addEventListener('controllerconnected', removeRay);
+  el.addEventListener('controllerdisconnected', removeRay);
+  el.addEventListener('controllermodelready', removeRay);
+}
 
 },{}],5:[function(require,module,exports){
 /* global THREE, AFRAME  */
@@ -2342,6 +2354,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.grabOffset = { x: 0, y: 0, z: 0 };
     // persistent object speeds up repeat setAttribute calls
     this.destPosition = { x: 0, y: 0, z: 0 };
+    this.deltaPosition = new THREE.Vector3();
+    this.targetPosition = new THREE.Vector3();
     this.physicsInit();
 
     this.el.addEventListener(this.GRAB_EVENT, function (e) {
@@ -2360,30 +2374,26 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.zFactor = this.data.invert ? -1 : 1;
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
-  tick: function () {
-    var deltaPosition = new THREE.Vector3();
-    var targetPosition = new THREE.Vector3();
-    return function () {
-      var entityPosition;
-      if (this.grabber) {
-        // reflect on z-axis to point in same direction as the laser
-        targetPosition.copy(this.grabDirection);
-        targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
-        if (this.deltaPositionIsValid) {
-          // relative position changes work better with nested entities
-          deltaPosition.sub(targetPosition);
-          entityPosition = this.el.getAttribute('position');
-          this.destPosition.x = entityPosition.x - deltaPosition.x * this.xFactor;
-          this.destPosition.y = entityPosition.y - deltaPosition.y * this.yFactor;
-          this.destPosition.z = entityPosition.z - deltaPosition.z * this.zFactor;
-          this.el.setAttribute('position', this.destPosition);
-        } else {
-          this.deltaPositionIsValid = true;
-        }
-        deltaPosition.copy(targetPosition);
+  tick: function tick() {
+    var entityPosition;
+    if (this.grabber) {
+      // reflect on z-axis to point in same direction as the laser
+      this.targetPosition.copy(this.grabDirection);
+      this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
+      if (this.deltaPositionIsValid) {
+        // relative position changes work better with nested entities
+        this.deltaPosition.sub(this.targetPosition);
+        entityPosition = this.el.getAttribute('position');
+        this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
+        this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
+        this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
+        this.el.setAttribute('position', this.destPosition);
+      } else {
+        this.deltaPositionIsValid = true;
       }
-    };
-  }(),
+      this.deltaPosition.copy(this.targetPosition);
+    }
+  },
   remove: function remove() {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -2590,6 +2600,10 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.stretched = false;
     this.stretchers = [];
 
+    this.scale = new THREE.Vector3();
+    this.handPos = new THREE.Vector3();
+    this.otherHandPos = new THREE.Vector3();
+
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
 
@@ -2597,50 +2611,45 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   update: function update(oldDat) {},
-  tick: function () {
-    var scale = new THREE.Vector3();
-    var handPos = new THREE.Vector3();
-    var otherHandPos = new THREE.Vector3();
-    return function () {
-      if (!this.stretched) {
-        return;
+  tick: function tick() {
+    if (!this.stretched) {
+      return;
+    }
+    this.scale.copy(this.el.getAttribute('scale'));
+    this.handPos.copy(this.stretchers[0].getAttribute('position'));
+    this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    var currentStretch = this.handPos.distanceTo(this.otherHandPos);
+    var deltaStretch = 1;
+    if (this.previousStretch !== null && currentStretch !== 0) {
+      deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
+    }
+    this.previousStretch = currentStretch;
+    this.scale.multiplyScalar(deltaStretch);
+    this.el.setAttribute('scale', this.scale);
+    // force scale update for physics body
+    if (this.el.body && this.data.usePhysics !== 'never') {
+      var physicsShape = this.el.body.shapes[0];
+      if (physicsShape.halfExtents) {
+        physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
+        physicsShape.updateConvexPolyhedronRepresentation();
+      } else if (physicsShape.radius) {
+        physicsShape.radius *= deltaStretch;
+        physicsShape.updateBoundingSphereRadius();
+        // This doesn't update the cone size - can't find right update function
+        // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
+        //     physicsShape.height) {
+        //   physicsShape.height *= deltaStretch;
+        //   physicsShape.radiusTop *= deltaStretch;
+        //   physicsShape.radiusBottom *= deltaStretch;
+        //   physicsShape.updateBoundingSphereRadius();
+      } else if (!this.shapeWarned) {
+        console.warn('Unable to stretch physics body: unsupported shape');
+        this.shapeWarned = true;
+        // todo: suport more shapes
       }
-      scale.copy(this.el.getAttribute('scale'));
-      handPos.copy(this.stretchers[0].getAttribute('position'));
-      otherHandPos.copy(this.stretchers[1].getAttribute('position'));
-      var currentStretch = handPos.distanceTo(otherHandPos);
-      var deltaStretch = 1;
-      if (this.previousStretch !== null && currentStretch !== 0) {
-        deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
-      }
-      this.previousStretch = currentStretch;
-      scale.multiplyScalar(deltaStretch);
-      this.el.setAttribute('scale', scale);
-      // force scale update for physics body
-      if (this.el.body && this.data.usePhysics !== 'never') {
-        var physicsShape = this.el.body.shapes[0];
-        if (physicsShape.halfExtents) {
-          physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
-          physicsShape.updateConvexPolyhedronRepresentation();
-        } else if (physicsShape.radius) {
-          physicsShape.radius *= deltaStretch;
-          physicsShape.updateBoundingSphereRadius();
-          // This doesn't update the cone size - can't find right update function
-          // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
-          //     physicsShape.height) {
-          //   physicsShape.height *= deltaStretch;
-          //   physicsShape.radiusTop *= deltaStretch;
-          //   physicsShape.radiusBottom *= deltaStretch;
-          //   physicsShape.updateBoundingSphereRadius();
-        } else if (!this.shapeWarned) {
-          console.warn('Unable to stretch physics body: unsupported shape');
-          this.shapeWarned = true;
-          // todo: suport more shapes
-        }
-        this.el.body.updateBoundingRadius();
-      }
-    };
-  }(),
+      this.el.body.updateBoundingRadius();
+    }
+  },
   remove: function remove() {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
