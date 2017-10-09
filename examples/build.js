@@ -613,7 +613,9 @@ AFRAME.registerComponent('progressive-controls', {
       _this[hand] = _this.el.querySelector('.' + hand + '-controller') || _this.el.appendChild(document.createElement('a-entity'));
       // add class on newly created entities
       _this[hand].classList && _this[hand].classList.add(hand + '-controller');
-      _this[hand].setAttribute('laser-controls', 'hand: ' + hand);
+      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(function (ctrlr) {
+        return _this[hand].setAttribute(ctrlr, 'hand: ' + hand);
+      });
       // save initial config
       _this[hand + 'shOriginal'] = _this[hand].getAttribute('super-hands') || {};
       if (typeof _this[hand + 'shOriginal'] === 'string') {
@@ -675,9 +677,11 @@ AFRAME.registerComponent('progressive-controls', {
         }
         break;
       case 1:
+        var ctrlrCfg = this.controllerConfig[this.controllerName] || {};
+        var rayConfig = AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, ctrlrCfg.raycaster || {});
         hands.forEach(function (h) {
           h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
-          h.setAttribute('raycaster', 'objects: ' + _this2.data.objects);
+          h.setAttribute('raycaster', rayConfig);
           if (physicsAvail) {
             h.setAttribute('static-body', _this2.data.physicsBody);
           }
@@ -685,7 +689,6 @@ AFRAME.registerComponent('progressive-controls', {
         break;
       case 2:
         ['right', 'left'].forEach(function (h) {
-          laserCleanup(_this2[h]);
           // clobber flag to restore defaults
           _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
           _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
@@ -713,7 +716,7 @@ AFRAME.registerComponent('progressive-controls', {
     }
   },
   eventRepeater: function eventRepeater(evt) {
-    if (evt.type.startsWith('touch') && evt.preventDefault) {
+    if (evt.type.startsWith('touch')) {
       evt.preventDefault();
       // avoid repeating touchmove because it interferes with look-controls
       if (evt.type === 'touchmove') {
@@ -733,19 +736,16 @@ AFRAME.registerComponent('progressive-controls', {
     this.el.sceneEl.canvas.addEventListener('touchmove', this.eventRepeaterB);
     this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
     this.eventsRegistered = true;
+  },
+  controllerConfig: {
+    'gearvr-controls': {
+      raycaster: { origin: { x: 0, y: 0.0005, z: 0 } }
+    },
+    'oculus-touch-controls': {
+      raycaster: { origin: { x: 0.001, y: 0, z: 0.065 }, direction: { x: 0, y: -0.8, z: -1 } }
+    }
   }
 });
-function laserCleanup(el) {
-  var removeRay = function removeRay(e) {
-    el.removeAttribute('raycaster');
-    el.removeAttribute('line');
-  };
-  el.removeAttribute('cursor');
-  // callbacks are a temp workaround until laser-controls cleanup improved
-  el.addEventListener('controllerconnected', removeRay);
-  el.addEventListener('controllerdisconnected', removeRay);
-  el.addEventListener('controllermodelready', removeRay);
-}
 
 },{}],5:[function(require,module,exports){
 /* global THREE, AFRAME  */
