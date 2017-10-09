@@ -82,12 +82,11 @@ AFRAME.registerComponent('progressive-controls', {
         }
         break;
       case 1:
-        // borrow raycaster config from laser-controls
-        const laserConfig = AFRAME.components['laser-controls']
-            .Component.prototype.config[this.controllerName] || {};
-        const rayConfig = AFRAME.utils.styleParser.stringify(AFRAME.utils
-            .extend({objects: this.data.objects, showLine: true},
-            laserConfig.raycaster || {}));
+        const ctrlrCfg = this.controllerConfig[this.controllerName] || {};
+        const rayConfig = AFRAME.utils.extend(
+          {objects: this.data.objects, showLine: true},
+          ctrlrCfg.raycaster || {}
+        );
         hands.forEach(h => {
           h.setAttribute('super-hands', this.superHandsRaycasterConfig);
           h.setAttribute('raycaster', rayConfig);
@@ -98,11 +97,12 @@ AFRAME.registerComponent('progressive-controls', {
         break;
       case 2:
         ['right', 'left'].forEach(h => {
-          laserCleanup(this[h]);
           // clobber flag to restore defaults
           this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
-          this[h].setAttribute(this.data.touchCollider,
-              'objects: ' + this.data.objects);
+          this[h].setAttribute(
+            this.data.touchCollider,
+            'objects: ' + this.data.objects
+          );
           if (physicsAvail) {
             this[h].setAttribute('static-body', this.data.physicsBody);
           }
@@ -128,7 +128,7 @@ AFRAME.registerComponent('progressive-controls', {
     }
   },
   eventRepeater: function (evt) {
-    if (evt.type.startsWith('touch') && evt.preventDefault) {
+    if (evt.type.startsWith('touch')) {
       evt.preventDefault();
       // avoid repeating touchmove because it interferes with look-controls
       if (evt.type === 'touchmove') { return; }
@@ -147,16 +147,13 @@ AFRAME.registerComponent('progressive-controls', {
     this.el.sceneEl.canvas.addEventListener('touchmove', this.eventRepeaterB);
     this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
     this.eventsRegistered = true;
+  },
+  controllerConfig: {
+    'gearvr-controls': {
+      raycaster: {origin: {x: 0, y: 0.0005, z: 0}}
+    },
+    'oculus-touch-controls': {
+      raycaster: {origin: {x: 0.001, y: 0, z: 0.065}, direction: {x: 0, y: -0.8, z: -1}}
+    }
   }
 });
-function laserCleanup (el) {
-  const removeRay = e => {
-    el.removeAttribute('raycaster');
-    el.removeAttribute('line');
-  };
-  el.removeAttribute('cursor');
-  // callbacks are a temp workaround until laser-controls cleanup improved
-  el.addEventListener('controllerconnected', removeRay);
-  el.addEventListener('controllerdisconnected', removeRay);
-  el.addEventListener('controllermodelready', removeRay);
-}
