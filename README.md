@@ -190,6 +190,7 @@ Daydream, GearVR, Vive, and Rift + Touch.
 
 | super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
+| ^v2.0.0 | >=v0.7.0 | ^v3.11.4 | ^v2.0.0 |
 | ^v2.0.0 | v0.6.x | ^v3.11.4 | ^v2.0.0 |
 | v1.1.0 | v0.6.x | v3.8.6 | v1.4.2 |
 | v1.0.0 | v0.5.x | v3.8.5 | v1.4.1 |
