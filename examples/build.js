@@ -579,7 +579,8 @@ AFRAME.registerComponent('progressive-controls', {
     maxLevel: { default: 'touch', oneOf: ['gaze', 'point', 'touch'] },
     objects: { default: '' },
     physicsBody: { default: 'shape: sphere; sphereRadius: 0.02' },
-    touchCollider: { default: 'sphere-collider' }
+    touchCollider: { default: 'sphere-collider' },
+    controllerModel: { default: true }
   },
   init: function () {
     // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
@@ -599,9 +600,12 @@ AFRAME.registerComponent('progressive-controls', {
     ['left', 'right'].forEach(hand => {
       // find controller by left-controller/right-controller class or create one
       this[hand] = this.el.querySelector('.' + hand + '-controller') || this.el.appendChild(document.createElement('a-entity'));
-      // add class on newly created entities
-      this[hand].classList && this[hand].classList.add(hand + '-controller');
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(ctrlr => this[hand].setAttribute(ctrlr, 'hand: ' + hand));
+      this[hand].classList.add(hand + '-controller');
+      const ctrlrCompConfig = {
+        hand: hand,
+        model: this.data.controllerModel
+      };
+      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(ctrlr => this[hand].setAttribute(ctrlr, ctrlrCompConfig));
       // save initial config
       this[hand + 'shOriginal'] = this[hand].getAttribute('super-hands') || {};
       if (typeof this[hand + 'shOriginal'] === 'string') {
