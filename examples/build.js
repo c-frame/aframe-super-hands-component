@@ -6,11 +6,11 @@ require('aframe-motion-capture-components');
 /* used in examples to allow a desktop playback without HMD
    defined here to keep example files clear of clutter */
 window.playDemoRecording = function (spectate) {
-  var l = document.querySelector('a-link, a-entity[link]');
-  var s = document.querySelector('a-scene');
+  let l = document.querySelector('a-link, a-entity[link]');
+  let s = document.querySelector('a-scene');
   l && l.setAttribute('visible', 'false');
-  s.addEventListener('replayingstopped', function (e) {
-    var c = document.querySelector('[camera]');
+  s.addEventListener('replayingstopped', e => {
+    let c = document.querySelector('[camera]');
     window.setTimeout(function () {
       c.setAttribute('position', '0 1.6 2');
       c.setAttribute('rotation', '0 0 0');
@@ -80,7 +80,7 @@ AFRAME.registerComponent('super-hands', {
   /**
    * Called once when component is attached. Generally for initial setup.
    */
-  init: function init() {
+  init: function () {
     // constants
     this.HOVER_EVENT = 'hover-start';
     this.UNHOVER_EVENT = 'hover-end';
@@ -122,7 +122,7 @@ AFRAME.registerComponent('super-hands', {
    * Called when component is attached and when component data changes.
    * Generally modifies the entity based on the data.
    */
-  update: function update(oldData) {
+  update: function (oldData) {
     this.unRegisterListeners(oldData);
     this.registerListeners();
   },
@@ -131,14 +131,12 @@ AFRAME.registerComponent('super-hands', {
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function remove() {
-    var _this = this;
-
+  remove: function () {
     this.system.unregisterMe(this);
     this.unRegisterListeners();
     // cleanup states
-    this.hoverEls.forEach(function (h) {
-      h.removeEventListener('stateremoved', _this.unWatch);
+    this.hoverEls.forEach(h => {
+      h.removeEventListener('stateremoved', this.unWatch);
     });
     this.hoverEls.length = 0;
     if (this.state.get(this.HOVER_EVENT)) {
@@ -152,15 +150,15 @@ AFRAME.registerComponent('super-hands', {
    * Called when entity pauses.
    * Use to stop or remove any dynamic or background behavior such as events.
    */
-  pause: function pause() {},
+  pause: function () {},
 
   /**
    * Called when entity resumes.
    * Use to continue or add any dynamic or background behavior such as events.
    */
-  play: function play() {},
-  onGrabStartButton: function onGrabStartButton(evt) {
-    var carried = this.state.get(this.GRAB_EVENT);
+  play: function () {},
+  onGrabStartButton: function (evt) {
+    let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
     if (!carried) {
@@ -174,16 +172,12 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onGrabEndButton: function onGrabEndButton(evt) {
-    var _this2 = this;
-
-    var clickables = this.hoverEls.filter(function (h) {
-      return _this2.gehClicking.has(h);
-    });
-    var grabbed = this.state.get(this.GRAB_EVENT);
-    var endEvt = { hand: this.el, buttonEvent: evt };
+  onGrabEndButton: function (evt) {
+    const clickables = this.hoverEls.filter(h => this.gehClicking.has(h));
+    const grabbed = this.state.get(this.GRAB_EVENT);
+    const endEvt = { hand: this.el, buttonEvent: evt };
     this.dispatchMouseEventAll('mouseup', this.el);
-    for (var i = 0; i < clickables.length; i++) {
+    for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
     this.gehClicking.clear();
@@ -196,8 +190,8 @@ AFRAME.registerComponent('super-hands', {
       this.hover();
     }
   },
-  onStretchStartButton: function onStretchStartButton(evt) {
-    var stretched = this.state.get(this.STRETCH_EVENT);
+  onStretchStartButton: function (evt) {
+    let stretched = this.state.get(this.STRETCH_EVENT);
     if (!stretched) {
       stretched = this.findTarget(this.STRETCH_EVENT, {
         hand: this.el,
@@ -209,9 +203,9 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onStretchEndButton: function onStretchEndButton(evt) {
-    var stretched = this.state.get(this.STRETCH_EVENT);
-    var endEvt = { hand: this.el, buttonEvent: evt };
+  onStretchEndButton: function (evt) {
+    const stretched = this.state.get(this.STRETCH_EVENT);
+    const endEvt = { hand: this.el, buttonEvent: evt };
     // check if end event accepted
     if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
@@ -219,8 +213,8 @@ AFRAME.registerComponent('super-hands', {
       this.hover();
     }
   },
-  onDragDropStartButton: function onDragDropStartButton(evt) {
-    var dragged = this.state.get(this.DRAG_EVENT);
+  onDragDropStartButton: function (evt) {
+    let dragged = this.state.get(this.DRAG_EVENT);
     this.dragging = true;
     if (this.hoverEls.length) {
       this.gehDragged = new Set(this.hoverEls);
@@ -245,27 +239,25 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onDragDropEndButton: function onDragDropEndButton(evt) {
-    var _this3 = this;
-
-    var carried = this.state.get(this.DRAG_EVENT);
+  onDragDropEndButton: function (evt) {
+    const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
-    this.gehDragged.forEach(function (carried) {
-      _this3.dispatchMouseEvent(carried, 'dragend', _this3.el);
+    this.gehDragged.forEach(carried => {
+      this.dispatchMouseEvent(carried, 'dragend', this.el);
       // fire event both ways for all intersected targets
-      _this3.dispatchMouseEventAll('drop', carried, true, true);
-      _this3.dispatchMouseEventAll('dragleave', carried, true, true);
+      this.dispatchMouseEventAll('drop', carried, true, true);
+      this.dispatchMouseEventAll('dragleave', carried, true, true);
     });
     this.gehDragged.clear();
     if (carried) {
-      var ddEvt = {
+      const ddEvt = {
         hand: this.el,
         dropped: carried,
         on: null,
         buttonEvent: evt
       };
-      var endEvt = { hand: this.el, buttonEvent: evt };
-      var dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
+      const endEvt = { hand: this.el, buttonEvent: evt };
+      const dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
       if (dropTarget) {
         ddEvt.on = dropTarget;
         this.emitCancelable(carried, this.DRAGDROP_EVENT, ddEvt);
@@ -279,25 +271,23 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onHit: function onHit(evt) {
-    var _this4 = this;
-
-    var hitEl = evt.detail[this.data.colliderEventProperty];
-    var processHitEl = function processHitEl(hitEl) {
-      var hitElIndex = void 0;
-      hitElIndex = _this4.hoverEls.indexOf(hitEl);
+  onHit: function (evt) {
+    const hitEl = evt.detail[this.data.colliderEventProperty];
+    var processHitEl = hitEl => {
+      let hitElIndex;
+      hitElIndex = this.hoverEls.indexOf(hitEl);
       if (hitElIndex === -1) {
-        _this4.hoverEls.push(hitEl);
+        this.hoverEls.push(hitEl);
         // later loss of collision will remove from hoverEls
-        hitEl.addEventListener('stateremoved', _this4.unWatch);
-        _this4.dispatchMouseEvent(hitEl, 'mouseover', _this4.el);
-        if (_this4.dragging && _this4.gehDragged.size) {
+        hitEl.addEventListener('stateremoved', this.unWatch);
+        this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
+        if (this.dragging && this.gehDragged.size) {
           // events on targets and on dragged
-          _this4.gehDragged.forEach(function (dragged) {
-            _this4.dispatchMouseEventAll('dragenter', dragged, true, true);
+          this.gehDragged.forEach(dragged => {
+            this.dispatchMouseEventAll('dragenter', dragged, true, true);
           });
         }
-        _this4.hover();
+        this.hover();
       }
     };
     if (!hitEl) {
@@ -310,7 +300,7 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   /* search collided entities for target to hover/dragover */
-  hover: function hover() {
+  hover: function () {
     var hvrevt, hoverEl;
     // end previous hover
     if (this.state.has(this.HOVER_EVENT)) {
@@ -343,15 +333,11 @@ AFRAME.registerComponent('super-hands', {
   },
   /* tied to 'stateremoved' event for hovered entities,
      called when controller moves out of collision range of entity */
-  unHover: function unHover(evt) {
-    var _this5 = this;
-
-    var clearedEls = evt.detail[this.data.colliderEndEventProperty];
+  unHover: function (evt) {
+    const clearedEls = evt.detail[this.data.colliderEndEventProperty];
     if (clearedEls) {
       if (Array.isArray(clearedEls)) {
-        clearedEls.forEach(function (el) {
-          return _this5._unHover(el);
-        });
+        clearedEls.forEach(el => this._unHover(el));
       } else {
         this._unHover(clearedEls);
       }
@@ -360,9 +346,9 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
-  _unHover: function _unHover(el, skipNextHover) {
-    var unHovered = false;
-    var evt = void 0;
+  _unHover: function (el, skipNextHover) {
+    let unHovered = false;
+    let evt;
     el.removeEventListener('stateremoved', this.unHover);
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT);
@@ -387,15 +373,11 @@ AFRAME.registerComponent('super-hands', {
       this.hover();
     }
   },
-  unWatch: function unWatch(evt) {
-    var _this6 = this;
-
-    var clearedEls = evt.detail[this.data.colliderEndEventProperty];
+  unWatch: function (evt) {
+    const clearedEls = evt.detail[this.data.colliderEndEventProperty];
     if (clearedEls) {
       if (Array.isArray(clearedEls)) {
-        clearedEls.forEach(function (el) {
-          return _this6._unWatch(el);
-        });
+        clearedEls.forEach(el => this._unWatch(el));
       } else {
         // deprecation path: aframe <=0.7.0 / sphere-collider
         this._unWatch(clearedEls);
@@ -405,49 +387,43 @@ AFRAME.registerComponent('super-hands', {
       this._unWatch(evt.target);
     }
   },
-  _unWatch: function _unWatch(target) {
-    var _this7 = this;
-
+  _unWatch: function (target) {
     var hoverIndex = this.hoverEls.indexOf(target);
     target.removeEventListener('stateremoved', this.unWatch);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
     }
-    this.gehDragged.forEach(function (dragged) {
-      _this7.dispatchMouseEvent(target, 'dragleave', dragged);
-      _this7.dispatchMouseEvent(dragged, 'dragleave', target);
+    this.gehDragged.forEach(dragged => {
+      this.dispatchMouseEvent(target, 'dragleave', dragged);
+      this.dispatchMouseEvent(dragged, 'dragleave', target);
     });
     this.dispatchMouseEvent(target, 'mouseout', this.el);
   },
-  registerListeners: function registerListeners() {
-    var _this8 = this;
-
+  registerListeners: function () {
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
     this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
 
-    this.data.grabStartButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onGrabStartButton);
+    this.data.grabStartButtons.forEach(b => {
+      this.el.addEventListener(b, this.onGrabStartButton);
     });
-    this.data.grabEndButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onGrabEndButton);
+    this.data.grabEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onGrabEndButton);
     });
-    this.data.stretchStartButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onStretchStartButton);
+    this.data.stretchStartButtons.forEach(b => {
+      this.el.addEventListener(b, this.onStretchStartButton);
     });
-    this.data.stretchEndButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onStretchEndButton);
+    this.data.stretchEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onStretchEndButton);
     });
-    this.data.dragDropStartButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onDragDropStartButton);
+    this.data.dragDropStartButtons.forEach(b => {
+      this.el.addEventListener(b, this.onDragDropStartButton);
     });
-    this.data.dragDropEndButtons.forEach(function (b) {
-      _this8.el.addEventListener(b, _this8.onDragDropEndButton);
+    this.data.dragDropEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onDragDropEndButton);
     });
   },
-  unRegisterListeners: function unRegisterListeners(data) {
-    var _this9 = this;
-
+  unRegisterListeners: function (data) {
     data = data || this.data;
     if (Object.keys(data).length === 0) {
       // Empty object passed on initalization
@@ -457,26 +433,26 @@ AFRAME.registerComponent('super-hands', {
     this.el.removeEventListener(data.colliderEndEvent, this.unHover);
     this.el.removeEventListener(data.colliderEndEvent, this.unWatch);
 
-    data.grabStartButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onGrabStartButton);
+    data.grabStartButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onGrabStartButton);
     });
-    data.grabEndButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onGrabEndButton);
+    data.grabEndButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onGrabEndButton);
     });
-    data.stretchStartButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onStretchStartButton);
+    data.stretchStartButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onStretchStartButton);
     });
-    data.stretchEndButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onStretchEndButton);
+    data.stretchEndButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onStretchEndButton);
     });
-    data.dragDropStartButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onDragDropStartButton);
+    data.dragDropStartButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onDragDropStartButton);
     });
-    data.dragDropEndButtons.forEach(function (b) {
-      _this9.el.removeEventListener(b, _this9.onDragDropEndButton);
+    data.dragDropEndButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onDragDropEndButton);
     });
   },
-  emitCancelable: function emitCancelable(target, name, detail) {
+  emitCancelable: function (target, name, detail) {
     var data, evt;
     detail = detail || {};
     data = { bubbles: true, cancelable: true, detail: detail };
@@ -484,39 +460,31 @@ AFRAME.registerComponent('super-hands', {
     evt = new window.CustomEvent(name, data);
     return target.dispatchEvent(evt);
   },
-  dispatchMouseEvent: function dispatchMouseEvent(target, name, relatedTarget) {
+  dispatchMouseEvent: function (target, name, relatedTarget) {
     var mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget });
     target.dispatchEvent(mEvt);
   },
-  dispatchMouseEventAll: function dispatchMouseEventAll(name, relatedTarget, filterUsed, alsoReverse) {
-    var _this10 = this;
-
-    var els = this.hoverEls;
+  dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
+    let els = this.hoverEls;
     if (filterUsed) {
-      els = els.filter(function (el) {
-        return el !== _this10.state.get(_this10.GRAB_EVENT) && el !== _this10.state.get(_this10.DRAG_EVENT) && el !== _this10.state.get(_this10.STRETCH_EVENT) && !_this10.gehDragged.has(el);
-      });
+      els = els.filter(el => el !== this.state.get(this.GRAB_EVENT) && el !== this.state.get(this.DRAG_EVENT) && el !== this.state.get(this.STRETCH_EVENT) && !this.gehDragged.has(el));
     }
     if (alsoReverse) {
-      for (var i = 0; i < els.length; i++) {
+      for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
         this.dispatchMouseEvent(relatedTarget, name, els[i]);
       }
     } else {
-      for (var _i = 0; _i < els.length; _i++) {
-        this.dispatchMouseEvent(els[_i], name, relatedTarget);
+      for (let i = 0; i < els.length; i++) {
+        this.dispatchMouseEvent(els[i], name, relatedTarget);
       }
     }
   },
-  findTarget: function findTarget(evType, detail, filterUsed) {
-    var _this11 = this;
-
+  findTarget: function (evType, detail, filterUsed) {
     var elIndex;
     var eligibleEls = this.hoverEls;
     if (filterUsed) {
-      eligibleEls = eligibleEls.filter(function (el) {
-        return el !== _this11.state.get(_this11.GRAB_EVENT) && el !== _this11.state.get(_this11.DRAG_EVENT) && el !== _this11.state.get(_this11.STRETCH_EVENT);
-      });
+      eligibleEls = eligibleEls.filter(el => el !== this.state.get(this.GRAB_EVENT) && el !== this.state.get(this.DRAG_EVENT) && el !== this.state.get(this.STRETCH_EVENT));
     }
     for (elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
       if (!this.emitCancelable(eligibleEls[elIndex], evType, detail)) {
@@ -525,7 +493,7 @@ AFRAME.registerComponent('super-hands', {
     }
     return null;
   },
-  promoteHoveredEl: function promoteHoveredEl(el) {
+  promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
@@ -545,11 +513,11 @@ AFRAME.registerComponent('locomotor-auto-config', {
     move: { default: true }
   },
   dependencies: ['grabbable', 'stretchable'],
-  init: function init() {
+  init: function () {
     this.ready = false;
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
-        var cam = document.createElement('a-camera');
+        let cam = document.createElement('a-camera');
         this.el.appendChild(cam);
       }
     }
@@ -558,7 +526,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
     this.fakeCollisionsB = this.fakeCollisions.bind(this);
     this.el.addEventListener('controllerconnected', this.fakeCollisionsB);
   },
-  update: function update() {
+  update: function () {
     if (this.el.getAttribute('stretchable') && !this.data.stretch) {
       // store settings for resetting
       this.stretchSet = this.el.getAttribute('stretchable');
@@ -574,30 +542,28 @@ AFRAME.registerComponent('locomotor-auto-config', {
       this.el.setAttribute('grabbable', this.grabSet);
     }
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeState(this.colliderState);
     this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
   },
-  announceReady: function announceReady() {
+  announceReady: function () {
     if (!this.ready) {
       this.ready = true;
       this.el.emit('locomotor-ready', {});
     }
   },
-  fakeCollisions: function fakeCollisions() {
-    var _this = this;
-
-    this.el.getChildEntities().forEach(function (el) {
-      var sh = el.getAttribute('super-hands');
+  fakeCollisions: function () {
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands');
       if (sh) {
         // generate fake collision to be permanently in super-hands queue
-        var evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = _this.el;
+        let evtDetails = {};
+        evtDetails[sh.colliderEventProperty] = this.el;
         el.emit(sh.colliderEvent, evtDetails);
-        _this.colliderState = sh.colliderState;
-        _this.el.addState(_this.colliderState);
+        this.colliderState = sh.colliderState;
+        this.el.addState(this.colliderState);
       }
-      _this.announceReady();
+      this.announceReady();
     });
   }
 });
@@ -613,12 +579,10 @@ AFRAME.registerComponent('progressive-controls', {
     physicsBody: { default: 'shape: sphere; sphereRadius: 0.02' },
     touchCollider: { default: 'sphere-collider' }
   },
-  init: function init() {
-    var _this = this;
-
+  init: function () {
     // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
     // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
-    var rayEndProp = !AFRAME.components.link.schema.titleColor ? 'el' : 'clearedEls';
+    const rayEndProp = !AFRAME.components.link.schema.titleColor ? 'el' : 'clearedEls';
     this.levels = ['gaze', 'point', 'touch'];
     this.currentLevel = 0;
     this.superHandsRaycasterConfig = {
@@ -629,49 +593,43 @@ AFRAME.registerComponent('progressive-controls', {
       colliderState: ''
     };
     this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
-    ['left', 'right'].forEach(function (hand) {
+    ['left', 'right'].forEach(hand => {
       // find controller by left-controller/right-controller class or create one
-      _this[hand] = _this.el.querySelector('.' + hand + '-controller') || _this.el.appendChild(document.createElement('a-entity'));
+      this[hand] = this.el.querySelector('.' + hand + '-controller') || this.el.appendChild(document.createElement('a-entity'));
       // add class on newly created entities
-      _this[hand].classList && _this[hand].classList.add(hand + '-controller');
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(function (ctrlr) {
-        return _this[hand].setAttribute(ctrlr, 'hand: ' + hand);
-      });
+      this[hand].classList && this[hand].classList.add(hand + '-controller');
+      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(ctrlr => this[hand].setAttribute(ctrlr, 'hand: ' + hand));
       // save initial config
-      _this[hand + 'shOriginal'] = _this[hand].getAttribute('super-hands') || {};
-      if (typeof _this[hand + 'shOriginal'] === 'string') {
-        _this[hand + 'shOriginal'] = AFRAME.utils.styleParser.parse(_this[hand + 'shOriginal']);
+      this[hand + 'shOriginal'] = this[hand].getAttribute('super-hands') || {};
+      if (typeof this[hand + 'shOriginal'] === 'string') {
+        this[hand + 'shOriginal'] = AFRAME.utils.styleParser.parse(this[hand + 'shOriginal']);
       }
     });
-    this.el.addEventListener('controllerconnected', function (e) {
-      return _this.detectLevel(e);
-    });
+    this.el.addEventListener('controllerconnected', e => this.detectLevel(e));
     this.eventRepeaterB = this.eventRepeater.bind(this);
     // pass mouse and touch events into the scene
     this.addEventListeners();
   },
-  update: function update(oldData) {
-    var level = this.currentLevel;
+  update: function (oldData) {
+    const level = this.currentLevel;
     // force setLevel refresh with new params
     this.currentLevel = -1;
     this.setLevel(level);
   },
-  remove: function remove() {
+  remove: function () {
     if (!this.eventsRegistered) {
       return;
     }
-    var canv = this.el.sceneEl.canvas;
+    const canv = this.el.sceneEl.canvas;
     canv.removeEventListener('mousedown', this.eventRepeaterB);
     canv.removeEventListener('mouseup', this.eventRepeaterB);
     canv.removeEventListener('touchstart', this.eventRepeaterB);
     canv.removeEventListener('touchend', this.eventRepeaterB);
   },
-  setLevel: function setLevel(newLevel) {
-    var _this2 = this;
-
-    var maxLevel = this.levels.indexOf(this.data.maxLevel);
-    var physicsAvail = !!this.el.sceneEl.getAttribute('physics');
-    var hands = [this.right, this.left];
+  setLevel: function (newLevel) {
+    const maxLevel = this.levels.indexOf(this.data.maxLevel);
+    const physicsAvail = !!this.el.sceneEl.getAttribute('physics');
+    const hands = [this.right, this.left];
     newLevel = newLevel > maxLevel ? maxLevel : newLevel;
     if (newLevel === this.currentLevel) {
       return;
@@ -698,23 +656,23 @@ AFRAME.registerComponent('progressive-controls', {
         }
         break;
       case 1:
-        var ctrlrCfg = this.controllerConfig[this.controllerName] || {};
-        var rayConfig = AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, ctrlrCfg.raycaster || {});
-        hands.forEach(function (h) {
-          h.setAttribute('super-hands', _this2.superHandsRaycasterConfig);
+        const ctrlrCfg = this.controllerConfig[this.controllerName] || {};
+        const rayConfig = AFRAME.utils.extend({ objects: this.data.objects, showLine: true }, ctrlrCfg.raycaster || {});
+        hands.forEach(h => {
+          h.setAttribute('super-hands', this.superHandsRaycasterConfig);
           h.setAttribute('raycaster', rayConfig);
           if (physicsAvail) {
-            h.setAttribute('static-body', _this2.data.physicsBody);
+            h.setAttribute('static-body', this.data.physicsBody);
           }
         });
         break;
       case 2:
-        ['right', 'left'].forEach(function (h) {
+        ['right', 'left'].forEach(h => {
           // clobber flag to restore defaults
-          _this2[h].setAttribute('super-hands', _this2[h + 'shOriginal'], true);
-          _this2[h].setAttribute(_this2.data.touchCollider, 'objects: ' + _this2.data.objects);
+          this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
+          this[h].setAttribute(this.data.touchCollider, 'objects: ' + this.data.objects);
           if (physicsAvail) {
-            _this2[h].setAttribute('static-body', _this2.data.physicsBody);
+            this[h].setAttribute('static-body', this.data.physicsBody);
           }
         });
         break;
@@ -724,9 +682,9 @@ AFRAME.registerComponent('progressive-controls', {
       level: this.levels[this.currentLevel]
     });
   },
-  detectLevel: function detectLevel(evt) {
-    var DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
-    var DOF3 = ['gearvr-controls', 'daydream-controls'];
+  detectLevel: function (evt) {
+    const DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
+    const DOF3 = ['gearvr-controls', 'daydream-controls'];
     this.controllerName = evt.detail.name;
     if (DOF6.indexOf(evt.detail.name) !== -1) {
       this.setLevel(this.levels.indexOf('touch'));
@@ -736,7 +694,7 @@ AFRAME.registerComponent('progressive-controls', {
       this.setLevel(this.levels.indexOf('gaze'));
     }
   },
-  eventRepeater: function eventRepeater(evt) {
+  eventRepeater: function (evt) {
     if (evt.type.startsWith('touch')) {
       evt.preventDefault();
       // avoid repeating touchmove because it interferes with look-controls
@@ -746,7 +704,7 @@ AFRAME.registerComponent('progressive-controls', {
     }
     this.camera.emit(evt.type, evt.detail);
   },
-  addEventListeners: function addEventListeners() {
+  addEventListeners: function () {
     if (!this.el.sceneEl.canvas) {
       this.el.sceneEl.addEventListener('loaded', this.addEventListeners.bind(this));
       return;
@@ -2225,12 +2183,12 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
 'use strict';
 
 /* global AFRAME */
-var buttonCore = require('buttons-proto.js');
+const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: { type: 'string' }
   },
-  init: function init() {
+  init: function () {
     this.CLICKED_STATE = 'clicked';
     this.CLICK_EVENT = 'grab-start';
     this.UNCLICK_EVENT = 'grab-end';
@@ -2241,11 +2199,11 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
     this.el.addEventListener(this.CLICK_EVENT, this.start);
     this.el.addEventListener(this.UNCLICK_EVENT, this.end);
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeEventListener(this.CLICK_EVENT, this.start);
     this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
   },
-  start: function start(evt) {
+  start: function (evt) {
     if (!this.startButtonOk(evt)) {
       return;
     }
@@ -2257,8 +2215,8 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
       }
     }
   },
-  end: function end(evt) {
-    var handIndex = this.clickers.indexOf(evt.detail.hand);
+  end: function (evt) {
+    const handIndex = this.clickers.indexOf(evt.detail.hand);
     if (!this.endButtonOk(evt)) {
       return;
     }
@@ -2274,15 +2232,15 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"buttons-proto.js":19}],16:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":19}],16:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
-var inherit = AFRAME.utils.extendDeep;
-var buttonCore = require('buttons-proto.js');
+const inherit = AFRAME.utils.extendDeep;
+const buttonCore = require('./prototypes/buttons-proto.js');
 
 AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
-  init: function init() {
+  init: function () {
     this.HOVERED_STATE = 'dragover';
     this.DRAGGED_STATE = 'dragged';
     this.HOVER_EVENT = 'dragover-start';
@@ -2303,20 +2261,20 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
     this.el.addEventListener(this.UNDRAG_EVENT, this.dragEnd);
     this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDrop);
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeEventListener(this.HOVER_EVENT, this.hoverStart);
     this.el.removeEventListener(this.DRAG_EVENT, this.dragStart);
     this.el.removeEventListener(this.UNHOVER_EVENT, this.hoverEnd);
     this.el.removeEventListener(this.UNDRAG_EVENT, this.dragEnd);
     this.el.removeEventListener(this.DRAGDROP_EVENT, this.dragDrop);
   },
-  hoverStart: function hoverStart(evt) {
+  hoverStart: function (evt) {
     this.el.addState(this.HOVERED_STATE);
     if (evt.preventDefault) {
       evt.preventDefault();
     }
   },
-  dragStart: function dragStart(evt) {
+  dragStart: function (evt) {
     if (!this.startButtonOk(evt)) {
       return;
     }
@@ -2325,10 +2283,10 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
       evt.preventDefault();
     }
   },
-  hoverEnd: function hoverEnd(evt) {
+  hoverEnd: function (evt) {
     this.el.removeState(this.HOVERED_STATE);
   },
-  dragEnd: function dragEnd(evt) {
+  dragEnd: function (evt) {
     if (!this.endButtonOk(evt)) {
       return;
     }
@@ -2337,7 +2295,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
       evt.preventDefault();
     }
   },
-  dragDrop: function dragDrop(evt) {
+  dragDrop: function (evt) {
     if (!this.endButtonOk(evt)) {
       return;
     }
@@ -2347,22 +2305,20 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"buttons-proto.js":19}],17:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":19}],17:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
-var inherit = AFRAME.utils.extendDeep;
-var physicsCore = require('physics-grab-proto.js');
-var buttonsCore = require('buttons-proto.js');
+const inherit = AFRAME.utils.extendDeep;
+const physicsCore = require('./prototypes/physics-grab-proto.js');
+const buttonsCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
     invert: { default: false },
     suppressY: { default: false }
   },
-  init: function init() {
-    var _this = this;
-
+  init: function () {
     this.GRABBED_STATE = 'grabbed';
     this.GRAB_EVENT = 'grab-start';
     this.UNGRAB_EVENT = 'grab-end';
@@ -2379,23 +2335,17 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
 
-    this.el.addEventListener(this.GRAB_EVENT, function (e) {
-      return _this.start(e);
-    });
-    this.el.addEventListener(this.UNGRAB_EVENT, function (e) {
-      return _this.end(e);
-    });
-    this.el.addEventListener('mouseout', function (e) {
-      return _this.lostGrabber(e);
-    });
+    this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
+    this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
+    this.el.addEventListener('mouseout', e => this.lostGrabber(e));
   },
-  update: function update() {
+  update: function () {
     this.physicsUpdate();
     this.xFactor = this.data.invert ? -1 : 1;
     this.zFactor = this.data.invert ? -1 : 1;
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
-  tick: function tick() {
+  tick: function () {
     var entityPosition;
     if (this.grabber) {
       // reflect on z-axis to point in same direction as the laser
@@ -2415,17 +2365,17 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
       this.deltaPosition.copy(this.targetPosition);
     }
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
     this.physicsRemove();
   },
-  start: function start(evt) {
+  start: function (evt) {
     if (!this.startButtonOk(evt)) {
       return;
     }
     // room for more grabbers?
-    var grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
+    const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
     if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
@@ -2446,8 +2396,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
       this.el.addState(this.GRABBED_STATE);
     }
   },
-  end: function end(evt) {
-    var handIndex = this.grabbers.indexOf(evt.detail.hand);
+  end: function (evt) {
+    const handIndex = this.grabbers.indexOf(evt.detail.hand);
     if (!this.endButtonOk(evt)) {
       return;
     }
@@ -2464,8 +2414,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
       evt.preventDefault();
     }
   },
-  resetGrabber: function resetGrabber() {
-    var raycaster = void 0;
+  resetGrabber: function () {
+    let raycaster;
     if (!this.grabber) {
       return false;
     }
@@ -2478,8 +2428,8 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     }
     return true;
   },
-  lostGrabber: function lostGrabber(evt) {
-    var i = this.grabbers.indexOf(evt.relatedTarget);
+  lostGrabber: function (evt) {
+    let i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
     if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
       this.grabbers.splice(i, 1);
@@ -2487,12 +2437,12 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"buttons-proto.js":19,"physics-grab-proto.js":20}],18:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":19,"./prototypes/physics-grab-proto.js":20}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
 AFRAME.registerComponent('hoverable', {
-  init: function init() {
+  init: function () {
     this.HOVERED_STATE = 'hovered';
     this.HOVER_EVENT = 'hover-start';
     this.UNHOVER_EVENT = 'hover-end';
@@ -2505,11 +2455,11 @@ AFRAME.registerComponent('hoverable', {
     this.el.addEventListener(this.HOVER_EVENT, this.start);
     this.el.addEventListener(this.UNHOVER_EVENT, this.end);
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeEventListener(this.HOVER_EVENT, this.start);
     this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
   },
-  start: function start(evt) {
+  start: function (evt) {
     this.el.addState(this.HOVERED_STATE);
     if (this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
@@ -2518,7 +2468,7 @@ AFRAME.registerComponent('hoverable', {
       evt.preventDefault();
     }
   },
-  end: function end(evt) {
+  end: function (evt) {
     var handIndex = this.hoverers.indexOf(evt.detail.hand);
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
@@ -2530,16 +2480,17 @@ AFRAME.registerComponent('hoverable', {
 });
 
 },{}],19:[function(require,module,exports){
+'use strict';
+
 // common code used in customizing reaction components by button
-module.exports = (function () {
-  function buttonIsValid (evt, buttonList) {
-    return buttonList.length === 0 ||
-        buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+module.exports = function () {
+  function buttonIsValid(evt, buttonList) {
+    return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
   }
   return {
     schema: {
-      startButtons: {default: []},
-      endButtons: {default: []}
+      startButtons: { default: [] },
+      endButtons: { default: [] }
     },
     startButtonOk: function (evt) {
       return buttonIsValid(evt, this.data['startButtons']);
@@ -2548,13 +2499,15 @@ module.exports = (function () {
       return buttonIsValid(evt, this.data['endButtons']);
     }
   };
-})();
+}();
 
 },{}],20:[function(require,module,exports){
+'use strict';
+
 // base code used by grabbable for physics interactions
 module.exports = {
   schema: {
-    usePhysics: {default: 'ifavailable'}
+    usePhysics: { default: 'ifavailable' }
   },
   physicsInit: function () {
     this.constraints = new Map();
@@ -2569,11 +2522,8 @@ module.exports = {
   },
   physicsStart: function (evt) {
     // initiate physics constraint if available and not already existing
-    if (this.data.usePhysics !== 'never' && this.el.body &&
-        evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-      let newCon = new window.CANNON.LockConstraint(
-        this.el.body, evt.detail.hand.body
-      );
+    if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
+      let newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
       this.el.body.world.addConstraint(newCon);
       this.constraints.set(evt.detail.hand, newCon);
       return true;
@@ -2598,7 +2548,7 @@ module.exports = {
   physicsIsConstrained: function (el) {
     return this.constraints.has(el);
   },
-  physicsIsGrabbing () {
+  physicsIsGrabbing() {
     return this.constraints.size > 0;
   }
 };
@@ -2607,14 +2557,14 @@ module.exports = {
 'use strict';
 
 /* global AFRAME, THREE */
-var inherit = AFRAME.utils.extendDeep;
-var buttonCore = require('buttons-proto.js');
+const inherit = AFRAME.utils.extendDeep;
+const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false }
   },
-  init: function init() {
+  init: function () {
     this.STRETCHED_STATE = 'stretched';
     this.STRETCH_EVENT = 'stretch-start';
     this.UNSTRETCH_EVENT = 'stretch-end';
@@ -2631,16 +2581,16 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.el.addEventListener(this.STRETCH_EVENT, this.start);
     this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
   },
-  update: function update(oldDat) {},
-  tick: function tick() {
+  update: function (oldDat) {},
+  tick: function () {
     if (!this.stretched) {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
     this.handPos.copy(this.stretchers[0].getAttribute('position'));
     this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
-    var currentStretch = this.handPos.distanceTo(this.otherHandPos);
-    var deltaStretch = 1;
+    const currentStretch = this.handPos.distanceTo(this.otherHandPos);
+    let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
       deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
     }
@@ -2671,11 +2621,11 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
       this.el.body.updateBoundingRadius();
     }
   },
-  remove: function remove() {
+  remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
-  start: function start(evt) {
+  start: function (evt) {
     if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt)) {
       return;
     } // already stretched or already captured this hand or wrong button
@@ -2689,7 +2639,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
       evt.preventDefault();
     } // gesture accepted
   },
-  end: function end(evt) {
+  end: function (evt) {
     var stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
     if (!this.endButtonOk(evt)) {
       return;
@@ -2705,15 +2655,15 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"buttons-proto.js":19}],22:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":19}],22:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
 AFRAME.registerSystem('super-hands', {
-  init: function init() {
+  init: function () {
     this.superHands = [];
   },
-  registerMe: function registerMe(comp) {
+  registerMe: function (comp) {
     // when second hand registers, store links
     if (this.superHands.length === 1) {
       this.superHands[0].otherSuperHand = comp;
@@ -2721,12 +2671,12 @@ AFRAME.registerSystem('super-hands', {
     }
     this.superHands.push(comp);
   },
-  unregisterMe: function unregisterMe(comp) {
+  unregisterMe: function (comp) {
     var index = this.superHands.indexOf(comp);
     if (index !== -1) {
       this.superHands.splice(index, 1);
     }
-    this.superHands.forEach(function (x) {
+    this.superHands.forEach(x => {
       if (x.otherSuperHand === comp) {
         x.otherSuperHand = null;
       }

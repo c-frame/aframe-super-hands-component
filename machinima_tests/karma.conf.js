@@ -1,25 +1,18 @@
 // karma configuration
 var karmaConf = {
   browserify: {
-    debug: true
+    debug: true,
+    transform: [
+      ['babelify']
+    ]
   },
-  // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   browsers: ['Firefox', 'Chrome'],
   // machinima: prevent timeout during recording playback
   browserNoActivityTimeout: 600000,
   client: {
-    captureConsole: true,
+    captureConsole: false,
     mocha: {'ui': 'tdd'}
   },
-  customLaunchers: {
-    Chromium_WebVR: {
-      base: 'Chromium',
-      flags: ['--enable-webvr', '--enable-gamepad-extensions']
-    }
-  },
-  envPreprocessor: [
-    'TEST_ENV'
-  ],
   files: [
     // module and dependencies
     {pattern: 'main.js', included: true},
@@ -33,7 +26,7 @@ var karmaConf = {
   frameworks: ['mocha', 'sinon-chai', 'chai-shallow-deep-equal', 'browserify'],
   preprocessors: {
     'main.js': ['browserify'],
-    './**/*.js': ['browserify', 'env'],
+    './**/*.js': ['browserify'],
     // process machinima scene files into window.__html__ array
     'scenes/*.html': ['html2js']
   },
