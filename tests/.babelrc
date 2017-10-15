@@ -1,0 +1,16 @@
+{
+  "presets": [["env", {
+    "targets": {
+      "browsers": [
+        "last 1 Samsung versions", "last 2 Firefox versions",
+        "last 2 Chrome versions", "last 2 FirefoxAndroid versions",
+        "last 2 iOS versions"
+      ]
+    }
+    }]],
+  "env": {
+    "production": {
+      "presets": ["minify"]
+    }
+  }
+}

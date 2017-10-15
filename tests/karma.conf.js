@@ -4,7 +4,7 @@ var karmaConf = {
   browserify: {
     debug: true,
     transform: [
-      ['babelify', {presets: ['es2015']}]
+      ['babelify']
     ]
   },
   browsers: ['Chrome', 'Firefox'],

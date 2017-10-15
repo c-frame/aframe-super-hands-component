@@ -4,10 +4,10 @@
   "description": "All-in-one natural hand controller interaction component for A-Frame.",
   "main": "index.js",
   "scripts": {
-    "build": "browserify examples/main.js -o examples/build.js -t [ babelify --presets [ es2015 ] ]",
+    "build": "browserify examples/main.js -o examples/build.js -t [ babelify ]",
     "dev": "budo examples/main.js:build.js --dir examples --port 8000 --live --open",
     "record": "budo machinima_tests/main.js:build.js --dir machinima_tests/scenes --port 8000 --live --open",
-    "dist": "webpack index.js dist/super-hands.js && webpack -p index.js dist/super-hands.min.js",
+    "dist": "browserify index.js -o dist/super-hands.js -t [ babelify ] && cross-env NODE_ENV=production browserify index.js -o dist/super-hands.min.js -t [ babelify ]",
     "lint": "semistandard -v | snazzy",
     "prepublish": "npm run dist",
     "preghpages": "npm run build && shx rm -rf gh-pages && shx mkdir gh-pages && shx cp -r examples/* gh-pages",
@@ -51,14 +51,15 @@
     "aframe-machinima-testing": "git+https://git@github.com/wmurphyrd/aframe-machinima-testing#v0.1.2a",
     "aframe-motion-capture-components": "git+https://git@github.com/wmurphyrd/aframe-motion-capture-components.git#v0.2.8a",
     "aframe-physics-system": "^2.0.0",
-    "babel-loader": "^6.2.10",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-minify": "^0.2.0",
     "babelify": "^7.3.0",
     "browserify": "^13.0.0",
     "browserify-istanbul": "^2.0.0",
     "budo": "^8.2.2",
     "chai": "^4.1.2",
     "chai-shallow-deep-equal": "^1.4.0",
+    "cross-env": "^5.0.5",
     "ghpages": "^0.0.8",
     "istanbul": "^0.4.5",
     "karma": "^1.7.1",
@@ -80,8 +81,7 @@
     "shx": "^0.1.1",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
-    "snazzy": "^4.0.0",
-    "webpack": "^1.13.0"
+    "snazzy": "^4.0.0"
   },
   "semistandard": {
     "ignore": [
