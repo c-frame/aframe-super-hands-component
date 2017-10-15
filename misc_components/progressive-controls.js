@@ -7,13 +7,18 @@ AFRAME.registerComponent('progressive-controls', {
     touchCollider: {default: 'sphere-collider'}
   },
   init: function () {
+    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
+    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
+    const rayEndProp = !AFRAME.components.link.schema.titleColor
+        ? 'el'
+        : 'clearedEls';
     this.levels = ['gaze', 'point', 'touch'];
     this.currentLevel = 0;
     this.superHandsRaycasterConfig = {
       colliderEvent: 'raycaster-intersection',
       colliderEventProperty: 'els',
       colliderEndEvent: 'raycaster-intersection-cleared',
-      colliderEndEventProperty: 'clearedEls',
+      colliderEndEventProperty: rayEndProp,
       colliderState: ''
     };
     this.camera = this.el.querySelector('a-camera,[camera]') ||

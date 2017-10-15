@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test */
+/* global assert, process, setup, suite, test, AFRAME */
 const helpers = require('../helpers');
 const entityFactory = helpers.entityFactory;
 
@@ -284,6 +284,11 @@ suite('super-hands & clickable component integration', function () {
 });
 suite('super-hands raycaster integration', function () {
   setup(function (done) {
+    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
+    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
+    const rayEndProp = !AFRAME.components.link.schema.titleColor
+        ? 'el'
+        : 'clearedEls';
     this.target1 = entityFactory();
     this.target1.id = 'target1';
     this.target1.setAttribute('geometry', 'primitive: box');
@@ -299,7 +304,7 @@ suite('super-hands raycaster integration', function () {
       'super-hands': 'colliderEvent: raycaster-intersection;' +
           'colliderEventProperty: els;' +
           'colliderEndEvent: raycaster-intersection-cleared;' +
-          'colliderEndEventProperty: clearedEls',
+          'colliderEndEventProperty: ' + rayEndProp,
       'raycaster': 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
     }, true);
     this.hand1.setAttribute('position', '0 0 1');

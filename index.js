@@ -325,7 +325,11 @@ AFRAME.registerComponent('super-hands', {
   unHover: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty];
     if (clearedEls) {
-      clearedEls.forEach(el => this._unHover(el));
+      if (Array.isArray(clearedEls)) {
+        clearedEls.forEach(el => this._unHover(el));
+      } else {
+        this._unHover(clearedEls);
+      }
     } else if (evt.detail.state === this.data.colliderState) {
       this._unHover(evt.target);
     }
@@ -365,8 +369,14 @@ AFRAME.registerComponent('super-hands', {
   unWatch: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty];
     if (clearedEls) {
-      clearedEls.forEach(el => this._unWatch(el));
+      if (Array.isArray(clearedEls)) {
+        clearedEls.forEach(el => this._unWatch(el));
+      } else {
+        // deprecation path: aframe <=0.7.0 / sphere-collider
+        this._unWatch(clearedEls);
+      }
     } else if (evt.detail.state === this.data.colliderState) {
+      // deprecation path: sphere-collider <=3.11.4
       this._unWatch(evt.target);
     }
   },

@@ -534,4 +534,18 @@ suite('state tracking', function () {
     assert.isTrue(hoverSpy2.called, '2nd hover start');
     assert.isTrue(hoverEndSpy1.called, '1st hover end');
   });
+  test('multiple collision start/end handling', function () {
+    this.hand1.setAttribute('super-hands', {
+      colliderEvent: 'collisions',
+      colliderEventProperty: 'els',
+      colliderEndEvent: 'collisions',
+      colliderEndEventProperty: 'clearedEls'
+    });
+    this.hand1.emit('collisions', {els: [this.target1, this.target2, this.target3]});
+    assert.sameMembers(this.sh1.hoverEls, [this.target1, this.target2, this.target3]);
+    this.hand1.emit('collisions', {clearedEls: [this.target1, this.target3]});
+    assert.sameMembers(this.sh1.hoverEls, [this.target2]);
+    this.hand1.emit('collisions', {els: [this.target1], clearedEls: [this.target2]});
+    assert.sameMembers(this.sh1.hoverEls, [this.target1]);
+  });
 });

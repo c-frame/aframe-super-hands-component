@@ -344,9 +344,17 @@ AFRAME.registerComponent('super-hands', {
   /* tied to 'stateremoved' event for hovered entities,
      called when controller moves out of collision range of entity */
   unHover: function unHover(evt) {
-    var target = evt.detail[this.data.colliderEndEventProperty];
-    if (target) {
-      this._unHover(target);
+    var _this5 = this;
+
+    var clearedEls = evt.detail[this.data.colliderEndEventProperty];
+    if (clearedEls) {
+      if (Array.isArray(clearedEls)) {
+        clearedEls.forEach(function (el) {
+          return _this5._unHover(el);
+        });
+      } else {
+        this._unHover(clearedEls);
+      }
     } else if (evt.detail.state === this.data.colliderState) {
       this._unHover(evt.target);
     }
@@ -380,15 +388,25 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   unWatch: function unWatch(evt) {
-    var target = evt.detail[this.data.colliderEndEventProperty];
-    if (target) {
-      this._unWatch(target);
+    var _this6 = this;
+
+    var clearedEls = evt.detail[this.data.colliderEndEventProperty];
+    if (clearedEls) {
+      if (Array.isArray(clearedEls)) {
+        clearedEls.forEach(function (el) {
+          return _this6._unWatch(el);
+        });
+      } else {
+        // deprecation path: aframe <=0.7.0 / sphere-collider
+        this._unWatch(clearedEls);
+      }
     } else if (evt.detail.state === this.data.colliderState) {
+      // deprecation path: sphere-collider <=3.11.4
       this._unWatch(evt.target);
     }
   },
   _unWatch: function _unWatch(target) {
-    var _this5 = this;
+    var _this7 = this;
 
     var hoverIndex = this.hoverEls.indexOf(target);
     target.removeEventListener('stateremoved', this.unWatch);
@@ -396,39 +414,39 @@ AFRAME.registerComponent('super-hands', {
       this.hoverEls.splice(hoverIndex, 1);
     }
     this.gehDragged.forEach(function (dragged) {
-      _this5.dispatchMouseEvent(target, 'dragleave', dragged);
-      _this5.dispatchMouseEvent(dragged, 'dragleave', target);
+      _this7.dispatchMouseEvent(target, 'dragleave', dragged);
+      _this7.dispatchMouseEvent(dragged, 'dragleave', target);
     });
     this.dispatchMouseEvent(target, 'mouseout', this.el);
   },
   registerListeners: function registerListeners() {
-    var _this6 = this;
+    var _this8 = this;
 
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
     this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
 
     this.data.grabStartButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onGrabStartButton);
+      _this8.el.addEventListener(b, _this8.onGrabStartButton);
     });
     this.data.grabEndButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onGrabEndButton);
+      _this8.el.addEventListener(b, _this8.onGrabEndButton);
     });
     this.data.stretchStartButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onStretchStartButton);
+      _this8.el.addEventListener(b, _this8.onStretchStartButton);
     });
     this.data.stretchEndButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onStretchEndButton);
+      _this8.el.addEventListener(b, _this8.onStretchEndButton);
     });
     this.data.dragDropStartButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onDragDropStartButton);
+      _this8.el.addEventListener(b, _this8.onDragDropStartButton);
     });
     this.data.dragDropEndButtons.forEach(function (b) {
-      _this6.el.addEventListener(b, _this6.onDragDropEndButton);
+      _this8.el.addEventListener(b, _this8.onDragDropEndButton);
     });
   },
   unRegisterListeners: function unRegisterListeners(data) {
-    var _this7 = this;
+    var _this9 = this;
 
     data = data || this.data;
     if (Object.keys(data).length === 0) {
@@ -440,22 +458,22 @@ AFRAME.registerComponent('super-hands', {
     this.el.removeEventListener(data.colliderEndEvent, this.unWatch);
 
     data.grabStartButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onGrabStartButton);
+      _this9.el.removeEventListener(b, _this9.onGrabStartButton);
     });
     data.grabEndButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onGrabEndButton);
+      _this9.el.removeEventListener(b, _this9.onGrabEndButton);
     });
     data.stretchStartButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onStretchStartButton);
+      _this9.el.removeEventListener(b, _this9.onStretchStartButton);
     });
     data.stretchEndButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onStretchEndButton);
+      _this9.el.removeEventListener(b, _this9.onStretchEndButton);
     });
     data.dragDropStartButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onDragDropStartButton);
+      _this9.el.removeEventListener(b, _this9.onDragDropStartButton);
     });
     data.dragDropEndButtons.forEach(function (b) {
-      _this7.el.removeEventListener(b, _this7.onDragDropEndButton);
+      _this9.el.removeEventListener(b, _this9.onDragDropEndButton);
     });
   },
   emitCancelable: function emitCancelable(target, name, detail) {
@@ -471,12 +489,12 @@ AFRAME.registerComponent('super-hands', {
     target.dispatchEvent(mEvt);
   },
   dispatchMouseEventAll: function dispatchMouseEventAll(name, relatedTarget, filterUsed, alsoReverse) {
-    var _this8 = this;
+    var _this10 = this;
 
     var els = this.hoverEls;
     if (filterUsed) {
       els = els.filter(function (el) {
-        return el !== _this8.state.get(_this8.GRAB_EVENT) && el !== _this8.state.get(_this8.DRAG_EVENT) && el !== _this8.state.get(_this8.STRETCH_EVENT) && !_this8.gehDragged.has(el);
+        return el !== _this10.state.get(_this10.GRAB_EVENT) && el !== _this10.state.get(_this10.DRAG_EVENT) && el !== _this10.state.get(_this10.STRETCH_EVENT) && !_this10.gehDragged.has(el);
       });
     }
     if (alsoReverse) {
@@ -491,13 +509,13 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   findTarget: function findTarget(evType, detail, filterUsed) {
-    var _this9 = this;
+    var _this11 = this;
 
     var elIndex;
     var eligibleEls = this.hoverEls;
     if (filterUsed) {
       eligibleEls = eligibleEls.filter(function (el) {
-        return el !== _this9.state.get(_this9.GRAB_EVENT) && el !== _this9.state.get(_this9.DRAG_EVENT) && el !== _this9.state.get(_this9.STRETCH_EVENT);
+        return el !== _this11.state.get(_this11.GRAB_EVENT) && el !== _this11.state.get(_this11.DRAG_EVENT) && el !== _this11.state.get(_this11.STRETCH_EVENT);
       });
     }
     for (elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
@@ -598,13 +616,16 @@ AFRAME.registerComponent('progressive-controls', {
   init: function init() {
     var _this = this;
 
+    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
+    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
+    var rayEndProp = !AFRAME.components.link.schema.titleColor ? 'el' : 'clearedEls';
     this.levels = ['gaze', 'point', 'touch'];
     this.currentLevel = 0;
     this.superHandsRaycasterConfig = {
       colliderEvent: 'raycaster-intersection',
       colliderEventProperty: 'els',
       colliderEndEvent: 'raycaster-intersection-cleared',
-      colliderEndEventProperty: 'el',
+      colliderEndEventProperty: rayEndProp,
       colliderState: ''
     };
     this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
