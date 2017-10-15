@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-const buttonCore = require('buttons-proto.js');
+const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   schema: {
     usePhysics: {default: 'ifavailable'},
