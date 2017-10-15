@@ -83,7 +83,7 @@ Install and use by directly including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.11.4/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@2.0.1/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@2.0.2/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -125,6 +125,14 @@ Master branch features can be tested using:
 ```html
 <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
 ```
+v2.0.2
+
+* A-Frame v0.7.0 and master support
+* Implement [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
+  for automated functional testing using motion captured user input
+* Bug fixes:
+  * Improved handling of touch (eliminate doubled events)
+  * Fix odd behavior of repeatedly or simultaneously grabbed objects
 
 v2.0.1
 
