@@ -119,19 +119,15 @@
       force laser pointer controls even with Vive/Oculus by setting the
       <code>maxLevel</code> property on <code>progressive-controls</code>,
       as in this example.</p>
-    <p>Under the hood, this works by using the <code>cursor</code> A-Frame
-      component as an intermediary with the controllers and configuring
-      <code>super-hands</code> to work with <code>cursor</code> events.
+    <p>Under the hood, this works by using the <code>raycaster</code> A-Frame
+      component for collision detection.
       This configuration is below for reference, but it is implemented
       automatically by <code>progressive-controls</code> when needed</p>
       <pre>
-super-hands="colliderEvent: mouseenter;
-             colliderEventProperty: intersectedEl;
-             colliderState: cursor-hovered;
-             grabStartButtons: mousedown;
-             grabEndButtons: mouseup;
-             dragDropStartButtons: mousedown;
-             dragDropEndButtons: mouseup;"</pre>
+super-hands="colliderEvent: raycaster-intersection;
+             colliderEventProperty: els;
+             colliderEndEvent: raycaster-intersection-cleared;
+             colliderEndEventProperty: el"</pre>
     <p>This scene also shows the fallback movement that occurs when physics
       is not available, which moves entities but does not rotation them.
       The laser and gaze controls work even better with
