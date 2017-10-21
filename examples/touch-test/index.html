@@ -21,7 +21,7 @@
     <a-assets></a-assets>
     <a-entity progressive-controls></a-entity>
     <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-plane hoverable grabbable stretchable drag-droppable
+    <a-plane hoverable grabbable stretchable draggable droppable
              color="blue" position="0 1.6 -1" rotation="0 0 0"
              onclick="this.emit('clickCounter')"
              bind__text="value: clickcount.count">

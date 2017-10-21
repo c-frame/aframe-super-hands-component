@@ -10,12 +10,13 @@
         <a-mixin id="controller" super-hands
                  sphere-collider="objects: .cube"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable grabbable stretchable drag-droppable
+                 hoverable grabbable stretchable draggable
+                 droppable="acceptEvent: drag-drop-accepted; rejectEvent: drag-drop-rejected"
                  event-set__accept="_event: drag-drop-accepted; geometry.primitive: sphere; geometry.radius: 0.25"
                  event-set__reject="_event: drag-drop-rejected; geometry.primitive: tetrahedron; geometry.radius: 0.25"></a-mixin>
-        <a-mixin id="red" material="color: red" drop-target="accepts: [mixin~='red']; acceptEvent: drag-drop-accepted; rejectEvent: drag-drop-rejected"></a-mixin>
-        <a-mixin id="green" material="color: green" drop-target="accepts: [mixin~='green']; acceptEvent: drag-drop-accepted; rejectEvent: drag-drop-rejected"></a-mixin>
-        <a-mixin id="blue" material="color: blue" drop-target="accepts: [mixin~='blue']; acceptEvent: drag-drop-accepted; rejectEvent: drag-drop-rejected"></a-mixin>
+        <a-mixin id="red" material="color: red" droppable="accepts: [mixin~='red']"></a-mixin>
+        <a-mixin id="green" material="color: green" droppable="accepts: [mixin~='green']"></a-mixin>
+        <a-mixin id="blue" material="color: blue" droppable="accepts: [mixin~='blue']"></a-mixin>
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>

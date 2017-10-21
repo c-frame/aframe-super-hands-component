@@ -4,7 +4,7 @@ function elementMatches (el, selector) {
   if (el.msMatchesSelector) { return el.msMatchesSelector(selector); }
   if (el.webkitMatchesSelector) { return el.webkitMatchesSelector(selector); }
 }
-AFRAME.registerComponent('drop-target', {
+AFRAME.registerComponent('droppable', {
   schema: {
     accepts: {default: ''},
     autoUpdate: {default: true},

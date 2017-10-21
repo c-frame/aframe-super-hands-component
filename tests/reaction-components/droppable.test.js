@@ -2,10 +2,10 @@
 const helpers = require('../helpers');
 const entityFactory = helpers.entityFactory;
 
-suite('drop-target', function () {
+suite('droppable', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
-    el.setAttribute('drop-target', '');
+    el.setAttribute('droppable', '');
     this.carried1 = document.createElement('a-entity');
     this.carried1.id = 'carried1';
     el.sceneEl.appendChild(this.carried1);
@@ -13,19 +13,19 @@ suite('drop-target', function () {
     this.carried2.classList.add('carried2');
     el.sceneEl.appendChild(this.carried2);
     el.addEventListener('loaded', evt => {
-      this.comp = el.components['drop-target'];
+      this.comp = el.components['droppable'];
       done();
     });
   });
   suite('lifecycle', function () {
     test('component attaches without errors', function () {
-      assert.isOk(this.el.components['drop-target']);
+      assert.isOk(this.el.components['droppable']);
     });
     test('component removes without errors', function (done) {
       var el = this.el;
-      el.removeComponent('drop-target');
+      el.removeComponent('droppable');
       process.nextTick(function () {
-        assert.notOk(el.components['drop-target']);
+        assert.notOk(el.components['droppable']);
         done();
       });
     });
@@ -41,33 +41,33 @@ suite('drop-target', function () {
   suite('discrimination', function () {
     test('dragover accepts listed entities', function () {
       const detail = {carried: this.carried1};
-      this.el.setAttribute('drop-target', {accepts: '.carried2, #carried1'});
+      this.el.setAttribute('droppable', {accepts: '.carried2, #carried1'});
       assert.isFalse(helpers.emitCancelable(this.el, 'dragover-start', detail));
       assert.isTrue(this.el.is('dragover'));
     });
     test('dragover rejects unlisted entities', function () {
       const detail = {carried: this.carried2};
-      this.el.setAttribute('drop-target', {accepts: '#carried1'});
+      this.el.setAttribute('droppable', {accepts: '#carried1'});
       assert.isTrue(helpers.emitCancelable(this.el, 'dragover-start', detail));
       assert.isFalse(this.el.is('dragover'));
     });
     test('dragdrop accepts listed entities', function () {
       const detail = {dropped: this.carried2};
-      this.el.setAttribute('drop-target', {accepts: '.carried2, #carried1'});
+      this.el.setAttribute('droppable', {accepts: '.carried2, #carried1'});
       assert.isFalse(helpers.emitCancelable(this.el, 'drag-drop', detail));
     });
     test('dragdrop rejects unlisted entities', function () {
       const detail = {dropped: this.carried1};
-      this.el.setAttribute('drop-target', {accepts: '.carried2'});
+      this.el.setAttribute('droppable', {accepts: '.carried2'});
       assert.isTrue(helpers.emitCancelable(this.el, 'drag-drop', detail));
     });
     test('dragdrop rejects all if no matches', function () {
       const detail = {dropped: this.carried1};
-      this.el.setAttribute('drop-target', {accepts: '.nomatches'});
+      this.el.setAttribute('droppable', {accepts: '.nomatches'});
       assert.isTrue(helpers.emitCancelable(this.el, 'drag-drop', detail));
     });
     test('dragdrop accepts newly added entities', function (done) {
-      this.el.setAttribute('drop-target', {accepts: '.carried2, #carried1'});
+      this.el.setAttribute('droppable', {accepts: '.carried2, #carried1'});
       const newEntity = document.createElement('a-entity');
       newEntity.classList.add('carried2');
       newEntity.addEventListener('loaded', () => {
@@ -87,7 +87,7 @@ suite('drop-target', function () {
       const acceptSpy = this.sinon.spy();
       this.el.addEventListener(rejectEvent, rejectSpy);
       this.el.addEventListener(acceptEvent, acceptSpy);
-      this.el.setAttribute('drop-target', {
+      this.el.setAttribute('droppable', {
         accepts: '.carried2, #carried1',
         acceptEvent: acceptEvent,
         rejectEvent: rejectEvent
@@ -107,7 +107,7 @@ suite('drop-target', function () {
       const acceptSpy = this.sinon.spy();
       this.el.addEventListener(rejectEvent, rejectSpy);
       this.el.addEventListener(acceptEvent, acceptSpy);
-      this.el.setAttribute('drop-target', {
+      this.el.setAttribute('droppable', {
         accepts: '#carried1',
         acceptEvent: acceptEvent,
         rejectEvent: rejectEvent

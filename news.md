@@ -1,5 +1,22 @@
 ## News
 
+v2.0.2
+
+* A-Frame v0.7.0 and master support
+* Implement [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
+  for automated functional testing using motion captured user input
+* Bug fixes:
+  * Improved handling of touch (eliminate doubled events)
+  * Fix odd behavior of repeatedly or simultaneously grabbed objects
+
+v2.0.1
+
+* Bug fixes:
+  * `'mouseup'` now fires correctly on target entities
+  * Fixed lingering hover when `progressive-controls` advances from gaze mode
+  * Fixed lingering hovers when `progressive-controls` in point mode
+  * Fixed some new files being excluded from babelify & breaking uglify
+
 v2.0.0
 
 * Consistent experience across devices: `super-hands` now provides interactivity
