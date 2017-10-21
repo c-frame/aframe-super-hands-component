@@ -37,6 +37,7 @@ require('./reaction_components/hoverable.js');
 require('./reaction_components/grabbable.js');
 require('./reaction_components/stretchable.js');
 require('./reaction_components/drag-droppable.js');
+require('./reaction_components/drop-target.js');
 require('./reaction_components/clickable.js');
 require('./misc_components/locomotor-auto-config.js');
 require('./misc_components/progressive-controls.js');
@@ -502,7 +503,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":14,"./reaction_components/clickable.js":15,"./reaction_components/drag-droppable.js":16,"./reaction_components/grabbable.js":17,"./reaction_components/hoverable.js":18,"./reaction_components/stretchable.js":21,"./systems/super-hands-system.js":22}],3:[function(require,module,exports){
+},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":14,"./reaction_components/clickable.js":15,"./reaction_components/drag-droppable.js":16,"./reaction_components/drop-target.js":17,"./reaction_components/grabbable.js":18,"./reaction_components/hoverable.js":19,"./reaction_components/stretchable.js":22,"./systems/super-hands-system.js":23}],3:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2232,7 +2233,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":19}],16:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":20}],16:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2305,7 +2306,79 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":19}],17:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":20}],17:[function(require,module,exports){
+'use strict';
+
+/* global AFRAME */
+AFRAME.registerComponent('drop-target', {
+  schema: {
+    accepts: { type: 'selectorAll' },
+    acceptEvent: { default: '' },
+    rejectEvent: { default: '' }
+  },
+  multiple: true,
+  init: function () {
+    this.HOVERED_STATE = 'dragover';
+    this.HOVER_EVENT = 'dragover-start';
+    this.UNHOVER_EVENT = 'dragover-end';
+    this.DRAGDROP_EVENT = 'drag-drop';
+
+    // better for Sinon spying if original method not overwritten
+    this.hoverStartBound = this.hoverStart.bind(this);
+    this.hoverEndBound = this.hoverEnd.bind(this);
+    this.dragDropBound = this.dragDrop.bind(this);
+
+    this.el.addEventListener(this.HOVER_EVENT, this.hoverStartBound);
+    this.el.addEventListener(this.UNHOVER_EVENT, this.hoverEndBound);
+    this.el.addEventListener(this.DRAGDROP_EVENT, this.dragDropBound);
+  },
+  remove: function () {
+    this.el.removeEventListener(this.HOVER_EVENT, this.hoverStartBound);
+    this.el.removeEventListener(this.UNHOVER_EVENT, this.hoverEndBound);
+    this.el.removeEventListener(this.DRAGDROP_EVENT, this.dragDropBound);
+  },
+  entityAcceptable: function (entity) {
+    const accepts = this.data.accepts;
+    if (accepts == null || accepts.length === 0) {
+      return true;
+    }
+    for (let item of accepts) {
+      if (item === entity) {
+        return true;
+      }
+    }
+    return false;
+  },
+  hoverStart: function (evt) {
+    if (!this.entityAcceptable(evt.detail.carried)) {
+      return;
+    }
+    this.el.addState(this.HOVERED_STATE);
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
+  },
+  hoverEnd: function (evt) {
+    this.el.removeState(this.HOVERED_STATE);
+  },
+  dragDrop: function (evt) {
+    const carried = evt.detail.carried;
+    if (!this.entityAcceptable(carried)) {
+      if (this.data.rejectEvent.length) {
+        this.el.emit(this.data.rejectEvent, { el: carried });
+      }
+      return;
+    }
+    if (this.data.acceptEvent.length) {
+      this.el.emit(this.data.acceptEvent, { el: carried });
+    }
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
+  }
+});
+
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2437,7 +2510,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":19,"./prototypes/physics-grab-proto.js":20}],18:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":20,"./prototypes/physics-grab-proto.js":21}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2479,7 +2552,7 @@ AFRAME.registerComponent('hoverable', {
   }
 });
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 // common code used in customizing reaction components by button
@@ -2501,7 +2574,7 @@ module.exports = function () {
   };
 }();
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -2553,7 +2626,7 @@ module.exports = {
   }
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
@@ -2655,7 +2728,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":19}],22:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":20}],23:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

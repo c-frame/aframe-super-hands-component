@@ -50,13 +50,14 @@ Readme contents:
 * [Core, primitives, and meta-components](#core-primitives-and-meta-components)
   * [`super-hands` gesture interpretation component](#super-hands-component)
   * [`progressive-controls` universal controller component](#progressive-controls-component)
-  * ['a-locomotor' free movement primitive](#a-locomotor-primitive)
+  * [`a-locomotor` free movement primitive](#a-locomotor-primitive)
 * [Reaction components](#reaction-components)
   * [`hoverable`](#hoverable-component)
   * [`grabbable`](#grabbable-component)
     * [`clickable`](#clickable-component)
   * [`stretchable`](#stretchable-component)
-  * ['drag-droppable'](#drag-droppable-component)
+  * [`drag-droppable`](#drag-droppable-component)
+    * [`drop-target`](#drop-target-component)
 * [Customizing interactivity](#customizing-interactivity)
 
 ## Examples
@@ -213,9 +214,9 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| colliderEventProperty | Name of property in event `details` object which contains the collided entity | `'el'` |
+| colliderEventProperty | Name of property in event `detail` object which contains the collided entity | `'el'` |
 | colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
-| colliderEndEventProperty | Name of property in event `details` object which contains the un-collided entity | `''` |
+| colliderEndEventProperty | Name of property in event `detail` object which contains the un-collided entity | `''` |
 | grabStartButtons | Array of button event types that can initiate grab | Button press, touch start, and mouse down events |
 | grabEndButtons | Array of button event types that can terminate grab | Button release, touch end, and mouse up events |
 | stretchStartButtons | Array of button event types that can initiate stretch | Button press, touch start, and mouse down events |
@@ -232,9 +233,9 @@ used, depending on the API of the collider in use.
 #### Gesture Events
 
 Events will be emitted by the entity being interacted with.
-The entity that `super-hands` is attached to is sent in the event `details` as the property `hand`.
+The entity that `super-hands` is attached to is sent in the event `detail` as the property `hand`.
 
-| Type | Description | Target |  details object |
+| Type | Description | Target |  detail object |
 | --- | --- | --- | --- |
 | hover-start | Collided with entity | collided entity | hand: `super-hands` entity |
 | hover-end | No longer collided with entity | collided entity | hand: `super-hands` entity |
@@ -254,10 +255,10 @@ Notes:
 * Only one entity at a time will be targeted for each event type,
 even if multiple overlapping collision zones exist. `super-hands` tracks a
 LIFO stack of collided entities to determine which will be affected.
-* drag-drop: For the receiving entity, `on` entry in the details is `null`.
+* drag-drop: For the receiving entity, `on` entry in the detail is `null`.
 If needed, use `event.target` instead.
 * For events triggered by buttons, the triggering button event is passed
-  along in `details.buttonEvent`
+  along in `detail.buttonEvent`
 
 #### Global Event Handler Integration
 
@@ -331,7 +332,7 @@ class names `'right-controller'` and `'left-controller'` to help
 
 #### Events
 
-| Type | Description |  details object |
+| Type | Description |  detail object |
 | --- | --- | --- |
 |'controller-progressed' | The detected controller type has changed | `level`: new control type, : `'gaze'`, `'point'`, or `'touch'` |
 
@@ -523,6 +524,30 @@ recognized by `super-hands` `dragDropStartButtons` and `dragDropEndButtons`.
 Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to
 receive the dragover state.
 
+### drop-target component
+
+The `drop-target` component sets an entity up as a target to respond to
+`drag-droppable` entities. Optionally, it can be configured to accept only
+specific entities and to emit custom events on acceptance or rejection.
+
+#### Component Schema
+
+| Property | Description | Default Value |
+| -------- | ----------- | ------------- |
+| accepts | CSS query string to specify which entities to respond to | `null` (accept all entities) |
+| acceptEvent | String. Name of custom event to emit upon successful drag-drop interaction | `''` (don't emit event) |
+| rejectEvent | String. Name of custom event to emit upon rejecting attempted drag-drop that contained an entity not included in `accepts` | `''` (don't emit event) |
+
+Accept and reject events will contain the carried entity that was accepted/rejected
+in the `el` property of `detail`.
+
+#### States
+
+| Name | Description |
+| --- | --- |
+| dragover | Added to the entity while a controller is carrying and acceptable `drag-droppable` entity |
+
+
 ## Customizing interactivity
 
 ### Gesture and Response Concept
@@ -547,3 +572,17 @@ event listeners and react accordingly.
 Global Event Handlers Web API to trigger standard mouse events analogous
 to the VR interactions that can easily be handled through
 properties like `onclick`.
+
+### Gesture acceptance and rejection
+
+Entities which are the target of gestures communicate back to `super-hands`
+that they have accepted the attempted interaction by 'cancelling' the
+gesture event (i.e. calling `.preventDefault()` on the event). This allows
+`super-hands` to penetrate overlapping and nested entities in order to find
+the desired target and for reaction components to be discriminating about
+their conditions for interaction
+(e.g., [`drop-target`](#drop-target-component)). All of the provided
+reaction components handle this signaling automatically, but, if you
+create your own reaction components, it is important to cancel the events when
+responding to a gesture so that `super-hands` knows the gesture has been
+accepted and stops searching for a viable target. 
