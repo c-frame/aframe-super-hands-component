@@ -2,31 +2,25 @@
 const helpers = require('../helpers');
 const entityFactory = helpers.entityFactory;
 
-suite('drag-droppable', function () {
+suite('draggable', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
-    el.setAttribute('drag-droppable', '');
+    el.setAttribute('draggable', '');
     el.addEventListener('loaded', evt => {
-      this.comp = el.components['drag-droppable'];
+      this.comp = el.components['draggable'];
       done();
     });
   });
   test('component attaches without errors', function () {
-    assert.isOk(this.el.components['drag-droppable']);
+    assert.isOk(this.el.components['draggable']);
   });
   test('component removes without errors', function (done) {
     var el = this.el;
-    el.removeComponent('drag-droppable');
+    el.removeComponent('draggable');
     process.nextTick(function () {
-      assert.notOk(el.components['drag-droppable']);
+      assert.notOk(el.components['draggable']);
       done();
     });
-  });
-  test('el gains and loses dragover state', function () {
-    this.el.emit('dragover-start', { hand: this.hand });
-    assert.isTrue(this.el.is('dragover'));
-    this.el.emit('dragover-end', { hand: this.hand });
-    assert.isFalse(this.el.is('dragover'));
   });
   test('el gains and loses dragged state', function () {
     this.el.emit('drag-start', { hand: this.hand });
@@ -35,14 +29,14 @@ suite('drag-droppable', function () {
     assert.isFalse(this.el.is('dragged'));
   });
 });
-suite('drag-droppable button mapping', function () {
+suite('draggable button mapping', function () {
   setup(function (done) {
     var el = this.el = entityFactory();
     this.hand = helpers.controllerFactory({'super-hands': ''});
-    el.setAttribute('drag-droppable',
+    el.setAttribute('draggable',
         'startButtons: triggerdown; endButtons: triggerup');
     el.addEventListener('loaded', () => {
-      this.comp = el.components['drag-droppable'];
+      this.comp = el.components['draggable'];
       done();
     });
   });

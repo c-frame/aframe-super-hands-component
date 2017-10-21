@@ -4,6 +4,7 @@ const buttonCore = require('./prototypes/buttons-proto.js');
 
 AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function () {
+    console.warn('Warning: drag-droppable is deprecated. Use draggable and droppable components instead');
     this.HOVERED_STATE = 'dragover';
     this.DRAGGED_STATE = 'dragged';
     this.HOVER_EVENT = 'dragover-start';

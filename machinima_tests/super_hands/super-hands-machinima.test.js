@@ -251,3 +251,30 @@ suite('laser-controls grabbable', function () {
     }
   );
 });
+suite('drop-targets', function () {
+  setup(function (done) {
+    machinima.setupScene('drop-targets.html');
+    this.scene = document.querySelector('a-scene');
+    this.timeout(5000);
+    this.scene.addEventListener('loaded', e => {
+      this.boxGrnUp = document.getElementById('greenHigh');
+      this.boxGrnDn = document.getElementById('greenLow');
+      this.boxRedUp = document.getElementById('redHigh');
+      this.boxRedDn = document.getElementById('redLow');
+      this.boxBlueUp = document.getElementById('blueHigh');
+      this.boxBlueDn = document.getElementById('blueLow');
+      // firefox needs time for hands to load
+      window.setTimeout(done, 1000);
+    });
+  });
+  machinima.test(
+    'drop-target discrimination and events',
+    'base/recordings/droptarget.json',
+    function () {
+      let blueDnGeo = this.boxBlueDn.getAttribute('geometry');
+      let grnDnGeo = this.boxGrnDn.getAttribute('geometry');
+      assert.strictEqual(grnDnGeo.primitive, 'sphere');
+      assert.strictEqual(blueDnGeo.primitive, 'tetrahedron');
+    }
+  );
+});

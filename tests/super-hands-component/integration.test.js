@@ -8,9 +8,11 @@ suite('super-hands & reaction component integration', function () {
     this.target1.setAttribute('grabbable', '');
     this.target1.setAttribute('hoverable', '');
     this.target1.setAttribute('stretchable', '');
-    this.target1.setAttribute('drag-droppable', '');
+    this.target1.setAttribute('draggable', '');
+    this.target1.setAttribute('droppable', '');
     this.target2 = document.createElement('a-entity');
-    this.target2.setAttribute('drag-droppable', '');
+    this.target2.setAttribute('draggable', '');
+    this.target2.setAttribute('droppable', '');
     this.target2.setAttribute('hoverable', '');
     this.target1.parentNode.appendChild(this.target2);
     this.hand1 = helpers.controllerFactory({
@@ -68,7 +70,7 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onStretchEndButton();
     assert.equal(this.target1.components.stretchable.stretchers.length, 0);
   });
-  test('drag-droppable', function () {
+  test('drag and drop', function () {
     const dropSpy = this.sinon.spy();
     const targetDropSpy = this.sinon.spy();
     this.target1.addEventListener('drag-drop', dropSpy);
@@ -106,7 +108,7 @@ suite('super-hands & reaction component integration', function () {
     assert.strictEqual(this.sh1.hoverEls.indexOf(this.target2), -1);
   });
   test('lastHover not confused by rejected dragover', function () {
-    this.target2.removeComponent('drag-droppable');
+    this.target2.removeComponent('droppable');
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
@@ -349,9 +351,11 @@ suite('progressive-controls & reaction component integration', function () {
     this.target1.setAttribute('grabbable', '');
     this.target1.setAttribute('hoverable', '');
     this.target1.setAttribute('stretchable', '');
-    this.target1.setAttribute('drag-droppable', '');
+    this.target1.setAttribute('draggable', '');
+    this.target1.setAttribute('droppable', '');
     this.target2 = document.createElement('a-entity');
-    this.target2.setAttribute('drag-droppable', '');
+    this.target2.setAttribute('draggable', '');
+    this.target2.setAttribute('droppable', '');
     this.target2.setAttribute('hoverable', '');
     this.target1.parentNode.appendChild(this.target2);
     this.player = document.createElement('a-entity');

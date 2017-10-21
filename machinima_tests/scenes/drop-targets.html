@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script src="build.js"></script>
+  </head>
+  <body>
+    <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
+      <a-assets>
+        <!-- <img id="grid" src="grid.png"/> -->
+
+        <a-mixin id="controller" super-hands
+                 sphere-collider="objects: .cube"></a-mixin>
+        <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 hoverable grabbable stretchable draggable
+                 droppable="acceptEvent: drag-drop-accepted; rejectEvent: drag-drop-rejected"
+                 event-set__accept="_event: drag-drop-accepted; geometry.primitive: sphere; geometry.radius: 0.25"
+                 event-set__reject="_event: drag-drop-rejected; geometry.primitive: tetrahedron; geometry.radius: 0.25"></a-mixin>
+        <a-mixin id="red" material="color: red" droppable="accepts: [mixin~='red']"></a-mixin>
+        <a-mixin id="green" material="color: green" droppable="accepts: [mixin~='green']"></a-mixin>
+        <a-mixin id="blue" material="color: blue" droppable="accepts: [mixin~='blue']"></a-mixin>
+        <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
+        </a-mixin>
+        <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
+      </a-assets>
+      <a-entity id="lhand" hand-controls="left" mixin="controller"></a-entity>
+      <a-entity id="rhand" hand-controls="right" mixin="controller"></a-entity>
+      <a-entity id="redLow" class="cube" mixin="cube red" position="0 1 -1"></a-entity>
+      <a-entity id="redHigh" class="cube" mixin="cube red" position="0 1.6 -1"></a-entity>
+      <a-entity id="blueLow" class="cube" mixin="cube blue" position="-1 1 -1"></a-entity>
+      <a-entity id="blueHigh" class="cube" mixin="cube blue" position="-1 1.6 -1"></a-entity>
+      <a-entity id="greenLow" class="cube" mixin="cube green" position="1 1 -1"></a-entity>
+      <a-entity id="greenHigh" class="cube" mixin="cube green" position="1 1.6 -1"></a-entity>
+      <a-plane rotation="-90 0 0" color="#888"
+                 width="50" height="50"></a-plane>
+    </a-scene>
+  </body>
+</html>

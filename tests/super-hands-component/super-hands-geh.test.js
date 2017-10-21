@@ -15,7 +15,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     });
     // add reaction components to ensure no conflicts
     [this.target1, this.target2].forEach(t => {
-      ['grabbable', 'hoverable', 'drag-droppable', 'stretchable']
+      ['grabbable', 'hoverable', 'draggable', 'droppable', 'stretchable']
         .forEach(c => t.setAttribute(c, ''));
     });
     this.hand2 = helpers.controllerFactory({

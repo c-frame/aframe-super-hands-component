@@ -29,7 +29,8 @@ The currently implemented gestures are:
 For an entity to respond to the `super-hands` gestures, it needs to have
 components attached to translate the gestures into actions. `super-hands`
 includes components for typical reactions to the implemented gestures:
-`hoverable`, `clickable`, `grabbable`, `stretchable`, and `drag-droppable`.
+`hoverable`, `clickable`, `grabbable`, `stretchable`, `draggable`, and
+`droppable`.
 
 **Universal Progressive Controls**: The `progressive-controls` component
 provides consistent interactivity on any viewer from desktop to full
@@ -50,13 +51,14 @@ Readme contents:
 * [Core, primitives, and meta-components](#core-primitives-and-meta-components)
   * [`super-hands` gesture interpretation component](#super-hands-component)
   * [`progressive-controls` universal controller component](#progressive-controls-component)
-  * ['a-locomotor' free movement primitive](#a-locomotor-primitive)
+  * [`a-locomotor` free movement primitive](#a-locomotor-primitive)
 * [Reaction components](#reaction-components)
   * [`hoverable`](#hoverable-component)
   * [`grabbable`](#grabbable-component)
     * [`clickable`](#clickable-component)
   * [`stretchable`](#stretchable-component)
-  * ['drag-droppable'](#drag-droppable-component)
+  * [`draggable`](#draggable-component)
+  * [`droppable`](#droppable-component)
 * [Customizing interactivity](#customizing-interactivity)
 
 ## Examples
@@ -115,10 +117,9 @@ require('super-hands');
 
 Master branch
 
-* Fix duplicate grab/click events with touch input
-* Update to A-Frame v0.7.0
-* Implement new [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
-  package for machinima test management
+* Deprecate `drag-droppable`; replace with separate `draggable` and `droppable`
+  reaction components. `droppable` can selectively accept or reject attempted
+  'drag-drop' gestures depending on the entity being dropped on it.
 
 Master branch features can be tested using:
 
@@ -141,32 +142,6 @@ v2.0.1
   * Fixed lingering hover when `progressive-controls` advances from gaze mode
   * Fixed lingering hovers when `progressive-controls` in point mode
   * Fixed some new files being excluded from babelify & breaking uglify
-
-v2.0.0
-
-* Consistent experience across devices: `super-hands` now provides interactivity
-  for all levels of VR controls: desktop mouse, mobile touch ("magic window"),
-  cardboard button,
-  3DOF (GearVR and Daydram), and 6DOF (Vive and Oculus Touch)
-  * `progressive-controls` meta-component to automatically setup interactive
-    controls on **any** device from desktop to Vive
-  * Upgraded `grabbable` reaction component.
-    * Now works with pointing and moving at a distance, e.g. with
-      3DOF controllers and `laser-controls`, using controller orientation
-      and position to move grabbed entities
-* Button mapping for reaction components: each reaction component now has
-  `startButtons` and `endButtons` schema properties to specify acceptable
-  buttons. This allows different entities to react to different buttons.
-  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)
-  `a-locomotor`'s `grabbable` can be set to respond to different
-  buttons than other `grabbable` entities so that
-  grabbing entities and locomotion are separate gestures for the user.
-* `a-locomotor` now functions independently from colliders;
-  removed `add-to-colliders` attribute.
-* Performance improvements in `grabbable` and `stretchable`
-* Gesture initiation changed to occur only on button press rather than
-  button press and collision. Pressing a button in empty space and then
-  moving into an object will no long scoop it up in a grab.
 
 [Previous news](news.md)
 
@@ -213,9 +188,9 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 | -------- | ----------- | ------------- |
 | colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider`) |
 | colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
-| colliderEventProperty | Name of property in event `details` object which contains the collided entity | `'el'` |
+| colliderEventProperty | Name of property in event `detail` object which contains the collided entity | `'el'` |
 | colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
-| colliderEndEventProperty | Name of property in event `details` object which contains the un-collided entity | `''` |
+| colliderEndEventProperty | Name of property in event `detail` object which contains the un-collided entity | `''` |
 | grabStartButtons | Array of button event types that can initiate grab | Button press, touch start, and mouse down events |
 | grabEndButtons | Array of button event types that can terminate grab | Button release, touch end, and mouse up events |
 | stretchStartButtons | Array of button event types that can initiate stretch | Button press, touch start, and mouse down events |
@@ -232,9 +207,9 @@ used, depending on the API of the collider in use.
 #### Gesture Events
 
 Events will be emitted by the entity being interacted with.
-The entity that `super-hands` is attached to is sent in the event `details` as the property `hand`.
+The entity that `super-hands` is attached to is sent in the event `detail` as the property `hand`.
 
-| Type | Description | Target |  details object |
+| Type | Description | Target |  detail object |
 | --- | --- | --- | --- |
 | hover-start | Collided with entity | collided entity | hand: `super-hands` entity |
 | hover-end | No longer collided with entity | collided entity | hand: `super-hands` entity |
@@ -254,10 +229,10 @@ Notes:
 * Only one entity at a time will be targeted for each event type,
 even if multiple overlapping collision zones exist. `super-hands` tracks a
 LIFO stack of collided entities to determine which will be affected.
-* drag-drop: For the receiving entity, `on` entry in the details is `null`.
+* drag-drop: For the receiving entity, `on` entry in the detail is `null`.
 If needed, use `event.target` instead.
 * For events triggered by buttons, the triggering button event is passed
-  along in `details.buttonEvent`
+  along in `detail.buttonEvent`
 
 #### Global Event Handler Integration
 
@@ -331,7 +306,7 @@ class names `'right-controller'` and `'left-controller'` to help
 
 #### Events
 
-| Type | Description |  details object |
+| Type | Description |  detail object |
 | --- | --- | --- |
 |'controller-progressed' | The detected controller type has changed | `level`: new control type, : `'gaze'`, `'point'`, or `'touch'` |
 
@@ -494,15 +469,18 @@ There is no CANNON api method for updating physics body scale, but `stretchable`
 | --- | --- |
 | stretched | Added to entity while it is grabbed with two hands |
 
-### drag-droppable component
+### draggable component
 
-`drag-droppable` is a shell component that only manages the 'dragover' state for the entity.
-This can be combined with  with a '-dragover' mixin to easily highlight when an entity is
-hovering in a drag-drop location.
+`draggable` makes an entity able to participate in a drag and drop
+gesture with a `droppable` entity. This does not move an entity
+(also add `grabbable` for that functionality), but instead tracks whether
+a gesture has been made that involves pressing a button down with the controller
+pointed at this entity, and then moving the controller to point at another
+entity with the `droppable` component before releasing.
 
 For interactivity, use the global event handler integration,
 the `event-set` from [kframe](http://github.com/ngokevin/kframe)
-with the `drag-dropped` event, or create your own component.
+with the `drag-drop` event, or create your own component.
 
 #### Component Schema
 
@@ -518,10 +496,37 @@ recognized by `super-hands` `dragDropStartButtons` and `dragDropEndButtons`.
 
 | Name | Description |
 | --- | --- |
-| dragover | Added to while a carried entity is colliding with a a `drag-droppable` entity |
+| dragged | Added to while a carried entity is colliding with a a `drag-droppable` entity |
 
-Add `drag-droppable` to both the carried entity and the receiving entity if you want both of them to
-receive the dragover state.
+### droppable component
+
+The `droppable` component sets an entity up as a target to respond to
+`dragged` entities. Optionally, it can be configured to accept only
+specific entities and to emit custom events on acceptance or rejection.
+
+Combining the `accepts` and `acceptEvent` property of `droppable` with
+`event-set` from [kframe](http://github.com/ngokevin/kframe), you can
+create rich interactivity without any additional JavaScript or
+custom components.
+
+#### Component Schema
+
+| Property | Description | Default Value |
+| -------- | ----------- | ------------- |
+| accepts | CSS query string to specify which entities to respond to | `null` (accept all entities) |
+| autoUpdate | Should it watch for newly added entities that match `accepts`? May impact performance. | `true` |
+| acceptEvent | String. Name of custom event to emit upon successful drag-drop interaction | `''` (don't emit event) |
+| rejectEvent | String. Name of custom event to emit upon rejecting attempted drag-drop that contained an entity not included in `accepts` | `''` (don't emit event) |
+
+Accept and reject events will contain the dragged entity that was accepted/rejected
+in the `el` property of `detail`.
+
+#### States
+
+| Name | Description |
+| --- | --- |
+| dragover | Added to the entity while a controller is holding an acceptable `draggable` entity in the collision space of the `droppable` entity |
+
 
 ## Customizing interactivity
 
@@ -541,9 +546,24 @@ There are two pathways to adding additional interactivity.
 
 1. A-Frame style: Each component's API documentation describes the A-Frame
 custom events and states it uses.
-These are best processed by creating new A-Frame components that register
+These can be used on conjunction with other community A-Frame components
+or by creating custom  components for your project that register
 event listeners and react accordingly.
 1. HTML style: The `super-hands` component also integrates with the
 Global Event Handlers Web API to trigger standard mouse events analogous
 to the VR interactions that can easily be handled through
 properties like `onclick`.
+
+### Gesture acceptance and rejection
+
+Entities which are the target of gestures communicate back to `super-hands`
+that they have accepted the attempted interaction by 'cancelling' the
+gesture event (i.e. calling `.preventDefault()` on the event). This allows
+`super-hands` to penetrate overlapping and nested entities in order to find
+the desired target and for reaction components to be discriminating about
+their conditions for interaction
+(e.g., [`droppable`](#droppable)). All of the provided
+reaction components handle this signaling automatically, but, if you
+create your own reaction components, it is important to cancel the events when
+responding to a gesture so that `super-hands` knows the gesture has been
+accepted and stops searching for a viable target.
