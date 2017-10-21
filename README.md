@@ -93,7 +93,7 @@ Install and use by directly including the [browser files](dist):
     <a-assets></a-assets>
     <a-entity progressive-controls="objects: a-box"></a-entity>
     <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
-    <a-box hoverable grabbable stretchable drag-droppable
+    <a-box hoverable grabbable stretchable draggable dropppable
     color="blue" position="0 0 -1"></a-box>
   </a-scene>
 </body>
@@ -496,7 +496,7 @@ recognized by `super-hands` `dragDropStartButtons` and `dragDropEndButtons`.
 
 | Name | Description |
 | --- | --- |
-| dragged | Added to while a carried entity is colliding with a a `drag-droppable` entity |
+| dragged | Added to entity from button press until button release |
 
 ### droppable component
 
@@ -513,7 +513,7 @@ custom components.
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| accepts | CSS query string to specify which entities to respond to | `null` (accept all entities) |
+| accepts | CSS query string to specify which entities to respond to | `''` (accept all entities) |
 | autoUpdate | Should it watch for newly added entities that match `accepts`? May impact performance. | `true` |
 | acceptEvent | String. Name of custom event to emit upon successful drag-drop interaction | `''` (don't emit event) |
 | rejectEvent | String. Name of custom event to emit upon rejecting attempted drag-drop that contained an entity not included in `accepts` | `''` (don't emit event) |
