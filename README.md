@@ -535,6 +535,7 @@ specific entities and to emit custom events on acceptance or rejection.
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | accepts | CSS query string to specify which entities to respond to | `null` (accept all entities) |
+| autoUpdate | Should it watch for newly added entities that match `accepts`? May impact performance. | `true` |
 | acceptEvent | String. Name of custom event to emit upon successful drag-drop interaction | `''` (don't emit event) |
 | rejectEvent | String. Name of custom event to emit upon rejecting attempted drag-drop that contained an entity not included in `accepts` | `''` (don't emit event) |
 
@@ -585,4 +586,4 @@ their conditions for interaction
 reaction components handle this signaling automatically, but, if you
 create your own reaction components, it is important to cancel the events when
 responding to a gesture so that `super-hands` knows the gesture has been
-accepted and stops searching for a viable target. 
+accepted and stops searching for a viable target.

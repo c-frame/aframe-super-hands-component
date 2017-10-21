@@ -52,21 +52,37 @@ suite('drop-target', function () {
       assert.isFalse(this.el.is('dragover'));
     });
     test('dragdrop accepts listed entities', function () {
-      const detail = {carried: this.carried2};
+      const detail = {dropped: this.carried2};
       this.el.setAttribute('drop-target', {accepts: '.carried2, #carried1'});
       assert.isFalse(helpers.emitCancelable(this.el, 'drag-drop', detail));
     });
     test('dragdrop rejects unlisted entities', function () {
-      const detail = {carried: this.carried1};
+      const detail = {dropped: this.carried1};
       this.el.setAttribute('drop-target', {accepts: '.carried2'});
       assert.isTrue(helpers.emitCancelable(this.el, 'drag-drop', detail));
+    });
+    test('dragdrop rejects all if no matches', function () {
+      const detail = {dropped: this.carried1};
+      this.el.setAttribute('drop-target', {accepts: '.nomatches'});
+      assert.isTrue(helpers.emitCancelable(this.el, 'drag-drop', detail));
+    });
+    test('dragdrop accepts newly added entities', function (done) {
+      this.el.setAttribute('drop-target', {accepts: '.carried2, #carried1'});
+      const newEntity = document.createElement('a-entity');
+      newEntity.classList.add('carried2');
+      newEntity.addEventListener('loaded', () => {
+        const detail = {dropped: newEntity};
+        assert.isFalse(helpers.emitCancelable(this.el, 'drag-drop', detail));
+        done();
+      });
+      this.el.sceneEl.appendChild(newEntity);
     });
   });
   suite('accept/reject events', function () {
     test('accept event fired', function () {
       const acceptEvent = 'accepted!';
       const rejectEvent = 'denied!';
-      const detail = {carried: this.carried2};
+      const detail = {dropped: this.carried2};
       const rejectSpy = this.sinon.spy();
       const acceptSpy = this.sinon.spy();
       this.el.addEventListener(rejectEvent, rejectSpy);
@@ -86,7 +102,7 @@ suite('drop-target', function () {
     test('reject event fired', function () {
       const acceptEvent = 'accepted!';
       const rejectEvent = 'denied!';
-      const detail = {carried: this.carried2};
+      const detail = {dropped: this.carried2};
       const rejectSpy = this.sinon.spy();
       const acceptSpy = this.sinon.spy();
       this.el.addEventListener(rejectEvent, rejectSpy);
