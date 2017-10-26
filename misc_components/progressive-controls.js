@@ -13,7 +13,8 @@ AFRAME.registerComponent('progressive-controls', {
         ? 'el'
         : 'clearedEls';
     this.levels = ['gaze', 'point', 'touch'];
-    this.currentLevel = 0;
+    this.currentLevel = new Map();
+    this.controllerName = new Map();
     this.superHandsRaycasterConfig = {
       colliderEvent: 'raycaster-intersection',
       colliderEventProperty: 'els',
@@ -43,12 +44,14 @@ AFRAME.registerComponent('progressive-controls', {
     this.eventRepeaterB = this.eventRepeater.bind(this);
     // pass mouse and touch events into the scene
     this.addEventListeners();
+    // default level
+    this.currentLevel.set('right', 0);
   },
   update: function (oldData) {
-    const level = this.currentLevel;
     // force setLevel refresh with new params
-    this.currentLevel = -1;
-    this.setLevel(level);
+    for (let [hand, level] of this.currentLevel) {
+      this.setLevel(level, hand, true);
+    }
   },
   remove: function () {
     if (!this.eventsRegistered) { return; }
@@ -58,19 +61,20 @@ AFRAME.registerComponent('progressive-controls', {
     canv.removeEventListener('touchstart', this.eventRepeaterB);
     canv.removeEventListener('touchend', this.eventRepeaterB);
   },
-  setLevel: function (newLevel) {
+  setLevel: function (newLevel, hand, force) {
+    hand = hand || 'right';
     const maxLevel = this.levels.indexOf(this.data.maxLevel);
     const physicsAvail = !!this.el.sceneEl.getAttribute('physics');
-    const hands = [this.right, this.left];
+    const currentHand = this[hand];
     newLevel = newLevel > maxLevel ? maxLevel : newLevel;
-    if (newLevel === this.currentLevel) { return; }
+    if (newLevel === this.currentLevel.get(hand) && !force) { return; }
     if (newLevel !== 0 && this.caster) {
       this.camera.removeChild(this.caster);
       this.caster = null;
       this.camera.removeAttribute('super-hands');
     }
     switch (newLevel) {
-      case 0:
+      case this.levels.indexOf('gaze'):
         this.caster = this.camera.querySelector('[raycaster]');
         if (!this.caster) {
           this.caster = document.createElement('a-entity');
@@ -86,50 +90,48 @@ AFRAME.registerComponent('progressive-controls', {
           this.camera.setAttribute('static-body', this.data.physicsBody);
         }
         break;
-      case 1:
-        const ctrlrCfg = this.controllerConfig[this.controllerName] || {};
+      case this.levels.indexOf('point'):
+        const ctrlrName = this.controllerName.get(hand);
+        const ctrlrCfg = this.controllerConfig[ctrlrName] || {};
         const rayConfig = AFRAME.utils.extend(
           {objects: this.data.objects, showLine: true},
           ctrlrCfg.raycaster || {}
         );
-        hands.forEach(h => {
-          h.setAttribute('super-hands', this.superHandsRaycasterConfig);
-          h.setAttribute('raycaster', rayConfig);
-          if (physicsAvail) {
-            h.setAttribute('static-body', this.data.physicsBody);
-          }
-        });
+        currentHand.setAttribute('super-hands', this.superHandsRaycasterConfig);
+        currentHand.setAttribute('raycaster', rayConfig);
+        if (physicsAvail) {
+          currentHand.setAttribute('static-body', this.data.physicsBody);
+        }
         break;
-      case 2:
-        ['right', 'left'].forEach(h => {
-          // clobber flag to restore defaults
-          this[h].setAttribute('super-hands', this[h + 'shOriginal'], true);
-          this[h].setAttribute(
-            this.data.touchCollider,
-            'objects: ' + this.data.objects
-          );
-          if (physicsAvail) {
-            this[h].setAttribute('static-body', this.data.physicsBody);
-          }
-        });
+      case this.levels.indexOf('touch'):
+        const shConfig = this[hand + 'shOriginal'];
+        // clobber flag to restore defaults
+        currentHand.setAttribute('super-hands', shConfig, true);
+        currentHand.setAttribute(
+          this.data.touchCollider,
+          'objects: ' + this.data.objects
+        );
+        if (physicsAvail) {
+          currentHand.setAttribute('static-body', this.data.physicsBody);
+        }
         break;
     }
-    this.currentLevel = newLevel;
+    this.currentLevel.set(hand, newLevel);
     this.el.emit('controller-progressed', {
-      level: this.levels[this.currentLevel]
+      level: this.levels[newLevel],
+      hand: hand
     });
   },
   detectLevel: function (evt) {
     const DOF6 = ['vive-controls', 'oculus-touch-controls',
         'windows-motion-controls'];
     const DOF3 = ['gearvr-controls', 'daydream-controls'];
-    this.controllerName = evt.detail.name;
+    const hand = evt.detail.component.data.hand || 'right';
+    this.controllerName.set(hand, evt.detail.name);
     if (DOF6.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('touch'));
+      this.setLevel(this.levels.indexOf('touch'), hand);
     } else if (DOF3.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('point'));
-    } else {
-      this.setLevel(this.levels.indexOf('gaze'));
+      this.setLevel(this.levels.indexOf('point'), hand);
     }
   },
   eventRepeater: function (evt) {
