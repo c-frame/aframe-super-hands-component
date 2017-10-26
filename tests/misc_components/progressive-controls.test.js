@@ -22,4 +22,11 @@ suite('progressive-controls', function () {
       done();
     });
   });
+  test('extra controller not activated', function () {
+    this.el.emit('controllerconnected', {name: 'gearvr-controls', component: {
+      data: {}
+    }});
+    assert.isOk(document.querySelector('.right-controller').getAttribute('line'));
+    assert.isNotOk(document.querySelector('.left-controller').getAttribute('line'));
+  });
 });

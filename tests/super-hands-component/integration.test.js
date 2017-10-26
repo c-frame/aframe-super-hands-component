@@ -369,7 +369,10 @@ suite('progressive-controls & reaction component integration', function () {
   });
   test('grabbable raycaster offset', function () {
     const grab = this.target1.components.grabbable;
-    this.ctrlr1.emit('controllerconnected', {name: 'gearvr-controls'});
+    this.ctrlr1.emit('controllerconnected', {
+      name: 'gearvr-controls',
+      component: {data: {}}
+    });
     grab.start({detail: {hand: this.ctrlr1}});
     assert.notDeepEqual(grab.grabOffset, {x: 0, y: 0, z: 0});
     assert.deepEqual(

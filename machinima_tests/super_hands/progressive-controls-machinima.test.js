@@ -87,6 +87,9 @@ suite('progressive pointer controls', function () {
       assert.isBelow(this.boxRedUp.getAttribute('position').y, -0.5, 'Red below');
       assert.isAbove(this.boxBlueUp.getAttribute('position').y, 3, 'Blue above');
       assert.isBelow(this.boxRedDn.getAttribute('position').x, -1, 'Red left');
+      // laser only activated on connected controller
+      assert.isOk(document.querySelector('.right-controller').getAttribute('line'));
+      assert.isNotOk(document.querySelector('.left-controller').getAttribute('line'));
     }
   );
   machinima.test(
