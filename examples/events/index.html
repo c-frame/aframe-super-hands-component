@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - GlobalEventHandler Integration</title>
-    <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.11.4/dist/aframe-extras.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
@@ -14,10 +14,9 @@
       }
       function paintBall (evt) {
         var col = evt.target.getAttribute('color');
-        evt.relatedTarget.querySelector('a-sphere')
-            .setAttribute('color', col);
-        evt.relatedTarget.querySelector('a-sphere')
-            .setAttribute('visible', true);
+        var target = evt.relatedTarget.querySelector('a-sphere')
+        target.setAttribute('color', col);
+        target.setAttribute('visible', true);
       }
       function unPaintBall (evt) {
         evt.relatedTarget.querySelector('a-sphere')
@@ -36,9 +35,10 @@
       </a-assets>
       <a-entity progressive-controls="objects: a-box, a-torus-knot, a-link">
         <a-camera>
-          <a-sphere radius="0.02" position="-0 0 -0.5" visible="false"
-                    shadow>
-          </a-sphere>
+          <a-entity class="gazecaster">
+            <a-sphere radius="0.02" visible="false" shadow>
+            </a-sphere>
+          </a-entity>
         </a-camera>
         <a-entity id="lhand" class="left-controller">
           <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
@@ -65,7 +65,7 @@
                     ondragenter="this.setAttribute('opacity', 0.5)"
                     ondragleave="this.setAttribute('opacity', 1)"
                     onmousedown="this.setAttribute('wireframe', true)"
-                    onmouseup="this.setAttribute('wireframe', false)">
+                    onclick="this.setAttribute('wireframe', false)">
       </a-torus-knot>
       <a-link href="../portals.html" title="Other Examples"
               image="#portals-preview"
