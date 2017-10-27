@@ -83,7 +83,7 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.11.4/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/super-hands@2.0.2/dist/super-hands.min.js"></script>
 </head>
@@ -117,9 +117,14 @@ require('super-hands');
 
 Master branch
 
+* A-Frame v0.8.0 (WIP) support
 * Deprecate `drag-droppable`; replace with separate `draggable` and `droppable`
   reaction components. `droppable` can selectively accept or reject attempted
   'drag-drop' gestures depending on the entity being dropped on it.
+* `progressive-controls` updates
+  * Use mixins for customization
+  * Remove extra controller on ground from single controller setups
+  * Add `controllerModel` option to bypass default controller models
 
 Master branch features can be tested using:
 
@@ -279,37 +284,69 @@ controller and camera entities as children automatically.
 <a-entity progressive-controls></a-entity>
 ```
 
-To add additional properties or override defaults, specify the entities
-you want to modify as children of the `progressive-controls` entity, following
-the pattern below. Controllers must be given
-class names `'right-controller'` and `'left-controller'` to help
-`progressive-controls` identify them.
-
-```html
-<a-entity progressive-controls>
-  <a-camera super-hands>
-    <a-entity raycaster></a-entity>
-  </a-camera>
-  <a-entity class="right-controller" super-hands></a-entity>
-  <a-entity class="left-controller" super-hands></a-entity>
-</a-entity>
-```
-
 #### Component Schema
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | maxLevel | Limit the highest interactivity level that will be activated: `'gaze'`, `'point'`, or `'touch'`. | `'touch'` |
-| objects | CSS selector string to be used by any automatically generated collision detectors | `''` (all entities) |
-| physicsBody | Properties to use when adding `static-body` to automatically generated controllers. Ignored if physics not added to the scene. | 'shape: sphere; sphereRadius: 0.02' |
-| touchCollider | Name of collider component to use with touch-level controls | 'sphere-collider' |
+| gazeMixin | String. Id of `a-mixin` to add to raycaster/cursor entity in gaze mode | `''` |
+| pointMixin | String. Id of `a-mixin` to add to raycaster/cursor entity in point mode | `''` |
+| touchMixin | String. Id of `a-mixin` to add to raycaster/cursor entity in touch mode | `''` |
+| override | Whether to merge specified mixins with default settings (`false`) or to use only properties included in the specified mixin (`true`) | `false` |
+| objects | CSS selector string to be used by any automatically generated collision detectors (ignored when overriding). | `''` (all entities) |
+| controllerModel | Whether to load default controller models | `true` |
 
 #### Events
 
 | Type | Description |  detail object |
 | --- | --- | --- |
-|'controller-progressed' | The detected controller type has changed | `level`: new control type, : `'gaze'`, `'point'`, or `'touch'` |
+|'controller-progressed' | The detected controller type has changed | `level`: new control type, : `'gaze'`, `'point'`, or `'touch'`; `hand`: `'left'` or `'right'`  |
 
+#### Customization
+
+For most cases, using mixin properties is sufficient to add components
+or change the defaults that `progressive-controls` sets on the
+controllers and cursor. If you need to completely avoid a component that
+would normally be added, set the `override` flag, but beware that this skips
+all of the default components so you will need to include the `super-hands`
+configuration and the raycaster or collider (e.g. the
+[physics example](/examples/physics/index.html)
+replaces the default collider with a different component).
+If you need to change to change or add entities,
+you can manually create the player avatar structure using classes to tag
+the controller and raycaster entities for `progressice-controls` (e.g., the
+[Global Event Handlers example](examples/events/index.html)
+adds children to the controllers and raycaster). The complete
+default configuration created by `progressive-controls` is below
+for reference.
+
+```html
+<a-assets>
+  <a-mixin id="progressivecontrolsgazedefault" position="0 0 -0.5" raycaster
+      geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+      material="color: #000; shader: flat"
+      super-hands="colliderEvent:raycaster-intersection;
+                   colliderEventProperty:els;
+                   colliderEndEvent:raycaster-intersection-cleared;
+                   colliderEndEventProperty:el;">
+  </a-mixin>
+  <a-mixin id="progressivecontrolspointdefault" raycaster="showLine:true"
+       super-hands="colliderEvent:raycaster-intersection;
+                    colliderEventProperty:els;
+                    colliderEndEvent:raycaster-intersection-cleared;
+                    colliderEndEventProperty:el;">
+  </a-mixin>
+  <a-mixin id="progressivecontrolstouchdefault" super-hands sphere-collider>
+  </a-mixin>
+</a-assets>
+<a-entity progressive-controls>
+  <a-camera>
+    <a-entity class="gazecaster"></a-entity>
+  </a-camera>
+  <a-entity class="right-controller"></a-entity>
+  <a-entity class="left-controller"></a-entity>
+</a-entity>
+```
 
 ### a-locomotor primitive
 

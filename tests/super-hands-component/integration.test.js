@@ -345,7 +345,8 @@ suite('super-hands raycaster integration', function () {
     assert.equal(this.sh1.state.get('hover-start'), undefined);
   });
 });
-suite('progressive-controls & reaction component integration', function () {
+// skip until aframevr/aframe#3200 is fixed
+suite.skip('progressive-controls & reaction component integration', function () {
   setup(function (done) {
     this.target1 = entityFactory();
     this.target1.setAttribute('grabbable', '');

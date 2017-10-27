@@ -1,10 +1,9 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Vive With Physics</title>
-    <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.11.4/dist/aframe-extras.min.js"></script>
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.min.js"></script>
-    <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://aframe.io/releases/0.7.1/aframe.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
         "https://unpkg.com/super-hands@2.0.2/dist/super-hands.min.js" -->
@@ -12,11 +11,23 @@
     <script>
       //color randomizer
       AFRAME.registerComponent('color-randomizer', {
-        play: function() {
-          this.el.addEventListener('drag-drop', function(evt) {
+        play: function () {
+          this.el.addEventListener('drag-drop', function (evt) {
             evt.detail.dropped.setAttribute('material', 'color',
               '#'+(Math.random()*0xFFFFFF<<0).toString(16));
             // color randomizer credit: http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036
+          });
+        }
+      });
+      // turn controller's physics presence on only while button held down
+      AFRAME.registerComponent('phase-shift', {
+        init: function () {
+          var el = this.el;
+          el.addEventListener('gripdown', function () {
+            el.setAttribute('collision-filter', {collisionForces: true});
+          });
+          el.addEventListener('gripup', function () {
+            el.setAttribute('collision-filter', {collisionForces: false});
           });
         }
       });
@@ -36,20 +47,33 @@
         <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
         </a-mixin>
         <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
-        <a-mixin id="transformer" color-randomizer droppable
+        <a-mixin id="transformer" color-randomizer droppable static-body
+                 collision-filter="collisionForces: false"
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
+        <!-- to customize gaze cursor appearance. must list all components
+             because override property is set on progressive-controls -->
+        <a-mixin id="mycursor" position="0 0 -0.5" raycaster
+                 geometry="primitive: ring; radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+                 material="color: white; shader: flat"
+                 static-body="shape: sphere; sphereRadius: 0.001"
+                 super-hands="colliderEvent: raycaster-intersection;
+                              colliderEventProperty: els;
+                              colliderEndEvent:raycaster-intersection-cleared;
+                              colliderEndEventProperty:el;
+                              colliderState:"></a-mixin>
+        <!-- to change touch mode collider -->
+        <a-mixin id="mytouch" physics-collider phase-shift
+                 collision-filter="collisionForces: false"
+                 static-body="shape: sphere; sphereRadius: 0.02"
+                 super-hands="colliderEvent: collisions; colliderEventProperty: els;
+                              colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
+                              colliderState:"></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-entity progressive-controls="objects: .cube, .transformer, a-link">
-        <a-entity id="lhand" class="left-controller"></a-entity>
+      <a-entity progressive-controls="gazeMixin: mycursor; touchMixin: mytouch; override: true">
+        <!-- listing controller entities to set IDs for MoCap replay optional for normal use -->
         <a-entity id="rhand" class="right-controller"></a-entity>
-        <!-- customize the mouse/gaze cursor -->
-        <a-camera>
-          <a-entity raycaster position="0 0 -0.5"
-                    geometry="primitive: ring; radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
-                    material="color: white; shader: flat">
-          </a-entity>
-        </a-camera>
+        <a-entity id="lhand" class="left-controller"></a-entity>
       </a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -0.5" material="color: red"></a-entity>
