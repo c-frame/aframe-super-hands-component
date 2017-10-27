@@ -88,9 +88,10 @@ AFRAME.registerComponent('progressive-controls', {
     updateMixin(this.gazeDefault, 'raycaster', objs);
     updateMixin(this.pointDefault, 'raycaster', objs);
     updateMixin(this.touchDefault, 'sphere-collider', objs);
+    // async updates due to aframevr/aframe#3200
     // force setLevel refresh with new params
     for (let [hand, level] of this.currentLevel) {
-      this.setLevel(level, hand, true);
+      window.setTimeout(() => this.setLevel(level, hand, true));
     }
   },
   remove: function () {

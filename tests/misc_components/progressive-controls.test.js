@@ -23,7 +23,8 @@ suite('progressive-controls', function () {
         done();
       });
     });
-    test('extra controller not activated', function () {
+    // skip until aframevr/aframe#3200 is fixed
+    test.skip('extra controller not activated', function () {
       this.el.emit('controllerconnected', {name: 'gearvr-controls', component: {
         data: {}
       }});
@@ -31,7 +32,8 @@ suite('progressive-controls', function () {
       assert.isNotOk(document.querySelector('.left-controller').getAttribute('line'));
     });
   });
-  suite('mixin properties', function () {
+  // skip until aframevr/aframe#3200 is fixed
+  suite.skip('mixin properties', function () {
     setup(function (done) {
       var el = this.el = entityFactory();
       helpers.mixinFactory('gz1', {geometry: 'primitive: circle'});
