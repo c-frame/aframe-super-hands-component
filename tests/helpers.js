@@ -87,3 +87,10 @@ module.exports.emitCancelable = function (target, name, detail) {
   evt = new window.CustomEvent(name, data);
   return target.dispatchEvent(evt);
 };
+
+module.exports.simCollisionEnd = function (shEl, targetEl) {
+  let deets = {detail: {}};
+  let dat = shEl.components['super-hands'].data;
+  deets[dat.colliderEndEventProperty] = targetEl;
+  shEl.emit(dat.colliderEndEvent, deets);
+};

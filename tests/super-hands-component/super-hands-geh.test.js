@@ -45,7 +45,7 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.hand1);
       done();
     };
-    this.target1.emit('stateremoved', {state: 'collided'});
+    helpers.simCollisionEnd(this.hand1, this.target1);
   });
   test('dragenter - carried', function (done) {
     this.target1.ondragenter = e => {
@@ -79,8 +79,7 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target2);
       done();
     };
-    this.target2.addState('collided');
-    this.target2.removeState('collided');
+    helpers.simCollisionEnd(this.hand1, this.target2);
   });
   test('dragleave by move- hovered', function (done) {
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -92,8 +91,7 @@ suite('super-hands GlobalEventHandler integration', function () {
       assert.strictEqual(e.relatedTarget, this.target1);
       done();
     };
-    this.target2.addState('collided');
-    this.target2.removeState('collided');
+    helpers.simCollisionEnd(this.hand1, this.target2);
   });
   test('dragleave by drop - carried', function (done) {
     this.sh1.onHit({ detail: { el: this.target1 } });
@@ -191,7 +189,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onGrabStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
-    this.sh1.unWatch({ target: this.target1, detail: { state: 'collided' } });
+    helpers.simCollisionEnd(this.hand1, this.target1);
     this.target1.onmouseup = spy1;
     this.target2.onmouseup = spy2;
     this.sh1.onGrabEndButton();
@@ -212,11 +210,10 @@ suite('super-hands GlobalEventHandler integration', function () {
   });
   test('click does not fire if target is lost', function () {
     var clickSpy = this.sinon.spy();
-    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onGrabStartButton();
     this.target1.onclick = clickSpy;
-    this.target1.removeState('collided');
+    helpers.simCollisionEnd(this.hand1, this.target1);
     this.sh1.onGrabEndButton();
     assert.isFalse(clickSpy.called);
   });

@@ -40,12 +40,11 @@ suite('super-hands & reaction component integration', function () {
     assert.notEqual(this.sh1.hoverEls.indexOf(this.target1), -1, 'still watched');
   });
   test('hoverable', function () {
-    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
     assert.strictEqual(this.target1.components.hoverable.hoverers[0], this.hand1);
     assert.isTrue(this.target1.is('hovered'));
-    this.target1.removeState('collided');
+    helpers.simCollisionEnd(this.hand1, this.target1);
     assert.isFalse(this.target1.is('hovered'));
     assert.equal(this.sh1.hoverEls.indexOf(this.target1), -1);
   });
@@ -80,7 +79,7 @@ suite('super-hands & reaction component integration', function () {
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.ok(this.target1.is('dragged'), 'carried dragged');
     assert.ok(this.target2.is('dragover'), 'drop target hovered');
-    this.target2.emit('stateremoved', { state: 'collided' });
+    helpers.simCollisionEnd(this.hand1, this.target2);
     assert.ok(this.target1.is('dragged'), 'carried still dragged after target lost');
     assert.isFalse(this.target2.is('dragover'), 'lost target unhovered');
     assert.isFalse(dropSpy.called, 'no drop before button release');
@@ -98,13 +97,13 @@ suite('super-hands & reaction component integration', function () {
     assert.isFalse(this.target2.is('dragover'), 'drop target unhovered');
   });
   test('drop target remains watched for collision end', function () {
-    this.timeout(0);
     this.target2.removeAttribute('hoverable');
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onDragDropStartButton();
     this.sh1.onHit({ detail: { el: this.target2 } });
     this.sh1.onDragDropEndButton();
     this.target2.emit('stateremoved', { state: 'collided' });
+    helpers.simCollisionEnd(this.hand1, this.target2);
     assert.strictEqual(this.sh1.hoverEls.indexOf(this.target2), -1);
   });
   test('lastHover not confused by rejected dragover', function () {

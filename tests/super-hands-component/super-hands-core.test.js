@@ -13,10 +13,6 @@ suite('super-hands lifecycle', function () {
   });
   test('component attaches without errors', function () {
     assert.isOk(this.el.components['super-hands'].data);
-    assert.equal(
-      this.el.components['super-hands'].data.colliderState,
-      'collided'
-    );
   });
   test('component removes without errors', function (done) {
     var el = this.el;
@@ -76,24 +72,23 @@ suite('super-hands hit processing & event emission', function () {
   });
   test('unhover event', function (done) {
     this.target1.addEventListener('hover-start', e => e.preventDefault());
-    this.target1.addState('collided');
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.target1.addEventListener('hover-end', evt => {
       assert.strictEqual(evt.detail.hand, this.hand1);
       assert.strictEqual(this.sh1.hoverEls.indexOf(this.target1), -1);
       done();
     });
-    this.target1.removeState('collided');
+    helpers.simCollisionEnd(this.hand1, this.target1);
   });
   test('stacking hovered entities', function () {
     this.sh1.onHit({ detail: { el: this.target1 } });
     this.sh1.onHit({ detail: { el: this.target2 } });
     assert.equal(this.sh1.hoverEls.length, 2);
     assert.strictEqual(this.sh1.hoverEls[0], this.target1);
-    this.target1.emit('stateremoved', {state: 'collided'});
+    helpers.simCollisionEnd(this.hand1, this.target1);
     assert.equal(this.sh1.hoverEls.length, 1);
     assert.strictEqual(this.sh1.hoverEls[0], this.target2);
-    this.target2.emit('stateremoved', {state: 'collided'});
+    helpers.simCollisionEnd(this.hand1, this.target2);
     assert.equal(this.sh1.hoverEls.length, 0);
   });
   test('finding targets in the stack', function () {
@@ -232,10 +227,7 @@ suite('super-hands hit processing & event emission', function () {
     assert.notEqual(this.sh1.hoverEls.indexOf(this.target2), -1, 'droptaret added to hoverEls');
     assert.isTrue(dragOverSpy1.called, 'dragover-start emitted from held');
     assert.isTrue(dragOverSpy2.called, 'dragover-start emitted from hovered');
-    this.sh1.unHover({ detail: { state: 'unrelated' }, target: this.target2 });
-    assert.isFalse(unDragOverSpy1.called, 'unhover ignores unrelated state changes: held');
-    assert.isFalse(unDragOverSpy2.called, 'unhover ignores unrelated state changes: hovered');
-    this.sh1.unHover({ detail: { state: 'collided' }, target: this.target2 });
+    helpers.simCollisionEnd(this.hand1, this.target2);
     assert.isTrue(unDragOverSpy1.called, 'drag-over ends with unhover: held');
     assert.isTrue(unDragOverSpy2.called, 'drag-over ends with unhover: hovered');
     this.sh1.onHit({ detail: { el: this.target2 } });

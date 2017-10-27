@@ -46,12 +46,7 @@ suite('basic interactions', function () {
       assert.isFalse(this.boxGrnDn.is('hovered'));
     }
   );
-  /* the two super-hands both trigger unHover when one collider detects
-     its collision has ended, and there is no way to distinguish which
-     collider is the cause, so hover will be lost for one tick when either
-     hand exits
-  */
-  test.skip('hover persist when hands overlap', function (done) {
+  test('hover persists when hands overlap', function (done) {
     const unHoverSpy = sinon
       .spy(this.boxGrnUp, 'removeState'); // no sinon cleanup
     unHoverSpy.withArgs('hovered');

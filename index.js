@@ -21,11 +21,11 @@ require('./primitives/a-locomotor.js');
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: {default: 'collided'},
+    colliderState: {default: ''},
     colliderEvent: {default: 'hit'},
     colliderEventProperty: {default: 'el'},
-    colliderEndEvent: {default: ''},
-    colliderEndEventProperty: {default: ''},
+    colliderEndEvent: {default: 'hitend'},
+    colliderEndEventProperty: {default: 'el'},
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
@@ -109,6 +109,9 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
+    if (this.data.colliderState.length) {
+      console.warn('super-hands colliderState property is deprecated. Use colliderEndEvent/colliderEndEventProperty instead');
+    }
     this.unRegisterListeners(oldData);
     this.registerListeners();
   },

@@ -184,18 +184,18 @@ The `super-hands` component is the core of the library.
 It communicates gesture events to entities based on
 user-input and entity collisions. The component is generally placed on
 the controller entities (or the camera for gaze interaction) and depends on
-a collision detection component (e.g. `cursor` or [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc))
+a collision detection component (e.g. `raycaster`, [aframe-extras sphere-collider](https://github.com/donmccurdy/aframe-extras/blob/master/src/misc),
+of [aframe-physics-extras physics-collider](https://github.com/wmurphyrd/aframe-physics-extras))
 which needs to be placed on the same entity or a child entity of `super-hands`.
 
 #### Component Schema
 
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
-| colliderState | Name of state added to entities by your chosen collider | `'collided'` (default for `sphere-collider`) |
-| colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` (default for `sphere-collider` and `physics-collider`) |
+| colliderEvent | Event that your chosen collider emits when identifying a new collision | `'hit'` |
 | colliderEventProperty | Name of property in event `detail` object which contains the collided entity | `'el'` |
-| colliderEndEvent | Event that your chosen collider emits when a collision ends | `''` |
-| colliderEndEventProperty | Name of property in event `detail` object which contains the un-collided entity | `''` |
+| colliderEndEvent | Event that your chosen collider emits when a collision ends | `'hitEnd'` |
+| colliderEndEventProperty | Name of property in event `detail` object which contains the un-collided entity | `'el'` |
 | grabStartButtons | Array of button event types that can initiate grab | Button press, touch start, and mouse down events |
 | grabEndButtons | Array of button event types that can terminate grab | Button release, touch end, and mouse up events |
 | stretchStartButtons | Array of button event types that can initiate stretch | Button press, touch start, and mouse down events |
@@ -203,6 +203,7 @@ which needs to be placed on the same entity or a child entity of `super-hands`.
 | dragDropStartButtons | Array of button event types that can initiate dragging/hovering | Button press, touch start, and mouse down events |
 | dragDropEndButtons | Array of button event types that can execute drag-drop | Button release, touch end, and mouse up events |
 
+Collider-related property defaults are set to work with `sphere-collider`.
 Default button events include specific events for `vive-controls`,
 `hand-controls`, `oculus-touch-controls`, `daydream-controls`,
 `gearvr-controls`, mouse, and touch. For detecting when collisions end,
