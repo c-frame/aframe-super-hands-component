@@ -85,7 +85,7 @@ Install and use by directly including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@2.0.2/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -117,7 +117,20 @@ require('super-hands');
 
 Master branch
 
-* A-Frame v0.8.0 (WIP) support
+* No changes
+
+Master branch features can be tested using:
+
+```html
+<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
+```
+
+v2.1.0
+
+* A-Frame v0.8.0 (WIP/master branch) support
+* Deprecate `super-hands.colliderState`
+  * `colliderEndEvent` and `colliderEndEventProperty` now supported by
+    `sphere-collider`
 * Deprecate `drag-droppable`; replace with separate `draggable` and `droppable`
   reaction components. `droppable` can selectively accept or reject attempted
   'drag-drop' gestures depending on the entity being dropped on it.
@@ -126,11 +139,6 @@ Master branch
   * Remove extra controller on ground from single controller setups
   * Add `controllerModel` option to bypass default controller models
 
-Master branch features can be tested using:
-
-```html
-<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
-```
 v2.0.2
 
 * A-Frame v0.7.0 and master support
@@ -152,10 +160,9 @@ v2.0.1
 
 ### Known Issues
 
-* When both hands are hovering an entity and one leaves, the entity will lose
-  the hover state for one tick
-  * Related to messaging from `sphere-collider`; unable to distinguish which
-    collider instance is signaling the collision termination.
+* Leftover hovers when using `raycaster` on overlapping objects
+  * Issue is in `raycaster` component; resolved in
+    A-Frame v0.8.0 (WIP/master branch)
 * Two-handed physics grabs don't feel great
   * Someone that knows something about game dev could be smarter about the
     constraints

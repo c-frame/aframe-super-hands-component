@@ -1,5 +1,19 @@
 ## News
 
+v2.1.0
+
+* A-Frame v0.8.0 (WIP/master branch) support
+* Deprecate `super-hands.colliderState`
+  * `colliderEndEvent` and `colliderEndEventProperty` now supported by
+    `sphere-collider`
+* Deprecate `drag-droppable`; replace with separate `draggable` and `droppable`
+  reaction components. `droppable` can selectively accept or reject attempted
+  'drag-drop' gestures depending on the entity being dropped on it.
+* `progressive-controls` updates
+  * Use mixins for customization
+  * Remove extra controller on ground from single controller setups
+  * Add `controllerModel` option to bypass default controller models
+
 v2.0.2
 
 * A-Frame v0.7.0 and master support
