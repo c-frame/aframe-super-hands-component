@@ -319,7 +319,7 @@ all of the default components so you will need to include the `super-hands`
 configuration and the raycaster or collider (e.g. the
 [physics example](/examples/physics/index.html)
 replaces the default collider with a different component).
-If you need to change to change or add entities,
+If you need to change or add entities,
 you can manually create the player avatar structure using classes to tag
 the controller and raycaster entities for `progressice-controls` (e.g., the
 [Global Event Handlers example](examples/events/index.html)
