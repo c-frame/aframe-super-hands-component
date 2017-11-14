@@ -43,6 +43,17 @@ suite('stretchable', function () {
     assert.equal(this.comp.stretchers.length, 1)
     assert.isFalse(this.el.is('stretched'))
   })
+  test('ignores cancelled events', function () {
+    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
+    const evt = {detail: {hand: {}}}
+    const evt2 = {detail: {hand: this.hand}}
+    this.comp.start(evt)
+    this.comp.start(evtCancelled)
+    assert.isFalse(this.el.is(this.comp.STRETCHED_STATE))
+    this.comp.start(evt2)
+    this.comp.end(evtCancelled)
+    assert.isTrue(this.el.is(this.comp.STRETCHED_STATE))
+  })
   test('scale updates during stretch', function () {
     const posStub1 = this.sinon.stub(this.hand1, 'getAttribute')
     const posStub2 = this.sinon.stub(this.hand2, 'getAttribute')

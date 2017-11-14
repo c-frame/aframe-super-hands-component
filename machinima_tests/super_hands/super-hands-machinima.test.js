@@ -103,10 +103,10 @@ suite('basic interactions', function () {
   )
 })
 
-suite('Nested object targeting', function () {
+suite('Overlapped object targeting', function () {
   setup(function (done) {
     /* inject the scene html into the testing docoument */
-    machinima.setupScene('nested.html')
+    machinima.setupScene('overlapped.html')
     this.scene = document.querySelector('a-scene')
     this.scene.addEventListener('loaded', e => {
       this.outter = document.getElementById('outter')
@@ -120,6 +120,29 @@ suite('Nested object targeting', function () {
     'base/recordings/nested-grab.json',
     function () {
       assert.isAbove(this.inner.getAttribute('position').y, 2)
+      assert.isBelow(this.middle.getAttribute('position').y, 0)
+      assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1})
+    }
+  )
+})
+
+suite('Nested object targeting', function () {
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    machinima.setupScene('nested.html')
+    this.scene = document.querySelector('a-scene')
+    this.scene.addEventListener('loaded', e => {
+      this.outter = document.getElementById('outter')
+      this.middle = document.getElementById('middle')
+      this.inner = document.getElementById('inner')
+      done()
+    })
+  })
+  machinima.test(
+    'target 1 nested entity at a time',
+    'base/recordings/nested-grab.json',
+    function () {
+      assert.isBelow(this.inner.getAttribute('position').y, 1.5)
       assert.isBelow(this.middle.getAttribute('position').y, 0)
       assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1})
     }

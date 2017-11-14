@@ -28,6 +28,15 @@ suite('draggable', function () {
     this.el.emit('drag-end', { hand: this.hand })
     assert.isFalse(this.el.is('dragged'))
   })
+  test('ignores cancelled events', function () {
+    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
+    const evt = {detail: {hand: this.hand}}
+    this.comp.dragStart(evtCancelled)
+    assert.isFalse(this.el.is(this.comp.DRAGGED_STATE))
+    this.comp.dragStart(evt)
+    this.comp.dragEnd(evtCancelled)
+    assert.isTrue(this.el.is(this.comp.DRAGGED_STATE))
+  })
 })
 suite('draggable button mapping', function () {
   setup(function (done) {

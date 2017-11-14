@@ -55,6 +55,15 @@ suite('clickable function', function () {
     assert.strictEqual(this.clicker.clickers.length, 0)
     assert.isFalse(this.el.is(this.clicker.CLICKED_STATE))
   })
+  test('ignores cancelled events', function () {
+    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
+    const evt = {detail: {hand: this.hand}}
+    this.clicker.start(evtCancelled)
+    assert.isFalse(this.el.is(this.clicker.CLICKED_STATE))
+    this.clicker.start(evt)
+    this.clicker.end(evtCancelled)
+    assert.isTrue(this.el.is(this.clicker.CLICKED_STATE))
+  })
 })
 suite('clickable button mapping', function () {
   setup(function (done) {

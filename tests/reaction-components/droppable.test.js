@@ -37,6 +37,21 @@ suite('droppable', function () {
       this.el.emit('dragover-end', { hand: this.hand })
       assert.isFalse(this.el.is('dragover'))
     })
+    test('ignores cancelled events', function () {
+      const evtCancelled = {defaultPrevented: true, detail: {carried: this.carried1}}
+      const evt = {detail: {carried: this.carried1}}
+      this.comp.hoverStart(evtCancelled)
+      assert.isFalse(this.el.is(this.comp.HOVERED_STATE))
+      this.comp.hoverStart(evt)
+      this.comp.hoverEnd(evtCancelled)
+      assert.isTrue(this.el.is(this.comp.HOVERED_STATE))
+
+      this.comp.data.acceptEvents = 'test2'
+      const dropSpy = this.sinon.spy()
+      this.el.addEventListener('test2', dropSpy)
+      this.comp.dragDrop(evtCancelled)
+      assert.isFalse(dropSpy.called)
+    })
   })
   suite('discrimination', function () {
     test('dragover accepts listed entities', function () {

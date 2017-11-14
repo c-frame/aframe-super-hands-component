@@ -46,6 +46,16 @@ suite('grabbable', function () {
       assert.strictEqual(myGrabbable.grabber, hand)
       assert.isOk(el.is(myGrabbable.GRABBED_STATE))
     })
+    test('ignores cancelled events', function () {
+      this.comp = this.el.components.grabbable
+      const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
+      const evt = {detail: {hand: this.hand}}
+      this.comp.start(evtCancelled)
+      assert.isFalse(this.el.is(this.comp.GRABBED_STATE))
+      this.comp.start(evt)
+      this.comp.end(evtCancelled)
+      assert.isTrue(this.el.is(this.comp.GRABBED_STATE))
+    })
     test('position updates during grab', function () {
       const myGrabbable = this.el.components.grabbable
       assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
