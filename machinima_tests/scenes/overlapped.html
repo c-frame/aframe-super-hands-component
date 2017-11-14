@@ -6,8 +6,8 @@
     <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
       <a-assets>
         <!-- <img id="grid" src="grid.png"/> -->
-
-        <a-mixin id="controller" super-hands
+  
+        <a-mixin id="controller" super-hands 
                  sphere-collider="objects: .sp"></a-mixin>
         <a-mixin id="sp" geometry="primitive: sphere"
                  material="wireframe: true; transparent: true; opacity: 0.7"
@@ -16,14 +16,12 @@
       </a-assets>
       <a-entity id="lhand" hand-controls="left" mixin="controller"></a-entity>
       <a-entity id="rhand" hand-controls="right" mixin="controller"></a-entity>
-      <a-entity id="outter" class="sp" mixin="sp" position="0 1 -1"
-                geometry="radius: 1" material="color: red">
-        <a-entity id="middle" class="sp" mixin="sp"
-                  geometry="radius: 0.5" material="color: blue">
-          <a-entity id="inner" class="sp" mixin="sp"
-                    geometry="radius: 0.1" material="color: yellow"></a-entity>
-        </a-entity>
-      </a-entity>
+      <a-entity id="outter" class="sp" mixin="sp" position="0 1 -1" 
+                geometry="radius: 1" material="color: red"></a-entity>
+      <a-entity id="middle" class="sp" mixin="sp" position="0 1 -1" 
+                geometry="radius: 0.5" material="color: blue"></a-entity>
+      <a-entity id="inner" class="sp" mixin="sp" position="0 1 -1" 
+                geometry="radius: 0.1" material="color: yellow"></a-entity>
       <a-plane rotation="-90 0 0" color="#888"
                  width="50" height="50"></a-plane>
     </a-scene>

@@ -2248,7 +2248,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
     this.el.removeEventListener(this.UNCLICK_EVENT, this.end);
   },
   start: function (evt) {
-    if (!this.startButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
     }
     this.el.addState(this.CLICKED_STATE);
@@ -2261,7 +2261,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   },
   end: function (evt) {
     const handIndex = this.clickers.indexOf(evt.detail.hand);
-    if (!this.endButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
     if (handIndex !== -1) {
@@ -2374,7 +2374,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
     this.el.removeEventListener(this.UNDRAG_EVENT, this.dragEnd);
   },
   dragStart: function (evt) {
-    if (!this.startButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
     }
     this.el.addState(this.DRAGGED_STATE);
@@ -2383,7 +2383,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
     }
   },
   dragEnd: function (evt) {
-    if (!this.endButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
     this.el.removeState(this.DRAGGED_STATE);
@@ -2477,7 +2477,7 @@ AFRAME.registerComponent('droppable', {
     return false;
   },
   hoverStart: function (evt) {
-    if (!this.entityAcceptable(evt.detail.carried)) {
+    if (evt.defaultPrevented || !this.entityAcceptable(evt.detail.carried)) {
       return;
     }
     this.el.addState(this.HOVERED_STATE);
@@ -2486,9 +2486,15 @@ AFRAME.registerComponent('droppable', {
     }
   },
   hoverEnd: function (evt) {
+    if (evt.defaultPrevented) {
+      return;
+    }
     this.el.removeState(this.HOVERED_STATE);
   },
   dragDrop: function (evt) {
+    if (evt.defaultPrevented) {
+      return;
+    }
     const dropped = evt.detail.dropped;
     if (!this.entityAcceptable(dropped)) {
       if (this.data.rejectEvent.length) {
@@ -2571,7 +2577,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.physicsRemove();
   },
   start: function (evt) {
-    if (!this.startButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
     }
     // room for more grabbers?
@@ -2598,7 +2604,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   },
   end: function (evt) {
     const handIndex = this.grabbers.indexOf(evt.detail.hand);
-    if (!this.endButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
     if (handIndex !== -1) {
@@ -2660,6 +2666,9 @@ AFRAME.registerComponent('hoverable', {
     this.el.removeEventListener(this.UNHOVER_EVENT, this.end);
   },
   start: function (evt) {
+    if (evt.defaultPrevented) {
+      return;
+    }
     this.el.addState(this.HOVERED_STATE);
     if (this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
@@ -2669,6 +2678,9 @@ AFRAME.registerComponent('hoverable', {
     }
   },
   end: function (evt) {
+    if (evt.defaultPrevented) {
+      return;
+    }
     var handIndex = this.hoverers.indexOf(evt.detail.hand);
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
@@ -2826,7 +2838,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function (evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt)) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
       return;
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
@@ -2841,7 +2853,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   },
   end: function (evt) {
     var stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
-    if (!this.endButtonOk(evt)) {
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
     if (stretcherIndex !== -1) {

@@ -8,7 +8,7 @@
     "dev": "budo examples/main.js:build.js --dir examples --port 8000 --live --open",
     "record": "budo machinima_tests/main.js:build.js --dir machinima_tests/scenes --port 8000 --live --open",
     "dist": "browserify index.js -o dist/super-hands.js -t [ babelify ] && cross-env NODE_ENV=production browserify index.js -o dist/super-hands.min.js -t [ babelify ]",
-    "lint": "semistandard -v | snazzy",
+    "lint": "standard -v | snazzy",
     "prepublish": "npm run dist",
     "preghpages": "npm run build && shx rm -rf gh-pages && shx mkdir gh-pages && shx cp -r examples/* gh-pages",
     "ghpages": "npm run preghpages && ghpages -p gh-pages",
@@ -76,14 +76,14 @@
     "mocha": "^3.5.3",
     "mozilla-download": "^1.1.1",
     "randomcolor": "^0.4.4",
-    "semistandard": "^8.0.0",
     "shelljs": "^0.7.0",
     "shx": "^0.1.1",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
-    "snazzy": "^4.0.0"
+    "snazzy": "^4.0.0",
+    "standard": "^10.0.3"
   },
-  "semistandard": {
+  "standard": {
     "ignore": [
       "examples/build.js",
       "dist/**"

@@ -39,7 +39,7 @@ var karmaConf = {
     'tests/**/*.js': ['browserify', 'env']
   },
   reporters: ['mocha']
-};
+}
 
 // configuration for code coverage reporting
 if (process.env.TEST_ENV === 'ci') {
@@ -55,7 +55,7 @@ if (process.env.TEST_ENV === 'ci') {
         }
       ]
     ]
-  });
+  })
   karmaConf.coverageReporter = {
     dir: 'tests/coverage',
     includeAllSources: true,
@@ -63,12 +63,12 @@ if (process.env.TEST_ENV === 'ci') {
       {'type': 'html', subdir: 'report'},
       {'type': 'lcov', subdir: '.'}
     ]
-  };
-  karmaConf.reporters.push('coverage');
-  karmaConf.preprocessors['src/**/*.js'] = ['coverage'];
+  }
+  karmaConf.reporters.push('coverage')
+  karmaConf.preprocessors['src/**/*.js'] = ['coverage']
 }
 
 // Apply configuration
 module.exports = function (config) {
-  config.set(karmaConf);
-};
+  config.set(karmaConf)
+}
