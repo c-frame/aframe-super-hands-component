@@ -2,7 +2,7 @@
 module.exports = (function () {
   function buttonIsValid (evt, buttonList) {
     return buttonList.length === 0 ||
-        buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
+        buttonList.indexOf(evt.detail.buttonEvent.type) !== -1
   }
   return {
     schema: {
@@ -10,10 +10,10 @@ module.exports = (function () {
       endButtons: {default: []}
     },
     startButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['startButtons']);
+      return buttonIsValid(evt, this.data['startButtons'])
     },
     endButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['endButtons']);
+      return buttonIsValid(evt, this.data['endButtons'])
     }
-  };
-})();
+  }
+})()

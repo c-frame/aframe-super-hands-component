@@ -35,9 +35,9 @@ var karmaConf = {
   html2JsPreprocessor: {
     stripPrefix: 'scenes/'
   }
-};
+}
 
 // Apply configuration
 module.exports = function (config) {
-  config.set(karmaConf);
-};
+  config.set(karmaConf)
+}
