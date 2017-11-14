@@ -75,7 +75,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   },
   start: function (evt) {
     if (this.stretched || this.stretchers.includes(evt.detail.hand) ||
-        !this.startButtonOk(evt)) {
+        !this.startButtonOk(evt) || evt.defaultPrevented) {
       return
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand)
@@ -88,7 +88,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   },
   end: function (evt) {
     var stretcherIndex = this.stretchers.indexOf(evt.detail.hand)
-    if (!this.endButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
     if (stretcherIndex !== -1) {
       this.stretchers.splice(stretcherIndex, 1)
       this.stretched = false

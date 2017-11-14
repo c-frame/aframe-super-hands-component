@@ -73,14 +73,18 @@ AFRAME.registerComponent('droppable', {
     return false
   },
   hoverStart: function (evt) {
-    if (!this.entityAcceptable(evt.detail.carried)) { return }
+    if (evt.defaultPrevented || !this.entityAcceptable(evt.detail.carried)) {
+      return
+    }
     this.el.addState(this.HOVERED_STATE)
     if (evt.preventDefault) { evt.preventDefault() }
   },
   hoverEnd: function (evt) {
+    if (evt.defaultPrevented) { return }
     this.el.removeState(this.HOVERED_STATE)
   },
   dragDrop: function (evt) {
+    if (evt.defaultPrevented) { return }
     const dropped = evt.detail.dropped
     if (!this.entityAcceptable(dropped)) {
       if (this.data.rejectEvent.length) {

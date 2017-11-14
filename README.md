@@ -245,6 +245,15 @@ LIFO stack of collided entities to determine which will be affected.
 If needed, use `event.target` instead.
 * For events triggered by buttons, the triggering button event is passed
   along in `detail.buttonEvent`
+* When entities are nested, gesture events will bubble to the closest parent
+  with a related reaction component. This makes it easy to make specific
+  hotspots on larger objects by placing the collidable component on a child
+  and the reaction component on the parent
+  (e.g., a door with the handle as a collidable child and a `grabable` parent
+  door so the whole door moves only when the handle is grabbed). To prevent
+  a gesture form bubbling, trap it on the child by giving it reaction components
+  or listening-for and cancelling the gesture events
+  (see [Gesture acceptance and rejection](#Gesture-acceptance-and-rejection]))
 
 #### Global Event Handler Integration
 

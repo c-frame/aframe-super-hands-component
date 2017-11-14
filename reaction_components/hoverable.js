@@ -18,6 +18,7 @@ AFRAME.registerComponent('hoverable', {
     this.el.removeEventListener(this.UNHOVER_EVENT, this.end)
   },
   start: function (evt) {
+    if (evt.defaultPrevented) { return }
     this.el.addState(this.HOVERED_STATE)
     if (this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand)
@@ -25,6 +26,7 @@ AFRAME.registerComponent('hoverable', {
     if (evt.preventDefault) { evt.preventDefault() }
   },
   end: function (evt) {
+    if (evt.defaultPrevented) { return }
     var handIndex = this.hoverers.indexOf(evt.detail.hand)
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1)

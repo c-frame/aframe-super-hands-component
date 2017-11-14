@@ -68,7 +68,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.physicsRemove()
   },
   start: function (evt) {
-    if (!this.startButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) { return }
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers
@@ -92,7 +92,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   },
   end: function (evt) {
     const handIndex = this.grabbers.indexOf(evt.detail.hand)
-    if (!this.endButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1)
       this.grabber = this.grabbers[0]

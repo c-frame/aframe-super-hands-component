@@ -20,7 +20,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
     this.el.removeEventListener(this.UNCLICK_EVENT, this.end)
   },
   start: function (evt) {
-    if (!this.startButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) { return }
     this.el.addState(this.CLICKED_STATE)
     if (this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand)
@@ -29,7 +29,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   },
   end: function (evt) {
     const handIndex = this.clickers.indexOf(evt.detail.hand)
-    if (!this.endButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
     if (handIndex !== -1) {
       this.clickers.splice(handIndex, 1)
     }

@@ -19,12 +19,12 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
     this.el.removeEventListener(this.UNDRAG_EVENT, this.dragEnd)
   },
   dragStart: function (evt) {
-    if (!this.startButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) { return }
     this.el.addState(this.DRAGGED_STATE)
     if (evt.preventDefault) { evt.preventDefault() }
   },
   dragEnd: function (evt) {
-    if (!this.endButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
     this.el.removeState(this.DRAGGED_STATE)
     if (evt.preventDefault) { evt.preventDefault() }
   }
