@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, sinon */
+/* global assert, process, setup, suite, test, sinon, CANNON */
 
 const machinima = require('aframe-machinima-testing')
 
@@ -171,6 +171,31 @@ suite('Physics grab', function () {
       this.target.addEventListener('grab-end', e => {
         this.yRot = this.target.getObject3D('mesh').getWorldRotation()._y
       }, {once: true})
+    }
+  )
+})
+
+suite('Physics worker driver', function () {
+  setup(function (done) {
+    /* inject the scene html into the testing docoument */
+    machinima.setupScene('physics-worker.html')
+    this.scene = document.querySelector('a-scene')
+    this.hand1 = document.getElementById('rhand')
+    this.hand2 = document.getElementById('lhand')
+    this.target = document.getElementById('greenHigh')
+    this.scene.addEventListener('loaded', e => {
+      done()
+    })
+  })
+  machinima.test(
+    'entity affected by grab',
+    'base/recordings/handsRecording.json',
+    function () {
+      const post = new CANNON.Vec3().copy(this.target.getAttribute('position'))
+      assert.isFalse(post.almostEquals(this.pre, 0.01))
+    },
+    function () {
+      this.pre = new CANNON.Vec3().copy(this.target.getAttribute('position'))
     }
   )
 })

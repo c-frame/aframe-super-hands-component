@@ -2735,17 +2735,23 @@ module.exports = {
   physicsStart: function (evt) {
     // initiate physics constraint if available and not already existing
     if (this.data.usePhysics !== 'never' && this.el.body && evt.detail.hand.body && !this.constraints.has(evt.detail.hand)) {
-      let newCon = new window.CANNON.LockConstraint(this.el.body, evt.detail.hand.body);
-      this.el.body.world.addConstraint(newCon);
-      this.constraints.set(evt.detail.hand, newCon);
+      const newConId = Math.random().toString(36).substr(2, 9);
+      this.el.setAttribute('constraint__' + newConId, {
+        target: evt.detail.hand
+      });
+      this.constraints.set(evt.detail.hand, newConId);
+      return true;
+    }
+    // Prevent manual grab by returning true
+    if (this.data.usePhysics === 'only') {
       return true;
     }
     return false;
   },
   physicsEnd: function (evt) {
-    let constraint = this.constraints.get(evt.detail.hand);
-    if (constraint) {
-      this.el.body.world.removeConstraint(constraint);
+    let constraintId = this.constraints.get(evt.detail.hand);
+    if (constraintId) {
+      this.el.removeAttribute('constraint__' + constraintId);
       this.constraints.delete(evt.detail.hand);
     }
   },
