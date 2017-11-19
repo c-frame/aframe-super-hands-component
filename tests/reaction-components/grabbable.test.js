@@ -126,10 +126,10 @@ suite('grabbable', function () {
     })
     test('constraint registered on grab', function () {
       this.comp.start({ detail: { hand: this.hand } })
-      let c = this.comp.constraints.get(this.hand)
+      const cId = this.comp.constraints.get(this.hand)
+      let c = this.el.components['constraint__' + cId]
       assert.isOk(c)
-      assert.instanceOf(c, window.CANNON.LockConstraint)
-      assert.notEqual(this.el.body.world.constraints.indexOf(c), -1)
+      assert.strictEqual(c.data.target, this.hand)
     })
     test('constraint not registered when usePhysics = never', function () {
       this.el.setAttribute('grabbable', 'usePhysics', 'never')
