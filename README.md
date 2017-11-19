@@ -121,6 +121,8 @@ Master branch
   gesture event.
 * Improved stretching of complex physics bodies: all shapes, child entity
   shapes, and offsets are updated
+* Added support for `'worker'` and other `aframe-physics-system` drivers
+  in `grabbable`
 
 
 Master branch features can be tested using:
