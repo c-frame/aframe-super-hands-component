@@ -117,7 +117,11 @@ require('super-hands');
 
 Master branch
 
-* No changes
+* Improved nested entity handling: only one component can react to each
+  gesture event.
+* Improved stretching of complex physics bodies: all shapes, child entity
+  shapes, and offsets are updated
+
 
 Master branch features can be tested using:
 

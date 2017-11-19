@@ -385,3 +385,53 @@ suite.skip('progressive-controls & reaction component integration', function () 
     )
   })
 })
+suite('super-hands & physics integration', function () {
+  setup(function (done) {
+    this.target1 = entityFactory()
+    this.target1.setAttribute('geometry', '')
+    this.target1.setAttribute('dynamic-body', '')
+    this.target1.setAttribute('grabbable', '')
+    this.target1.setAttribute('hoverable', '')
+    this.target1.setAttribute('stretchable', '')
+    this.target1.setAttribute('draggable', '')
+    this.target1.setAttribute('droppable', '')
+    this.target2 = document.createElement('a-entity')
+    this.target2.setAttribute('geometry', '')
+    this.target2.setAttribute('dynamic-body', '')
+    this.target1.appendChild(this.target2)
+    this.hand1 = helpers.controllerFactory({
+      'super-hands': ''
+    })
+    this.hand2 = helpers.controllerFactory({
+      'vive-controls': 'hand: left',
+      'super-hands': ''
+    }, true)
+    var bodies = 0
+    this.target1.addEventListener('body-loaded', () => {
+      if (++bodies === 2) {
+        this.sh1 = this.hand1.components['super-hands']
+        this.sh2 = this.hand2.components['super-hands']
+        done()
+      }
+    })
+  })
+  test('stretches complex physics bodies', function () {
+    const stretch = this.target1.components.stretchable
+    const size2 = new window.CANNON.Vec3(1, 1, 1)
+    const offset2 = new window.CANNON.Vec3(1, 1, 1)
+    const shape2 = new window.CANNON.Box(size2)
+    this.target1.body.addShape(shape2, offset2)
+    this.hand2.setAttribute('position', '1 1 1')
+    stretch.start({detail: {hand: this.hand1}})
+    stretch.start({detail: {hand: this.hand2}})
+    stretch.tick()
+    this.hand2.setAttribute('position', '2 1 1')
+    stretch.tick()
+    const check = new window.CANNON.Vec3(0.707, 0.707, 0.707)
+    assert.isTrue(this.target1.body.shapes[0].halfExtents.almostEquals(check, 0.001))
+    assert.isTrue(this.target2.body.shapes[0].halfExtents.almostEquals(check, 0.001), 'child')
+    check.set(1.414, 1.414, 1.414)
+    assert.isTrue(this.target1.body.shapes[1].halfExtents.almostEquals(check, 0.001), 'scale')
+    assert.isTrue(this.target1.body.shapeOffsets[1].almostEquals(check, 0.001), 'offset')
+  })
+})

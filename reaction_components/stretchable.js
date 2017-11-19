@@ -22,11 +22,13 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
 
     this.el.addEventListener(this.STRETCH_EVENT, this.start)
     this.el.addEventListener(this.UNSTRETCH_EVENT, this.end)
+
+    this.tick = AFRAME.utils.throttleTick(this._tick, 33, this)
   },
   update: function (oldDat) {
 
   },
-  tick: function () {
+  _tick: function () {
     if (!this.stretched) { return }
     this.scale.copy(this.el.getAttribute('scale'))
     this.handPos.copy(this.stretchers[0].getAttribute('position'))
@@ -44,29 +46,10 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.previousStretch = currentStretch
     this.scale.multiplyScalar(deltaStretch)
     this.el.setAttribute('scale', this.scale)
-    // force scale update for physics body
+    // force scale update for all nested physics bodies
     if (this.el.body && this.data.usePhysics !== 'never') {
-      var physicsShape = this.el.body.shapes[0]
-      if (physicsShape.halfExtents) {
-        physicsShape.halfExtents
-            .scale(deltaStretch, physicsShape.halfExtents)
-        physicsShape.updateConvexPolyhedronRepresentation()
-      } else if (physicsShape.radius) {
-        physicsShape.radius *= deltaStretch
-        physicsShape.updateBoundingSphereRadius()
-      // This doesn't update the cone size - can't find right update function
-      // } else if (physicsShape.radiusTop && physicsShape.radiusBottom &&
-      //     physicsShape.height) {
-      //   physicsShape.height *= deltaStretch;
-      //   physicsShape.radiusTop *= deltaStretch;
-      //   physicsShape.radiusBottom *= deltaStretch;
-      //   physicsShape.updateBoundingSphereRadius();
-      } else if (!this.shapeWarned) {
-        console.warn('Unable to stretch physics body: unsupported shape')
-        this.shapeWarned = true
-        // todo: suport more shapes
-      }
-      this.el.body.updateBoundingRadius()
+      for (let c of this.el.children) { this.stretchBody(c, deltaStretch) }
+      this.stretchBody(this.el, deltaStretch)
     }
   },
   remove: function () {
@@ -95,5 +78,28 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
       this.el.removeState(this.STRETCHED_STATE)
     }
     if (evt.preventDefault) { evt.preventDefault() }
+  },
+  stretchBody: function (el, deltaStretch) {
+    if (!el.body) { return }
+    let physicsShape
+    let offset
+    for (let i = 0; i < el.body.shapes.length; i++) {
+      physicsShape = el.body.shapes[i]
+      if (physicsShape.halfExtents) {
+        physicsShape.halfExtents
+            .scale(deltaStretch, physicsShape.halfExtents)
+        physicsShape.updateConvexPolyhedronRepresentation()
+      } else if (physicsShape.radius) {
+        physicsShape.radius *= deltaStretch
+        physicsShape.updateBoundingSphereRadius()
+      } else if (!this.shapeWarned) {
+        console.warn('Unable to stretch physics body: unsupported shape')
+        this.shapeWarned = true
+      }
+      // also move offset to match scale change
+      offset = el.body.shapeOffsets[i]
+      offset.scale(deltaStretch, offset)
+    }
+    el.body.updateBoundingRadius()
   }
 }))
