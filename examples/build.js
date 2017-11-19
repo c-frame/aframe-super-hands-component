@@ -2774,7 +2774,8 @@ const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   schema: {
     usePhysics: { default: 'ifavailable' },
-    invert: { default: false }
+    invert: { default: false },
+    physicsUpdateRate: { default: 100 }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -2792,11 +2793,11 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
 
     this.el.addEventListener(this.STRETCH_EVENT, this.start);
     this.el.addEventListener(this.UNSTRETCH_EVENT, this.end);
-
-    this.tick = AFRAME.utils.throttleTick(this._tick, 33, this);
   },
-  update: function (oldDat) {},
-  _tick: function () {
+  update: function (oldDat) {
+    this.updateBodies = AFRAME.utils.throttleTick(this._updateBodies, this.data.physicsUpdateRate, this);
+  },
+  tick: function (time, timeDelta) {
     if (!this.stretched) {
       return;
     }
@@ -2809,15 +2810,14 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
       deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
     }
     this.previousStretch = currentStretch;
+    if (this.previousPhysicsStretch == null) {
+      // establish correct baseline even if throttled function isn't called
+      this.previousPhysicsStretch = currentStretch;
+    }
     this.scale.multiplyScalar(deltaStretch);
     this.el.setAttribute('scale', this.scale);
-    // force scale update for all nested physics bodies
-    if (this.el.body && this.data.usePhysics !== 'never') {
-      for (let c of this.el.children) {
-        this.stretchBody(c, deltaStretch);
-      }
-      this.stretchBody(this.el, deltaStretch);
-    }
+    // scale update for all nested physics bodies (throttled)
+    this.updateBodies(time, timeDelta);
   },
   remove: function () {
     this.el.removeEventListener(this.STRETCH_EVENT, this.start);
@@ -2831,6 +2831,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     if (this.stretchers.length === 2) {
       this.stretched = true;
       this.previousStretch = null;
+      this.previousPhysicsStretch = null;
       this.el.addState(this.STRETCHED_STATE);
     }
     if (evt.preventDefault) {
@@ -2846,10 +2847,30 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
       this.stretchers.splice(stretcherIndex, 1);
       this.stretched = false;
       this.el.removeState(this.STRETCHED_STATE);
+      // override throttle to push last stretch to physics bodies
+      this._updateBodies();
     }
     if (evt.preventDefault) {
       evt.preventDefault();
     }
+  },
+  _updateBodies: function () {
+    if (!this.el.body || this.data.usePhysics === 'never') {
+      return;
+    }
+    const currentStretch = this.previousStretch; // last visible geometry stretch
+    let deltaStretch = 1;
+    if (this.previousPhysicsStretch !== null && currentStretch > 0) {
+      deltaStretch = Math.pow(currentStretch / this.previousPhysicsStretch, this.data.invert ? -1 : 1);
+    }
+    this.previousPhysicsStretch = currentStretch;
+    if (deltaStretch === 1) {
+      return;
+    }
+    for (let c of this.el.children) {
+      this.stretchBody(c, deltaStretch);
+    }
+    this.stretchBody(this.el, deltaStretch);
   },
   stretchBody: function (el, deltaStretch) {
     if (!el.body) {
