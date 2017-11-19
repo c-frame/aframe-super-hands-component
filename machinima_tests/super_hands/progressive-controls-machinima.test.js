@@ -4,6 +4,7 @@ const machinima = require('aframe-machinima-testing')
 
 suite('progressive-controls touch interactions', function () {
   setup(function (done) {
+    this.timeout(0)
     machinima.setupScene('progressive-hands.html')
     this.scene = document.querySelector('a-scene')
     this.scene.addEventListener('loaded', e => {

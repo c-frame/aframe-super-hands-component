@@ -117,7 +117,11 @@ require('super-hands');
 
 Master branch
 
-* No changes
+* Improved nested entity handling: only one component can react to each
+  gesture event.
+* Improved stretching of complex physics bodies: all shapes, child entity
+  shapes, and offsets are updated
+
 
 Master branch features can be tested using:
 
@@ -510,11 +514,21 @@ Makes and entity rescale while grabbed by both controllers as they are moved clo
 | endButtons | Which button events to accept to end stretch | `[]` |
 | usePhysics | Whether to update physics body shapes with scale changes, 'ifavailable' or 'never' | 'ifavailable' |
 | invert | Reverse the direction of scaling in relation to controller movement | `false` |
+| phyicsUpdateRate | Milliseconds between each update to the physics bodies of a stretched entity | 100 |
 
 The default for `startButtons` and `endButtons` is to accept any button
 recognized by `super-hands` `stretchStartButtons` and `stretchEndButtons`.
 
-There is no CANNON api method for updating physics body scale, but `stretchable` will manually rescale basic shapes. Currently rescalable shapes are: box and sphere.
+There is no CANNON API method for updating physics body scale, but `stretchable`
+will manually rescale shapes and offsets for stretched entity body and
+all descendent entity bodies.
+This update is throttled and will occur no more than once every
+`physicsUpdateRate` milliseconds to improve performance. Set this to a smaller
+number to increase the physics simulation fidelity.
+Currently rescalable shapes are: box and sphere. At present, this rescaling
+is only possible on when using the `'local'` physics driver. If using another
+driver, setting `usePhysics: never` will avoid errors but also cause
+loss of sync between stretched entities' appearance and behavior.  
 
 #### States
 
