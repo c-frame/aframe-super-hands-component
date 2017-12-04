@@ -28,31 +28,37 @@ AFRAME.registerComponent('super-hands', {
     colliderEndEventProperty: {default: 'el'},
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
+        'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
         'thumbstickdown', 'mousedown', 'touchstart']
     },
     grabEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
+        'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
         'thumbstickup', 'mouseup', 'touchend']
     },
     stretchStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
+        'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
         'thumbstickdown', 'mousedown', 'touchstart']
     },
     stretchEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
+        'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
         'thumbstickup', 'mouseup', 'touchend']
     },
     dragDropStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
+        'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
         'pointup', 'thumbup', 'pointingstart', 'pistolstart',
         'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
+        'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
         'thumbstickup', 'mouseup', 'touchend']
     }

@@ -30,22 +30,22 @@ AFRAME.registerComponent('super-hands', {
     colliderEndEvent: { default: 'hitend' },
     colliderEndEventProperty: { default: 'el' },
     grabStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     grabEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     stretchStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     stretchEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     dragDropStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'gripdown', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'gripup', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     }
   },
 
@@ -185,9 +185,9 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     const stretched = this.state.get(this.STRETCH_EVENT);
-    const endEvt = { hand: this.el, buttonEvent: evt };
-    // check if end event accepted
-    if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
+    const endEvt = { hand: this.el, buttonEvent: evt
+      // check if end event accepted
+    };if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
@@ -1083,9 +1083,9 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.deltaPositionIsValid = false;
     this.grabDistance = undefined;
     this.grabDirection = { x: 0, y: 0, z: -1 };
-    this.grabOffset = { x: 0, y: 0, z: 0 };
-    // persistent object speeds up repeat setAttribute calls
-    this.destPosition = { x: 0, y: 0, z: 0 };
+    this.grabOffset = { x: 0, y: 0, z: 0
+      // persistent object speeds up repeat setAttribute calls
+    };this.destPosition = { x: 0, y: 0, z: 0 };
     this.deltaPosition = new THREE.Vector3();
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
