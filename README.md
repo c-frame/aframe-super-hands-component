@@ -489,6 +489,8 @@ An alternative version of `grabbable` that registers that a button was pressed, 
 move the entity. Do not use `clickable` and `grabbable` on the same entity
 (just use `grabbable` and watch the "grabbed" state instead of "clicked")
 
+#### Component Schema
+
 | Property | Description | Default Value |
 | -------- | ----------- | ------------- |
 | startButtons | Which button events to accept to start grab | `[]` |
