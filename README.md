@@ -117,6 +117,7 @@ require('super-hands');
 
 Master branch
 
+* Prioritize the nearest intersected entity when using raycaster
 * Improved nested entity handling: only one component can react to each
   gesture event.
 * Improved stretching of complex physics bodies: all shapes, child entity

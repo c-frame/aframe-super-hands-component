@@ -57,22 +57,22 @@ AFRAME.registerComponent('super-hands', {
     colliderEndEvent: { default: 'hitend' },
     colliderEndEventProperty: { default: 'el' },
     grabStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     grabEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     stretchStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     stretchEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     dragDropStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     }
   },
 
@@ -107,6 +107,7 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = [];
+    this.hoverElsDist = [];
     this.state = new Map();
     this.dragging = false;
 
@@ -280,11 +281,23 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
-    var processHitEl = hitEl => {
+    var processHitEl = (hitEl, distance) => {
       let hitElIndex;
       hitElIndex = this.hoverEls.indexOf(hitEl);
       if (hitElIndex === -1) {
-        this.hoverEls.push(hitEl);
+        // insert in order of distance when available
+        if (distance) {
+          let i = 0;
+          const dists = this.hoverElsDist;
+          while (distance < dists[i] && i < dists.length) {
+            i++;
+          }
+          this.hoverEls.splice(i, 0, hitEl);
+          this.hoverElsDist.splice(i, 0, distance);
+        } else {
+          this.hoverEls.push(hitEl);
+          this.hoverElsDist.push(null);
+        }
         // later loss of collision will remove from hoverEls
         hitEl.addEventListener('stateremoved', this.unWatch);
         this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
@@ -301,9 +314,13 @@ AFRAME.registerComponent('super-hands', {
       return;
     }
     if (Array.isArray(hitEl)) {
+      for (let i = 0, dist; i < hitEl.length; i++) {
+        dist = evt.detail.intersections && evt.detail.intersections[i].distance;
+        processHitEl(hitEl[i], dist);
+      }
       hitEl.forEach(processHitEl);
     } else {
-      processHitEl(hitEl);
+      processHitEl(hitEl, null);
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -399,6 +416,7 @@ AFRAME.registerComponent('super-hands', {
     target.removeEventListener('stateremoved', this.unWatch);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
+      this.hoverElsDist.splice(hoverIndex, 1);
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged);
@@ -500,11 +518,15 @@ AFRAME.registerComponent('super-hands', {
     }
     return null;
   },
+  // Helper to ensure dropping and regrabbing finds the same target for
+  // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el);
-    if (hoverIndex !== -1) {
+    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
       this.hoverEls.splice(hoverIndex, 1);
+      this.hoverElsDist.splice(hoverIndex, 1);
       this.hoverEls.push(el);
+      this.hoverElsDist.push(null);
     }
   }
 });
