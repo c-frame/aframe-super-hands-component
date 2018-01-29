@@ -258,7 +258,7 @@ If needed, use `event.target` instead.
   and the reaction component on the parent
   (e.g., a door with the handle as a collidable child and a `grabable` parent
   door so the whole door moves only when the handle is grabbed). To prevent
-  a gesture form bubbling, trap it on the child by giving it reaction components
+  a gesture from bubbling, trap it on the child by giving it reaction components
   or listening-for and cancelling the gesture events
   (see [Gesture acceptance and rejection](#Gesture-acceptance-and-rejection]))
 
@@ -337,7 +337,7 @@ configuration and the raycaster or collider (e.g. the
 replaces the default collider with a different component).
 If you need to change or add entities,
 you can manually create the player avatar structure using classes to tag
-the controller and raycaster entities for `progressice-controls` (e.g., the
+the controller and raycaster entities for `progressive-controls` (e.g., the
 [Global Event Handlers example](examples/events/index.html)
 adds children to the controllers and raycaster). The complete
 default configuration created by `progressive-controls` is below
@@ -430,9 +430,7 @@ super-hands gestures.
 ### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity
-by adding the 'hovered' state. When using a mixin, including another mixin
-in the assets withe same id + '-hovered' will activate automatically, as in
-[the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/).
+by adding the 'hovered' state.
 
 #### States
 

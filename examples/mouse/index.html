@@ -5,7 +5,7 @@
     <script src="https://rawgit.com/ngokevin/aframe-event-set-component/master/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js" -->
+        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
@@ -20,10 +20,12 @@
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable draggable droppable
                  shadow
-                 event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
-        <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
+                 event-set__dragdrop="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 event-set__dragon="_event: dragover-start; wireframe: true"
+                 event-set__dragoff="_event: dragover-end; wireframe: false">
         </a-mixin>
-        <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
       </a-assets>
       <a-entity progressive-controls="objects: .cube, a-link; maxLevel: point">
           <a-entity id="rhand" class="right-controller"></a-entity>
