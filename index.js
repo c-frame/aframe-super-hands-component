@@ -161,7 +161,7 @@ AFRAME.registerComponent('super-hands', {
     this.dispatchMouseEventAll('mousedown', this.el)
     this.gehClicking = new Set(this.hoverEls)
     if (!carried) {
-      carried = this.findTarget(this.GRAB_EVENT, {
+      carried = evt.detail.targetEntity || this.findTarget(this.GRAB_EVENT, {
         hand: this.el,
         buttonEvent: evt
       })
