@@ -1,3 +1,4 @@
+require('aframe')
 require('../index.js')
 require('aframe-motion-capture-components')
 /* used in examples to allow a desktop playback without HMD

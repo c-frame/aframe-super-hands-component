@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
   "devDependencies": {
-    "aframe": "^0.7.1",
+    "aframe": "wmurphyrd/aframe#v0.7.9",
     "aframe-event-set-component": "^3.0.2",
     "aframe-extras": "^3.12.4",
     "aframe-machinima-testing": "^0.1.2",
