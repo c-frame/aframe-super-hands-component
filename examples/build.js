@@ -572,7 +572,14 @@ AFRAME.registerComponent('locomotor-auto-config', {
     }
   },
   remove: function () {
-    this.el.removeState(this.colliderState);
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands');
+      if (sh) {
+        let evtDetails = {};
+        evtDetails[sh.colliderEndEventProperty] = this.el;
+        el.emit(sh.colliderEndEvent, evtDetails);
+      }
+    });
     this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
   },
   announceReady: function () {
@@ -592,8 +599,8 @@ AFRAME.registerComponent('locomotor-auto-config', {
         this.colliderState = sh.colliderState;
         this.el.addState(this.colliderState);
       }
-      this.announceReady();
     });
+    this.announceReady();
   }
 });
 
@@ -658,7 +665,11 @@ AFRAME.registerComponent('progressive-controls', {
     assets.appendChild(pointDefault);
     assets.appendChild(touchDefault);
 
-    this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
+    this.camera = this.el.querySelector('a-camera,[camera]');
+    if (!this.camera) {
+      this.camera = this.el.appendChild(document.createElement('a-camera'));
+      this.camera.setAttribute('position', '0 1.6 0');
+    }
     this.caster = this.camera.querySelector('.gazecaster') || this.camera.appendChild(document.createElement('a-entity'));
     ['left', 'right'].forEach(hand => {
       // find controller by left-controller/right-controller class or create one

@@ -36,7 +36,14 @@ AFRAME.registerComponent('locomotor-auto-config', {
     }
   },
   remove: function () {
-    this.el.removeState(this.colliderState)
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands')
+      if (sh) {
+        let evtDetails = {}
+        evtDetails[sh.colliderEndEventProperty] = this.el
+        el.emit(sh.colliderEndEvent, evtDetails)
+      }
+    })
     this.el.removeEventListener('controllerconnected', this.fakeCollisionsB)
   },
   announceReady: function () {
@@ -56,7 +63,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
         this.colliderState = sh.colliderState
         this.el.addState(this.colliderState)
       }
-      this.announceReady()
     })
+    this.announceReady()
   }
 })

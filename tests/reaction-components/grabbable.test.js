@@ -58,32 +58,32 @@ suite('grabbable', function () {
     })
     test('position updates during grab', function () {
       const myGrabbable = this.el.components.grabbable
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       myGrabbable.start({detail: {hand: this.hand}})
       /* with render loop stubbed out, need to force ticks */
       myGrabbable.tick()
       this.hand.setAttribute('position', '1 1 1')
       myGrabbable.tick()
-      assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('1 1 1')))
     })
     test(
       'position does not update during grab when usePhysics set to "only"',
       function () {
         const posStub = this.sinon.stub(this.hand, 'getAttribute')
         const myGrabbable = this.el.components.grabbable
-        assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+        assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
         posStub.withArgs('position')
           .onFirstCall().returns(coord('0 0 0'))
           .onSecondCall().returns(coord('1 1 1'))
         myGrabbable.data.usePhysics = 'only'
         myGrabbable.start({detail: {hand: this.hand}})
         myGrabbable.tick()
-        assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+        assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       })
     test('updates cease on release event', function () {
       const posStub = this.sinon.stub(this.hand, 'getAttribute')
       const myGrabbable = this.el.components.grabbable
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       posStub.withArgs('position')
         .onFirstCall().returns(coord('0 0 0'))
         .onSecondCall().returns(coord('1 1 1'))
@@ -91,7 +91,7 @@ suite('grabbable', function () {
       myGrabbable.tick()
       myGrabbable.end({detail: {hand: this.hand}})
       myGrabbable.tick()
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       assert.notOk(this.el.is(myGrabbable.GRABBED_STATE))
       assert.notOk(myGrabbable.grabbed)
       assert.notOk(myGrabbable.grabber)
