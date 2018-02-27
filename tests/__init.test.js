@@ -33,4 +33,5 @@ teardown(function () {
     els[i].parentNode.removeChild(els[i])
   }
   this.sinon.restore()
+  delete window.NAF
 })

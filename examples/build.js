@@ -532,7 +532,7 @@ AFRAME.registerComponent('super-hands', {
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":15,"./reaction_components/clickable.js":16,"./reaction_components/drag-droppable.js":17,"./reaction_components/draggable.js":18,"./reaction_components/droppable.js":19,"./reaction_components/grabbable.js":20,"./reaction_components/hoverable.js":21,"./reaction_components/stretchable.js":24,"./systems/super-hands-system.js":25}],3:[function(require,module,exports){
+},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":15,"./reaction_components/clickable.js":16,"./reaction_components/drag-droppable.js":17,"./reaction_components/draggable.js":18,"./reaction_components/droppable.js":19,"./reaction_components/grabbable.js":20,"./reaction_components/hoverable.js":21,"./reaction_components/stretchable.js":25,"./systems/super-hands-system.js":26}],3:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -85123,7 +85123,10 @@ AFRAME.registerComponent('droppable', {
 const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./prototypes/physics-grab-proto.js');
 const buttonsCore = require('./prototypes/buttons-proto.js');
-AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
+const networkedCore = require('./prototypes/networked-proto.js');
+// new object with all core modules
+const base = inherit({}, physicsCore, buttonsCore, networkedCore);
+AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
     invert: { default: false },
@@ -85188,7 +85191,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable && this.networkedOk()) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D');
         return;
@@ -85248,7 +85251,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22,"./prototypes/physics-grab-proto.js":23}],21:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":22,"./prototypes/networked-proto.js":23,"./prototypes/physics-grab-proto.js":24}],21:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -85319,6 +85322,25 @@ module.exports = function () {
 }();
 
 },{}],23:[function(require,module,exports){
+"use strict";
+
+// integration with networked-aframe
+module.exports = {
+  schema: {
+    takeOwnership: { default: false }
+  },
+  networkedOk: function () {
+    if (!window.NAF || window.NAF.utils.isMine(this.el)) {
+      return true;
+    }
+    if (this.data.takeOwnership) {
+      return window.NAF.utils.takeOwnership(this.el);
+    }
+    return false;
+  }
+};
+
+},{}],24:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -85376,13 +85398,16 @@ module.exports = {
   }
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-const buttonCore = require('./prototypes/buttons-proto.js');
-AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
+const buttonsCore = require('./prototypes/buttons-proto.js');
+const networkedCore = require('./prototypes/networked-proto.js');
+// new object with all core modules
+const base = inherit({}, buttonsCore, networkedCore);
+AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
@@ -85435,7 +85460,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function (evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented || !this.networkedOk()) {
       return;
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
@@ -85509,7 +85534,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22}],25:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":22,"./prototypes/networked-proto.js":23}],26:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
