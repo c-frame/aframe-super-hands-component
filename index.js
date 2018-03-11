@@ -424,23 +424,25 @@ AFRAME.registerComponent('super-hands', {
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch)
     this.el.addEventListener(this.data.colliderEndEvent, this.unHover)
 
+    // binding order to keep grabEnd from triggering dragover
+    // again before dragDropEnd can delete its carried state
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton)
     })
-    this.data.grabEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onGrabEndButton)
-    })
     this.data.stretchStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onStretchStartButton)
-    })
-    this.data.stretchEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onStretchEndButton)
     })
     this.data.dragDropStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropStartButton)
     })
     this.data.dragDropEndButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropEndButton)
+    })
+    this.data.stretchEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onStretchEndButton)
+    })
+    this.data.grabEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onGrabEndButton)
     })
   },
   unRegisterListeners: function (data) {
