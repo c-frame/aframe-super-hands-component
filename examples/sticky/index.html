@@ -1,12 +1,13 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Sticky Grab</title>
-    <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
   <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js" -->
+        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
   </head>
   <body>
@@ -19,16 +20,17 @@
         <a-mixin id="ball" geometry="primitive: sphere; radius: 0.33"
                  stretchable="startButtons: trackpaddown; endButtons: trackpadup"
                  hoverable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
                  dynamic-body shadow></a-mixin>
         <a-mixin id="floor" static-body
                  geometry="width: 50; height: 50; depth: 0.01"
                  shadow="cast: false"></a-mixin>
         <a-mixin id="bat" hoverable
                  grabbable="startButtons: triggerdown; endButtons: trackpadup"
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
                  material="color: brown" shadow></a-mixin>
-        <a-mixin id="bat-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
-        <a-mixin id="ball-hovered" material="opacity: 0.7; transparent: true"></a-mixin>
-        <a-mixin id="bat-stretched" material="wireframe: true"></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-locomotor allow-scaling="false"

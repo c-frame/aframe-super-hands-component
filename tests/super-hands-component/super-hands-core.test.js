@@ -462,8 +462,11 @@ suite('custom button mapping', function () {
 suite('state tracking', function () {
   setup(function (done) {
     this.target1 = entityFactory()
+    this.target1.id = 'target1'
     this.target2 = entityFactory()
+    this.target2.id = 'target2'
     this.target3 = entityFactory()
+    this.target3.id = 'target3'
     this.hand1 = helpers.controllerFactory({
       'super-hands': ''
     })
@@ -491,6 +494,24 @@ suite('state tracking', function () {
     this.sh1.onHit({ detail: { el: this.target3 } })
     this.sh1.onGrabStartButton()
     assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target3)
+  })
+  test('hover els nearest-first for actions', function () {
+    this.hand1.setAttribute('super-hands', {colliderEventProperty: 'els'})
+    this.target1.addEventListener('hover-start', e => e.preventDefault())
+    this.target2.addEventListener('hover-start', e => e.preventDefault())
+    this.target3.addEventListener('hover-start', e => e.preventDefault())
+    this.sh1.onHit({
+      detail: {
+        els: [this.target1, this.target2],
+        intersections: [{distance: 1}, {distance: 2}]
+      }
+    })
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
+    this.sh1.onHit({detail: {els: [this.target3], intersections: [{distance: 3}]}})
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
+    this.sh1.unWatch({detail: {el: this.target1}})
+    this.sh1.unHover({detail: {el: this.target1}})
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2')
   })
   test('released el placed back at top of stack', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault())

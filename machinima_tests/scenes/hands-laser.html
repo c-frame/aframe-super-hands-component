@@ -16,11 +16,13 @@
                  sphere-collider="objects: .cube, a-link"></a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable
-                 event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"></a-mixin>
-        <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
-        <a-mixin id="cube-grabbed" material="opacity: 0.7; transparent: true">
-        </a-mixin>
-        <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
+                 event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 event-set__grabon="_event: grab-start; material.opacity: 0.7; transparent: true"
+                 event-set__graboff="_event: grab-end; material.opacity: 1; transparent: false"
+                 event-set__dragon="_event: dragover-start; wireframe: true"
+                 event-set__dragoff="_event: dragover-end; wireframe: false"></a-mixin>
       </a-assets>
       <!-- <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity> -->
       <a-entity id="rhand" laser-controls="hand: right" mixin="controller"></a-entity>

@@ -95,6 +95,7 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = []
+    this.hoverElsDist = []
     this.state = new Map()
     this.dragging = false
 
@@ -275,11 +276,21 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty]
-    var processHitEl = (hitEl) => {
+    var processHitEl = (hitEl, distance) => {
       let hitElIndex
       hitElIndex = this.hoverEls.indexOf(hitEl)
       if (hitElIndex === -1) {
-        this.hoverEls.push(hitEl)
+        // insert in order of distance when available
+        if (distance) {
+          let i = 0
+          const dists = this.hoverElsDist
+          while (distance < dists[i] && i < dists.length) { i++ }
+          this.hoverEls.splice(i, 0, hitEl)
+          this.hoverElsDist.splice(i, 0, distance)
+        } else {
+          this.hoverEls.push(hitEl)
+          this.hoverElsDist.push(null)
+        }
         // later loss of collision will remove from hoverEls
         hitEl.addEventListener('stateremoved', this.unWatch)
         this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
@@ -294,9 +305,13 @@ AFRAME.registerComponent('super-hands', {
     }
     if (!hitEl) { return }
     if (Array.isArray(hitEl)) {
+      for (let i = 0, dist; i < hitEl.length; i++) {
+        dist = evt.detail.intersections && evt.detail.intersections[i].distance
+        processHitEl(hitEl[i], dist)
+      }
       hitEl.forEach(processHitEl)
     } else {
-      processHitEl(hitEl)
+      processHitEl(hitEl, null)
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -394,7 +409,10 @@ AFRAME.registerComponent('super-hands', {
   _unWatch: function (target) {
     var hoverIndex = this.hoverEls.indexOf(target)
     target.removeEventListener('stateremoved', this.unWatch)
-    if (hoverIndex !== -1) { this.hoverEls.splice(hoverIndex, 1) }
+    if (hoverIndex !== -1) {
+      this.hoverEls.splice(hoverIndex, 1)
+      this.hoverElsDist.splice(hoverIndex, 1)
+    }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged)
       this.dispatchMouseEvent(dragged, 'dragleave', target)
@@ -406,23 +424,25 @@ AFRAME.registerComponent('super-hands', {
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch)
     this.el.addEventListener(this.data.colliderEndEvent, this.unHover)
 
+    // binding order to keep grabEnd from triggering dragover
+    // again before dragDropEnd can delete its carried state
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton)
     })
-    this.data.grabEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onGrabEndButton)
-    })
     this.data.stretchStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onStretchStartButton)
-    })
-    this.data.stretchEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onStretchEndButton)
     })
     this.data.dragDropStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropStartButton)
     })
     this.data.dragDropEndButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropEndButton)
+    })
+    this.data.stretchEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onStretchEndButton)
+    })
+    this.data.grabEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onGrabEndButton)
     })
   },
   unRegisterListeners: function (data) {
@@ -502,11 +522,15 @@ AFRAME.registerComponent('super-hands', {
     }
     return null
   },
+  // Helper to ensure dropping and regrabbing finds the same target for
+  // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el)
-    if (hoverIndex !== -1) {
+    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
       this.hoverEls.splice(hoverIndex, 1)
+      this.hoverElsDist.splice(hoverIndex, 1)
       this.hoverEls.push(el)
+      this.hoverElsDist.push(null)
     }
   }
 })

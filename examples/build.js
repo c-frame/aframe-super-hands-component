@@ -57,22 +57,22 @@ AFRAME.registerComponent('super-hands', {
     colliderEndEvent: { default: 'hitend' },
     colliderEndEventProperty: { default: 'el' },
     grabStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     grabEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     stretchStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     stretchEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     },
     dragDropStartButtons: {
-      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown', 'pointup', 'thumbup', 'pointingstart', 'pistolstart', 'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
-      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
     }
   },
 
@@ -107,6 +107,7 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = [];
+    this.hoverElsDist = [];
     this.state = new Map();
     this.dragging = false;
 
@@ -280,11 +281,23 @@ AFRAME.registerComponent('super-hands', {
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
-    var processHitEl = hitEl => {
+    var processHitEl = (hitEl, distance) => {
       let hitElIndex;
       hitElIndex = this.hoverEls.indexOf(hitEl);
       if (hitElIndex === -1) {
-        this.hoverEls.push(hitEl);
+        // insert in order of distance when available
+        if (distance) {
+          let i = 0;
+          const dists = this.hoverElsDist;
+          while (distance < dists[i] && i < dists.length) {
+            i++;
+          }
+          this.hoverEls.splice(i, 0, hitEl);
+          this.hoverElsDist.splice(i, 0, distance);
+        } else {
+          this.hoverEls.push(hitEl);
+          this.hoverElsDist.push(null);
+        }
         // later loss of collision will remove from hoverEls
         hitEl.addEventListener('stateremoved', this.unWatch);
         this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
@@ -301,9 +314,13 @@ AFRAME.registerComponent('super-hands', {
       return;
     }
     if (Array.isArray(hitEl)) {
+      for (let i = 0, dist; i < hitEl.length; i++) {
+        dist = evt.detail.intersections && evt.detail.intersections[i].distance;
+        processHitEl(hitEl[i], dist);
+      }
       hitEl.forEach(processHitEl);
     } else {
-      processHitEl(hitEl);
+      processHitEl(hitEl, null);
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -399,6 +416,7 @@ AFRAME.registerComponent('super-hands', {
     target.removeEventListener('stateremoved', this.unWatch);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
+      this.hoverElsDist.splice(hoverIndex, 1);
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged);
@@ -411,23 +429,25 @@ AFRAME.registerComponent('super-hands', {
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
     this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
 
+    // binding order to keep grabEnd from triggering dragover
+    // again before dragDropEnd can delete its carried state
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton);
     });
-    this.data.grabEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onGrabEndButton);
-    });
     this.data.stretchStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onStretchStartButton);
-    });
-    this.data.stretchEndButtons.forEach(b => {
-      this.el.addEventListener(b, this.onStretchEndButton);
     });
     this.data.dragDropStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropStartButton);
     });
     this.data.dragDropEndButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropEndButton);
+    });
+    this.data.stretchEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onStretchEndButton);
+    });
+    this.data.grabEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onGrabEndButton);
     });
   },
   unRegisterListeners: function (data) {
@@ -500,16 +520,20 @@ AFRAME.registerComponent('super-hands', {
     }
     return null;
   },
+  // Helper to ensure dropping and regrabbing finds the same target for
+  // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el);
-    if (hoverIndex !== -1) {
+    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
       this.hoverEls.splice(hoverIndex, 1);
+      this.hoverElsDist.splice(hoverIndex, 1);
       this.hoverEls.push(el);
+      this.hoverElsDist.push(null);
     }
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":14,"./reaction_components/clickable.js":15,"./reaction_components/drag-droppable.js":16,"./reaction_components/draggable.js":17,"./reaction_components/droppable.js":18,"./reaction_components/grabbable.js":19,"./reaction_components/hoverable.js":20,"./reaction_components/stretchable.js":23,"./systems/super-hands-system.js":24}],3:[function(require,module,exports){
+},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":14,"./reaction_components/clickable.js":15,"./reaction_components/drag-droppable.js":16,"./reaction_components/draggable.js":17,"./reaction_components/droppable.js":18,"./reaction_components/grabbable.js":19,"./reaction_components/hoverable.js":20,"./reaction_components/stretchable.js":24,"./systems/super-hands-system.js":25}],3:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -525,6 +549,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         let cam = document.createElement('a-camera');
+        cam.setAttribute('position', '0 1.6 0');
         this.el.appendChild(cam);
       }
     }
@@ -550,7 +575,14 @@ AFRAME.registerComponent('locomotor-auto-config', {
     }
   },
   remove: function () {
-    this.el.removeState(this.colliderState);
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands');
+      if (sh) {
+        let evtDetails = {};
+        evtDetails[sh.colliderEndEventProperty] = this.el;
+        el.emit(sh.colliderEndEvent, evtDetails);
+      }
+    });
     this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
   },
   announceReady: function () {
@@ -570,8 +602,8 @@ AFRAME.registerComponent('locomotor-auto-config', {
         this.colliderState = sh.colliderState;
         this.el.addState(this.colliderState);
       }
-      this.announceReady();
     });
+    this.announceReady();
   }
 });
 
@@ -636,7 +668,11 @@ AFRAME.registerComponent('progressive-controls', {
     assets.appendChild(pointDefault);
     assets.appendChild(touchDefault);
 
-    this.camera = this.el.querySelector('a-camera,[camera]') || this.el.appendChild(document.createElement('a-camera'));
+    this.camera = this.el.querySelector('a-camera,[camera]');
+    if (!this.camera) {
+      this.camera = this.el.appendChild(document.createElement('a-camera'));
+      this.camera.setAttribute('position', '0 1.6 0');
+    }
     this.caster = this.camera.querySelector('.gazecaster') || this.camera.appendChild(document.createElement('a-entity'));
     ['left', 'right'].forEach(hand => {
       // find controller by left-controller/right-controller class or create one
@@ -2518,7 +2554,10 @@ AFRAME.registerComponent('droppable', {
 const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./prototypes/physics-grab-proto.js');
 const buttonsCore = require('./prototypes/buttons-proto.js');
-AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
+const networkedCore = require('./prototypes/networked-proto.js');
+// new object with all core modules
+const base = inherit({}, physicsCore, buttonsCore, networkedCore);
+AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
     invert: { default: false },
@@ -2583,7 +2622,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable && this.networkedOk()) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D');
         return;
@@ -2643,7 +2682,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":21,"./prototypes/physics-grab-proto.js":22}],20:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21,"./prototypes/networked-proto.js":22,"./prototypes/physics-grab-proto.js":23}],20:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -2714,6 +2753,25 @@ module.exports = function () {
 }();
 
 },{}],22:[function(require,module,exports){
+"use strict";
+
+// integration with networked-aframe
+module.exports = {
+  schema: {
+    takeOwnership: { default: false }
+  },
+  networkedOk: function () {
+    if (!window.NAF || window.NAF.utils.isMine(this.el)) {
+      return true;
+    }
+    if (this.data.takeOwnership) {
+      return window.NAF.utils.takeOwnership(this.el);
+    }
+    return false;
+  }
+};
+
+},{}],23:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -2771,13 +2829,16 @@ module.exports = {
   }
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-const buttonCore = require('./prototypes/buttons-proto.js');
-AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
+const buttonsCore = require('./prototypes/buttons-proto.js');
+const networkedCore = require('./prototypes/networked-proto.js');
+// new object with all core modules
+const base = inherit({}, buttonsCore, networkedCore);
+AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
@@ -2830,7 +2891,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function (evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented || !this.networkedOk()) {
       return;
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
@@ -2904,7 +2965,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":21}],24:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21,"./prototypes/networked-proto.js":22}],25:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

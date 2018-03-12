@@ -9,8 +9,10 @@
 
         <a-mixin id="controller" super-hands controller-loaded
                  sphere-collider="objects: .dynamic"
-                 static-body="shape: sphere; sphereRadius: 0.02;"></a-mixin>
-        <a-mixin id="sp-hovered" material="wireframe: false;"></a-mixin>
+                 static-body="shape: sphere; sphereRadius: 0.02;"
+                 event-set__hoveron="_event: hover-start; wireframe: false"
+                 event-set__hoveroff="_event: hover-end; wireframe: true">
+        </a-mixin>
       </a-assets>
       <a-entity id="lhand" hand-controls="left" mixin="controller"></a-entity>
       <a-entity id="rhand" hand-controls="right" mixin="controller"></a-entity>

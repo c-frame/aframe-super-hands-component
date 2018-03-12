@@ -83,7 +83,7 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
 </head>
@@ -117,6 +117,7 @@ require('super-hands');
 
 Master branch
 
+* Prioritize the nearest intersected entity when using raycaster
 * Improved nested entity handling: only one component can react to each
   gesture event.
 * Improved stretching of complex physics bodies: all shapes, child entity
@@ -257,7 +258,7 @@ If needed, use `event.target` instead.
   and the reaction component on the parent
   (e.g., a door with the handle as a collidable child and a `grabable` parent
   door so the whole door moves only when the handle is grabbed). To prevent
-  a gesture form bubbling, trap it on the child by giving it reaction components
+  a gesture from bubbling, trap it on the child by giving it reaction components
   or listening-for and cancelling the gesture events
   (see [Gesture acceptance and rejection](#Gesture-acceptance-and-rejection]))
 
@@ -336,7 +337,7 @@ configuration and the raycaster or collider (e.g. the
 replaces the default collider with a different component).
 If you need to change or add entities,
 you can manually create the player avatar structure using classes to tag
-the controller and raycaster entities for `progressice-controls` (e.g., the
+the controller and raycaster entities for `progressive-controls` (e.g., the
 [Global Event Handlers example](examples/events/index.html)
 adds children to the controllers and raycaster). The complete
 default configuration created by `progressive-controls` is below
@@ -429,9 +430,7 @@ super-hands gestures.
 ### hoverable component
 
 Used to indicate when the controller is within range to interact with an entity
-by adding the 'hovered' state. When using a mixin, including another mixin
-in the assets withe same id + '-hovered' will activate automatically, as in
-[the examples](https://wmurphyrd.github.io/aframe-super-hands-component/examples/).
+by adding the 'hovered' state.
 
 #### States
 

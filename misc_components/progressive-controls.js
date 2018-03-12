@@ -60,8 +60,11 @@ AFRAME.registerComponent('progressive-controls', {
     assets.appendChild(pointDefault)
     assets.appendChild(touchDefault)
 
-    this.camera = this.el.querySelector('a-camera,[camera]') ||
-        this.el.appendChild(document.createElement('a-camera'))
+    this.camera = this.el.querySelector('a-camera,[camera]')
+    if (!this.camera) {
+      this.camera = this.el.appendChild(document.createElement('a-camera'))
+      this.camera.setAttribute('position', '0 1.6 0')
+    }
     this.caster = this.camera.querySelector('.gazecaster') ||
       this.camera.appendChild(document.createElement('a-entity'));
     ['left', 'right'].forEach(hand => {

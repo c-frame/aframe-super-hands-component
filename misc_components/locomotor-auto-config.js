@@ -11,6 +11,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         let cam = document.createElement('a-camera')
+        cam.setAttribute('position', '0 1.6 0')
         this.el.appendChild(cam)
       }
     }
@@ -36,7 +37,14 @@ AFRAME.registerComponent('locomotor-auto-config', {
     }
   },
   remove: function () {
-    this.el.removeState(this.colliderState)
+    this.el.getChildEntities().forEach(el => {
+      let sh = el.getAttribute('super-hands')
+      if (sh) {
+        let evtDetails = {}
+        evtDetails[sh.colliderEndEventProperty] = this.el
+        el.emit(sh.colliderEndEvent, evtDetails)
+      }
+    })
     this.el.removeEventListener('controllerconnected', this.fakeCollisionsB)
   },
   announceReady: function () {
@@ -56,7 +64,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
         this.colliderState = sh.colliderState
         this.el.addState(this.colliderState)
       }
-      this.announceReady()
     })
+    this.announceReady()
   }
 })
