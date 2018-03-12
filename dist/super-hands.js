@@ -1,4 +1,4 @@
-(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -186,9 +186,9 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     const stretched = this.state.get(this.STRETCH_EVENT);
-    const endEvt = { hand: this.el, buttonEvent: evt
-      // check if end event accepted
-    };if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
+    const endEvt = { hand: this.el, buttonEvent: evt };
+    // check if end event accepted
+    if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
@@ -522,6 +522,7 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         let cam = document.createElement('a-camera');
+        cam.setAttribute('position', '0 1.6 0');
         this.el.appendChild(cam);
       }
     }
@@ -1121,9 +1122,9 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPositionIsValid = false;
     this.grabDistance = undefined;
     this.grabDirection = { x: 0, y: 0, z: -1 };
-    this.grabOffset = { x: 0, y: 0, z: 0
-      // persistent object speeds up repeat setAttribute calls
-    };this.destPosition = { x: 0, y: 0, z: 0 };
+    this.grabOffset = { x: 0, y: 0, z: 0 };
+    // persistent object speeds up repeat setAttribute calls
+    this.destPosition = { x: 0, y: 0, z: 0 };
     this.deltaPosition = new THREE.Vector3();
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
