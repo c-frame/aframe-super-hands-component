@@ -1,11 +1,11 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - GlobalEventHandler Integration</title>
-    <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js" -->
+        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <script>
       function randomizeColor (target) {
@@ -34,7 +34,7 @@
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity progressive-controls="objects: a-box, a-torus-knot, a-link">
-        <a-camera>
+        <a-camera position="0 1.6 0">
           <a-entity class="gazecaster">
             <a-sphere radius="0.02" visible="false" shadow>
             </a-sphere>

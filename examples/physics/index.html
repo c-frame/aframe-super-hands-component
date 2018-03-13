@@ -1,12 +1,13 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Vive With Physics</title>
-    <script src="https://aframe.io/releases/0.7.1/aframe.js"></script>
+    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.1.0/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js" -->
+        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
     <script src="../build.js"></script>
     <script>
       //color randomizer
@@ -43,10 +44,11 @@
         <img id="colortransform" src="./colortransform.png" />
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  hoverable grabbable stretchable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 event-set__dragon="_event: dragover-start; wireframe: true"
+                 event-set__dragoff="_event: dragover-end; wireframe: false"
                  dynamic-body shadow></a-mixin>
-        <a-mixin id="cube-hovered" material="opacity: 0.7; transparent: true">
-        </a-mixin>
-        <a-mixin id="cube-dragover" material="wireframe: true;"></a-mixin>
         <a-mixin id="transformer" color-randomizer droppable static-body
                  collision-filter="collisionForces: false"
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
@@ -59,7 +61,7 @@
                  super-hands="colliderEvent: raycaster-intersection;
                               colliderEventProperty: els;
                               colliderEndEvent:raycaster-intersection-cleared;
-                              colliderEndEventProperty:el;
+                              colliderEndEventProperty: clearedEls;
                               colliderState:"></a-mixin>
         <!-- to change touch mode collider -->
         <a-mixin id="mytouch" physics-collider phase-shift

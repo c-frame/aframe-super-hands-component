@@ -58,32 +58,32 @@ suite('grabbable', function () {
     })
     test('position updates during grab', function () {
       const myGrabbable = this.el.components.grabbable
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       myGrabbable.start({detail: {hand: this.hand}})
       /* with render loop stubbed out, need to force ticks */
       myGrabbable.tick()
       this.hand.setAttribute('position', '1 1 1')
       myGrabbable.tick()
-      assert.deepEqual(this.el.getAttribute('position'), coord('1 1 1'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('1 1 1')))
     })
     test(
       'position does not update during grab when usePhysics set to "only"',
       function () {
         const posStub = this.sinon.stub(this.hand, 'getAttribute')
         const myGrabbable = this.el.components.grabbable
-        assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+        assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
         posStub.withArgs('position')
           .onFirstCall().returns(coord('0 0 0'))
           .onSecondCall().returns(coord('1 1 1'))
         myGrabbable.data.usePhysics = 'only'
         myGrabbable.start({detail: {hand: this.hand}})
         myGrabbable.tick()
-        assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+        assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       })
     test('updates cease on release event', function () {
       const posStub = this.sinon.stub(this.hand, 'getAttribute')
       const myGrabbable = this.el.components.grabbable
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       posStub.withArgs('position')
         .onFirstCall().returns(coord('0 0 0'))
         .onSecondCall().returns(coord('1 1 1'))
@@ -91,7 +91,7 @@ suite('grabbable', function () {
       myGrabbable.tick()
       myGrabbable.end({detail: {hand: this.hand}})
       myGrabbable.tick()
-      assert.deepEqual(this.el.getAttribute('position'), coord('0 0 0'))
+      assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       assert.notOk(this.el.is(myGrabbable.GRABBED_STATE))
       assert.notOk(myGrabbable.grabbed)
       assert.notOk(myGrabbable.grabber)
@@ -270,6 +270,36 @@ suite('grabbable', function () {
       assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNGRAB_EVENT, dtl))
       assert.notStrictEqual(this.comp.grabber, this.hand)
       assert.isNotOk(this.el.is(this.comp.GRABBED_STATE))
+    })
+  })
+  suite('networked aframe awareness', function () {
+    setup(function (done) {
+      window.NAF = {
+        utils: {
+          isMine: this.sinon.stub().returns(false),
+          takeOwnership: this.sinon.stub().returns(true)
+        }
+      }
+      var el = this.el = entityFactory()
+      el.setAttribute('grabbable', '')
+      this.hand = helpers.controllerFactory()
+      el.sceneEl.addEventListener('loaded', () => {
+        this.comp = el.components.grabbable
+        done()
+      })
+    })
+    test('No grab if remote and ownership transfer not enabled', function () {
+      this.el.setAttribute('grabbable', {takeOwnership: false})
+      this.comp.start({detail: {hand: this.hand}})
+      assert.isFalse(this.comp.grabbed)
+      assert.isFalse(this.el.is(this.comp.GRABBED_STATE))
+      assert.isFalse(window.NAF.utils.takeOwnership.called)
+    })
+    test('Ownership transfer requested when enabled', function () {
+      this.el.setAttribute('grabbable', {takeOwnership: true})
+      this.comp.start({detail: {hand: this.hand}})
+      assert.isTrue(this.comp.grabbed)
+      assert.isTrue(window.NAF.utils.takeOwnership.called)
     })
   })
 })

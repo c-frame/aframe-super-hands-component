@@ -2,7 +2,10 @@
 const inherit = AFRAME.utils.extendDeep
 const physicsCore = require('./prototypes/physics-grab-proto.js')
 const buttonsCore = require('./prototypes/buttons-proto.js')
-AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
+const networkedCore = require('./prototypes/networked-proto.js')
+// new object with all core modules
+const base = inherit({}, physicsCore, buttonsCore, networkedCore)
+AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN},
     invert: {default: false},
@@ -68,12 +71,15 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     this.physicsRemove()
   },
   start: function (evt) {
-    if (evt.defaultPrevented || !this.startButtonOk(evt)) { return }
+    if (evt.defaultPrevented || !this.startButtonOk(evt)) {
+      return
+    }
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable &&
+        this.networkedOk()) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D')
         return

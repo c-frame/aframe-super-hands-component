@@ -2,7 +2,7 @@
 
 const machinima = require('aframe-machinima-testing')
 
-suite('progressive-controls touch interactions', function () {
+suite.skip('progressive-controls touch interactions', function () {
   setup(function (done) {
     this.timeout(0)
     machinima.setupScene('progressive-hands.html')
@@ -68,7 +68,7 @@ suite('progressive-controls touch interactions', function () {
     }
   )
 })
-suite('progressive pointer controls', function () {
+suite.skip('progressive pointer controls', function () {
   setup(function (done) {
     machinima.setupScene('progressive-laser.html')
     this.scene = document.querySelector('a-scene')
