@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, AFRAME */
+/* global assert, process, setup, suite, test, AFRAME, teardown */
 const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
 const coord = AFRAME.utils.coordinates.parse
@@ -277,7 +277,8 @@ suite('grabbable', function () {
       window.NAF = {
         utils: {
           isMine: this.sinon.stub().returns(false),
-          takeOwnership: this.sinon.stub().returns(true)
+          takeOwnership: this.sinon.stub().returns(true),
+          getNetworkedEntity: this.sinon.stub().returns(true)
         }
       }
       var el = this.el = entityFactory()
@@ -287,6 +288,9 @@ suite('grabbable', function () {
         this.comp = el.components.grabbable
         done()
       })
+    })
+    teardown(function () {
+      delete window.NAF
     })
     test('No grab if remote and ownership transfer not enabled', function () {
       this.el.setAttribute('grabbable', {takeOwnership: false})

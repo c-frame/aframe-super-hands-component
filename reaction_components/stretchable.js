@@ -21,6 +21,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     this.handPos = new THREE.Vector3()
     this.otherHandPos = new THREE.Vector3()
 
+    this.networkedInit()
+
     this.start = this.start.bind(this)
     this.end = this.end.bind(this)
 

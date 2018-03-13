@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, AFRAME */
+/* global assert, process, setup, suite, test, AFRAME, teardown */
 
 var helpers = require('../helpers')
 var entityFactory = helpers.entityFactory
@@ -96,27 +96,41 @@ suite('stretchable', function () {
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale))
   })
-  suite('networked aframe awareness', function () {
-    setup(function () {
-      window.NAF = {
-        utils: {
-          isMine: this.sinon.stub().returns(false),
-          takeOwnership: this.sinon.stub().returns(true)
-        }
+})
+suite('stretchable networked aframe awareness', function () {
+  setup(function (done) {
+    window.NAF = {
+      utils: {
+        isMine: this.sinon.stub().returns(false),
+        takeOwnership: this.sinon.stub().returns(true),
+        getNetworkedEntity: this.sinon.stub().returns(true)
       }
+    }
+    var el = this.el = entityFactory()
+    this.hand1 = helpers
+      .controllerFactory({ 'hand-controls': 'right' }, true)
+    this.hand2 = helpers
+      .controllerFactory({ 'hand-controls': 'left' }, true)
+    el.setAttribute('stretchable', '')
+    el.sceneEl.addEventListener('loaded', evt => {
+      this.comp = el.components.stretchable
+      done()
     })
-    test('No stretch if remote and ownership transfer not enabled', function () {
-      this.el.setAttribute('stretchable', {takeOwnership: false})
-      this.comp.start({detail: {hand: this.hand}})
-      assert.strictEqual(this.comp.stretchers.length, 0)
-      assert.isFalse(window.NAF.utils.takeOwnership.called)
-    })
-    test('Ownership transfer requested when enabled', function () {
-      this.el.setAttribute('stretchable', {takeOwnership: true})
-      this.comp.start({detail: {hand: this.hand}})
-      assert.strictEqual(this.comp.stretchers.length, 1)
-      assert.isTrue(window.NAF.utils.takeOwnership.called)
-    })
+  })
+  teardown(function () {
+    delete window.NAF
+  })
+  test('No stretch if remote and ownership transfer not enabled', function () {
+    this.el.setAttribute('stretchable', {takeOwnership: false})
+    this.comp.start({detail: {hand: this.hand}})
+    assert.strictEqual(this.comp.stretchers.length, 0)
+    assert.isFalse(window.NAF.utils.takeOwnership.called)
+  })
+  test('Ownership transfer requested when enabled', function () {
+    this.el.setAttribute('stretchable', {takeOwnership: true})
+    this.comp.start({detail: {hand: this.hand}})
+    assert.strictEqual(this.comp.stretchers.length, 1)
+    assert.isTrue(window.NAF.utils.takeOwnership.called)
   })
 })
 

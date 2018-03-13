@@ -1130,6 +1130,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPosition = new THREE.Vector3();
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
+    this.networkedInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
@@ -1311,8 +1312,11 @@ module.exports = {
   schema: {
     takeOwnership: { default: false }
   },
+  networkedInit: function () {
+    this.isNetworked = window.NAF && !!window.NAF.utils.getNetworkedEntity(this.el);
+  },
   networkedOk: function () {
-    if (!window.NAF || window.NAF.utils.isMine(this.el)) {
+    if (!this.isNetworked || window.NAF.utils.isMine(this.el)) {
       return true;
     }
     if (this.data.takeOwnership) {
@@ -1405,6 +1409,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     this.scale = new THREE.Vector3();
     this.handPos = new THREE.Vector3();
     this.otherHandPos = new THREE.Vector3();
+
+    this.networkedInit();
 
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);

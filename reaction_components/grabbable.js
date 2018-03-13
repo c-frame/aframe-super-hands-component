@@ -27,6 +27,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPosition = new THREE.Vector3()
     this.targetPosition = new THREE.Vector3()
     this.physicsInit()
+    this.networkedInit()
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e))
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e))
