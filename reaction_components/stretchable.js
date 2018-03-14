@@ -9,7 +9,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     usePhysics: {default: 'ifavailable'},
     invert: {default: false},
     physicsUpdateRate: {default: 100},
-    useWorldSpaceCoordinates: {type: 'bool', default: false}
+    useWorldPosition: {type: 'bool', default: false}
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched'
@@ -38,7 +38,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   tick: function (time, timeDelta) {
     if (!this.stretched) { return }
     this.scale.copy(this.el.getAttribute('scale'))
-    if (this.data.useWorldSpaceCoordinates) {
+    if (this.data.useWorldPosition) {
       this.stretchers[0].object3D.getWorldPosition(this.handPos)
       this.stretchers[1].object3D.getWorldPosition(this.otherHandPos)
     } else {
