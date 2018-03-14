@@ -143,7 +143,7 @@ AFRAME.registerComponent('super-hands', {
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
     if (!carried) {
-      carried = this.findTarget(this.GRAB_EVENT, {
+      carried = (evt.detail ? evt.detail.targetEntity : false) || this.findTarget(this.GRAB_EVENT, {
         hand: this.el,
         buttonEvent: evt
       });
@@ -1391,7 +1391,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
-    physicsUpdateRate: { default: 100 }
+    physicsUpdateRate: { default: 100 },
+    useWorldSpaceCoordinates: { type: 'bool', default: false }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -1418,8 +1419,13 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
-    this.handPos.copy(this.stretchers[0].getAttribute('position'));
-    this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    if (this.data.useWorldSpaceCoordinates) {
+      this.stretchers[0].object3D.getWorldPosition(this.handPos);
+      this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
+    } else {
+      this.handPos.copy(this.stretchers[0].getAttribute('position'));
+      this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    }
     const currentStretch = this.handPos.distanceTo(this.otherHandPos);
     let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
