@@ -9,7 +9,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     usePhysics: {default: 'ifavailable'},
     invert: {default: false},
     physicsUpdateRate: {default: 100},
-    useWorldPosition: {type: 'bool', default: false}
+    useWorldPosition: {default: false}
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched'
