@@ -19,7 +19,7 @@ suite('basic interactions', function () {
     'base/recordings/handsRecording.json',
     function () {
       var endScale = this.boxRedUp.getAttribute('scale')
-      assert.notDeepEqual(this.boxRedUp.getAttribute('position'), this.startPos, 'moved')
+      assert.isFalse(this.startPos.equals(this.boxRedUp.getAttribute('position')), 'moved')
       assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
       assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
       assert.isTrue(endScale.z > this.startScale.z, 'grew-z')
@@ -32,8 +32,8 @@ suite('basic interactions', function () {
       assert.isFalse(this.boxGrnDn.is('hovered'))
     },
     function () {
-      this.startPos = this.boxRedUp.getAttribute('position')
-      this.startScale = this.boxRedUp.getAttribute('scale')
+      this.startPos = this.boxRedUp.getAttribute('position').clone()
+      this.startScale = this.boxRedUp.getAttribute('scale').clone()
       assert.equal(this.boxGrnUp.getAttribute('geometry').primitive, 'box')
       assert.equal(this.boxGrnDn.getAttribute('geometry').primitive, 'box')
     }
@@ -68,10 +68,10 @@ suite('basic interactions', function () {
     'regrabbing after release grabs same entity',
     'base/recordings/regrab.json',
     function () {
-      assert.deepEqual(this.boxGrnDn.getAttribute('position'), this.dnStartPos)
+      assert.isTrue(this.dnStartPos.equals(this.boxGrnDn.getAttribute('position')))
     },
     function () {
-      this.dnStartPos = this.boxGrnDn.getAttribute('position')
+      this.dnStartPos = this.boxGrnDn.getAttribute('position').clone()
     }
   )
   machinima.test(
@@ -121,7 +121,7 @@ suite('Overlapped object targeting', function () {
     function () {
       assert.isAbove(this.inner.getAttribute('position').y, 2)
       assert.isBelow(this.middle.getAttribute('position').y, 0)
-      assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1})
+      assert.isTrue(this.outter.getAttribute('position').equals({x: 0, y: 1, z: -1}))
     }
   )
 })
@@ -144,7 +144,7 @@ suite('Nested object targeting', function () {
     function () {
       assert.isBelow(this.inner.getAttribute('position').y, 1.5)
       assert.isBelow(this.middle.getAttribute('position').y, 0)
-      assert.deepEqual(this.outter.getAttribute('position'), {x: 0, y: 1, z: -1})
+      assert.isTrue(this.outter.getAttribute('position').equals({x: 0, y: 1, z: -1}))
     }
   )
 })
@@ -241,7 +241,7 @@ suite('Locomotion', function () {
     'base/recordings/loco-hands2.json',
     function () {
       var endScale = this.redBox.getAttribute('scale')
-      assert.notDeepEqual(this.redBox.getAttribute('position'), this.startPos, 'moved')
+      assert.isFalse(this.startPos.equals(this.redBox.getAttribute('position')), 'moved')
       assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
       assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
       assert.isTrue(endScale.z > this.startScale.z, 'grew-z')
@@ -250,8 +250,8 @@ suite('Locomotion', function () {
     function () {
       this.boxGreenTop = document.getElementById('greenHigh')
       this.redBox = document.getElementById('redHigh')
-      this.startPos = this.redBox.getAttribute('position')
-      this.startScale = this.redBox.getAttribute('scale')
+      this.startPos = this.redBox.getAttribute('position').clone()
+      this.startScale = this.redBox.getAttribute('scale').clone()
     }
   )
 })

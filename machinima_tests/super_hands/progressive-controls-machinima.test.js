@@ -21,7 +21,7 @@ suite('progressive-controls touch interactions', function () {
     'base/recordings/handsRecording.json',
     function () {
       var endScale = this.boxRedUp.getAttribute('scale')
-      assert.notDeepEqual(this.boxRedUp.getAttribute('position'), this.startPos, 'moved')
+      assert.isFalse(this.startPos.equals(this.boxRedUp.getAttribute('position')), 'moved')
       assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
       assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
       assert.isTrue(endScale.z > this.startScale.z, 'grew-z')
@@ -34,8 +34,8 @@ suite('progressive-controls touch interactions', function () {
       assert.isFalse(this.boxGrnDn.is('hovered'))
     },
     function () {
-      this.startPos = this.boxRedUp.getAttribute('position')
-      this.startScale = this.boxRedUp.getAttribute('scale')
+      this.startPos = this.boxRedUp.getAttribute('position').clone()
+      this.startScale = this.boxRedUp.getAttribute('scale').clone()
       assert.equal(this.boxGrnUp.getAttribute('geometry').primitive, 'box')
       assert.equal(this.boxGrnDn.getAttribute('geometry').primitive, 'box')
     }

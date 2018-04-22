@@ -49,7 +49,7 @@
     "aframe-event-set-component": "^3.0.2",
     "aframe-extras": "^3.12.4",
     "aframe-machinima-testing": "^0.1.2",
-    "aframe-motion-capture-components": "git+https://git@github.com/wmurphyrd/aframe-motion-capture-components.git#v0.2.8a",
+    "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8c",
     "aframe-physics-system": "^2.1.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-minify": "^0.2.0",
