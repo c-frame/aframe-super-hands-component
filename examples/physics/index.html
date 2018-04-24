@@ -1,14 +1,15 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Vive With Physics</title>
-    <!-- <script src="https://aframe.io/releases/0.7.1/aframe.js"></script> -->
+    <!-- Replace "../build.js" with the super-hands and
+         A-Frame distributions to run : -->
     <script src="../build.js"></script>
+    <!-- <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.1.0/dist/aframe-physics-system.min.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
-    <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
     <script>
       //color randomizer
       AFRAME.registerComponent('color-randomizer', {
@@ -73,7 +74,7 @@
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
       <a-entity progressive-controls="gazeMixin: mycursor; touchMixin: mytouch; override: true">
-        <!-- listing controller entities to set IDs for MoCap replay optional for normal use -->
+        <!-- listing controller entities to set IDs for MoCap replay; not needed for normal use -->
         <a-entity id="rhand" class="right-controller"></a-entity>
         <a-entity id="lhand" class="left-controller"></a-entity>
       </a-entity>
@@ -89,6 +90,7 @@
       <a-box static-body width=100 height=0.001 depth=100 visible="false"></a-box>
       <a-link href="../portals.html" title="Other Examples"
               image="#portals-preview"
+              static-body="shape: sphere; sphereRadius: 0.25"
               onmouseover="this.setAttribute('link', {highlighted: true})"
               onmouseout="this.setAttribute('link', {highlighted: false})"
               position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
