@@ -49,7 +49,7 @@
     "aframe-event-set-component": "^3.0.2",
     "aframe-extras": "^3.12.4",
     "aframe-machinima-testing": "^0.1.2",
-    "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8c",
+    "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8e",
     "aframe-physics-system": "^2.1.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-minify": "^0.2.0",
@@ -80,7 +80,7 @@
     "shx": "^0.1.1",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
-    "snazzy": "^4.0.0",
+    "snazzy": "^7.0.0",
     "standard": "^10.0.3"
   },
   "standard": {
