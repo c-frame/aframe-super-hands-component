@@ -236,7 +236,7 @@ suite('Locomotion', function () {
       })
     }, {once: true})
   })
-  machinima.test(
+  machinima.test.skip(
     'locomotor does not interfere with normal interactions',
     'base/recordings/loco-hands2.json',
     function () {
