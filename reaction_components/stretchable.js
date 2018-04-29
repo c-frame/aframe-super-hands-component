@@ -106,7 +106,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     }
     this.previousPhysicsStretch = currentStretch
     if (deltaStretch === 1) { return }
-    for (let c of this.el.children) { this.stretchBody(c, deltaStretch) }
+    for (let c of this.el.childNodes) { this.stretchBody(c, deltaStretch) }
     this.stretchBody(this.el, deltaStretch)
   },
   stretchBody: function (el, deltaStretch) {
