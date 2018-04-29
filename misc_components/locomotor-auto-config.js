@@ -11,6 +11,10 @@ AFRAME.registerComponent('locomotor-auto-config', {
     if (this.data.camera) {
       if (!document.querySelector('a-camera, [camera]')) {
         let cam = document.createElement('a-camera')
+        // DEPRECATION path: camera y instead of userHeight in verions >= 0.8
+        if (parseFloat(AFRAME.version) > 0.7) {
+          cam.setAttribute('position', '0 1.6 0')
+        }
         this.el.appendChild(cam)
       }
     }

@@ -115,22 +115,19 @@ require('super-hands');
 ```
 ### News
 
-Master branch
+v3.0.0
 
-* Prioritize the nearest intersected entity when using raycaster
+* `networked-aframe` ownership transfer compatibility:`grabbable` and
+  `stretchable` components
+  will auto-detect when networked entities are owned by other clients and
+  respond appropriately based on their `takeOwnership` property setting
+* Smarter `raycaster` support: chooses nearest intersected entity first
 * Improved nested entity handling: only one component can react to each
   gesture event.
 * Improved stretching of complex physics bodies: all shapes, child entity
   shapes, and offsets are updated
 * Added support for `'worker'` and other `aframe-physics-system` drivers
   in `grabbable`
-
-
-Master branch features can be tested using:
-
-```html
-<script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.min.js"></script>
-```
 
 v2.1.0
 
@@ -145,23 +142,6 @@ v2.1.0
   * Use mixins for customization
   * Remove extra controller on ground from single controller setups
   * Add `controllerModel` option to bypass default controller models
-
-v2.0.2
-
-* A-Frame v0.7.0 and master support
-* Implement [aframe-machinima-testing](https://github.com/wmurphyrd/aframe-machinima-testing)
-  for automated functional testing using motion captured user input
-* Bug fixes:
-  * Improved handling of touch (eliminate doubled events)
-  * Fix odd behavior of repeatedly or simultaneously grabbed objects
-
-v2.0.1
-
-* Bug fixes:
-  * `'mouseup'` now fires correctly on target entities
-  * Fixed lingering hover when `progressive-controls` advances from gaze mode
-  * Fixed lingering hovers when `progressive-controls` in point mode
-  * Fixed some new files being excluded from babelify & breaking uglify
 
 [Previous news](news.md)
 

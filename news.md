@@ -1,5 +1,19 @@
 ## News
 
+v3.0.0
+
+* `networked-aframe` ownership transfer compatibility:`grabbable` and
+  `stretchable` components
+  will auto-detect when networked entities are owned by other clients and
+  respond appropriately based on their `takeOwnership` property setting
+* Smarter `raycaster` support: chooses nearest intersected entity first
+* Improved nested entity handling: only one component can react to each
+  gesture event.
+* Improved stretching of complex physics bodies: all shapes, child entity
+  shapes, and offsets are updated
+* Added support for `'worker'` and other `aframe-physics-system` drivers
+  in `grabbable`
+  
 v2.1.0
 
 * A-Frame v0.8.0 (WIP/master branch) support

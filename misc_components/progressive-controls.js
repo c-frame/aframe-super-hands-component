@@ -14,12 +14,7 @@ AFRAME.registerComponent('progressive-controls', {
     controllerModel: {default: true}
   },
   init: function () {
-    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
-    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
-    const rayEndProp = !AFRAME.components.link.schema.titleColor
-        ? 'el'
-        : 'clearedEls'
-
+    const rayEndProp = 'clearedEls'
     this.levels = ['gaze', 'point', 'touch']
     this.currentLevel = new Map()
     this.controllerName = new Map()
@@ -63,8 +58,8 @@ AFRAME.registerComponent('progressive-controls', {
     this.camera = this.el.querySelector('a-camera,[camera]')
     if (!this.camera) {
       this.camera = this.el.appendChild(document.createElement('a-camera'))
-      // DEPRECATION: only set camera height on versions with WebGLRenderer
-      if (parseInt(AFRAME.version.split('.')[1]) > 7) {
+      // DEPRECATION path: camera y instead of userHeight in verions >= 0.8
+      if (parseFloat(AFRAME.version) > 0.7) {
         this.camera.setAttribute('position', '0 1.6 0')
       }
     }
@@ -94,10 +89,8 @@ AFRAME.registerComponent('progressive-controls', {
     updateMixin(this.gazeDefault, 'raycaster', objs)
     updateMixin(this.pointDefault, 'raycaster', objs)
     updateMixin(this.touchDefault, 'sphere-collider', objs)
-    // async updates due to aframevr/aframe#3200
-    // force setLevel refresh with new params
     for (let [hand, level] of this.currentLevel) {
-      window.setTimeout(() => this.setLevel(level, hand, true))
+      this.setLevel(level, hand, true)
     }
   },
   remove: function () {

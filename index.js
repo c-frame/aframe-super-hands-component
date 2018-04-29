@@ -21,7 +21,6 @@ require('./primitives/a-locomotor.js')
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: {default: ''},
     colliderEvent: {default: 'hit'},
     colliderEventProperty: {default: 'el'},
     colliderEndEvent: {default: 'hitend'},
@@ -116,9 +115,6 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-    if (this.data.colliderState.length) {
-      console.warn('super-hands colliderState property is deprecated. Use colliderEndEvent/colliderEndEventProperty instead')
-    }
     this.unRegisterListeners(oldData)
     this.registerListeners()
   },
@@ -130,10 +126,6 @@ AFRAME.registerComponent('super-hands', {
   remove: function () {
     this.system.unregisterMe(this)
     this.unRegisterListeners()
-    // cleanup states
-    this.hoverEls.forEach(h => {
-      h.removeEventListener('stateremoved', this.unWatch)
-    })
     this.hoverEls.length = 0
     if (this.state.get(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT))
@@ -291,8 +283,6 @@ AFRAME.registerComponent('super-hands', {
           this.hoverEls.push(hitEl)
           this.hoverElsDist.push(null)
         }
-        // later loss of collision will remove from hoverEls
-        hitEl.addEventListener('stateremoved', this.unWatch)
         this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
         if (this.dragging && this.gehDragged.size) {
           // events on targets and on dragged
@@ -332,7 +322,6 @@ AFRAME.registerComponent('super-hands', {
       }
       hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true)
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover)
         this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt)
         this.state.set(this.DRAGOVER_EVENT, hoverEl)
       }
@@ -341,13 +330,11 @@ AFRAME.registerComponent('super-hands', {
     if (!this.state.has(this.DRAGOVER_EVENT)) {
       hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true)
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover)
         this.state.set(this.HOVER_EVENT, hoverEl)
       }
     }
   },
-  /* tied to 'stateremoved' event for hovered entities,
-     called when controller moves out of collision range of entity */
+  /* called when controller moves out of collision range of entity */
   unHover: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty]
     if (clearedEls) {
@@ -356,15 +343,12 @@ AFRAME.registerComponent('super-hands', {
       } else {
         this._unHover(clearedEls)
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      this._unHover(evt.target)
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function (el, skipNextHover) {
     let unHovered = false
     let evt
-    el.removeEventListener('stateremoved', this.unHover)
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT)
       unHovered = true
@@ -398,17 +382,13 @@ AFRAME.registerComponent('super-hands', {
       if (Array.isArray(clearedEls)) {
         clearedEls.forEach(el => this._unWatch(el))
       } else {
-        // deprecation path: aframe <=0.7.0 / sphere-collider
+        // deprecation path: sphere-collider
         this._unWatch(clearedEls)
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      // deprecation path: sphere-collider <=3.11.4
-      this._unWatch(evt.target)
     }
   },
   _unWatch: function (target) {
     var hoverIndex = this.hoverEls.indexOf(target)
-    target.removeEventListener('stateremoved', this.unWatch)
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1)
       this.hoverElsDist.splice(hoverIndex, 1)
