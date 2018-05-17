@@ -64,17 +64,17 @@ AFRAME.registerComponent('progressive-controls', {
       }
     }
     this.caster = this.camera.querySelector('.gazecaster') ||
-      this.camera.appendChild(document.createElement('a-entity'));
-    ['left', 'right'].forEach(hand => {
+      this.camera.appendChild(document.createElement('a-entity'))
+    ;['left', 'right'].forEach(hand => {
       // find controller by left-controller/right-controller class or create one
       this[hand] = this.el.querySelector('.' + hand + '-controller') ||
           this.el.appendChild(document.createElement('a-entity'))
       const ctrlrCompConfig = {
         hand: hand,
         model: this.data.controllerModel
-      };
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls',
-        'vive-controls', 'windows-motion-controls']
+      }
+      ;['daydream-controls', 'gearvr-controls', 'oculus-touch-controls',
+        'vive-controls', 'windows-motion-controls', 'oculus-go-controls']
           .forEach(ctrlr => this[hand].setAttribute(ctrlr, ctrlrCompConfig))
     })
     this.el.addEventListener('controllerconnected', e => this.detectLevel(e))
@@ -151,7 +151,7 @@ AFRAME.registerComponent('progressive-controls', {
   detectLevel: function (evt) {
     const DOF6 = ['vive-controls', 'oculus-touch-controls',
       'windows-motion-controls']
-    const DOF3 = ['gearvr-controls', 'daydream-controls']
+    const DOF3 = ['gearvr-controls', 'daydream-controls', 'oculus-go-controls']
     const hand = evt.detail.component.data.hand || 'right'
     this.controllerName.set(hand, evt.detail.name)
     if (DOF6.indexOf(evt.detail.name) !== -1) {
@@ -188,6 +188,12 @@ AFRAME.registerComponent('progressive-controls', {
     },
     'oculus-touch-controls': {
       raycaster: {origin: {x: 0.001, y: 0, z: 0.065}, direction: {x: 0, y: -0.8, z: -1}}
+    },
+    'oculus-go-controls': {
+      raycaster: {origin: {x: 0, y: 0.0005, z: 0}}
+    },
+    'windows-motion-controls': {
+      raycaster: {direction: {x: 0, y: -0.4472, z: -0.8944}}
     }
   }
 })
