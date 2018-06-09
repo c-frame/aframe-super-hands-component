@@ -23,8 +23,7 @@ suite('progressive-controls', function () {
         done()
       })
     })
-    // skip until aframevr/aframe#3200 is fixed
-    test.skip('extra controller not activated', function () {
+    test('extra controller not activated', function () {
       this.el.emit('controllerconnected', {name: 'gearvr-controls',
         component: {
           data: {}
@@ -33,8 +32,7 @@ suite('progressive-controls', function () {
       assert.isNotOk(document.querySelector('.left-controller').getAttribute('line'))
     })
   })
-  // skip until aframevr/aframe#3200 is fixed
-  suite.skip('mixin properties', function () {
+  suite('mixin properties', function () {
     setup(function (done) {
       var el = this.el = entityFactory()
       helpers.mixinFactory('gz1', {geometry: 'primitive: circle'})
