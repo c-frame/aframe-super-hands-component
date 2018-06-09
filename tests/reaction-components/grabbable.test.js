@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, AFRAME, teardown */
+/* global assert, process, setup, suite, test, AFRAME */
 const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
 const coord = AFRAME.utils.coordinates.parse
@@ -270,40 +270,6 @@ suite('grabbable', function () {
       assert.isNotOk(helpers.emitCancelable(this.el, this.comp.UNGRAB_EVENT, dtl))
       assert.notStrictEqual(this.comp.grabber, this.hand)
       assert.isNotOk(this.el.is(this.comp.GRABBED_STATE))
-    })
-  })
-  suite('networked aframe awareness', function () {
-    setup(function (done) {
-      window.NAF = {
-        utils: {
-          isMine: this.sinon.stub().returns(false),
-          takeOwnership: this.sinon.stub().returns(true),
-          getNetworkedEntity: this.sinon.stub().returns(true)
-        }
-      }
-      var el = this.el = entityFactory()
-      el.setAttribute('grabbable', '')
-      this.hand = helpers.controllerFactory()
-      el.sceneEl.addEventListener('loaded', () => {
-        this.comp = el.components.grabbable
-        done()
-      })
-    })
-    teardown(function () {
-      delete window.NAF
-    })
-    test('No grab if remote and ownership transfer not enabled', function () {
-      this.el.setAttribute('grabbable', {takeOwnership: false})
-      this.comp.start({detail: {hand: this.hand}})
-      assert.isFalse(this.comp.grabbed)
-      assert.isFalse(this.el.is(this.comp.GRABBED_STATE))
-      assert.isFalse(window.NAF.utils.takeOwnership.called)
-    })
-    test('Ownership transfer requested when enabled', function () {
-      this.el.setAttribute('grabbable', {takeOwnership: true})
-      this.comp.start({detail: {hand: this.hand}})
-      assert.isTrue(this.comp.grabbed)
-      assert.isTrue(window.NAF.utils.takeOwnership.called)
     })
   })
 })

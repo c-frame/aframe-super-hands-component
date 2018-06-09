@@ -2,9 +2,8 @@
 const inherit = AFRAME.utils.extendDeep
 const physicsCore = require('./prototypes/physics-grab-proto.js')
 const buttonsCore = require('./prototypes/buttons-proto.js')
-const networkedCore = require('./prototypes/networked-proto.js')
 // new object with all core modules
-const base = inherit({}, physicsCore, buttonsCore, networkedCore)
+const base = inherit({}, physicsCore, buttonsCore)
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN},
@@ -27,7 +26,6 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPosition = new THREE.Vector3()
     this.targetPosition = new THREE.Vector3()
     this.physicsInit()
-    this.networkedInit()
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e))
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e))
@@ -79,8 +77,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable &&
-        this.networkedOk()) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D')
         return
