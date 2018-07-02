@@ -270,7 +270,7 @@ AFRAME.registerComponent('super-hands', {
       hitElIndex = this.hoverEls.indexOf(hitEl)
       if (hitElIndex === -1) {
         // insert in order of distance when available
-        if (distance) {
+        if (distance != null) {
           let i = 0
           const dists = this.hoverElsDist
           while (distance < dists[i] && i < dists.length) { i++ }
@@ -287,7 +287,24 @@ AFRAME.registerComponent('super-hands', {
             this.dispatchMouseEventAll('dragenter', dragged, true, true)
           })
         }
-        this.hover()
+      } else if (distance != null) {
+        // update distance and reorder
+        let i = 0
+        const dists = this.hoverElsDist
+        while (distance < dists[i] && i < dists.length) { i++ }
+        if (i === hitElIndex) {
+          dists[i] = distance
+        } else if (i < hitElIndex) {
+          this.hoverEls.splice(hitElIndex, 1)
+          this.hoverElsDist.splice(hitElIndex, 1)
+          this.hoverEls.splice(i, 0, hitEl)
+          this.hoverElsDist.splice(i, 0, distance)
+        } else {
+          this.hoverEls.splice(i, 0, hitEl)
+          this.hoverElsDist.splice(i, 0, distance)
+          this.hoverEls.splice(hitElIndex, 1)
+          this.hoverElsDist.splice(hitElIndex, 1)
+        }
       }
     }
     if (!hitEl) { return }
@@ -296,10 +313,10 @@ AFRAME.registerComponent('super-hands', {
         dist = evt.detail.intersections && evt.detail.intersections[i].distance
         processHitEl(hitEl[i], dist)
       }
-      hitEl.forEach(processHitEl)
     } else {
       processHitEl(hitEl, null)
     }
+    this.hover()
   },
   /* search collided entities for target to hover/dragover */
   hover: function () {
