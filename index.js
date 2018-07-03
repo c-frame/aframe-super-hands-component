@@ -263,43 +263,65 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  onHit: function (evt) {
-    const hitEl = evt.detail[this.data.colliderEventProperty]
-    var processHitEl = (hitEl, distance) => {
-      let hitElIndex
-      hitElIndex = this.hoverEls.indexOf(hitEl)
-      if (hitElIndex === -1) {
-        // insert in order of distance when available
-        if (distance) {
-          let i = 0
-          const dists = this.hoverElsDist
-          while (distance < dists[i] && i < dists.length) { i++ }
-          this.hoverEls.splice(i, 0, hitEl)
-          this.hoverElsDist.splice(i, 0, distance)
-        } else {
-          this.hoverEls.push(hitEl)
-          this.hoverElsDist.push(null)
-        }
-        this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
-        if (this.dragging && this.gehDragged.size) {
-          // events on targets and on dragged
-          this.gehDragged.forEach(dragged => {
-            this.dispatchMouseEventAll('dragenter', dragged, true, true)
-          })
-        }
-        this.hover()
+  processHitEl: function (hitEl, distance) {
+    const dists = this.hoverElsDist
+    const hoverEls = this.hoverEls
+    const hitElIndex = this.hoverEls.indexOf(hitEl)
+    let hoverNeedsUpdate = false
+    if (hitElIndex === -1) {
+      hoverNeedsUpdate = true
+      // insert in order of distance when available
+      if (distance != null) {
+        let i = 0
+        while (distance < dists[i] && i < dists.length) { i++ }
+        hoverEls.splice(i, 0, hitEl)
+        dists.splice(i, 0, distance)
+      } else {
+        hoverEls.push(hitEl)
+        dists.push(null)
+      }
+      this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
+      if (this.dragging && this.gehDragged.size) {
+        // events on targets and on dragged
+        this.gehDragged.forEach(dragged => {
+          this.dispatchMouseEventAll('dragenter', dragged, true, true)
+        })
+      }
+    } else if (distance != null) {
+      // update distance and reorder
+      let i = 0
+      while (distance < dists[i] && i < dists.length) { i++ }
+      if (i === hitElIndex) {
+        dists[i] = distance
+      } else if (i < hitElIndex) {
+        hoverNeedsUpdate = true
+        hoverEls.splice(hitElIndex, 1)
+        dists.splice(hitElIndex, 1)
+        hoverEls.splice(i, 0, hitEl)
+        dists.splice(i, 0, distance)
+      } else {
+        hoverNeedsUpdate = true
+        hoverEls.splice(i, 0, hitEl)
+        dists.splice(i, 0, distance)
+        hoverEls.splice(hitElIndex, 1)
+        dists.splice(hitElIndex, 1)
       }
     }
+    return hoverNeedsUpdate
+  },
+  onHit: function (evt) {
+    const hitEl = evt.detail[this.data.colliderEventProperty]
+    let hoverNeedsUpdate = 0
     if (!hitEl) { return }
     if (Array.isArray(hitEl)) {
       for (let i = 0, dist; i < hitEl.length; i++) {
         dist = evt.detail.intersections && evt.detail.intersections[i].distance
-        processHitEl(hitEl[i], dist)
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], dist)
       }
-      hitEl.forEach(processHitEl)
     } else {
-      processHitEl(hitEl, null)
+      hoverNeedsUpdate += this.processHitEl(hitEl, null)
     }
+    if (hoverNeedsUpdate) { this.hover() }
   },
   /* search collided entities for target to hover/dragover */
   hover: function () {

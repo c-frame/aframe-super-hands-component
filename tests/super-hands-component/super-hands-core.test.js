@@ -513,6 +513,37 @@ suite('state tracking', function () {
     this.sh1.unHover({detail: {el: this.target1}})
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2')
   })
+  test('hover targeting updates as distances change', function () {
+    this.hand1.setAttribute('super-hands', { colliderEventProperty: 'els' })
+    this.target1.addEventListener('hover-start', e => e.preventDefault())
+    this.target2.addEventListener('hover-start', e => e.preventDefault())
+    this.target3.addEventListener('hover-start', e => e.preventDefault())
+    this.sh1.onHit({
+      detail: {
+        els: [this.target1, this.target2],
+        intersections: [{ distance: 1 }, { distance: 2 }]
+      }
+    })
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
+    this.sh1.onHit({
+      detail: {
+        els: [this.target1, this.target2],
+        intersections: [{ distance: 1 }, { distance: 0.5 }]
+      }
+    })
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2', 'closer')
+    assert.sameOrderedMembers(this.sh1.hoverElsDist, [1, 0.5], 'closer')
+    assert.sameOrderedMembers(this.sh1.hoverEls, [this.target1, this.target2], 'closer')
+    this.sh1.onHit({
+      detail: {
+        els: [this.target1, this.target2],
+        intersections: [{ distance: 2 }, { distance: 3 }]
+      }
+    })
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1', 'further')
+    assert.sameOrderedMembers(this.sh1.hoverElsDist, [3, 2], 'further')
+    assert.sameOrderedMembers(this.sh1.hoverEls, [this.target2, this.target1], 'further')
+  })
   test('released el placed back at top of stack', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault())
     this.target2.addEventListener('grab-start', e => e.preventDefault())
