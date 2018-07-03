@@ -267,7 +267,9 @@ AFRAME.registerComponent('super-hands', {
     const dists = this.hoverElsDist
     const hoverEls = this.hoverEls
     const hitElIndex = this.hoverEls.indexOf(hitEl)
+    let hoverNeedsUpdate = false
     if (hitElIndex === -1) {
+      hoverNeedsUpdate = true
       // insert in order of distance when available
       if (distance != null) {
         let i = 0
@@ -292,30 +294,34 @@ AFRAME.registerComponent('super-hands', {
       if (i === hitElIndex) {
         dists[i] = distance
       } else if (i < hitElIndex) {
+        hoverNeedsUpdate = true
         hoverEls.splice(hitElIndex, 1)
         dists.splice(hitElIndex, 1)
         hoverEls.splice(i, 0, hitEl)
         dists.splice(i, 0, distance)
       } else {
+        hoverNeedsUpdate = true
         hoverEls.splice(i, 0, hitEl)
         dists.splice(i, 0, distance)
         hoverEls.splice(hitElIndex, 1)
         dists.splice(hitElIndex, 1)
       }
     }
+    return hoverNeedsUpdate
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty]
+    let hoverNeedsUpdate = 0
     if (!hitEl) { return }
     if (Array.isArray(hitEl)) {
       for (let i = 0, dist; i < hitEl.length; i++) {
         dist = evt.detail.intersections && evt.detail.intersections[i].distance
-        this.processHitEl(hitEl[i], dist)
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], dist)
       }
     } else {
-      this.processHitEl(hitEl, null)
+      hoverNeedsUpdate += this.processHitEl(hitEl, null)
     }
-    this.hover()
+    if (hoverNeedsUpdate) { this.hover() }
   },
   /* search collided entities for target to hover/dragover */
   hover: function () {
