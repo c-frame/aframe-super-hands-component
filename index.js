@@ -57,7 +57,8 @@ AFRAME.registerComponent('super-hands', {
         'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
         'thumbstickup', 'mouseup', 'touchend']
-    }
+    },
+    interval: { default: 0 }
   },
 
   /**
@@ -91,7 +92,8 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = []
-    this.hoverElsDist = []
+    this.hoverElsIntersections = []
+    this.prevCheckTime = null
     this.state = new Map()
     this.dragging = false
 
@@ -131,21 +133,37 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton()
     this.onDragDropEndButton()
   },
-  /**
-   * Called when entity pauses.
-   * Use to stop or remove any dynamic or background behavior such as events.
-   */
-  pause: function () {
+  tick: (function () {
+    let orderChanged = false
+    // closer objects and objects with no distance come later in list
+    function sorter (a, b) {
+      const aDist = a.distance == null ? -1 : a.distance
+      const bDist = b.distance == null ? -1 : b.distance
+      if (aDist < bDist) {
+        orderChanged = true
+        return 1
+      }
+      if (bDist < aDist) {
+        return -1
+      }
+      return 0
+    }
+    return function (time) {
+      const data = this.data
+      const prevCheckTime = this.prevCheckTime
+      if (prevCheckTime && (time - prevCheckTime < data.interval)) { return }
+      this.prevCheckTime = time
 
-  },
-
-  /**
-   * Called when entity resumes.
-   * Use to continue or add any dynamic or background behavior such as events.
-   */
-  play: function () {
-
-  },
+      orderChanged = false
+      this.hoverElsIntersections.sort(sorter)
+      if (orderChanged) {
+        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+          this.hoverEls[i] = this.hoverElsIntersections[i].object.el
+        }
+        this.hover()
+      }
+    }
+  })(),
   onGrabStartButton: function (evt) {
     let carried = this.state.get(this.GRAB_EVENT)
     this.dispatchMouseEventAll('mousedown', this.el)
@@ -263,22 +281,23 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-  processHitEl: function (hitEl, distance) {
-    const dists = this.hoverElsDist
+  processHitEl: function (hitEl, intersection) {
+    const dist = intersection && intersection.distance
+    const sects = this.hoverElsIntersections
     const hoverEls = this.hoverEls
     const hitElIndex = this.hoverEls.indexOf(hitEl)
     let hoverNeedsUpdate = false
     if (hitElIndex === -1) {
       hoverNeedsUpdate = true
       // insert in order of distance when available
-      if (distance != null) {
+      if (dist != null) {
         let i = 0
-        while (distance < dists[i] && i < dists.length) { i++ }
+        while (i < sects.length && dist < sects[i].distance) { i++ }
         hoverEls.splice(i, 0, hitEl)
-        dists.splice(i, 0, distance)
+        sects.splice(i, 0, intersection)
       } else {
         hoverEls.push(hitEl)
-        dists.push(null)
+        sects.push({ object: { el: hitEl } })
       }
       this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
       if (this.dragging && this.gehDragged.size) {
@@ -286,25 +305,6 @@ AFRAME.registerComponent('super-hands', {
         this.gehDragged.forEach(dragged => {
           this.dispatchMouseEventAll('dragenter', dragged, true, true)
         })
-      }
-    } else if (distance != null) {
-      // update distance and reorder
-      let i = 0
-      while (distance < dists[i] && i < dists.length) { i++ }
-      if (i === hitElIndex) {
-        dists[i] = distance
-      } else if (i < hitElIndex) {
-        hoverNeedsUpdate = true
-        hoverEls.splice(hitElIndex, 1)
-        dists.splice(hitElIndex, 1)
-        hoverEls.splice(i, 0, hitEl)
-        dists.splice(i, 0, distance)
-      } else {
-        hoverNeedsUpdate = true
-        hoverEls.splice(i, 0, hitEl)
-        dists.splice(i, 0, distance)
-        hoverEls.splice(hitElIndex, 1)
-        dists.splice(hitElIndex, 1)
       }
     }
     return hoverNeedsUpdate
@@ -314,9 +314,9 @@ AFRAME.registerComponent('super-hands', {
     let hoverNeedsUpdate = 0
     if (!hitEl) { return }
     if (Array.isArray(hitEl)) {
-      for (let i = 0, dist; i < hitEl.length; i++) {
-        dist = evt.detail.intersections && evt.detail.intersections[i].distance
-        hoverNeedsUpdate += this.processHitEl(hitEl[i], dist)
+      for (let i = 0, sect; i < hitEl.length; i++) {
+        sect = evt.detail.intersections && evt.detail.intersections[i]
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], sect)
       }
     } else {
       hoverNeedsUpdate += this.processHitEl(hitEl, null)
@@ -410,7 +410,7 @@ AFRAME.registerComponent('super-hands', {
     var hoverIndex = this.hoverEls.indexOf(target)
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1)
-      this.hoverElsDist.splice(hoverIndex, 1)
+      this.hoverElsIntersections.splice(hoverIndex, 1)
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged)
@@ -525,11 +525,12 @@ AFRAME.registerComponent('super-hands', {
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el)
-    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
+    if (hoverIndex !== -1 &&
+        this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1)
-      this.hoverElsDist.splice(hoverIndex, 1)
+      const sect = this.hoverElsIntersections.splice(hoverIndex, 1)
       this.hoverEls.push(el)
-      this.hoverElsDist.push(null)
+      this.hoverElsIntersections.push(sect)
     }
   }
 })
