@@ -22,6 +22,8 @@ v3.0.0
   shapes, and offsets are updated
 * Added support for `'worker'` and other `aframe-physics-system` drivers
   in `grabbable`
+* v2.x deprecations removed: `drag-droppable` component and
+  `super-hands.colliderState` property.
 
 v2.1.0
 

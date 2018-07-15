@@ -95,10 +95,7 @@ require('super-hands');
 * [Examples](#examples)
 * [News](#news)
 * [Compatibility](#compatibility)
-* [Core and meta-components](#core-primitives-and-meta-components)
-  * [`super-hands` gesture interpretation component](#super-hands-component)
-  * [`progressive-controls` universal controller component](#progressive-controls-component)
-  * [`a-locomotor` free movement primitive](#a-locomotor-primitive)
+* [Super Hands Core Component](#super-hands-component)
 * [Reaction components](#reaction-components)
   * [`hoverable`](#hoverable-component)
   * [`grabbable`](#grabbable-component)
@@ -142,6 +139,8 @@ v3.0.0
   shapes, and offsets are updated
 * Added support for `'worker'` and other `aframe-physics-system` drivers
   in `grabbable`
+* v2.x deprecations removed: `drag-droppable` component and
+  `super-hands.colliderState` property.
 
 [Previous news](news.md)
 
@@ -163,7 +162,7 @@ Daydream, GearVR, Vive, and Rift + Touch.
 | ^v3.0.0 | >=v0.8.2 | ^v4.1.2 | ^v3.1.2 |
 | ^v2.0.0 | v0.6.x | ^v3.11.4 | ^v2.0.0 |
 
-## Core, primitives, and meta-components
+## Core Component
 
 ### super-hands component
 
