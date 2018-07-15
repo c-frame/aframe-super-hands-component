@@ -148,6 +148,10 @@ v3.0.0
 
 * Two-handed physics grabs don't feel great
   * Help wanted with configuring ideal constraints for this situation
+* `too much recursion` errors when using two raycasting controllers:
+  When using raycasters,
+  always set their `objects` property to prevent the raycasters from colliding
+  with each other's lines.
 
 ## Compatibility
 

@@ -18,15 +18,20 @@
              touch-to-click-converter>
       <a-assets>
         <img id="portal-preview" src="../assets/physics.jpg"></img>
-        <a-mixin id="controller"
-                 vive-controls oculus-touch-controls
-                 windows-motion-controls gearvr-controls daydream-controls
-                 oculus-go-controls
-                 raycaster="showLine: true"
-                 super-hands="colliderEvent: raycaster-intersection;
-                              colliderEventProperty: els;
-                              colliderEndEvent:raycaster-intersection-cleared;
-                              colliderEndEventProperty: clearedEls;">
+        <a-mixin id="pointer" raycaster="showLine: true; objects: .cube, a-link"
+                  super-hands="colliderEvent: raycaster-intersection;
+                               colliderEventProperty: els;
+                               colliderEndEvent:raycaster-intersection-cleared;
+                               colliderEndEventProperty: clearedEls;">
+        </a-mixin>
+        <a-mixin id="controller-right" mixin="pointer"
+                 vive-controls="hand: right" oculus-touch-controls="hand: right"
+                 windows-motion-controls="hand: right"
+                 gearvr-controls daydream-controls oculus-go-controls>
+        </a-mixin>
+        <a-mixin id="controller-left" mixin="pointer"
+                 vive-controls="hand: left" oculus-touch-controls="hand: left"
+                 windows-motion-controls="hand: left">
         </a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable draggable droppable
@@ -39,8 +44,8 @@
         </a-mixin>
       </a-assets>
       <a-entity>
-          <a-entity id="rhand" mixin="controller"></a-entity>
-          <a-entity id="lhand" mixin="controller"></a-entity>
+          <a-entity id="rhand" mixin="controller-right"></a-entity>
+          <a-entity id="lhand" mixin="controller-left"></a-entity>
       </a-entity>
       <a-entity class="cube" mixin="cube" position="0 1 -1.25" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 1.6 -1.5" material="color: red"></a-entity>

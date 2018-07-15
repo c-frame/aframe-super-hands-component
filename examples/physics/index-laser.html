@@ -38,11 +38,17 @@
                  event-set__dragoff="_event: dragover-end; material.wireframe: false"
                  collision-filter="collisionForces: false"
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
-        <a-mixin id="controllers" vive-controls oculus-touch-controls
-                 windows-motion-controls gearvr-controls daydream-controls
+        <a-mixin id="controllers-right" vive-controls="hand: right"
+                 oculus-touch-controls="hand: right"
+                 windows-motion-controls="hand: right"
+                 gearvr-controls daydream-controls
                  oculus-go-controls>
         </a-mixin>
-        <a-mixin id="point" mixin="controllers" raycaster="showLine: true"
+        <a-mixin id="controllers-left" vive-controls="hand: left"
+                 oculus-touch-controls="hand: left"
+                 windows-motion-controls="hand: left">
+        </a-mixin>
+        <a-mixin id="point" raycaster="showLine: true; objects: .cube"
                  collision-filter="collisionForces: false"
                  static-body="shape: sphere; sphereRadius: 0.001"
                  super-hands="colliderEvent: raycaster-intersection;
@@ -52,8 +58,8 @@
       </a-assets>
       <a-entity>
         <a-camera positon="0 1.6 0"></a-camera>
-        <a-entity id="rhand" mixin="point"></a-entity>
-        <a-entity id="lhand" mixin="point"></a-entity>
+        <a-entity id="rhand" mixin="controllers-right point"></a-entity>
+        <a-entity id="lhand" mixin="controllers-left point"></a-entity>
       </a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -0.5" material="color: red"></a-entity>

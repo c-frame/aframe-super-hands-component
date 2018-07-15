@@ -27,7 +27,7 @@
       </a-assets>
       <a-entity camera wasd-controls position="0 1 1"
                 capture-mouse
-                raycaster cursor="rayOrigin:mouse"
+                raycaster="objects: .cube" cursor="rayOrigin:mouse"
                 static-body="shape: sphere; sphereRadius: 0.001"
                 super-hands="colliderEvent: raycaster-intersection;
                              colliderEventProperty: els;
