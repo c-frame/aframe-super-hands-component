@@ -11,6 +11,9 @@ suite('basic interactions', function () {
       this.boxGrnUp = document.getElementById('greenHigh')
       this.boxGrnDn = document.getElementById('greenLow')
       this.boxRedUp = document.getElementById('redHigh')
+      this.boxRedDn = document.getElementById('redLow')
+      this.boxBlueUp = document.getElementById('blueHigh')
+      this.boxBlueDn = document.getElementById('blueLow')
       done()
     })
   })
@@ -19,7 +22,7 @@ suite('basic interactions', function () {
     'base/recordings/handsRecording.json',
     function () {
       var endScale = this.boxRedUp.getAttribute('scale')
-      assert.notDeepEqual(this.boxRedUp.getAttribute('position'), this.startPos, 'moved')
+      assert.isFalse(this.startPos.equals(this.boxRedUp.getAttribute('position')), 'moved')
       assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
       assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
       assert.isTrue(endScale.z > this.startScale.z, 'grew-z')
@@ -68,10 +71,10 @@ suite('basic interactions', function () {
     'regrabbing after release grabs same entity',
     'base/recordings/regrab.json',
     function () {
-      assert.deepEqual(this.boxGrnDn.getAttribute('position'), this.dnStartPos)
+      assert.isTrue(this.dnStartPos.equals(this.boxGrnDn.getAttribute('position')))
     },
     function () {
-      this.dnStartPos = this.boxGrnDn.getAttribute('position')
+      this.dnStartPos = this.boxGrnDn.getAttribute('position').clone()
     }
   )
   machinima.test(
@@ -99,6 +102,17 @@ suite('basic interactions', function () {
     function () {
       // disable stretching so hand can leave collision zone while grabbing
       this.boxGrnUp.components['stretchable'].remove()
+    }
+  )
+  machinima.test(
+    'no state bleed between reaction component instances',
+    'base/recordings/doublegrab.json',
+    function () {
+      assert.strictEqual(this.boxRedUp.getAttribute('position').y, 1.6, 'Red unmoved')
+      assert.isAbove(this.boxRedDn.getAttribute('position').x, 0, 'Red still around')
+      assert.isBelow(this.boxRedDn.getAttribute('position').x, 0.75, 'Red still around')
+      assert.isAbove(this.boxGrnDn.getAttribute('position').z, -1, 'Green still around')
+      assert.isBelow(this.boxGrnDn.getAttribute('position').z, 0, 'Green still around')
     }
   )
 })
@@ -200,78 +214,7 @@ suite('Physics worker driver', function () {
   )
 })
 
-suite('Locomotion', function () {
-  setup(function (done) {
-    /* inject the scene html into the testing docoument */
-    machinima.setupScene('locomotor.html')
-    this.scene = document.querySelector('a-scene')
-    this.scene.addEventListener('loaded', e => {
-      done()
-    })
-  })
-  machinima.test(
-    'player location moves',
-    'base/recordings/hands-worldMover.json',
-    function () {
-      let z = document.querySelector('[camera]')
-      .object3DMap.camera.getWorldPosition().z
-      assert.isBelow(z, 0.6, 'camera ending z position')
-    }
-  )
-  test('player scale changes', function (done) {
-    machinima.testStart(this, 'base/recordings/locomotor-worldScaleGrowShrink.json')
-    this.scene.addEventListener('grab-end', e => {
-      var camScale = document.querySelector('[camera]')
-          .object3DMap.camera.getWorldScale()
-      assert.isBelow(camScale.x, 1, 'scaled up')
-      assert.isBelow(camScale.y, 1, 'scaled up')
-      assert.isBelow(camScale.z, 1, 'scaled up')
-      machinima.testEnd(e => {
-        let newCamScale = document.querySelector('[camera]')
-          .object3DMap.camera.getWorldScale()
-        assert.isAbove(newCamScale.x, camScale.x, 'camera scales back down')
-        assert.isAbove(newCamScale.y, camScale.y, 'camera scales back down')
-        assert.isAbove(newCamScale.z, camScale.z, 'camera scales back down')
-        done()
-      })
-    }, {once: true})
-  })
-  machinima.test(
-    'locomotor does not interfere with normal interactions',
-    'base/recordings/loco-hands2.json',
-    function () {
-      var endScale = this.redBox.getAttribute('scale')
-      assert.notDeepEqual(this.redBox.getAttribute('position'), this.startPos, 'moved')
-      assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
-      assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
-      assert.isTrue(endScale.z > this.startScale.z, 'grew-z')
-      assert.isAbove(this.boxGreenTop.getAttribute('position').z, -1)
-    },
-    function () {
-      this.boxGreenTop = document.getElementById('greenHigh')
-      this.redBox = document.getElementById('redHigh')
-      this.startPos = this.redBox.getAttribute('position').clone()
-      this.startScale = this.redBox.getAttribute('scale').clone()
-    }
-  )
-})
-suite('camera userHeight', function () {
-  setup(function (done) {
-    machinima.setupScene('locomotor.html')
-    this.scene = document.querySelector('a-scene')
-    this.scene.addEventListener('camera-ready', e => {
-      done()
-    })
-  })
-  test('camera userHeight preserved', function () {
-    assert.isAbove(
-      document.querySelector('[camera]').object3D.getWorldPosition().y,
-      1
-    )
-  })
-})
-
-suite.skip('laser-controls grabbable', function () {
+suite('laser-controls grabbable', function () {
   setup(function (done) {
     machinima.setupScene('hands-laser.html')
     this.scene = document.querySelector('a-scene')
@@ -291,6 +234,35 @@ suite.skip('laser-controls grabbable', function () {
       assert.isBelow(this.boxRedUp.getAttribute('position').y, -0.5, 'Red below')
       assert.isAbove(this.boxBlueUp.getAttribute('position').y, 3, 'Blue above')
       assert.isBelow(this.boxRedDn.getAttribute('position').x, -1, 'Red left')
+    }
+  )
+})
+suite('raycaster', function () {
+  setup(function (done) {
+    machinima.setupScene('hands-raycaster.html')
+    this.scene = document.querySelector('a-scene')
+    this.scene.addEventListener('loaded', e => {
+      this.boxGrnUp = document.getElementById('greenHigh')
+      this.boxBlueUp = document.getElementById('blueHigh')
+      this.boxRedUp = document.getElementById('redHigh')
+      this.boxRedDn = document.getElementById('redLow')
+      done()
+    })
+  })
+  machinima.test(
+    'button filtering',
+    'base/recordings/laserhands.json',
+    function () {
+      assert.isAbove(this.boxGrnUp.getAttribute('position').z, 2, 'Green behind')
+      assert.strictEqual(this.boxRedUp.getAttribute('position').y, 1.6, 'Red unmoved')
+      assert.isAbove(this.boxBlueUp.getAttribute('position').y, 3, 'Blue above')
+      assert.strictEqual(this.boxRedDn.getAttribute('position').x, 0, 'Red unmoved')
+    },
+    function () {
+      this.boxRedUp.setAttribute('grabbable', 'startButtons: trackpaddown; endButtons: trackpadup')
+      this.boxRedDn.setAttribute('grabbable', 'startButtons: trackpaddown; endButtons: trackpadup')
+      this.boxGrnUp.setAttribute('grabbable', 'startButtons: triggerdown; endButtons: triggerup')
+      this.boxBlueUp.setAttribute('grabbable', 'startButtons: triggerdown; endButtons: triggerup')
     }
   )
 })

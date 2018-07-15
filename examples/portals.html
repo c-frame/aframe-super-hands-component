@@ -1,22 +1,19 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Examples Home</title>
-    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+    <!-- Replace "../build.js" with the super-hands and
+         A-Frame distributions to run : -->
+    <script src="./build.js"></script>
+    <!-- <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.rawgit.com/feiss/aframe-environment-component/a33afd32/dist/aframe-environment-component.min.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
-    <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js" -->
-    <script src="./build.js"></script>
   </head>
   <body>
     <a-scene environment="preset: checkerboard; shadow: true">
       <a-assets>
-        <!-- by default, sphere-collider will collide with all entities.
-             If you set specific objects for the collider, be sure to
-             include a-link and/or [link] to keep the portals active -->
         <a-mixin id="portal" scale="0.25 0.25 0.25"></a-mixin>
-        <a-mixin id="portal-hovered" link="highlighted: true"></a-mixin>
         <img id="basic-preview" src="assets/hand-controls.jpg"></img>
         <img id="locomotion-preview" src="./assets/locomotion.jpg"></img>
         <img id="sticky-preview" src="./assets/sticky.jpg"></img>
@@ -26,32 +23,36 @@
       </a-assets>
       <a-entity progressive-controls="objects: a-link">
       </a-entity>
-      <!-- The first few use the hoverable component and the
-           portal-hovered mixin to highlight active portals -->
+      <!-- Using Kframe event-set with hoverable and gesture events -->
+      <a-link href="./sticky/index.html" title="Button Mappings"
+              image="#sticky-preview"
+              mixin="portal" hoverable
+              event-set__on="_event: hover-start; link.highlighted: true;"
+              event-set__off="_event: hover-end; link.highlighted: false;"
+              position="-0.411 1.6 0.566" rotation="0 -36 0">
+      </a-link>
       <a-link href="./mouse/index.html" title="Laser Controls"
               image="#hands-preview"
               mixin="portal" hoverable
+              event-set__on="_event: hover-start; link.highlighted: true;"
+              event-set__off="_event: hover-end; link.highlighted: false;"
               position="0 1.6 -0.7" rotation="0 0 0">
       </a-link>
       <a-link href="./locomotion/index.html" title="Grab Locomotion"
               image="#locomotion-preview"
               mixin="portal" hoverable
+              event-set__on="_event: hover-start; link.highlighted: true;"
+              event-set__off="_event: hover-end; link.highlighted: false;"
               position="0.666 1.6 -0.216" rotation="0 -72 0">
       </a-link>
+      <!-- Using Global Event Handler integration without hoverable -->
       <a-link href="./events/index.html" title="Mouse Events"
               image="#events-preview"
-              mixin="portal" hoverable
+              mixin="portal"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
               position="0.411 1.6 0.566" rotation="0 54 0">
       </a-link>
-      <!-- These one uses Kframe event-set with the mouse events -->
-      <a-link href="./sticky/index.html" title="Button Mappings"
-              image="#sticky-preview"
-              mixin="portal"
-              event-set__on="_event: mouseover; link.highlighted: true;"
-              event-set__off="_event: mouseout; link.highlighted: false;"
-              position="-0.411 1.6 0.566" rotation="0 -36 0">
-      </a-link>
-      <!-- Finally, using Global Event Handler integration -->
       <a-link href="./physics/index.html" title="With Physics System"
               image="#physics-preview"
               mixin="portal"
