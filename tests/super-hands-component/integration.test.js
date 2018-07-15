@@ -339,47 +339,6 @@ suite('super-hands raycaster integration', function () {
     assert.equal(this.sh1.state.get('hover-start'), undefined)
   })
 })
-// skip until aframevr/aframe#3200 is fixed
-suite.skip('progressive-controls & reaction component integration', function () {
-  setup(function (done) {
-    this.target1 = entityFactory()
-    this.target1.setAttribute('grabbable', '')
-    this.target1.setAttribute('hoverable', '')
-    this.target1.setAttribute('stretchable', '')
-    this.target1.setAttribute('draggable', '')
-    this.target1.setAttribute('droppable', '')
-    this.target2 = document.createElement('a-entity')
-    this.target2.setAttribute('draggable', '')
-    this.target2.setAttribute('droppable', '')
-    this.target2.setAttribute('hoverable', '')
-    this.target1.parentNode.appendChild(this.target2)
-    this.player = document.createElement('a-entity')
-    this.player.setAttribute('progressive-controls', '')
-    this.target1.parentNode.appendChild(this.player)
-    this.player.parentNode.addEventListener('loaded', () => {
-      this.pc = this.player.components['progressive-controls']
-      this.ctrlr1 = this.player.querySelector('.right-controller')
-      done()
-    })
-  })
-  test('grabbable raycaster offset', function () {
-    const grab = this.target1.components.grabbable
-    this.ctrlr1.emit('controllerconnected', {
-      name: 'gearvr-controls',
-      component: {data: {}}
-    })
-    grab.start({detail: {hand: this.ctrlr1}})
-    assert.notDeepEqual(grab.grabOffset, {x: 0, y: 0, z: 0})
-    assert.deepEqual(
-        grab.grabOffset,
-        this.ctrlr1.getAttribute('raycaster').origin
-    )
-    assert.deepEqual(
-        grab.grabDirection,
-        this.ctrlr1.getAttribute('raycaster').direction
-    )
-  })
-})
 suite('super-hands & physics integration', function () {
   setup(function (done) {
     this.target1 = entityFactory()
