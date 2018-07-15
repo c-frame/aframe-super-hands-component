@@ -21,28 +21,12 @@
           })
         }
       })
-      // turn controller's physics presence on only while button held down
-      AFRAME.registerComponent('phase-shift', {
-        init: function () {
-          var el = this.el
-          el.addEventListener('gripdown', function () {
-            el.setAttribute('collision-filter', {collisionForces: true})
-          })
-          el.addEventListener('gripup', function () {
-            el.setAttribute('collision-filter', {collisionForces: false})
-          })
-        }
-      })
     </script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
-    <button id="replayer-button" type="button" onclick="playDemoRecording()">
-      Don't have roomscale VR handy? Click here for a preview.
-    </button>
     <a-scene physics environment="preset: tron; shadow: true">
       <a-assets>
-        <img id="portals-preview" src="../assets/hand-controls.jpg"></img>
         <img id="colortransform" src="./colortransform.png" />
         <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
                  hoverable grabbable stretchable draggable
@@ -50,27 +34,26 @@
                  event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
                  dynamic-body shadow></a-mixin>
         <a-mixin id="transformer" color-randomizer droppable static-body
-                 collision-filter="collisionForces: false"
                  event-set__dragon="_event: dragover-start; material.wireframe: true"
                  event-set__dragoff="_event: dragover-end; material.wireframe: false"
+                 collision-filter="collisionForces: false"
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"></a-mixin>
         <a-mixin id="controllers" vive-controls oculus-touch-controls
-                 windows-motion-controls>
+                 windows-motion-controls gearvr-controls daydream-controls
+                 oculus-go-controls>
         </a-mixin>
-        <a-mixin id="touch" mixin="controllers"
-                 physics-collider phase-shift
+        <a-mixin id="point" mixin="controllers" raycaster="showLine: true"
                  collision-filter="collisionForces: false"
-                 static-body="shape: sphere; sphereRadius: 0.02"
-                 super-hands="colliderEvent: collisions;
+                 static-body="shape: sphere; sphereRadius: 0.001"
+                 super-hands="colliderEvent: raycaster-intersection;
                               colliderEventProperty: els;
-                              colliderEndEvent: collisions;
-                              colliderEndEventProperty: clearedEls;">
-        </a-mixin>
+                              colliderEndEvent:raycaster-intersection-cleared;
+                              colliderEndEventProperty: clearedEls;"></a-mixin>
       </a-assets>
       <a-entity>
         <a-camera positon="0 1.6 0"></a-camera>
-        <a-entity id="rhand" mixin="touch"></a-entity>
-        <a-entity id="lhand" mixin="touch"></a-entity>
+        <a-entity id="rhand" mixin="point"></a-entity>
+        <a-entity id="lhand" mixin="point"></a-entity>
       </a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -1" material="color: red"></a-entity>
       <a-entity class="cube" mixin="cube" position="0 0.265 -0.5" material="color: red"></a-entity>
@@ -82,13 +65,6 @@
                 material="src:#colortransform" shadow></a-entity>
       <!-- ground collider keeps objets from falling -->
       <a-box static-body width=100 height=0.001 depth=100 visible="false"></a-box>
-      <a-link href="../mouse" title="Basic Example"
-              static-body="shape: sphere; sphereRadius: 0.25"
-              image="#portals-preview"
-              onmouseover="this.setAttribute('link', {highlighted: true})"
-              onmouseout="this.setAttribute('link', {highlighted: false})"
-              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
-      </a-link>
     </a-scene>
 
     <!-- GitHub Corner. -->

@@ -34,11 +34,10 @@
                  material="color: brown" shadow></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-locomotor allow-scaling="false"
-                   grabbable="startButtons: gripdown; endButtons: gripup">
+      <a-entity>
         <a-entity hand-controls="left" mixin="controller"></a-entity>
         <a-entity hand-controls="right" mixin="controller"></a-entity>
-      </a-locomotor>
+      </a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.45 -1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.45 1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="-1 0.45 -1" material="color: blue"></a-entity>

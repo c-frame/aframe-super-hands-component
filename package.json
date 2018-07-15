@@ -46,7 +46,7 @@
   "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
   "devDependencies": {
     "aframe": "^0.8.2",
-    "aframe-event-set-component": "^3.0.2",
+    "aframe-event-set-component": "^4.0.0",
     "aframe-extras": "^4.1.2",
     "aframe-machinima-testing": "^0.1.2",
     "aframe-motion-capture-components": "github:dmarcos/aframe-motion-capture-components#3a3cbd73",
