@@ -26,7 +26,7 @@ window.playDemoRecording = function (spectate) {
   });
 };
 
-},{"../index.js":2,"aframe":14,"aframe-motion-capture-components":11}],2:[function(require,module,exports){
+},{"../index.js":2,"aframe":12,"aframe-motion-capture-components":9}],2:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -43,9 +43,6 @@ require('./reaction_components/drag-droppable.js');
 require('./reaction_components/draggable.js');
 require('./reaction_components/droppable.js');
 require('./reaction_components/clickable.js');
-require('./misc_components/locomotor-auto-config.js');
-require('./misc_components/progressive-controls.js');
-require('./primitives/a-locomotor.js');
 
 /**
  * Super Hands component for A-Frame.
@@ -73,7 +70,8 @@ AFRAME.registerComponent('super-hands', {
     },
     dragDropEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
-    }
+    },
+    interval: { default: 0 }
   },
 
   /**
@@ -107,7 +105,8 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = [];
-    this.hoverElsDist = [];
+    this.hoverElsIntersections = [];
+    this.prevCheckTime = null;
     this.state = new Map();
     this.dragging = false;
 
@@ -147,17 +146,39 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton();
     this.onDragDropEndButton();
   },
-  /**
-   * Called when entity pauses.
-   * Use to stop or remove any dynamic or background behavior such as events.
-   */
-  pause: function () {},
+  tick: function () {
+    let orderChanged = false;
+    // closer objects and objects with no distance come later in list
+    function sorter(a, b) {
+      const aDist = a.distance == null ? -1 : a.distance;
+      const bDist = b.distance == null ? -1 : b.distance;
+      if (aDist < bDist) {
+        orderChanged = true;
+        return 1;
+      }
+      if (bDist < aDist) {
+        return -1;
+      }
+      return 0;
+    }
+    return function (time) {
+      const data = this.data;
+      const prevCheckTime = this.prevCheckTime;
+      if (prevCheckTime && time - prevCheckTime < data.interval) {
+        return;
+      }
+      this.prevCheckTime = time;
 
-  /**
-   * Called when entity resumes.
-   * Use to continue or add any dynamic or background behavior such as events.
-   */
-  play: function () {},
+      orderChanged = false;
+      this.hoverElsIntersections.sort(sorter);
+      if (orderChanged) {
+        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+          this.hoverEls[i] = this.hoverElsIntersections[i].object.el;
+        }
+        this.hover();
+      }
+    };
+  }(),
   onGrabStartButton: function (evt) {
     let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
@@ -272,46 +293,52 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
+  processHitEl: function (hitEl, intersection) {
+    const dist = intersection && intersection.distance;
+    const sects = this.hoverElsIntersections;
+    const hoverEls = this.hoverEls;
+    const hitElIndex = this.hoverEls.indexOf(hitEl);
+    let hoverNeedsUpdate = false;
+    if (hitElIndex === -1) {
+      hoverNeedsUpdate = true;
+      // insert in order of distance when available
+      if (dist != null) {
+        let i = 0;
+        while (i < sects.length && dist < sects[i].distance) {
+          i++;
+        }
+        hoverEls.splice(i, 0, hitEl);
+        sects.splice(i, 0, intersection);
+      } else {
+        hoverEls.push(hitEl);
+        sects.push({ object: { el: hitEl } });
+      }
+      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
+      if (this.dragging && this.gehDragged.size) {
+        // events on targets and on dragged
+        this.gehDragged.forEach(dragged => {
+          this.dispatchMouseEventAll('dragenter', dragged, true, true);
+        });
+      }
+    }
+    return hoverNeedsUpdate;
+  },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
-    var processHitEl = (hitEl, distance) => {
-      let hitElIndex;
-      hitElIndex = this.hoverEls.indexOf(hitEl);
-      if (hitElIndex === -1) {
-        // insert in order of distance when available
-        if (distance) {
-          let i = 0;
-          const dists = this.hoverElsDist;
-          while (distance < dists[i] && i < dists.length) {
-            i++;
-          }
-          this.hoverEls.splice(i, 0, hitEl);
-          this.hoverElsDist.splice(i, 0, distance);
-        } else {
-          this.hoverEls.push(hitEl);
-          this.hoverElsDist.push(null);
-        }
-        this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-        if (this.dragging && this.gehDragged.size) {
-          // events on targets and on dragged
-          this.gehDragged.forEach(dragged => {
-            this.dispatchMouseEventAll('dragenter', dragged, true, true);
-          });
-        }
-        this.hover();
-      }
-    };
+    let hoverNeedsUpdate = 0;
     if (!hitEl) {
       return;
     }
     if (Array.isArray(hitEl)) {
-      for (let i = 0, dist; i < hitEl.length; i++) {
-        dist = evt.detail.intersections && evt.detail.intersections[i].distance;
-        processHitEl(hitEl[i], dist);
+      for (let i = 0, sect; i < hitEl.length; i++) {
+        sect = evt.detail.intersections && evt.detail.intersections[i];
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], sect);
       }
-      hitEl.forEach(processHitEl);
     } else {
-      processHitEl(hitEl, null);
+      hoverNeedsUpdate += this.processHitEl(hitEl, null);
+    }
+    if (hoverNeedsUpdate) {
+      this.hover();
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -397,7 +424,7 @@ AFRAME.registerComponent('super-hands', {
     var hoverIndex = this.hoverEls.indexOf(target);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
-      this.hoverElsDist.splice(hoverIndex, 1);
+      this.hoverElsIntersections.splice(hoverIndex, 1);
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged);
@@ -505,290 +532,16 @@ AFRAME.registerComponent('super-hands', {
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el);
-    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
+    if (hoverIndex !== -1 && this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1);
-      this.hoverElsDist.splice(hoverIndex, 1);
+      const sect = this.hoverElsIntersections.splice(hoverIndex, 1);
       this.hoverEls.push(el);
-      this.hoverElsDist.push(null);
+      this.hoverElsIntersections.push(sect);
     }
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":3,"./misc_components/progressive-controls.js":4,"./primitives/a-locomotor.js":15,"./reaction_components/clickable.js":16,"./reaction_components/drag-droppable.js":17,"./reaction_components/draggable.js":18,"./reaction_components/droppable.js":19,"./reaction_components/grabbable.js":20,"./reaction_components/hoverable.js":21,"./reaction_components/stretchable.js":25,"./systems/super-hands-system.js":26}],3:[function(require,module,exports){
-'use strict';
-
-/* global AFRAME */
-AFRAME.registerComponent('locomotor-auto-config', {
-  schema: {
-    camera: { default: true },
-    stretch: { default: true },
-    move: { default: true }
-  },
-  dependencies: ['grabbable', 'stretchable'],
-  init: function () {
-    this.ready = false;
-    if (this.data.camera) {
-      if (!document.querySelector('a-camera, [camera]')) {
-        let cam = document.createElement('a-camera');
-        // DEPRECATION path: camera y instead of userHeight in verions >= 0.8
-        if (parseFloat(AFRAME.version) > 0.7) {
-          cam.setAttribute('position', '0 1.6 0');
-        }
-        this.el.appendChild(cam);
-      }
-    }
-    this.fakeCollisions();
-    // for controllers added later
-    this.fakeCollisionsB = this.fakeCollisions.bind(this);
-    this.el.addEventListener('controllerconnected', this.fakeCollisionsB);
-  },
-  update: function () {
-    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
-      // store settings for resetting
-      this.stretchSet = this.el.getAttribute('stretchable');
-      this.el.removeAttribute('stretchable');
-    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
-      this.el.setAttribute('stretchable', this.stretchSet);
-    }
-    if (this.el.getAttribute('grabbable') && !this.data.move) {
-      // store settings for resetting
-      this.grabSet = this.el.getAttribute('grabbable');
-      this.el.removeAttribute('grabbable');
-    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
-      this.el.setAttribute('grabbable', this.grabSet);
-    }
-  },
-  remove: function () {
-    this.el.getChildEntities().forEach(el => {
-      let sh = el.getAttribute('super-hands');
-      if (sh) {
-        let evtDetails = {};
-        evtDetails[sh.colliderEndEventProperty] = this.el;
-        el.emit(sh.colliderEndEvent, evtDetails);
-      }
-    });
-    this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
-  },
-  announceReady: function () {
-    if (!this.ready) {
-      this.ready = true;
-      this.el.emit('locomotor-ready', {});
-    }
-  },
-  fakeCollisions: function () {
-    this.el.getChildEntities().forEach(el => {
-      let sh = el.getAttribute('super-hands');
-      if (sh) {
-        // generate fake collision to be permanently in super-hands queue
-        let evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = this.el;
-        el.emit(sh.colliderEvent, evtDetails);
-        this.colliderState = sh.colliderState;
-        this.el.addState(this.colliderState);
-      }
-    });
-    this.announceReady();
-  }
-});
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
-/* global AFRAME */
-const gazeDefaultId = 'progressivecontrolsgazedefault';
-const pointDefaultId = 'progressivecontrolspointdefault';
-const touchDefaultId = 'progressivecontrolstouchdefault';
-
-AFRAME.registerComponent('progressive-controls', {
-  schema: {
-    maxLevel: { default: 'touch', oneOf: ['gaze', 'point', 'touch'] },
-    gazeMixin: { default: '' },
-    pointMixin: { default: '' },
-    touchMixin: { default: '' },
-    override: { default: false },
-    objects: { default: '' },
-    controllerModel: { default: true }
-  },
-  init: function () {
-    const rayEndProp = 'clearedEls';
-    this.levels = ['gaze', 'point', 'touch'];
-    this.currentLevel = new Map();
-    this.controllerName = new Map();
-
-    // setup mixins for defaults
-    const assets = this.el.sceneEl.querySelector('a-assets') || this.el.sceneEl.appendChild(document.createElement('a-assets'));
-    const gazeDefault = this.gazeDefault = document.createElement('a-mixin');
-    const shRayConfig = AFRAME.utils.styleParser.stringify({
-      colliderEvent: 'raycaster-intersection',
-      colliderEventProperty: 'els',
-      colliderEndEvent: 'raycaster-intersection-cleared',
-      colliderEndEventProperty: rayEndProp,
-      colliderState: ''
-    });
-    gazeDefault.setAttribute('id', gazeDefaultId);
-    gazeDefault.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
-    gazeDefault.setAttribute('material', 'color: #000; shader: flat');
-    gazeDefault.setAttribute('position', '0 0 -0.5');
-    gazeDefault.setAttribute('raycaster', '');
-    gazeDefault.setAttribute('super-hands', shRayConfig);
-    const pointDefault = this.pointDefault = document.createElement('a-mixin');
-    pointDefault.setAttribute('id', pointDefaultId);
-    pointDefault.setAttribute('raycaster', 'showLine: true');
-    pointDefault.setAttribute('super-hands', shRayConfig);
-    const touchDefault = this.touchDefault = document.createElement('a-mixin');
-    touchDefault.setAttribute('id', touchDefaultId);
-    touchDefault.setAttribute('super-hands', '');
-    touchDefault.setAttribute('sphere-collider', '');
-    if (this.el.sceneEl.getAttribute('physics')) {
-      const physicsBodyDefault = 'shape: sphere; sphereRadius: 0.02';
-      pointDefault.setAttribute('static-body', physicsBodyDefault);
-      gazeDefault.setAttribute('static-body', physicsBodyDefault);
-      touchDefault.setAttribute('static-body', physicsBodyDefault);
-    }
-    assets.appendChild(gazeDefault);
-    assets.appendChild(pointDefault);
-    assets.appendChild(touchDefault);
-
-    this.camera = this.el.querySelector('a-camera,[camera]');
-    if (!this.camera) {
-      this.camera = this.el.appendChild(document.createElement('a-camera'));
-      // DEPRECATION path: camera y instead of userHeight in verions >= 0.8
-      if (parseFloat(AFRAME.version) > 0.7) {
-        this.camera.setAttribute('position', '0 1.6 0');
-      }
-    }
-    this.caster = this.camera.querySelector('.gazecaster') || this.camera.appendChild(document.createElement('a-entity'));
-    ['left', 'right'].forEach(hand => {
-      // find controller by left-controller/right-controller class or create one
-      this[hand] = this.el.querySelector('.' + hand + '-controller') || this.el.appendChild(document.createElement('a-entity'));
-      const ctrlrCompConfig = {
-        hand: hand,
-        model: this.data.controllerModel
-      };
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(ctrlr => this[hand].setAttribute(ctrlr, ctrlrCompConfig));
-    });
-    this.el.addEventListener('controllerconnected', e => this.detectLevel(e));
-    this.eventRepeaterB = this.eventRepeater.bind(this);
-    // pass mouse and touch events into the scene
-    this.addEventListeners();
-    // default level
-    this.currentLevel.set('right', 0);
-  },
-  update: function (oldData) {
-    const objs = { objects: this.data.objects };
-    updateMixin(this.gazeDefault, 'raycaster', objs);
-    updateMixin(this.pointDefault, 'raycaster', objs);
-    updateMixin(this.touchDefault, 'sphere-collider', objs);
-    for (let [hand, level] of this.currentLevel) {
-      this.setLevel(level, hand, true);
-    }
-  },
-  remove: function () {
-    if (!this.eventsRegistered) {
-      return;
-    }
-    const canv = this.el.sceneEl.canvas;
-    canv.removeEventListener('mousedown', this.eventRepeaterB);
-    canv.removeEventListener('mouseup', this.eventRepeaterB);
-    canv.removeEventListener('touchstart', this.eventRepeaterB);
-    canv.removeEventListener('touchend', this.eventRepeaterB);
-  },
-  setLevel: function (newLevel, hand, force) {
-    hand = hand || 'right';
-    const maxLevel = this.levels.indexOf(this.data.maxLevel);
-    const currentHand = this[hand];
-    const override = this.data.override;
-    newLevel = newLevel > maxLevel ? maxLevel : newLevel;
-    if (newLevel === this.currentLevel.get(hand) && !force) {
-      return;
-    }
-    if (newLevel !== 0 && this.caster) {
-      // avoids error where physics system tries to tick on removed entity
-      this.caster.setAttribute('mixin', '');
-      this.camera.removeChild(this.caster);
-      this.caster = null;
-    }
-    switch (newLevel) {
-      case this.levels.indexOf('gaze'):
-        const gazeMixin = this.data.gazeMixin;
-        this.caster.setAttribute('mixin', (override && gazeMixin.length ? '' : gazeDefaultId + ' ') + gazeMixin);
-        break;
-      case this.levels.indexOf('point'):
-        const ctrlrName = this.controllerName.get(hand);
-        const ctrlrCfg = this.controllerConfig[ctrlrName];
-        const pntMixin = this.data.pointMixin;
-        if (ctrlrCfg && ctrlrCfg.raycaster) {
-          currentHand.setAttribute('raycaster', ctrlrCfg.raycaster);
-        }
-        currentHand.setAttribute('mixin', (override && pntMixin.length ? '' : pointDefaultId + ' ') + pntMixin);
-        break;
-      case this.levels.indexOf('touch'):
-        const tchMixin = this.data.touchMixin;
-        currentHand.setAttribute('mixin', (override && tchMixin.length ? '' : touchDefaultId + ' ') + tchMixin);
-        break;
-    }
-    this.currentLevel.set(hand, newLevel);
-    this.el.emit('controller-progressed', {
-      level: this.levels[newLevel],
-      hand: hand
-    });
-  },
-  detectLevel: function (evt) {
-    const DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
-    const DOF3 = ['gearvr-controls', 'daydream-controls'];
-    const hand = evt.detail.component.data.hand || 'right';
-    this.controllerName.set(hand, evt.detail.name);
-    if (DOF6.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('touch'), hand);
-    } else if (DOF3.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('point'), hand);
-    }
-  },
-  eventRepeater: function (evt) {
-    if (!this.caster) {
-      return;
-    } // only for gaze mode
-    if (evt.type.startsWith('touch')) {
-      evt.preventDefault();
-      // avoid repeating touchmove because it interferes with look-controls
-      if (evt.type === 'touchmove') {
-        return;
-      }
-    }
-    this.caster.emit(evt.type, evt.detail);
-  },
-  addEventListeners: function () {
-    if (!this.el.sceneEl.canvas) {
-      this.el.sceneEl.addEventListener('loaded', this.addEventListeners.bind(this));
-      return;
-    }
-    this.el.sceneEl.canvas.addEventListener('mousedown', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('mouseup', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchstart', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchmove', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
-    this.eventsRegistered = true;
-  },
-  controllerConfig: {
-    'gearvr-controls': {
-      raycaster: { origin: { x: 0, y: 0.0005, z: 0 } }
-    },
-    'oculus-touch-controls': {
-      raycaster: { origin: { x: 0.001, y: 0, z: 0.065 }, direction: { x: 0, y: -0.8, z: -1 } }
-    }
-  }
-});
-
-function updateMixin(mixin, attr, additions) {
-  const stringify = AFRAME.utils.styleParser.stringify;
-  const extend = AFRAME.utils.extend;
-  const old = mixin.getAttribute(attr);
-  if (old) {
-    mixin.setAttribute(attr, stringify(extend(old, additions)));
-  }
-}
-
-},{}],5:[function(require,module,exports){
+},{"./reaction_components/clickable.js":15,"./reaction_components/drag-droppable.js":16,"./reaction_components/draggable.js":17,"./reaction_components/droppable.js":18,"./reaction_components/grabbable.js":19,"./reaction_components/hoverable.js":20,"./reaction_components/stretchable.js":23,"./systems/super-hands-system.js":24}],3:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var constants = require('../constants');
 var log = AFRAME.utils.debug('aframe-motion-capture:avatar-recorder:info');
@@ -995,7 +748,7 @@ AFRAME.registerComponent('avatar-recorder', {
   }
 });
 
-},{"../constants":10}],6:[function(require,module,exports){
+},{"../constants":8}],4:[function(require,module,exports){
 /* global THREE, AFRAME  */
 var constants = require('../constants');
 
@@ -1382,7 +1135,7 @@ AFRAME.registerComponent('avatar-replayer', {
   }
 });
 
-},{"../constants":10}],7:[function(require,module,exports){
+},{"../constants":8}],5:[function(require,module,exports){
 /* global AFRAME, THREE */
 
 var EVENTS = {
@@ -1604,7 +1357,7 @@ AFRAME.registerComponent('motion-capture-recorder', {
   }
 });
 
-},{}],8:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /* global THREE, AFRAME  */
 AFRAME.registerComponent('motion-capture-replayer', {
   schema: {
@@ -1826,7 +1579,7 @@ function applyPose (el, pose) {
   el.object3D.updateMatrix()
 };
 
-},{}],9:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* global THREE AFRAME  */
 AFRAME.registerComponent('stroke', {
   schema: {
@@ -2007,11 +1760,11 @@ AFRAME.registerComponent('stroke', {
   }
 });
 
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports.LOCALSTORAGE_RECORDINGS = 'avatarRecordings';
 module.exports.DEFAULT_RECORDING_NAME = 'default';
 
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -2027,7 +1780,7 @@ require('./components/stroke.js');
 require('./systems/motion-capture-replayer.js');
 require('./systems/recordingdb.js');
 
-},{"./components/avatar-recorder.js":5,"./components/avatar-replayer.js":6,"./components/motion-capture-recorder.js":7,"./components/motion-capture-replayer.js":8,"./components/stroke.js":9,"./systems/motion-capture-replayer.js":12,"./systems/recordingdb.js":13}],12:[function(require,module,exports){
+},{"./components/avatar-recorder.js":3,"./components/avatar-replayer.js":4,"./components/motion-capture-recorder.js":5,"./components/motion-capture-replayer.js":6,"./components/stroke.js":7,"./systems/motion-capture-replayer.js":10,"./systems/recordingdb.js":11}],10:[function(require,module,exports){
 AFRAME.registerSystem('motion-capture-replayer', {
   init: function () {
     var sceneEl = this.sceneEl;
@@ -2089,7 +1842,7 @@ AFRAME.registerSystem('motion-capture-replayer', {
   }
 });
 
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* global indexedDB */
 var constants = require('../constants');
 
@@ -2212,8 +1965,8 @@ AFRAME.registerSystem('recordingdb', {
   }
 });
 
-},{"../constants":10}],14:[function(require,module,exports){
-(function (global){
+},{"../constants":8}],12:[function(require,module,exports){
+(function (global,setImmediate){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.AFRAME = f()}})(function(){var define,module,exports;return (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(_dereq_,module,exports){
 (function (process){
 /**
@@ -81519,37 +81272,273 @@ module.exports = getWakeLock();
 });
 
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
-'use strict';
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
+},{"timers":14}],13:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
 
-/* global AFRAME */
-var extendDeep = AFRAME.utils.extendDeep;
-// The mesh mixin provides common material properties for creating mesh-based primitives.
-// This makes the material component a default component and maps all the base material properties.
-var meshMixin = AFRAME.primitives.getMeshMixin();
-AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
-  // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
-  defaultComponents: {
-    grabbable: {
-      usePhysics: 'never',
-      invert: true,
-      suppressY: true
-    },
-    stretchable: {
-      invert: true
-    },
-    'locomotor-auto-config': {}
-  },
-  mappings: {
-    'fetch-camera': 'locomotor-auto-config.camera',
-    'allow-movement': 'locomotor-auto-config.move',
-    'horizontal-only': 'grabbable.suppressY',
-    'allow-scaling': 'locomotor-auto-config.stretch'
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],14:[function(require,module,exports){
+(function (setImmediate,clearImmediate){
+var nextTick = require('process/browser.js').nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
   }
-}));
+};
 
-},{}],16:[function(require,module,exports){
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
+},{"process/browser.js":13,"timers":14}],15:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -81602,7 +81591,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22}],17:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21}],16:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -81676,7 +81665,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22}],18:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21}],17:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -81719,7 +81708,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22}],19:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21}],18:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -81837,16 +81826,15 @@ AFRAME.registerComponent('droppable', {
   }
 });
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./prototypes/physics-grab-proto.js');
 const buttonsCore = require('./prototypes/buttons-proto.js');
-const networkedCore = require('./prototypes/networked-proto.js');
 // new object with all core modules
-const base = inherit({}, physicsCore, buttonsCore, networkedCore);
+const base = inherit({}, physicsCore, buttonsCore);
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
@@ -81869,7 +81857,6 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPosition = new THREE.Vector3();
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
-    this.networkedInit();
 
     this.el.addEventListener(this.GRAB_EVENT, e => this.start(e));
     this.el.addEventListener(this.UNGRAB_EVENT, e => this.end(e));
@@ -81913,7 +81900,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable && this.networkedOk()) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D');
         return;
@@ -81973,7 +81960,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22,"./prototypes/networked-proto.js":23,"./prototypes/physics-grab-proto.js":24}],21:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21,"./prototypes/physics-grab-proto.js":22}],20:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -82021,7 +82008,7 @@ AFRAME.registerComponent('hoverable', {
   }
 });
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 // common code used in customizing reaction components by button
@@ -82043,29 +82030,7 @@ module.exports = function () {
   };
 }();
 
-},{}],23:[function(require,module,exports){
-"use strict";
-
-// integration with networked-aframe
-module.exports = {
-  schema: {
-    takeOwnership: { default: false }
-  },
-  networkedInit: function () {
-    this.isNetworked = window.NAF && !!window.NAF.utils.getNetworkedEntity(this.el);
-  },
-  networkedOk: function () {
-    if (!this.isNetworked || window.NAF.utils.isMine(this.el)) {
-      return true;
-    }
-    if (this.data.takeOwnership) {
-      return window.NAF.utils.takeOwnership(this.el);
-    }
-    return false;
-  }
-};
-
-},{}],24:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -82123,15 +82088,14 @@ module.exports = {
   }
 };
 
-},{}],25:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const buttonsCore = require('./prototypes/buttons-proto.js');
-const networkedCore = require('./prototypes/networked-proto.js');
 // new object with all core modules
-const base = inherit({}, buttonsCore, networkedCore);
+const base = inherit({}, buttonsCore);
 AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
@@ -82148,8 +82112,6 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     this.scale = new THREE.Vector3();
     this.handPos = new THREE.Vector3();
     this.otherHandPos = new THREE.Vector3();
-
-    this.networkedInit();
 
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
@@ -82187,7 +82149,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function (evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented || !this.networkedOk()) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
       return;
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
@@ -82261,7 +82223,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":22,"./prototypes/networked-proto.js":23}],26:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":21}],24:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
