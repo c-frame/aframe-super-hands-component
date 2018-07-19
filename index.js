@@ -12,6 +12,7 @@ require('./reaction_components/drag-droppable.js')
 require('./reaction_components/draggable.js')
 require('./reaction_components/droppable.js')
 require('./reaction_components/clickable.js')
+require('./reaction_components/activatable.js')
 
 /**
  * Super Hands component for A-Frame.
@@ -53,6 +54,18 @@ AFRAME.registerComponent('super-hands', {
         'thumbstickdown', 'mousedown', 'touchstart']
     },
     dragDropEndButtons: {
+      default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
+        'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
+        'pointdown', 'thumbdown', 'pointingend', 'pistolend',
+        'thumbstickup', 'mouseup', 'touchend']
+    },
+    activateStartButtons: {
+      default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
+        'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
+        'pointup', 'thumbup', 'pointingstart', 'pistolstart',
+        'thumbstickdown', 'mousedown', 'touchstart']
+    },
+    activateEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen',
         'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
@@ -106,6 +119,8 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton = this.onStretchEndButton.bind(this)
     this.onDragDropStartButton = this.onDragDropStartButton.bind(this)
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this)
+    this.onActivateStartButton = this.onActivateStartButton.bind(this)
+    this.onActivateEndButton = this.onActivateEndButton.bind(this)
     this.system.registerMe(this)
   },
 
@@ -286,6 +301,37 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
+  onActivateStartButton: function (evt) {
+    const carried = this.state.get(this.GRAB_EVENT)
+    if (carried) {
+      const activatable = carried.getAttribute('activatable')
+      const activateEvent = activatable.activateEvent
+      const validButton = activatable.buttonStartEvent == '' || activatable.buttonStartEvent == evt.type;
+      let activated = this.state.get(activateEvent)
+      if (validButton && !activated && !this.emitCancelable(carried, activateEvent, {hand: this.el, buttonEvent: evt})) {
+        activated = this.state.get(activateEvent)
+      }
+      if (activated) {
+        this.state.set(activateEvent, activated)
+      }
+    }
+  },
+  onActivateEndButton: function (evt) {
+    const carried = this.state.get(this.GRAB_EVENT)
+    if (carried) {
+      const activatable = carried.getAttribute('activatable')
+      const activateEvent = activatable.activateEvent
+      const unactivateEvent = activatable.unactivateEvent
+      const validButton = activatable.buttonEndEvent == '' || activatable.buttonEndEvent == evt.type;
+      let unactivated = this.state.get(unactivateEvent)
+      if (validButton && !unactivated && !this.emitCancelable(carried, unactivateEvent, {hand: this.el, buttonEvent: evt})) {
+        unactivated = this.state.get(unactivateEvent)
+      }
+      if (unactivated) {
+        this.state.delete(activateEvent, unactivated)
+      }
+    }
+  },
   processHitEl: function (hitEl, intersection) {
     const dist = intersection && intersection.distance
     const sects = this.hoverElsIntersections
@@ -439,6 +485,9 @@ AFRAME.registerComponent('super-hands', {
     this.data.dragDropStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropStartButton)
     })
+    this.data.activateStartButtons.forEach(b => {
+      this.el.addEventListener(b, this.onActivateStartButton)
+    })
     this.data.dragDropEndButtons.forEach(b => {
       this.el.addEventListener(b, this.onDragDropEndButton)
     })
@@ -447,6 +496,9 @@ AFRAME.registerComponent('super-hands', {
     })
     this.data.grabEndButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabEndButton)
+    })
+    this.data.activateEndButtons.forEach(b => {
+      this.el.addEventListener(b, this.onActivateEndButton)
     })
   },
   unRegisterListeners: function (data) {
@@ -468,6 +520,9 @@ AFRAME.registerComponent('super-hands', {
     data.stretchStartButtons.forEach(b => {
       this.el.removeEventListener(b, this.onStretchStartButton)
     })
+    data.activateStartButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onActivateStartButton)
+    })
     data.stretchEndButtons.forEach(b => {
       this.el.removeEventListener(b, this.onStretchEndButton)
     })
@@ -476,6 +531,9 @@ AFRAME.registerComponent('super-hands', {
     })
     data.dragDropEndButtons.forEach(b => {
       this.el.removeEventListener(b, this.onDragDropEndButton)
+    })
+    data.activateEndButtons.forEach(b => {
+      this.el.removeEventListener(b, this.onActivateEndButton)
     })
   },
   emitCancelable: function (target, name, detail) {
