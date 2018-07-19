@@ -82,8 +82,8 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     // room for more grabbers?
     let grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers
-    if (Number.isFinite(this.data.maxGrabbers) && !grabAvailable && 
-        this.grabbed && this.data.maxGrabBehavior == 'drop') {
+    if (Number.isFinite(this.data.maxGrabbers) && !grabAvailable &&
+        this.grabbed && this.data.maxGrabBehavior === 'drop') {
       this.grabbers[0].components['super-hands'].onGrabEndButton()
       grabAvailable = true
     }
