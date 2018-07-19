@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -15,16 +15,12 @@ require('./reaction_components/drag-droppable.js');
 require('./reaction_components/draggable.js');
 require('./reaction_components/droppable.js');
 require('./reaction_components/clickable.js');
-require('./misc_components/locomotor-auto-config.js');
-require('./misc_components/progressive-controls.js');
-require('./primitives/a-locomotor.js');
 
 /**
  * Super Hands component for A-Frame.
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: { default: '' },
     colliderEvent: { default: 'hit' },
     colliderEventProperty: { default: 'el' },
     colliderEndEvent: { default: 'hitend' },
@@ -46,7 +42,8 @@ AFRAME.registerComponent('super-hands', {
     },
     dragDropEndButtons: {
       default: ['gripup', 'trackpadup', 'triggerup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup', 'pointdown', 'thumbdown', 'pointingend', 'pistolend', 'thumbstickup', 'mouseup', 'touchend']
-    }
+    },
+    interval: { default: 0 }
   },
 
   /**
@@ -80,7 +77,8 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = [];
-    this.hoverElsDist = [];
+    this.hoverElsIntersections = [];
+    this.prevCheckTime = null;
     this.state = new Map();
     this.dragging = false;
 
@@ -101,9 +99,6 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-    if (this.data.colliderState.length) {
-      console.warn('super-hands colliderState property is deprecated. Use colliderEndEvent/colliderEndEventProperty instead');
-    }
     this.unRegisterListeners(oldData);
     this.registerListeners();
   },
@@ -115,10 +110,6 @@ AFRAME.registerComponent('super-hands', {
   remove: function () {
     this.system.unregisterMe(this);
     this.unRegisterListeners();
-    // cleanup states
-    this.hoverEls.forEach(h => {
-      h.removeEventListener('stateremoved', this.unWatch);
-    });
     this.hoverEls.length = 0;
     if (this.state.get(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT));
@@ -127,26 +118,53 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton();
     this.onDragDropEndButton();
   },
-  /**
-   * Called when entity pauses.
-   * Use to stop or remove any dynamic or background behavior such as events.
-   */
-  pause: function () {},
+  tick: function () {
+    let orderChanged = false;
+    // closer objects and objects with no distance come later in list
+    function sorter(a, b) {
+      const aDist = a.distance == null ? -1 : a.distance;
+      const bDist = b.distance == null ? -1 : b.distance;
+      if (aDist < bDist) {
+        orderChanged = true;
+        return 1;
+      }
+      if (bDist < aDist) {
+        return -1;
+      }
+      return 0;
+    }
+    return function (time) {
+      const data = this.data;
+      const prevCheckTime = this.prevCheckTime;
+      if (prevCheckTime && time - prevCheckTime < data.interval) {
+        return;
+      }
+      this.prevCheckTime = time;
 
-  /**
-   * Called when entity resumes.
-   * Use to continue or add any dynamic or background behavior such as events.
-   */
-  play: function () {},
+      orderChanged = false;
+      this.hoverElsIntersections.sort(sorter);
+      if (orderChanged) {
+        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+          this.hoverEls[i] = this.hoverElsIntersections[i].object.el;
+        }
+        this.hover();
+      }
+    };
+  }(),
   onGrabStartButton: function (evt) {
     let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
+    const detail = {
+      hand: this.el,
+      buttonEvent: evt
+    };
     if (!carried) {
-      carried = (evt.detail ? evt.detail.targetEntity : false) || this.findTarget(this.GRAB_EVENT, {
-        hand: this.el,
-        buttonEvent: evt
-      });
+      if (evt.detail && evt.detail.targetEntity && !this.emitCancelable(evt.detail.targetEntity, this.GRAB_EVENT, detail)) {
+        carried = evt.detail.targetEntity;
+      } else {
+        carried = this.findTarget(this.GRAB_EVENT, detail);
+      }
       if (carried) {
         this.state.set(this.GRAB_EVENT, carried);
         this._unHover(carried);
@@ -186,9 +204,9 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     const stretched = this.state.get(this.STRETCH_EVENT);
-    const endEvt = { hand: this.el, buttonEvent: evt };
-    // check if end event accepted
-    if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
+    const endEvt = { hand: this.el, buttonEvent: evt
+      // check if end event accepted
+    };if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
       this.hover();
@@ -252,48 +270,52 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
+  processHitEl: function (hitEl, intersection) {
+    const dist = intersection && intersection.distance;
+    const sects = this.hoverElsIntersections;
+    const hoverEls = this.hoverEls;
+    const hitElIndex = this.hoverEls.indexOf(hitEl);
+    let hoverNeedsUpdate = false;
+    if (hitElIndex === -1) {
+      hoverNeedsUpdate = true;
+      // insert in order of distance when available
+      if (dist != null) {
+        let i = 0;
+        while (i < sects.length && dist < sects[i].distance) {
+          i++;
+        }
+        hoverEls.splice(i, 0, hitEl);
+        sects.splice(i, 0, intersection);
+      } else {
+        hoverEls.push(hitEl);
+        sects.push({ object: { el: hitEl } });
+      }
+      this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
+      if (this.dragging && this.gehDragged.size) {
+        // events on targets and on dragged
+        this.gehDragged.forEach(dragged => {
+          this.dispatchMouseEventAll('dragenter', dragged, true, true);
+        });
+      }
+    }
+    return hoverNeedsUpdate;
+  },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
-    var processHitEl = (hitEl, distance) => {
-      let hitElIndex;
-      hitElIndex = this.hoverEls.indexOf(hitEl);
-      if (hitElIndex === -1) {
-        // insert in order of distance when available
-        if (distance) {
-          let i = 0;
-          const dists = this.hoverElsDist;
-          while (distance < dists[i] && i < dists.length) {
-            i++;
-          }
-          this.hoverEls.splice(i, 0, hitEl);
-          this.hoverElsDist.splice(i, 0, distance);
-        } else {
-          this.hoverEls.push(hitEl);
-          this.hoverElsDist.push(null);
-        }
-        // later loss of collision will remove from hoverEls
-        hitEl.addEventListener('stateremoved', this.unWatch);
-        this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-        if (this.dragging && this.gehDragged.size) {
-          // events on targets and on dragged
-          this.gehDragged.forEach(dragged => {
-            this.dispatchMouseEventAll('dragenter', dragged, true, true);
-          });
-        }
-        this.hover();
-      }
-    };
+    let hoverNeedsUpdate = 0;
     if (!hitEl) {
       return;
     }
     if (Array.isArray(hitEl)) {
-      for (let i = 0, dist; i < hitEl.length; i++) {
-        dist = evt.detail.intersections && evt.detail.intersections[i].distance;
-        processHitEl(hitEl[i], dist);
+      for (let i = 0, sect; i < hitEl.length; i++) {
+        sect = evt.detail.intersections && evt.detail.intersections[i];
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], sect);
       }
-      hitEl.forEach(processHitEl);
     } else {
-      processHitEl(hitEl, null);
+      hoverNeedsUpdate += this.processHitEl(hitEl, null);
+    }
+    if (hoverNeedsUpdate) {
+      this.hover();
     }
   },
   /* search collided entities for target to hover/dragover */
@@ -314,7 +336,6 @@ AFRAME.registerComponent('super-hands', {
       };
       hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover);
         this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt);
         this.state.set(this.DRAGOVER_EVENT, hoverEl);
       }
@@ -323,13 +344,11 @@ AFRAME.registerComponent('super-hands', {
     if (!this.state.has(this.DRAGOVER_EVENT)) {
       hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true);
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover);
         this.state.set(this.HOVER_EVENT, hoverEl);
       }
     }
   },
-  /* tied to 'stateremoved' event for hovered entities,
-     called when controller moves out of collision range of entity */
+  /* called when controller moves out of collision range of entity */
   unHover: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty];
     if (clearedEls) {
@@ -338,15 +357,12 @@ AFRAME.registerComponent('super-hands', {
       } else {
         this._unHover(clearedEls);
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      this._unHover(evt.target);
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function (el, skipNextHover) {
     let unHovered = false;
     let evt;
-    el.removeEventListener('stateremoved', this.unHover);
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT);
       unHovered = true;
@@ -376,20 +392,16 @@ AFRAME.registerComponent('super-hands', {
       if (Array.isArray(clearedEls)) {
         clearedEls.forEach(el => this._unWatch(el));
       } else {
-        // deprecation path: aframe <=0.7.0 / sphere-collider
+        // deprecation path: sphere-collider
         this._unWatch(clearedEls);
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      // deprecation path: sphere-collider <=3.11.4
-      this._unWatch(evt.target);
     }
   },
   _unWatch: function (target) {
     var hoverIndex = this.hoverEls.indexOf(target);
-    target.removeEventListener('stateremoved', this.unWatch);
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
-      this.hoverElsDist.splice(hoverIndex, 1);
+      this.hoverElsIntersections.splice(hoverIndex, 1);
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged);
@@ -497,318 +509,16 @@ AFRAME.registerComponent('super-hands', {
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el);
-    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
+    if (hoverIndex !== -1 && this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1);
-      this.hoverElsDist.splice(hoverIndex, 1);
+      const sect = this.hoverElsIntersections.splice(hoverIndex, 1);
       this.hoverEls.push(el);
-      this.hoverElsDist.push(null);
+      this.hoverElsIntersections.push(sect);
     }
   }
 });
 
-},{"./misc_components/locomotor-auto-config.js":2,"./misc_components/progressive-controls.js":3,"./primitives/a-locomotor.js":4,"./reaction_components/clickable.js":5,"./reaction_components/drag-droppable.js":6,"./reaction_components/draggable.js":7,"./reaction_components/droppable.js":8,"./reaction_components/grabbable.js":9,"./reaction_components/hoverable.js":10,"./reaction_components/stretchable.js":14,"./systems/super-hands-system.js":15}],2:[function(require,module,exports){
-'use strict';
-
-/* global AFRAME */
-AFRAME.registerComponent('locomotor-auto-config', {
-  schema: {
-    camera: { default: true },
-    stretch: { default: true },
-    move: { default: true }
-  },
-  dependencies: ['grabbable', 'stretchable'],
-  init: function () {
-    this.ready = false;
-    if (this.data.camera) {
-      if (!document.querySelector('a-camera, [camera]')) {
-        let cam = document.createElement('a-camera');
-        cam.setAttribute('position', '0 1.6 0');
-        this.el.appendChild(cam);
-      }
-    }
-    this.fakeCollisions();
-    // for controllers added later
-    this.fakeCollisionsB = this.fakeCollisions.bind(this);
-    this.el.addEventListener('controllerconnected', this.fakeCollisionsB);
-  },
-  update: function () {
-    if (this.el.getAttribute('stretchable') && !this.data.stretch) {
-      // store settings for resetting
-      this.stretchSet = this.el.getAttribute('stretchable');
-      this.el.removeAttribute('stretchable');
-    } else if (!this.el.getAttribute('stretchable') && this.data.stretch) {
-      this.el.setAttribute('stretchable', this.stretchSet);
-    }
-    if (this.el.getAttribute('grabbable') && !this.data.move) {
-      // store settings for resetting
-      this.grabSet = this.el.getAttribute('grabbable');
-      this.el.removeAttribute('grabbable');
-    } else if (!this.el.getAttribute('grabbable') && this.data.move) {
-      this.el.setAttribute('grabbable', this.grabSet);
-    }
-  },
-  remove: function () {
-    this.el.getChildEntities().forEach(el => {
-      let sh = el.getAttribute('super-hands');
-      if (sh) {
-        let evtDetails = {};
-        evtDetails[sh.colliderEndEventProperty] = this.el;
-        el.emit(sh.colliderEndEvent, evtDetails);
-      }
-    });
-    this.el.removeEventListener('controllerconnected', this.fakeCollisionsB);
-  },
-  announceReady: function () {
-    if (!this.ready) {
-      this.ready = true;
-      this.el.emit('locomotor-ready', {});
-    }
-  },
-  fakeCollisions: function () {
-    this.el.getChildEntities().forEach(el => {
-      let sh = el.getAttribute('super-hands');
-      if (sh) {
-        // generate fake collision to be permanently in super-hands queue
-        let evtDetails = {};
-        evtDetails[sh.colliderEventProperty] = this.el;
-        el.emit(sh.colliderEvent, evtDetails);
-        this.colliderState = sh.colliderState;
-        this.el.addState(this.colliderState);
-      }
-    });
-    this.announceReady();
-  }
-});
-
-},{}],3:[function(require,module,exports){
-'use strict';
-
-/* global AFRAME */
-const gazeDefaultId = 'progressivecontrolsgazedefault';
-const pointDefaultId = 'progressivecontrolspointdefault';
-const touchDefaultId = 'progressivecontrolstouchdefault';
-
-AFRAME.registerComponent('progressive-controls', {
-  schema: {
-    maxLevel: { default: 'touch', oneOf: ['gaze', 'point', 'touch'] },
-    gazeMixin: { default: '' },
-    pointMixin: { default: '' },
-    touchMixin: { default: '' },
-    override: { default: false },
-    objects: { default: '' },
-    controllerModel: { default: true }
-  },
-  init: function () {
-    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
-    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
-    const rayEndProp = !AFRAME.components.link.schema.titleColor ? 'el' : 'clearedEls';
-
-    this.levels = ['gaze', 'point', 'touch'];
-    this.currentLevel = new Map();
-    this.controllerName = new Map();
-
-    // setup mixins for defaults
-    const assets = this.el.sceneEl.querySelector('a-assets') || this.el.sceneEl.appendChild(document.createElement('a-assets'));
-    const gazeDefault = this.gazeDefault = document.createElement('a-mixin');
-    const shRayConfig = AFRAME.utils.styleParser.stringify({
-      colliderEvent: 'raycaster-intersection',
-      colliderEventProperty: 'els',
-      colliderEndEvent: 'raycaster-intersection-cleared',
-      colliderEndEventProperty: rayEndProp,
-      colliderState: ''
-    });
-    gazeDefault.setAttribute('id', gazeDefaultId);
-    gazeDefault.setAttribute('geometry', 'primitive: ring;' + 'radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32');
-    gazeDefault.setAttribute('material', 'color: #000; shader: flat');
-    gazeDefault.setAttribute('position', '0 0 -0.5');
-    gazeDefault.setAttribute('raycaster', '');
-    gazeDefault.setAttribute('super-hands', shRayConfig);
-    const pointDefault = this.pointDefault = document.createElement('a-mixin');
-    pointDefault.setAttribute('id', pointDefaultId);
-    pointDefault.setAttribute('raycaster', 'showLine: true');
-    pointDefault.setAttribute('super-hands', shRayConfig);
-    const touchDefault = this.touchDefault = document.createElement('a-mixin');
-    touchDefault.setAttribute('id', touchDefaultId);
-    touchDefault.setAttribute('super-hands', '');
-    touchDefault.setAttribute('sphere-collider', '');
-    if (this.el.sceneEl.getAttribute('physics')) {
-      const physicsBodyDefault = 'shape: sphere; sphereRadius: 0.02';
-      pointDefault.setAttribute('static-body', physicsBodyDefault);
-      gazeDefault.setAttribute('static-body', physicsBodyDefault);
-      touchDefault.setAttribute('static-body', physicsBodyDefault);
-    }
-    assets.appendChild(gazeDefault);
-    assets.appendChild(pointDefault);
-    assets.appendChild(touchDefault);
-
-    this.camera = this.el.querySelector('a-camera,[camera]');
-    if (!this.camera) {
-      this.camera = this.el.appendChild(document.createElement('a-camera'));
-      this.camera.setAttribute('position', '0 1.6 0');
-    }
-    this.caster = this.camera.querySelector('.gazecaster') || this.camera.appendChild(document.createElement('a-entity'));
-    ['left', 'right'].forEach(hand => {
-      // find controller by left-controller/right-controller class or create one
-      this[hand] = this.el.querySelector('.' + hand + '-controller') || this.el.appendChild(document.createElement('a-entity'));
-      const ctrlrCompConfig = {
-        hand: hand,
-        model: this.data.controllerModel
-      };
-      ['daydream-controls', 'gearvr-controls', 'oculus-touch-controls', 'vive-controls', 'windows-motion-controls'].forEach(ctrlr => this[hand].setAttribute(ctrlr, ctrlrCompConfig));
-    });
-    this.el.addEventListener('controllerconnected', e => this.detectLevel(e));
-    this.eventRepeaterB = this.eventRepeater.bind(this);
-    // pass mouse and touch events into the scene
-    this.addEventListeners();
-    // default level
-    this.currentLevel.set('right', 0);
-  },
-  update: function (oldData) {
-    const objs = { objects: this.data.objects };
-    updateMixin(this.gazeDefault, 'raycaster', objs);
-    updateMixin(this.pointDefault, 'raycaster', objs);
-    updateMixin(this.touchDefault, 'sphere-collider', objs);
-    // async updates due to aframevr/aframe#3200
-    // force setLevel refresh with new params
-    for (let [hand, level] of this.currentLevel) {
-      window.setTimeout(() => this.setLevel(level, hand, true));
-    }
-  },
-  remove: function () {
-    if (!this.eventsRegistered) {
-      return;
-    }
-    const canv = this.el.sceneEl.canvas;
-    canv.removeEventListener('mousedown', this.eventRepeaterB);
-    canv.removeEventListener('mouseup', this.eventRepeaterB);
-    canv.removeEventListener('touchstart', this.eventRepeaterB);
-    canv.removeEventListener('touchend', this.eventRepeaterB);
-  },
-  setLevel: function (newLevel, hand, force) {
-    hand = hand || 'right';
-    const maxLevel = this.levels.indexOf(this.data.maxLevel);
-    const currentHand = this[hand];
-    const override = this.data.override;
-    newLevel = newLevel > maxLevel ? maxLevel : newLevel;
-    if (newLevel === this.currentLevel.get(hand) && !force) {
-      return;
-    }
-    if (newLevel !== 0 && this.caster) {
-      // avoids error where physics system tries to tick on removed entity
-      this.caster.setAttribute('mixin', '');
-      this.camera.removeChild(this.caster);
-      this.caster = null;
-    }
-    switch (newLevel) {
-      case this.levels.indexOf('gaze'):
-        const gazeMixin = this.data.gazeMixin;
-        this.caster.setAttribute('mixin', (override && gazeMixin.length ? '' : gazeDefaultId + ' ') + gazeMixin);
-        break;
-      case this.levels.indexOf('point'):
-        const ctrlrName = this.controllerName.get(hand);
-        const ctrlrCfg = this.controllerConfig[ctrlrName];
-        const pntMixin = this.data.pointMixin;
-        if (ctrlrCfg && ctrlrCfg.raycaster) {
-          currentHand.setAttribute('raycaster', ctrlrCfg.raycaster);
-        }
-        currentHand.setAttribute('mixin', (override && pntMixin.length ? '' : pointDefaultId + ' ') + pntMixin);
-        break;
-      case this.levels.indexOf('touch'):
-        const tchMixin = this.data.touchMixin;
-        currentHand.setAttribute('mixin', (override && tchMixin.length ? '' : touchDefaultId + ' ') + tchMixin);
-        break;
-    }
-    this.currentLevel.set(hand, newLevel);
-    this.el.emit('controller-progressed', {
-      level: this.levels[newLevel],
-      hand: hand
-    });
-  },
-  detectLevel: function (evt) {
-    const DOF6 = ['vive-controls', 'oculus-touch-controls', 'windows-motion-controls'];
-    const DOF3 = ['gearvr-controls', 'daydream-controls'];
-    const hand = evt.detail.component.data.hand || 'right';
-    this.controllerName.set(hand, evt.detail.name);
-    if (DOF6.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('touch'), hand);
-    } else if (DOF3.indexOf(evt.detail.name) !== -1) {
-      this.setLevel(this.levels.indexOf('point'), hand);
-    }
-  },
-  eventRepeater: function (evt) {
-    if (!this.caster) {
-      return;
-    } // only for gaze mode
-    if (evt.type.startsWith('touch')) {
-      evt.preventDefault();
-      // avoid repeating touchmove because it interferes with look-controls
-      if (evt.type === 'touchmove') {
-        return;
-      }
-    }
-    this.caster.emit(evt.type, evt.detail);
-  },
-  addEventListeners: function () {
-    if (!this.el.sceneEl.canvas) {
-      this.el.sceneEl.addEventListener('loaded', this.addEventListeners.bind(this));
-      return;
-    }
-    this.el.sceneEl.canvas.addEventListener('mousedown', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('mouseup', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchstart', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchmove', this.eventRepeaterB);
-    this.el.sceneEl.canvas.addEventListener('touchend', this.eventRepeaterB);
-    this.eventsRegistered = true;
-  },
-  controllerConfig: {
-    'gearvr-controls': {
-      raycaster: { origin: { x: 0, y: 0.0005, z: 0 } }
-    },
-    'oculus-touch-controls': {
-      raycaster: { origin: { x: 0.001, y: 0, z: 0.065 }, direction: { x: 0, y: -0.8, z: -1 } }
-    }
-  }
-});
-
-function updateMixin(mixin, attr, additions) {
-  const stringify = AFRAME.utils.styleParser.stringify;
-  const extend = AFRAME.utils.extend;
-  const old = mixin.getAttribute(attr);
-  if (old) {
-    mixin.setAttribute(attr, stringify(extend(old, additions)));
-  }
-}
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
-/* global AFRAME */
-var extendDeep = AFRAME.utils.extendDeep;
-// The mesh mixin provides common material properties for creating mesh-based primitives.
-// This makes the material component a default component and maps all the base material properties.
-var meshMixin = AFRAME.primitives.getMeshMixin();
-AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
-  // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
-  defaultComponents: {
-    grabbable: {
-      usePhysics: 'never',
-      invert: true,
-      suppressY: true
-    },
-    stretchable: {
-      invert: true
-    },
-    'locomotor-auto-config': {}
-  },
-  mappings: {
-    'fetch-camera': 'locomotor-auto-config.camera',
-    'allow-movement': 'locomotor-auto-config.move',
-    'horizontal-only': 'grabbable.suppressY',
-    'allow-scaling': 'locomotor-auto-config.stretch'
-  }
-}));
-
-},{}],5:[function(require,module,exports){
+},{"./reaction_components/clickable.js":2,"./reaction_components/drag-droppable.js":3,"./reaction_components/draggable.js":4,"./reaction_components/droppable.js":5,"./reaction_components/grabbable.js":6,"./reaction_components/hoverable.js":7,"./reaction_components/stretchable.js":10,"./systems/super-hands-system.js":11}],2:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -861,7 +571,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":11}],6:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":8}],3:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -935,7 +645,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":11}],7:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":8}],4:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -978,7 +688,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":11}],8:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":8}],5:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1096,16 +806,15 @@ AFRAME.registerComponent('droppable', {
   }
 });
 
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./prototypes/physics-grab-proto.js');
 const buttonsCore = require('./prototypes/buttons-proto.js');
-const networkedCore = require('./prototypes/networked-proto.js');
 // new object with all core modules
-const base = inherit({}, physicsCore, buttonsCore, networkedCore);
+const base = inherit({}, physicsCore, buttonsCore);
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: { type: 'int', default: NaN },
@@ -1122,9 +831,9 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.deltaPositionIsValid = false;
     this.grabDistance = undefined;
     this.grabDirection = { x: 0, y: 0, z: -1 };
-    this.grabOffset = { x: 0, y: 0, z: 0 };
-    // persistent object speeds up repeat setAttribute calls
-    this.destPosition = { x: 0, y: 0, z: 0 };
+    this.grabOffset = { x: 0, y: 0, z: 0
+      // persistent object speeds up repeat setAttribute calls
+    };this.destPosition = { x: 0, y: 0, z: 0 };
     this.deltaPosition = new THREE.Vector3();
     this.targetPosition = new THREE.Vector3();
     this.physicsInit();
@@ -1140,25 +849,30 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
-    var entityPosition;
-    if (this.grabber) {
-      // reflect on z-axis to point in same direction as the laser
-      this.targetPosition.copy(this.grabDirection);
-      this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
-      if (this.deltaPositionIsValid) {
-        // relative position changes work better with nested entities
-        this.deltaPosition.sub(this.targetPosition);
-        entityPosition = this.el.getAttribute('position');
-        this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
-        this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
-        this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
-        this.el.setAttribute('position', this.destPosition);
-      } else {
-        this.deltaPositionIsValid = true;
+    var q = new THREE.Quaternion();
+    var v = new THREE.Vector3();
+
+    return function () {
+      var entityPosition;
+      if (this.grabber) {
+        // reflect on z-axis to point in same direction as the laser
+        this.targetPosition.copy(this.grabDirection);
+        this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion(q)).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition(v)).add(this.grabOffset);
+        if (this.deltaPositionIsValid) {
+          // relative position changes work better with nested entities
+          this.deltaPosition.sub(this.targetPosition);
+          entityPosition = this.el.getAttribute('position');
+          this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
+          this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
+          this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
+          this.el.setAttribute('position', this.destPosition);
+        } else {
+          this.deltaPositionIsValid = true;
+        }
+        this.deltaPosition.copy(this.targetPosition);
       }
-      this.deltaPosition.copy(this.targetPosition);
-    }
-  },
+    };
+  }(),
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -1171,7 +885,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
 
-    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable && this.networkedOk()) {
+    if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D');
         return;
@@ -1209,19 +923,23 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
   },
   resetGrabber: function () {
-    let raycaster;
-    if (!this.grabber) {
-      return false;
-    }
-    raycaster = this.grabber.getAttribute('raycaster');
-    this.deltaPositionIsValid = false;
-    this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
-    if (raycaster) {
-      this.grabDirection = raycaster.direction;
-      this.grabOffset = raycaster.origin;
-    }
-    return true;
-  },
+    var objPos = new THREE.Vector3();
+    var grabPos = new THREE.Vector3();
+    return function () {
+      let raycaster;
+      if (!this.grabber) {
+        return false;
+      }
+      raycaster = this.grabber.getAttribute('raycaster');
+      this.deltaPositionIsValid = false;
+      this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos));
+      if (raycaster) {
+        this.grabDirection = raycaster.direction;
+        this.grabOffset = raycaster.origin;
+      }
+      return true;
+    };
+  }(),
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
@@ -1231,7 +949,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":11,"./prototypes/networked-proto.js":12,"./prototypes/physics-grab-proto.js":13}],10:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":8,"./prototypes/physics-grab-proto.js":9}],7:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */
@@ -1279,7 +997,7 @@ AFRAME.registerComponent('hoverable', {
   }
 });
 
-},{}],11:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 // common code used in customizing reaction components by button
@@ -1301,26 +1019,7 @@ module.exports = function () {
   };
 }();
 
-},{}],12:[function(require,module,exports){
-"use strict";
-
-// integration with networked-aframe
-module.exports = {
-  schema: {
-    takeOwnership: { default: false }
-  },
-  networkedOk: function () {
-    if (!window.NAF || window.NAF.utils.isMine(this.el)) {
-      return true;
-    }
-    if (this.data.takeOwnership) {
-      return window.NAF.utils.takeOwnership(this.el);
-    }
-    return false;
-  }
-};
-
-},{}],13:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 // base code used by grabbable for physics interactions
@@ -1378,21 +1077,20 @@ module.exports = {
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const buttonsCore = require('./prototypes/buttons-proto.js');
-const networkedCore = require('./prototypes/networked-proto.js');
 // new object with all core modules
-const base = inherit({}, buttonsCore, networkedCore);
+const base = inherit({}, buttonsCore);
 AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
     physicsUpdateRate: { default: 100 },
-    useWorldSpaceCoordinates: { type: 'bool', default: false }
+    useWorldPosition: { default: false }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -1419,7 +1117,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
-    if (this.data.useWorldSpaceCoordinates) {
+    if (this.data.useWorldPosition) {
       this.stretchers[0].object3D.getWorldPosition(this.handPos);
       this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
     } else {
@@ -1446,7 +1144,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     this.el.removeEventListener(this.UNSTRETCH_EVENT, this.end);
   },
   start: function (evt) {
-    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented || !this.networkedOk()) {
+    if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
       return;
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand);
@@ -1489,7 +1187,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (deltaStretch === 1) {
       return;
     }
-    for (let c of this.el.children) {
+    for (let c of this.el.childNodes) {
       this.stretchBody(c, deltaStretch);
     }
     this.stretchBody(this.el, deltaStretch);
@@ -1520,7 +1218,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   }
 }));
 
-},{"./prototypes/buttons-proto.js":11,"./prototypes/networked-proto.js":12}],15:[function(require,module,exports){
+},{"./prototypes/buttons-proto.js":8}],11:[function(require,module,exports){
 'use strict';
 
 /* global AFRAME */

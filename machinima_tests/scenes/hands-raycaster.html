@@ -6,15 +6,14 @@
     <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
       <a-assets>
         <a-mixin id="controller"
-                 super-hands="colliderEvent: mouseenter;
-                              colliderEventProperty: intersectedEl;
-                              colliderEndEvent: mouseleave;
-                              colliderEndEventProperty: intersectedEl;
-                              grabStartButtons: mousedown;
-                              grabEndButtons: mouseup;
-                              dragDropStartButtons: mousedown;
-                              dragDropEndButtons: mouseup;"
-                 sphere-collider="objects: .cube, a-link"></a-mixin>
+                 raycaster="objects: .cube; showLine: true"
+                 super-hands="
+                   colliderEvent:raycaster-intersection;
+                   colliderEventProperty:els;
+                   colliderEndEvent:raycaster-intersection-cleared;
+                   colliderEndEventProperty:el;
+                  ">
+        </a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable
                  event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"
@@ -25,8 +24,8 @@
                  event-set__dragon="_event: dragover-start; wireframe: true"
                  event-set__dragoff="_event: dragover-end; wireframe: false"></a-mixin>
       </a-assets>
-      <!-- <a-entity id="lhand" laser-controls="hand: left" mixin="controller"></a-entity> -->
-      <a-entity id="rhand" laser-controls="hand: right" mixin="controller"></a-entity>
+      <a-entity id="lhand" vive-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity id="rhand" vive-controls="hand: right" mixin="controller"></a-entity>
       <a-entity id="redLow" class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
       <a-entity id="redHigh" class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
       <a-entity id="blueLow" class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>

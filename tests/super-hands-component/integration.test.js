@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, AFRAME */
+/* global assert, process, setup, suite, test */
 const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
 
@@ -285,11 +285,6 @@ suite('super-hands & clickable component integration', function () {
 })
 suite('super-hands raycaster integration', function () {
   setup(function (done) {
-    // deprecation path: AFRAME v0.8.0 prerelease not reporting new version number
-    // use this condition after v0.8.0 release: parseFloat(AFRAME.version) < 0.8
-    const rayEndProp = !AFRAME.components.link.schema.titleColor
-        ? 'el'
-        : 'clearedEls'
     this.target1 = entityFactory()
     this.target1.id = 'target1'
     this.target1.setAttribute('geometry', 'primitive: box')
@@ -305,7 +300,7 @@ suite('super-hands raycaster integration', function () {
       'super-hands': 'colliderEvent: raycaster-intersection;' +
           'colliderEventProperty: els;' +
           'colliderEndEvent: raycaster-intersection-cleared;' +
-          'colliderEndEventProperty: ' + rayEndProp,
+          'colliderEndEventProperty: clearedEls',
       'raycaster': 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
     }, true)
     this.hand1.setAttribute('position', '0 0 1')
@@ -342,47 +337,6 @@ suite('super-hands raycaster integration', function () {
     this.target1.object3D.updateMatrixWorld()
     this.ray1.tick()
     assert.equal(this.sh1.state.get('hover-start'), undefined)
-  })
-})
-// skip until aframevr/aframe#3200 is fixed
-suite.skip('progressive-controls & reaction component integration', function () {
-  setup(function (done) {
-    this.target1 = entityFactory()
-    this.target1.setAttribute('grabbable', '')
-    this.target1.setAttribute('hoverable', '')
-    this.target1.setAttribute('stretchable', '')
-    this.target1.setAttribute('draggable', '')
-    this.target1.setAttribute('droppable', '')
-    this.target2 = document.createElement('a-entity')
-    this.target2.setAttribute('draggable', '')
-    this.target2.setAttribute('droppable', '')
-    this.target2.setAttribute('hoverable', '')
-    this.target1.parentNode.appendChild(this.target2)
-    this.player = document.createElement('a-entity')
-    this.player.setAttribute('progressive-controls', '')
-    this.target1.parentNode.appendChild(this.player)
-    this.player.parentNode.addEventListener('loaded', () => {
-      this.pc = this.player.components['progressive-controls']
-      this.ctrlr1 = this.player.querySelector('.right-controller')
-      done()
-    })
-  })
-  test('grabbable raycaster offset', function () {
-    const grab = this.target1.components.grabbable
-    this.ctrlr1.emit('controllerconnected', {
-      name: 'gearvr-controls',
-      component: {data: {}}
-    })
-    grab.start({detail: {hand: this.ctrlr1}})
-    assert.notDeepEqual(grab.grabOffset, {x: 0, y: 0, z: 0})
-    assert.deepEqual(
-        grab.grabOffset,
-        this.ctrlr1.getAttribute('raycaster').origin
-    )
-    assert.deepEqual(
-        grab.grabDirection,
-        this.ctrlr1.getAttribute('raycaster').direction
-    )
   })
 })
 suite('super-hands & physics integration', function () {

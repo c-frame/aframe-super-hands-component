@@ -12,16 +12,12 @@ require('./reaction_components/drag-droppable.js')
 require('./reaction_components/draggable.js')
 require('./reaction_components/droppable.js')
 require('./reaction_components/clickable.js')
-require('./misc_components/locomotor-auto-config.js')
-require('./misc_components/progressive-controls.js')
-require('./primitives/a-locomotor.js')
 
 /**
  * Super Hands component for A-Frame.
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderState: {default: ''},
     colliderEvent: {default: 'hit'},
     colliderEventProperty: {default: 'el'},
     colliderEndEvent: {default: 'hitend'},
@@ -61,7 +57,8 @@ AFRAME.registerComponent('super-hands', {
         'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
         'pointdown', 'thumbdown', 'pointingend', 'pistolend',
         'thumbstickup', 'mouseup', 'touchend']
-    }
+    },
+    interval: { default: 0 }
   },
 
   /**
@@ -95,7 +92,8 @@ AFRAME.registerComponent('super-hands', {
 
     // state tracking - reaction components
     this.hoverEls = []
-    this.hoverElsDist = []
+    this.hoverElsIntersections = []
+    this.prevCheckTime = null
     this.state = new Map()
     this.dragging = false
 
@@ -116,9 +114,6 @@ AFRAME.registerComponent('super-hands', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-    if (this.data.colliderState.length) {
-      console.warn('super-hands colliderState property is deprecated. Use colliderEndEvent/colliderEndEventProperty instead')
-    }
     this.unRegisterListeners(oldData)
     this.registerListeners()
   },
@@ -130,10 +125,6 @@ AFRAME.registerComponent('super-hands', {
   remove: function () {
     this.system.unregisterMe(this)
     this.unRegisterListeners()
-    // cleanup states
-    this.hoverEls.forEach(h => {
-      h.removeEventListener('stateremoved', this.unWatch)
-    })
     this.hoverEls.length = 0
     if (this.state.get(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT))
@@ -142,21 +133,37 @@ AFRAME.registerComponent('super-hands', {
     this.onStretchEndButton()
     this.onDragDropEndButton()
   },
-  /**
-   * Called when entity pauses.
-   * Use to stop or remove any dynamic or background behavior such as events.
-   */
-  pause: function () {
+  tick: (function () {
+    let orderChanged = false
+    // closer objects and objects with no distance come later in list
+    function sorter (a, b) {
+      const aDist = a.distance == null ? -1 : a.distance
+      const bDist = b.distance == null ? -1 : b.distance
+      if (aDist < bDist) {
+        orderChanged = true
+        return 1
+      }
+      if (bDist < aDist) {
+        return -1
+      }
+      return 0
+    }
+    return function (time) {
+      const data = this.data
+      const prevCheckTime = this.prevCheckTime
+      if (prevCheckTime && (time - prevCheckTime < data.interval)) { return }
+      this.prevCheckTime = time
 
-  },
-
-  /**
-   * Called when entity resumes.
-   * Use to continue or add any dynamic or background behavior such as events.
-   */
-  play: function () {
-
-  },
+      orderChanged = false
+      this.hoverElsIntersections.sort(sorter)
+      if (orderChanged) {
+        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+          this.hoverEls[i] = this.hoverElsIntersections[i].object.el
+        }
+        this.hover()
+      }
+    }
+  })(),
   onGrabStartButton: function (evt) {
     let carried = this.state.get(this.GRAB_EVENT)
     this.dispatchMouseEventAll('mousedown', this.el)
@@ -279,45 +286,47 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
+  processHitEl: function (hitEl, intersection) {
+    const dist = intersection && intersection.distance
+    const sects = this.hoverElsIntersections
+    const hoverEls = this.hoverEls
+    const hitElIndex = this.hoverEls.indexOf(hitEl)
+    let hoverNeedsUpdate = false
+    if (hitElIndex === -1) {
+      hoverNeedsUpdate = true
+      // insert in order of distance when available
+      if (dist != null) {
+        let i = 0
+        while (i < sects.length && dist < sects[i].distance) { i++ }
+        hoverEls.splice(i, 0, hitEl)
+        sects.splice(i, 0, intersection)
+      } else {
+        hoverEls.push(hitEl)
+        sects.push({ object: { el: hitEl } })
+      }
+      this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
+      if (this.dragging && this.gehDragged.size) {
+        // events on targets and on dragged
+        this.gehDragged.forEach(dragged => {
+          this.dispatchMouseEventAll('dragenter', dragged, true, true)
+        })
+      }
+    }
+    return hoverNeedsUpdate
+  },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty]
-    var processHitEl = (hitEl, distance) => {
-      let hitElIndex
-      hitElIndex = this.hoverEls.indexOf(hitEl)
-      if (hitElIndex === -1) {
-        // insert in order of distance when available
-        if (distance) {
-          let i = 0
-          const dists = this.hoverElsDist
-          while (distance < dists[i] && i < dists.length) { i++ }
-          this.hoverEls.splice(i, 0, hitEl)
-          this.hoverElsDist.splice(i, 0, distance)
-        } else {
-          this.hoverEls.push(hitEl)
-          this.hoverElsDist.push(null)
-        }
-        // later loss of collision will remove from hoverEls
-        hitEl.addEventListener('stateremoved', this.unWatch)
-        this.dispatchMouseEvent(hitEl, 'mouseover', this.el)
-        if (this.dragging && this.gehDragged.size) {
-          // events on targets and on dragged
-          this.gehDragged.forEach(dragged => {
-            this.dispatchMouseEventAll('dragenter', dragged, true, true)
-          })
-        }
-        this.hover()
-      }
-    }
+    let hoverNeedsUpdate = 0
     if (!hitEl) { return }
     if (Array.isArray(hitEl)) {
-      for (let i = 0, dist; i < hitEl.length; i++) {
-        dist = evt.detail.intersections && evt.detail.intersections[i].distance
-        processHitEl(hitEl[i], dist)
+      for (let i = 0, sect; i < hitEl.length; i++) {
+        sect = evt.detail.intersections && evt.detail.intersections[i]
+        hoverNeedsUpdate += this.processHitEl(hitEl[i], sect)
       }
-      hitEl.forEach(processHitEl)
     } else {
-      processHitEl(hitEl, null)
+      hoverNeedsUpdate += this.processHitEl(hitEl, null)
     }
+    if (hoverNeedsUpdate) { this.hover() }
   },
   /* search collided entities for target to hover/dragover */
   hover: function () {
@@ -337,7 +346,6 @@ AFRAME.registerComponent('super-hands', {
       }
       hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true)
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover)
         this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt)
         this.state.set(this.DRAGOVER_EVENT, hoverEl)
       }
@@ -346,13 +354,11 @@ AFRAME.registerComponent('super-hands', {
     if (!this.state.has(this.DRAGOVER_EVENT)) {
       hoverEl = this.findTarget(this.HOVER_EVENT, { hand: this.el }, true)
       if (hoverEl) {
-        hoverEl.addEventListener('stateremoved', this.unHover)
         this.state.set(this.HOVER_EVENT, hoverEl)
       }
     }
   },
-  /* tied to 'stateremoved' event for hovered entities,
-     called when controller moves out of collision range of entity */
+  /* called when controller moves out of collision range of entity */
   unHover: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty]
     if (clearedEls) {
@@ -361,15 +367,12 @@ AFRAME.registerComponent('super-hands', {
       } else {
         this._unHover(clearedEls)
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      this._unHover(evt.target)
     }
   },
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function (el, skipNextHover) {
     let unHovered = false
     let evt
-    el.removeEventListener('stateremoved', this.unHover)
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT)
       unHovered = true
@@ -403,20 +406,16 @@ AFRAME.registerComponent('super-hands', {
       if (Array.isArray(clearedEls)) {
         clearedEls.forEach(el => this._unWatch(el))
       } else {
-        // deprecation path: aframe <=0.7.0 / sphere-collider
+        // deprecation path: sphere-collider
         this._unWatch(clearedEls)
       }
-    } else if (evt.detail.state === this.data.colliderState) {
-      // deprecation path: sphere-collider <=3.11.4
-      this._unWatch(evt.target)
     }
   },
   _unWatch: function (target) {
     var hoverIndex = this.hoverEls.indexOf(target)
-    target.removeEventListener('stateremoved', this.unWatch)
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1)
-      this.hoverElsDist.splice(hoverIndex, 1)
+      this.hoverElsIntersections.splice(hoverIndex, 1)
     }
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged)
@@ -531,11 +530,12 @@ AFRAME.registerComponent('super-hands', {
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     var hoverIndex = this.hoverEls.indexOf(el)
-    if (hoverIndex !== -1 && this.hoverElsDist[hoverIndex] == null) {
+    if (hoverIndex !== -1 &&
+        this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1)
-      this.hoverElsDist.splice(hoverIndex, 1)
+      const sect = this.hoverElsIntersections.splice(hoverIndex, 1)
       this.hoverEls.push(el)
-      this.hoverElsDist.push(null)
+      this.hoverElsIntersections.push(sect)
     }
   }
 })

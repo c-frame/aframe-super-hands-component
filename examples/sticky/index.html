@@ -1,14 +1,15 @@
 <html>
   <head>
     <title>A-Frame Super Hands Component - Sticky Grab</title>
-    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+    <!-- Replace "../build.js" with the super-hands and
+         A-Frame distributions to run : -->
+    <script src="../build.js"></script>
+    <!-- <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
     <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.0.0/dist/aframe-physics-system.min.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
-  <!-- Replace "../build.js" with the super-hands distribution to run locally:
-        "https://unpkg.com/super-hands/dist/super-hands.min.js" -->
-    <script src="../build.js"></script>
   </head>
   <body>
     <a-scene physics="debug: true" environment="preset: contact; shadow: true">
@@ -33,11 +34,10 @@
                  material="color: brown" shadow></a-mixin>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
       </a-assets>
-      <a-locomotor allow-scaling="false"
-                   grabbable="startButtons: gripdown; endButtons: gripup">
+      <a-entity>
         <a-entity hand-controls="left" mixin="controller"></a-entity>
         <a-entity hand-controls="right" mixin="controller"></a-entity>
-      </a-locomotor>
+      </a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.45 -1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="0 0.45 1" material="color: red"></a-entity>
       <a-entity class="ball" mixin="ball" position="-1 0.45 -1" material="color: blue"></a-entity>

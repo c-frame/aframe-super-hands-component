@@ -1,73 +1,45 @@
 <html>
   <head>
-    <title>A-Frame Super Hands Component - GlobalEventHandler Integration</title>
+    <title>A-Frame Super Hands Component - Pointer Controls</title>
     <!-- Replace "../build.js" with the super-hands and
          A-Frame distributions to run : -->
     <script src="../build.js"></script>
     <!-- <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script> -->
     <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.12.4/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
-    <script>
-      function randomizeColor (target) {
-        target.setAttribute('color','#'+Math.random().toString(16).substr(-6));
-        // color randomizer credit: http://stackoverflow.com/a/7638362
-      }
-      function paintBall (evt) {
-        var col = evt.target.getAttribute('color');
-        var target = evt.relatedTarget.querySelector('a-sphere')
-        target.setAttribute('color', col);
-        target.setAttribute('visible', true);
-      }
-      function unPaintBall (evt) {
-        evt.relatedTarget.querySelector('a-sphere')
-            .setAttribute('visible', false);
-      }
-    </script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
-    <button id="replayer-button" type="button" onclick="playDemoRecording()">
-      Don't have a Vive or Rift handy? Click here for a preview.
-    </button>
-    <a-scene environment="preset: japan; shadow: true">
+    <a-scene environment="preset: default; shadow: true" avatar-recorder
+             touch-to-click-converter>
       <a-assets>
         <img id="portals-preview" src="../assets/portals.jpg"></img>
+        <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 hoverable grabbable stretchable draggable droppable
+                 shadow
+                 event-set__dragdrop="_event: drag-drop; geometry.radius: 0.25; geometry.primitive: sphere"
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 event-set__dragon="_event: dragover-start; material.wireframe: true"
+                 event-set__dragoff="_event: dragover-end; material.wireframe: false">
+        </a-mixin>
       </a-assets>
-      <a-entity progressive-controls="objects: a-box, a-torus-knot, a-link">
-        <a-camera position="0 1.6 0">
-          <a-entity class="gazecaster">
-            <a-sphere radius="0.02" visible="false" shadow>
-            </a-sphere>
-          </a-entity>
-        </a-camera>
-        <a-entity id="lhand" class="left-controller">
-          <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
-                    shadow>
-          </a-sphere>
-        </a-entity>
-        <a-entity id="rhand" class="right-controller">
-          <a-sphere radius="0.07" position="-0.01 -0.02 0.02" visible="false"
-                    shadow>
-          </a-sphere>
-        </a-entity>
+      <a-entity camera wasd-controls position="0 1 1"
+                capture-mouse
+                raycaster="objects: .cube" cursor="rayOrigin:mouse"
+                static-body="shape: sphere; sphereRadius: 0.001"
+                super-hands="colliderEvent: raycaster-intersection;
+                             colliderEventProperty: els;
+                             colliderEndEvent:raycaster-intersection-cleared;
+                             colliderEndEventProperty: clearedEls;">
       </a-entity>
-      <a-box position="0 1 -1" color="red"
-             onclick="randomizeColor(this)"
-             ondragstart="paintBall(event)"
-             ondragend="unPaintBall(event)"
-             ondrop="event.relatedTarget.setAttribute('color', this.getAttribute('color'))">
-        <a-text position="0 0 0.5"
-                value="click to change color\ndrag-drop to paint the knot"
-                width="1" wrap-count="15" anchor="center"></a-text>
-      </a-box>
-      <a-torus-knot position="0 0.838 0.152" radius="0.15" radius-tubular="0.04"
-                    transparent="true" shadow
-                    ondragenter="this.setAttribute('opacity', 0.5)"
-                    ondragleave="this.setAttribute('opacity', 1)"
-                    onmousedown="this.setAttribute('wireframe', true)"
-                    onclick="this.setAttribute('wireframe', false)">
-      </a-torus-knot>
+      <a-entity class="cube" mixin="cube" position="0 1 -1.25" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0 1.6 -1.5" material="color: red"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-0.9 1 -0.9" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
+      <a-entity class="cube" mixin="cube" position="0.9 1 -0.9" material="color: green"></a-entity>
+      <a-entity class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
       <a-link href="../portals.html" title="Other Examples"
               image="#portals-preview"
               onmouseover="this.setAttribute('link', {highlighted: true})"
@@ -75,7 +47,6 @@
               position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
       </a-link>
     </a-scene>
-
     <!-- GitHub Corner. -->
     <a href="https://github.com/wmurphyrd/aframe-super-hands-component" class="github-corner">
       <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#222; color:#fff; position: absolute; top: 0; border: 0; right: 0;">
