@@ -95,6 +95,8 @@ AFRAME.registerComponent('super-hands', {
     this.DRAGOVER_EVENT = 'dragover-start'
     this.UNDRAGOVER_EVENT = 'dragover-end'
     this.DRAGDROP_EVENT = 'drag-drop'
+    this.ACTIVATE_EVENT = 'activate-start'
+    this.DEACTIVATE_EVENT = 'activate-end'
 
     // links to other systems/components
     this.otherSuperHand = null
@@ -303,42 +305,26 @@ AFRAME.registerComponent('super-hands', {
   },
   onActivateStartButton: function (evt) {
     const carried = this.state.get(this.GRAB_EVENT)
+    let activated = this.state.get(this.ACTIVATE_EVENT)
     if (carried) {
-      for (let key in carried.components) {
-        if (carried.components.hasOwnProperty(key) && carried.components[key].data.componentType === 'activatable') {
-          let activatable = carried.getAttribute(key)
-          let activateEvent = activatable.activateEvent
-          let validButton = activatable.buttonStartEvent == '' || activatable.buttonStartEvent == evt.type
-          let activated = this.state.get(activateEvent)
-          if (validButton && !activated && !this.emitCancelable(carried, activateEvent, {hand: this.el, buttonEvent: evt})) {
-            activated = this.state.get(activateEvent)
-          }
-          if (activated) {
-            this.state.set(activateEvent, activated)
-          }
-        }
-      }      
+      if (!activated && !this.emitCancelable(carried, this.ACTIVATE_EVENT, {hand: this.el, buttonEvent: evt})) {
+        activated = this.state.get(this.ACTIVATE_EVENT)
+      }
+      if (activated) {
+        this.state.set(this.ACTIVATE_EVENT, activated)
+      }
     }
   },
   onActivateEndButton: function (evt) {
     const carried = this.state.get(this.GRAB_EVENT)
+    let deactivated = this.state.get(this.DEACTIVATE_EVENT)
     if (carried) {
-      
-      for (let key in carried.components) {
-        if (carried.components.hasOwnProperty(key) && carried.components[key].data.componentType === 'activatable') {
-          let activatable = carried.getAttribute(key)
-          let activateEvent = activatable.activateEvent
-          let unactivateEvent = activatable.unactivateEvent
-          let validButton = activatable.buttonEndEvent == '' || activatable.buttonEndEvent == evt.type
-          let unactivated = this.state.get(unactivateEvent)
-          if (validButton && !unactivated && !this.emitCancelable(carried, unactivateEvent, {hand: this.el, buttonEvent: evt})) {
-            unactivated = this.state.get(unactivateEvent)
-          }
-          if (unactivated) {
-            this.state.delete(activateEvent, unactivated)
-          }
-        }
-      }  
+      if (!deactivated && !this.emitCancelable(carried, this.DEACTIVATE_EVENT, {hand: this.el, buttonEvent: evt})) {
+        deactivated = this.state.get(this.DEACTIVATE_EVENT)
+      }
+      if (deactivated) {
+        this.state.set(this.DEACTIVATE_EVENT, deactivated)
+      }
     }
   },
   processHitEl: function (hitEl, intersection) {
