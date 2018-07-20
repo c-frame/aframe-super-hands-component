@@ -5,6 +5,7 @@ const buttonCore = require('./prototypes/buttons-proto.js')
 AFRAME.registerComponent('activatable', inherit({}, buttonCore, {
   multiple: true,
   schema: {
+    componentType: {default: 'activatable'},
     buttonStartEvent: {default: ''},
     buttonEndEvent: {default: ''},
     activatedState: {default: 'activated'},
