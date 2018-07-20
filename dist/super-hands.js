@@ -155,11 +155,16 @@ AFRAME.registerComponent('super-hands', {
     let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
+    const detail = {
+      hand: this.el,
+      buttonEvent: evt
+    };
     if (!carried) {
-      carried = this.findTarget(this.GRAB_EVENT, {
-        hand: this.el,
-        buttonEvent: evt
-      });
+      if (evt.detail && evt.detail.targetEntity && !this.emitCancelable(evt.detail.targetEntity, this.GRAB_EVENT, detail)) {
+        carried = evt.detail.targetEntity;
+      } else {
+        carried = this.findTarget(this.GRAB_EVENT, detail);
+      }
       if (carried) {
         this.state.set(this.GRAB_EVENT, carried);
         this._unHover(carried);
@@ -844,25 +849,30 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
-    var entityPosition;
-    if (this.grabber) {
-      // reflect on z-axis to point in same direction as the laser
-      this.targetPosition.copy(this.grabDirection);
-      this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
-      if (this.deltaPositionIsValid) {
-        // relative position changes work better with nested entities
-        this.deltaPosition.sub(this.targetPosition);
-        entityPosition = this.el.getAttribute('position');
-        this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
-        this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
-        this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
-        this.el.setAttribute('position', this.destPosition);
-      } else {
-        this.deltaPositionIsValid = true;
+    var q = new THREE.Quaternion();
+    var v = new THREE.Vector3();
+
+    return function () {
+      var entityPosition;
+      if (this.grabber) {
+        // reflect on z-axis to point in same direction as the laser
+        this.targetPosition.copy(this.grabDirection);
+        this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion(q)).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition(v)).add(this.grabOffset);
+        if (this.deltaPositionIsValid) {
+          // relative position changes work better with nested entities
+          this.deltaPosition.sub(this.targetPosition);
+          entityPosition = this.el.getAttribute('position');
+          this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
+          this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
+          this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
+          this.el.setAttribute('position', this.destPosition);
+        } else {
+          this.deltaPositionIsValid = true;
+        }
+        this.deltaPosition.copy(this.targetPosition);
       }
-      this.deltaPosition.copy(this.targetPosition);
-    }
-  },
+    };
+  }(),
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -913,19 +923,23 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
   },
   resetGrabber: function () {
-    let raycaster;
-    if (!this.grabber) {
-      return false;
-    }
-    raycaster = this.grabber.getAttribute('raycaster');
-    this.deltaPositionIsValid = false;
-    this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
-    if (raycaster) {
-      this.grabDirection = raycaster.direction;
-      this.grabOffset = raycaster.origin;
-    }
-    return true;
-  },
+    var objPos = new THREE.Vector3();
+    var grabPos = new THREE.Vector3();
+    return function () {
+      let raycaster;
+      if (!this.grabber) {
+        return false;
+      }
+      raycaster = this.grabber.getAttribute('raycaster');
+      this.deltaPositionIsValid = false;
+      this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos));
+      if (raycaster) {
+        this.grabDirection = raycaster.direction;
+        this.grabOffset = raycaster.origin;
+      }
+      return true;
+    };
+  }(),
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
@@ -1075,7 +1089,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
-    physicsUpdateRate: { default: 100 }
+    physicsUpdateRate: { default: 100 },
+    useWorldPosition: { default: false }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -1102,8 +1117,13 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
-    this.handPos.copy(this.stretchers[0].getAttribute('position'));
-    this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    if (this.data.useWorldPosition) {
+      this.stretchers[0].object3D.getWorldPosition(this.handPos);
+      this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
+    } else {
+      this.handPos.copy(this.stretchers[0].getAttribute('position'));
+      this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    }
     const currentStretch = this.handPos.distanceTo(this.otherHandPos);
     let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
