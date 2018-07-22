@@ -67,37 +67,30 @@
       </a>
       for super-easy hand controller interactivity in A-Frame WebVR experiences.
     </p>
-    <h2>Progressive Controls</h2>
-    <p>These examples use the <code>progressive-controls</code> component
-      to provide experiences that work across the full range of VR devices
-      and provide the controller interaction best suited to the current device.
-    </p>
-    <a id="physics" class="example" href="physics/">Progressive controls
+    <a id="physics" class="example" href="physics/">Hand controls
       with physics<br />
       <img class="preview" src="./assets/physics.jpg"/>
       <div class="bonus"></div>
     </a>
     <p><ul>
       <li>Grabbed boxes lock position and rotation to controller</li>
-      <li>Grabbed boxes appear in wireframe when held inside the color changer box</li>
       <li><code>color-randomizer</code> changes the color of entities dropped inside of the color changer box</li>
-      <li>Boxes can be stretched with two hands to change size, and their physical properties adapt</li>
+      <li>Boxes can be stretched with two hands to change size, updating their physics bodies</li>
     </ul></p>
-    <p>Example of super-hands interactivity with the
-      <code>progressive-controls</code> component that adapts to any VR device
-      and <code>afame-physics-system</code>. Also includes
-      <code>color-randomizer</code>,
-      an example of creating a component to customize the response to cues
-      from<code>super-hands</code>:</p>
+    <p>Example of super-hands interactivity with roomscale tracked controllers
+       and <code>aframe-physics-system</code>. Also showcases creating a simple
+       custom reaction component.</p>
     <pre>
     AFRAME.registerComponent('color-randomizer', {
       play: function() {
         this.el.addEventListener('drag-drop', function(evt) {
           evt.detail.dropped.setAttribute('material', 'color',
-            '#'+(Math.random()*0xFFFFFF<<0).toString(16));
-        });
+            '#'+(Math.random()*0xFFFFFF<<0).toString(16))
+           // notify super-hands that the gesture was accepted
+          evt.preventDefault()
+        })
       }
-    });
+    })
     </pre>
     <p class = "unemph">Credit for random color generator code: <a href="http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036">Mohsen via StackOverflow</a></p>
     <a id="mouse" class="example" href="mouse/">
@@ -106,97 +99,26 @@
       <img class="preview" src="./assets/hand-controls.jpg"/>
       <div class="bonus"></div>
     </a>
+    <p><a href="mouse/index-laser.html">Laser pointer setup for 3DOF controllers</a></p>
+    <p><a href="mouse/index-mouse.html">Mouse cursor based version for desktop</a></p>
     <p><ul>
       <li>Grabbed entities move by controller position and rotation</li>
       <li>Drag-drop targets and their hovering entity appear in wireframe</li>
       <li>Entities change to spheres upon completing drag-drop interaction via the
         <code>event-set</code> component listening for the 'drag-drop' event</li>
     </ul></p>
-    <p>When full VR controllers aren't available,
-      <code>progressive-controls</code> will fall back to laser pointer
-      controlers when there is a 3-DOF controller detected (GearVR or Daydream)
-      and to gaze-based control is there are no controllers. You can also
-      force laser pointer controls even with Vive/Oculus by setting the
-      <code>maxLevel</code> property on <code>progressive-controls</code>,
-      as in this example.</p>
-    <p>Under the hood, this works by using the <code>raycaster</code> A-Frame
-      component for collision detection.
-      This configuration is below for reference, but it is implemented
-      automatically by <code>progressive-controls</code> when needed</p>
+    <p><code>super-hands</code> can also be use with other types of input
+      including 3DOF controllers, mouse, and touch. In these cases, a
+      raycasting can be used intead of collision detection.
+      The confugration below works with the A-Frame <code>raycaster</code>
+      component.
       <pre>
 super-hands="colliderEvent: raycaster-intersection;
              colliderEventProperty: els;
              colliderEndEvent: raycaster-intersection-cleared;
              colliderEndEventProperty: el"</pre>
     <p>This scene also shows the fallback movement that occurs when physics
-      is not available, which moves entities but does not rotation them.
-      The laser and gaze controls work even better with
-      <code>aframe-physics-system</code>.</p>
-    <a id="events" class="example" href="events/">
-      Integration with Global Event Handlers
-      <br />
-      <img class="preview" src="./assets/events.jpg"/>
-      <div class="bonus"></div>
-    </a>
-    <p><ul>
-      <li>onmousedown changes the box color</li>
-      <li>ondragstart the controller/cursor picks up the box's color</li>
-      <li>ondragenter the torus knot turns transparent</li>
-      <li>ondrop the torus knot takes on the current color of the box</li>
-      <li>onmousedown the torus knot changes to wireframe</li>
-    </ul></p>
-    <p>Another option for customizing reactions is by using the
-      Global Event Handlers Web API (e.g., 'onclick').
-      super-hands will trigger standard events that are analogous to the VR
-      interactions taking place, like mousedown, click, dragenter, et c.
-      Just like in standard HTML, setting the
-      related 'on' property for an entity will register the event listener, so
-      simple reactions can be defined inline.
-    </p>
-    <a id="portals" class="example" href="portals.html">Link Portals
-      <br />
-      <img class="preview" src="./assets/portals.jpg"/>
-    </a>
-    <p>A-Frame 0.6.0 added the ability to traverse experiences without
-      leaving VR with the <code>link</code> component and <code>a-link</code>
-      primitive. Just make sure your colliders are configured to find the link
-      entities and you'll be able to activate the portals with
-      <code>super-hands</code> automatically (because
-      both use the <code>'click'</code> <code>MouseEvent</code> by default).
-    </p>
-    <p>You can make the experience even better by activating the
-      <code>highlighted</code> property of the link when a hand is hovering
-      in it. There are a few way to accomplish this:</p>
-    <ul>
-      <li>With the <code>hoverable</code> reaction component
-        and a <code>-hovered</code> mixin.
-      </li>
-      <li>With kframe's <code>event-set</code>
-        listening for <code>'mouseover'</code> and
-        <code>'mouseout'</code>.
-      </li>
-      <li>With <code>onmouseover</code> and <code>onmouseout</code>
-        Global Event Handlers on each link entity.
-      </li>
-    </ul>
-    <p>Each of these methods is demonstrated in the portals
-      example source</p>
-
-    <h2>Additional 6-DOF functionality</h2>
-    <p>These examples showcase additional functionality of
-      <code>super-hands</code> that takes advantage of the full capabilities
-      of top-of-the-line VR setups</p>
-    <a id="locomotion" class="example" href="locomotion/">Grab-based locomotion
-      <br />
-      <img class="preview" src="./assets/locomotion.jpg"/>
-      <div class="bonus"></div>
-    </a>
-    <p>Example of the <code>a-locomotor</code> primitive to add easy
-      locomotion to a scene with 6-DOF controllers (Vive/Oculus Touch)</p>
-    <ul>
-      <li>Grab the air and drag the scene around you to move</li>
-      <li>Stretch with two hands to scale the scene up or down</li>
-    </ul>
+      is not available.</p>
     <a id="sticky" class="example" href="sticky/">Sticky Grab via
       Custom Button Mapping<br />
       <img class="preview" src="./assets/sticky.jpg"/>
@@ -207,7 +129,6 @@ super-hands="colliderEvent: raycaster-intersection;
       <li>Knock some balls around</li>
       <li>Press trackpad to drop the bat</li>
       <li>Stretch the balls by pressing both trackpads</li>
-      <li>Use grip to locomote around the scene</li>
     </ul>
     <!-- GitHub Corner. -->
     <a href="https://github.com/wmurphyrd/aframe-super-hands-component" class="github-corner">

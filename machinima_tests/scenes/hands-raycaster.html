@@ -5,26 +5,33 @@
   <body>
     <a-scene avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
       <a-assets>
+        <a-mixin id="controller"
+                 raycaster="objects: .cube; showLine: true"
+                 super-hands="
+                   colliderEvent:raycaster-intersection;
+                   colliderEventProperty:els;
+                   colliderEndEvent:raycaster-intersection-cleared;
+                   colliderEndEventProperty:clearedEls;
+                  ">
+        </a-mixin>
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
-                 hoverable grabbable stretchable draggable droppable
-                 event-set__drop="_event: drag-drop; geometry.radius: 0.25; geometry.primitive: sphere;"
+                 hoverable grabbable
+                 event-set="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"
                  event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
                  event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
-                 event-set__dragon="_event: dragover-start; material.wireframe: true"
-                 event-set__dragoff="_event: dragover-end; material.wireframe: false"></a-mixin>
+                 event-set__grabon="_event: grab-start; material.opacity: 0.7; transparent: true"
+                 event-set__graboff="_event: grab-end; material.opacity: 1; transparent: false"
+                 event-set__dragon="_event: dragover-start; wireframe: true"
+                 event-set__dragoff="_event: dragover-end; wireframe: false"></a-mixin>
       </a-assets>
-      <a-entity progressive-controls="objects: .cube">
-        <a-entity id="lhand" class="left-controller"></a-entity>
-        <a-entity id="rhand" class="right-controller"></a-entity>
-      </a-entity>
+      <a-entity id="lhand" vive-controls="hand: left" mixin="controller"></a-entity>
+      <a-entity id="rhand" vive-controls="hand: right" mixin="controller"></a-entity>
       <a-entity id="redLow" class="cube" mixin="cube" position="0 1 -1" material="color: red"></a-entity>
       <a-entity id="redHigh" class="cube" mixin="cube" position="0 1.6 -1" material="color: red"></a-entity>
       <a-entity id="blueLow" class="cube" mixin="cube" position="-1 1 -1" material="color: blue"></a-entity>
       <a-entity id="blueHigh" class="cube" mixin="cube" position="-1 1.6 -1" material="color: blue"></a-entity>
       <a-entity id="greenLow" class="cube" mixin="cube" position="1 1 -1" material="color: green"></a-entity>
       <a-entity id="greenHigh" class="cube" mixin="cube" position="1 1.6 -1" material="color: green"></a-entity>
-      <a-plane rotation="-90 0 0" color="#888"
-                 width="50" height="50"></a-plane>
     </a-scene>
   </body>
 </html>

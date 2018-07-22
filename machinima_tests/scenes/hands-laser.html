@@ -8,7 +8,8 @@
         <a-mixin id="controller"
                  super-hands="colliderEvent: mouseenter;
                               colliderEventProperty: intersectedEl;
-                              colliderState: cursor-hovered;
+                              colliderEndEvent: mouseleave;
+                              colliderEndEventProperty: intersectedEl;
                               grabStartButtons: mousedown;
                               grabEndButtons: mouseup;
                               dragDropStartButtons: mousedown;

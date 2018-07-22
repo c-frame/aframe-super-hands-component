@@ -1,5 +1,30 @@
 ## News
 
+v3.0.0
+
+* The 'Less is More' update. This package has scope has been narrowed to keep
+  it maintainable, increase the frequency of updates, and allow for focus on
+  implementing new gestures instead of peripheral components.
+  * `progressive-controls` and `a-locomotor` removed from this repo.
+    I understand `progressive-controls` was fairly popular, but is has a
+    [compatibility issue](https://github.com/aframevr/aframe/issues/3610)
+    with the latest A-Frame which was holding up releases for the entire
+    package.
+    I intend to refactor it and release it in another library, but you can
+    still use the last version by including
+    [its source file](https://github.com/wmurphyrd/aframe-super-hands-component/blob/dc1a601b7fa9d606a05ec2d3500f8f141c65c20c/misc_components/progressive-controls.js) in your project.
+* Smarter raycasting support: chooses nearest intersected entity first,
+  reordering stack as distances change (\* if the raycaster in use updates
+  intersection objects' distances)
+* Improved nested entity handling: only one component can react to each
+  gesture event.
+* Improved stretching of complex physics bodies: all shapes, child entity
+  shapes, and offsets are updated
+* Added support for `'worker'` and other `aframe-physics-system` drivers
+  in `grabbable`
+* v2.x deprecations removed: `drag-droppable` component and
+  `super-hands.colliderState` property.
+
 v2.1.0
 
 * A-Frame v0.8.0 (WIP/master branch) support

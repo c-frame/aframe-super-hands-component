@@ -503,7 +503,10 @@ suite('state tracking', function () {
     this.sh1.onHit({
       detail: {
         els: [this.target1, this.target2],
-        intersections: [{distance: 1}, {distance: 2}]
+        intersections: [
+          { distance: 1, object: { el: this.target1 } },
+          { distance: 2, object: { el: this.target2 } }
+        ]
       }
     })
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
@@ -512,6 +515,32 @@ suite('state tracking', function () {
     this.sh1.unWatch({detail: {el: this.target1}})
     this.sh1.unHover({detail: {el: this.target1}})
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2')
+  })
+  test('hover targeting updates as distances change', function () {
+    let time = 10000
+    this.hand1.setAttribute('super-hands', { colliderEventProperty: 'els' })
+    this.target1.addEventListener('hover-start', e => e.preventDefault())
+    this.target2.addEventListener('hover-start', e => e.preventDefault())
+    this.target3.addEventListener('hover-start', e => e.preventDefault())
+    const target1Sect = { distance: 1, object: { el: this.target1 } }
+    const target2Sect = { distance: 2, object: { el: this.target2 } }
+    this.sh1.onHit({
+      detail: {
+        els: [this.target1, this.target2],
+        intersections: [target1Sect, target2Sect]
+      }
+    })
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
+    target2Sect.distance = 0.5
+    this.sh1.tick(time)
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2', 'closer')
+    assert.sameOrderedMembers(this.sh1.hoverEls, [this.target1, this.target2], 'closer')
+    target2Sect.distance = 3
+    target1Sect.distance = 2
+    time += 10000
+    this.sh1.tick(time)
+    assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1', 'further')
+    assert.sameOrderedMembers(this.sh1.hoverEls, [this.target2, this.target1], 'further')
   })
   test('released el placed back at top of stack', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault())

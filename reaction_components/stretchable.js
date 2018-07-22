@@ -1,9 +1,8 @@
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep
 const buttonsCore = require('./prototypes/buttons-proto.js')
-const networkedCore = require('./prototypes/networked-proto.js')
 // new object with all core modules
-const base = inherit({}, buttonsCore, networkedCore)
+const base = inherit({}, buttonsCore)
 AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: {default: 'ifavailable'},
@@ -71,8 +70,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   },
   start: function (evt) {
     if (this.stretched || this.stretchers.includes(evt.detail.hand) ||
-        !this.startButtonOk(evt) || evt.defaultPrevented ||
-        !this.networkedOk()) {
+        !this.startButtonOk(evt) || evt.defaultPrevented) {
       return
     } // already stretched or already captured this hand or wrong button
     this.stretchers.push(evt.detail.hand)
@@ -110,7 +108,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     }
     this.previousPhysicsStretch = currentStretch
     if (deltaStretch === 1) { return }
-    for (let c of this.el.children) { this.stretchBody(c, deltaStretch) }
+    for (let c of this.el.childNodes) { this.stretchBody(c, deltaStretch) }
     this.stretchBody(this.el, deltaStretch)
   },
   stretchBody: function (el, deltaStretch) {

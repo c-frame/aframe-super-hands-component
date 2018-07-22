@@ -1,6 +1,6 @@
 {
   "name": "super-hands",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "All-in-one natural hand controller interaction component for A-Frame.",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "test": "karma start ./tests/karma.conf.js",
     "test:firefox": "karma start ./tests/karma.conf.js --browsers Firefox",
     "test:chrome": "karma start ./tests/karma.conf.js --browsers Chrome",
-    "test:ci": "TEST_ENV=ci karma start ./tests/karma.conf.js --single-run --browsers FirefoxNightly",
+    "test:ci": "TEST_ENV=ci karma start ./tests/karma.conf.js --single-run --browsers Firefox",
     "test:machinima": "karma start ./machinima_tests/karma.conf.js"
   },
   "repository": {
@@ -45,12 +45,12 @@
   },
   "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
   "devDependencies": {
-    "aframe": "^0.8.1",
-    "aframe-event-set-component": "^3.0.2",
-    "aframe-extras": "^3.12.4",
+    "aframe": "^0.8.2",
+    "aframe-event-set-component": "^4.0.0",
+    "aframe-extras": "^4.1.2",
     "aframe-machinima-testing": "^0.1.2",
-    "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8b",
-    "aframe-physics-system": "^2.1.0",
+    "aframe-motion-capture-components": "github:dmarcos/aframe-motion-capture-components#3a3cbd73",
+    "aframe-physics-system": "^3.2.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-minify": "^0.2.0",
     "babelify": "^7.3.0",
@@ -80,7 +80,7 @@
     "shx": "^0.1.1",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
-    "snazzy": "^4.0.0",
+    "snazzy": "^7.0.0",
     "standard": "^10.0.3"
   },
   "standard": {
