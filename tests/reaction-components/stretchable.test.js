@@ -4,6 +4,9 @@ var helpers = require('../helpers')
 var entityFactory = helpers.entityFactory
 var coord = AFRAME.utils.coordinates.parse
 var uncoord = AFRAME.utils.coordinates.stringify
+function move (entity, dest) {
+  entity.object3D.position.copy(coord(dest))
+}
 
 suite('stretchable', function () {
   setup(function (done) {
@@ -55,43 +58,37 @@ suite('stretchable', function () {
     assert.isTrue(this.el.is(this.comp.STRETCHED_STATE))
   })
   test('scale updates during stretch', function () {
-    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute')
-    const posStub2 = this.sinon.stub(this.hand2, 'getAttribute')
     var lastScale
-    posStub1.withArgs('position')
-      .onFirstCall().returns(coord('0 0 0'))
-      .onSecondCall().returns(coord('1 1 1'))
-      .onThirdCall().returns(coord('2 2 2'))
-    posStub2.withArgs('position').returns(coord('-1 -1 -1'))
+    move(this.hand1, '0 0 0')
+    move(this.hand2, '-1 -1 -1')
     this.comp.start({ detail: { hand: this.hand1 } })
     this.comp.start({ detail: { hand: this.hand2 } })
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1')
+    move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.notStrictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1')
     assert.isAbove(this.el.getAttribute('scale').x, 1)
+    move(this.hand1, '2 2 2')
     lastScale = this.el.getAttribute('scale')
     this.comp.end({ detail: { hand: this.hand1 } })
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale))
   })
   test('scale updates are invertable', function () {
-    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute')
-    const posStub2 = this.sinon.stub(this.hand2, 'getAttribute')
     var lastScale
     this.el.setAttribute('stretchable', {invert: true})
-    posStub1.withArgs('position')
-      .onFirstCall().returns(coord('0 0 0'))
-      .onSecondCall().returns(coord('1 1 1'))
-      .onThirdCall().returns(coord('2 2 2'))
-    posStub2.withArgs('position').returns(coord('-1 -1 -1'))
+    move(this.hand1, '0 0 0')
+    move(this.hand2, '-1 -1 -1')
     this.comp.start({ detail: { hand: this.hand1 } })
     this.comp.start({ detail: { hand: this.hand2 } })
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1')
+    move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.isBelow(this.el.getAttribute('scale').x, 1)
     lastScale = this.el.getAttribute('scale')
+    move(this.hand1, '2 2 2')
     this.comp.end({ detail: { hand: this.hand1 } })
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale))
@@ -114,28 +111,23 @@ suite('stretchable-physics', function () {
     })
   })
   test('box bodies update with scaling', function () {
-    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute')
     const scale = new window.CANNON.Vec3()
-    posStub1.withArgs('position')
-      .onFirstCall().returns(coord('0 0 0'))
-      .onSecondCall().returns(coord('1 1 1'))
-      .onThirdCall().returns(coord('2 2 2'))
+    move(this.hand1, '0 0 0')
+    move(this.hand2, '0 0 0')
     this.comp.start({ detail: { hand: this.hand1 } })
     this.comp.start({ detail: { hand: this.hand2 } })
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
                      scale.set(0.5, 0.5, 0.5))
+    move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.notDeepEqual(this.el.body.shapes[0].halfExtents,
                         scale.set(0.5, 0.5, 0.5))
   })
   test('box bodies do not update when usePhysics = never', function () {
-    const posStub1 = this.sinon.stub(this.hand1, 'getAttribute')
     const scale = new window.CANNON.Vec3()
-    posStub1.withArgs('position')
-      .onFirstCall().returns(coord('0 0 0'))
-      .onSecondCall().returns(coord('1 1 1'))
-      .onThirdCall().returns(coord('2 2 2'))
+    move(this.hand1, '0 0 0')
+    move(this.hand2, '0 0 0')
     this.el.setAttribute('stretchable', 'usePhysics: never')
     this.comp.start({ detail: { hand: this.hand1 } })
     this.comp.start({ detail: { hand: this.hand2 } })
@@ -143,6 +135,7 @@ suite('stretchable-physics', function () {
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
                      scale.set(0.5, 0.5, 0.5))
+    move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
                         scale.set(0.5, 0.5, 0.5))

@@ -147,13 +147,11 @@ AFRAME.registerComponent('super-hands', {
     this.onDragDropEndButton();
   },
   tick: function () {
-    let orderChanged = false;
     // closer objects and objects with no distance come later in list
     function sorter(a, b) {
       const aDist = a.distance == null ? -1 : a.distance;
       const bDist = b.distance == null ? -1 : b.distance;
       if (aDist < bDist) {
-        orderChanged = true;
         return 1;
       }
       if (bDist < aDist) {
@@ -169,12 +167,15 @@ AFRAME.registerComponent('super-hands', {
       }
       this.prevCheckTime = time;
 
-      orderChanged = false;
+      let orderChanged = false;
       this.hoverElsIntersections.sort(sorter);
-      if (orderChanged) {
-        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+      for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+        if (this.hoverEls[i] !== this.hoverElsIntersections[i].object.el) {
+          orderChanged = true;
           this.hoverEls[i] = this.hoverElsIntersections[i].object.el;
         }
+      }
+      if (orderChanged) {
         this.hover();
       }
     };
@@ -536,7 +537,7 @@ AFRAME.registerComponent('super-hands', {
       this.hoverEls.splice(hoverIndex, 1);
       const sect = this.hoverElsIntersections.splice(hoverIndex, 1);
       this.hoverEls.push(el);
-      this.hoverElsIntersections.push(sect);
+      this.hoverElsIntersections.push(sect[0]);
     }
   }
 });
@@ -82100,7 +82101,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
-    physicsUpdateRate: { default: 100 }
+    physicsUpdateRate: { default: 100 },
+    useWorldPosition: { default: false }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -82127,8 +82129,13 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
-    this.handPos.copy(this.stretchers[0].getAttribute('position'));
-    this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    if (this.data.useWorldPosition) {
+      this.stretchers[0].object3D.getWorldPosition(this.handPos);
+      this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
+    } else {
+      this.handPos.copy(this.stretchers[0].getAttribute('position'));
+      this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
+    }
     const currentStretch = this.handPos.distanceTo(this.otherHandPos);
     let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
