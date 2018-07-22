@@ -86,9 +86,9 @@ aframe-machinima-testing@^0.1.2:
   version "0.2.7"
   resolved "https://codeload.github.com/dmarcos/aframe-motion-capture-components/tar.gz/3a3cbd73ffc751285be95e9729a09121ff03c440"
 
-aframe-physics-system@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/aframe-physics-system/-/aframe-physics-system-3.1.2.tgz#cb10f39b0d564637e729bb24e0f802ad16afcb1b"
+aframe-physics-system@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/aframe-physics-system/-/aframe-physics-system-3.2.0.tgz#6d73c065fdf1010c32be62723b6c187e9fa0d6a3"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"

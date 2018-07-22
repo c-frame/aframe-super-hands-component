@@ -50,7 +50,7 @@
     "aframe-extras": "^4.1.2",
     "aframe-machinima-testing": "^0.1.2",
     "aframe-motion-capture-components": "github:dmarcos/aframe-motion-capture-components#3a3cbd73",
-    "aframe-physics-system": "^3.1.2",
+    "aframe-physics-system": "^3.2.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-minify": "^0.2.0",
     "babelify": "^7.3.0",
