@@ -7,7 +7,7 @@ var karmaConf = {
       ['babelify']
     ]
   },
-  browsers: ['Chrome', 'Firefox'],
+  browsers: ['Chrome', 'Firefox_NoVR'],
   // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
@@ -17,6 +17,12 @@ var karmaConf = {
     Chromium_WebVR: {
       base: 'Chromium',
       flags: ['--enable-webvr', '--enable-gamepad-extensions']
+    },
+    Firefox_NoVR: {
+      base: 'Firefox',
+      prefs: {
+        'dom.vr.enabled': false
+      }
     }
   },
   envPreprocessor: [
