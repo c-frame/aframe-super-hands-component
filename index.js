@@ -134,13 +134,11 @@ AFRAME.registerComponent('super-hands', {
     this.onDragDropEndButton()
   },
   tick: (function () {
-    let orderChanged = false
     // closer objects and objects with no distance come later in list
     function sorter (a, b) {
       const aDist = a.distance == null ? -1 : a.distance
       const bDist = b.distance == null ? -1 : b.distance
       if (aDist < bDist) {
-        orderChanged = true
         return 1
       }
       if (bDist < aDist) {
@@ -154,12 +152,15 @@ AFRAME.registerComponent('super-hands', {
       if (prevCheckTime && (time - prevCheckTime < data.interval)) { return }
       this.prevCheckTime = time
 
-      orderChanged = false
+      let orderChanged = false
       this.hoverElsIntersections.sort(sorter)
-      if (orderChanged) {
-        for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+      for (let i = 0; i < this.hoverElsIntersections.length; i++) {
+        if (this.hoverEls[i] !== this.hoverElsIntersections[i].object.el) {
+          orderChanged = true
           this.hoverEls[i] = this.hoverElsIntersections[i].object.el
         }
+      }
+      if (orderChanged) {
         this.hover()
       }
     }
