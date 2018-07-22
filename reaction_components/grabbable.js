@@ -41,7 +41,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     var q = new THREE.Quaternion()
     var v = new THREE.Vector3()
 
-    return function(){
+    return function () {
       var entityPosition
       if (this.grabber) {
         // reflect on z-axis to point in same direction as the laser
@@ -68,7 +68,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
         this.deltaPosition.copy(this.targetPosition)
       }
     }
-})(),
+  })(),
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start)
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end)
@@ -113,7 +113,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
     if (evt.preventDefault) { evt.preventDefault() }
   },
-  resetGrabber: function () {
+  resetGrabber: (function () {
     var objPos = new THREE.Vector3()
     var grabPos = new THREE.Vector3()
     return function () {
@@ -129,8 +129,8 @@ AFRAME.registerComponent('grabbable', inherit(base, {
         this.grabOffset = raycaster.origin
       }
       return true
-    };
-  }(),
+    }
+  })(),
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget)
     // if a queued, non-physics grabber leaves the collision zone, forget it

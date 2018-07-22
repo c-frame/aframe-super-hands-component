@@ -845,25 +845,30 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
-    var entityPosition;
-    if (this.grabber) {
-      // reflect on z-axis to point in same direction as the laser
-      this.targetPosition.copy(this.grabDirection);
-      this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion()).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition()).add(this.grabOffset);
-      if (this.deltaPositionIsValid) {
-        // relative position changes work better with nested entities
-        this.deltaPosition.sub(this.targetPosition);
-        entityPosition = this.el.getAttribute('position');
-        this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
-        this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
-        this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
-        this.el.setAttribute('position', this.destPosition);
-      } else {
-        this.deltaPositionIsValid = true;
+    var q = new THREE.Quaternion();
+    var v = new THREE.Vector3();
+
+    return function () {
+      var entityPosition;
+      if (this.grabber) {
+        // reflect on z-axis to point in same direction as the laser
+        this.targetPosition.copy(this.grabDirection);
+        this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion(q)).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition(v)).add(this.grabOffset);
+        if (this.deltaPositionIsValid) {
+          // relative position changes work better with nested entities
+          this.deltaPosition.sub(this.targetPosition);
+          entityPosition = this.el.getAttribute('position');
+          this.destPosition.x = entityPosition.x - this.deltaPosition.x * this.xFactor;
+          this.destPosition.y = entityPosition.y - this.deltaPosition.y * this.yFactor;
+          this.destPosition.z = entityPosition.z - this.deltaPosition.z * this.zFactor;
+          this.el.setAttribute('position', this.destPosition);
+        } else {
+          this.deltaPositionIsValid = true;
+        }
+        this.deltaPosition.copy(this.targetPosition);
       }
-      this.deltaPosition.copy(this.targetPosition);
-    }
-  },
+    };
+  }(),
   remove: function () {
     this.el.removeEventListener(this.GRAB_EVENT, this.start);
     this.el.removeEventListener(this.UNGRAB_EVENT, this.end);
@@ -914,19 +919,23 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
   },
   resetGrabber: function () {
-    let raycaster;
-    if (!this.grabber) {
-      return false;
-    }
-    raycaster = this.grabber.getAttribute('raycaster');
-    this.deltaPositionIsValid = false;
-    this.grabDistance = this.el.object3D.getWorldPosition().distanceTo(this.grabber.object3D.getWorldPosition());
-    if (raycaster) {
-      this.grabDirection = raycaster.direction;
-      this.grabOffset = raycaster.origin;
-    }
-    return true;
-  },
+    var objPos = new THREE.Vector3();
+    var grabPos = new THREE.Vector3();
+    return function () {
+      let raycaster;
+      if (!this.grabber) {
+        return false;
+      }
+      raycaster = this.grabber.getAttribute('raycaster');
+      this.deltaPositionIsValid = false;
+      this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos));
+      if (raycaster) {
+        this.grabDirection = raycaster.direction;
+        this.grabOffset = raycaster.origin;
+      }
+      return true;
+    };
+  }(),
   lostGrabber: function (evt) {
     let i = this.grabbers.indexOf(evt.relatedTarget);
     // if a queued, non-physics grabber leaves the collision zone, forget it
