@@ -1076,8 +1076,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
     usePhysics: { default: 'ifavailable' },
     invert: { default: false },
-    physicsUpdateRate: { default: 100 },
-    useWorldPosition: { default: false }
+    physicsUpdateRate: { default: 100 }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched';
@@ -1104,13 +1103,8 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
     this.scale.copy(this.el.getAttribute('scale'));
-    if (this.data.useWorldPosition) {
-      this.stretchers[0].object3D.getWorldPosition(this.handPos);
-      this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
-    } else {
-      this.handPos.copy(this.stretchers[0].getAttribute('position'));
-      this.otherHandPos.copy(this.stretchers[1].getAttribute('position'));
-    }
+    this.stretchers[0].object3D.getWorldPosition(this.handPos);
+    this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
     const currentStretch = this.handPos.distanceTo(this.otherHandPos);
     let deltaStretch = 1;
     if (this.previousStretch !== null && currentStretch !== 0) {
