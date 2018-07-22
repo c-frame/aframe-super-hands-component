@@ -531,7 +531,7 @@ AFRAME.registerComponent('super-hands', {
       this.hoverEls.splice(hoverIndex, 1)
       const sect = this.hoverElsIntersections.splice(hoverIndex, 1)
       this.hoverEls.push(el)
-      this.hoverElsIntersections.push(sect)
+      this.hoverElsIntersections.push(sect[0])
     }
   }
 })
