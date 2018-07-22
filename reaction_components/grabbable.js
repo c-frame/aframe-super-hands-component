@@ -7,6 +7,7 @@ const base = inherit({}, physicsCore, buttonsCore)
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
     maxGrabbers: {type: 'int', default: NaN},
+    maxGrabBehavior: {default: 'nothing', oneOf: ['nothing', 'drop']},
     invert: {default: false},
     suppressY: {default: false}
   },
@@ -79,9 +80,13 @@ AFRAME.registerComponent('grabbable', inherit(base, {
       return
     }
     // room for more grabbers?
-    const grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
+    let grabAvailable = !Number.isFinite(this.data.maxGrabbers) ||
         this.grabbers.length < this.data.maxGrabbers
-
+    if (Number.isFinite(this.data.maxGrabbers) && !grabAvailable &&
+        this.grabbed && this.data.maxGrabBehavior === 'drop') {
+      this.grabbers[0].components['super-hands'].onGrabEndButton()
+      grabAvailable = true
+    }
     if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D')
