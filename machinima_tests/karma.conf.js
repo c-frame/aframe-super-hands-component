@@ -6,12 +6,20 @@ var karmaConf = {
       ['babelify']
     ]
   },
-  browsers: ['Firefox', 'Chrome'],
+  browsers: ['Firefox_NoVR', 'Chrome'],
   // machinima: prevent timeout during recording playback
   browserNoActivityTimeout: 600000,
   client: {
     captureConsole: false,
     mocha: {'ui': 'tdd'}
+  },
+  customLaunchers: {
+    Firefox_NoVR: {
+      base: 'Firefox',
+      prefs: {
+        'dom.vr.enabled': false
+      }
+    }
   },
   files: [
     // module and dependencies
