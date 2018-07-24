@@ -302,7 +302,7 @@ AFRAME.registerComponent('super-hands', {
     const carried = this.state.get(this.GRAB_EVENT)
     if (carried) {
       if (!this.emitCancelable(carried, this.ACTIVATE_EVENT, {hand: this.el, buttonEvent: evt})) {
-        if (activated) this.state.set(this.ACTIVATE_EVENT, grabbed)
+        this.state.set(this.ACTIVATE_EVENT, carried)
       }
     }
   },
