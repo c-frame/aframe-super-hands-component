@@ -31,7 +31,7 @@ AFRAME.registerComponent('activatable', inherit({}, buttonCore, {
   },
   activateEnd: function (evt) {
     if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
-    if (evt.detail.buttonEvent.type !== this.data.buttonEndEvent) { return }
+    if (evt.detail.buttonEvent.type !== this.data.buttonEndEvent || !this.el.is(this.data.activatedState)) { return }
     this.el.removeState(this.data.activatedState)
     if (evt.preventDefault) { evt.preventDefault() }
   }
