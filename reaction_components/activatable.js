@@ -5,8 +5,8 @@ const buttonCore = require('./prototypes/buttons-proto.js')
 AFRAME.registerComponent('activatable', inherit({}, buttonCore, {
   multiple: true,
   schema: {
-    buttonStartEvent: {default: ''},
-    buttonEndEvent: {default: ''},
+    buttonStartEvents: {default: []},
+    buttonEndEvents: {default: []},
     activatedState: {default: 'activated'}
   },
   init: function () {
@@ -25,13 +25,13 @@ AFRAME.registerComponent('activatable', inherit({}, buttonCore, {
   },
   activateStart: function (evt) {
     if (evt.defaultPrevented || !this.startButtonOk(evt)) { return }
-    if (evt.detail.buttonEvent.type !== this.data.buttonStartEvent) { return }
+    if (this.data.buttonStartEvents.indexOf(evt.detail.buttonEvent.type) === -1) { return }
     this.el.addState(this.data.activatedState)
     if (evt.preventDefault) { evt.preventDefault() }
   },
   activateEnd: function (evt) {
     if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
-    if (evt.detail.buttonEvent.type !== this.data.buttonEndEvent || !this.el.is(this.data.activatedState)) { return }
+    if (this.data.buttonEndEvents.indexOf(evt.detail.buttonEvent.type) === -1 || !this.el.is(this.data.activatedState)) { return }
     this.el.removeState(this.data.activatedState)
     if (evt.preventDefault) { evt.preventDefault() }
   }
