@@ -306,9 +306,8 @@ AFRAME.registerComponent('super-hands', {
   },
   onActivateEndButton: function (evt) {
     const target = this.state.get(this.GRAB_EVENT) || this.state.get(this.HOVER_EVENT)
-      if (target && !this.emitCancelable(target, this.DEACTIVATE_EVENT, {hand: this.el, buttonEvent: evt})) {
-        this.state.delete(this.ACTIVATE_EVENT)
-      }
+    if (target && !this.emitCancelable(target, this.DEACTIVATE_EVENT, {hand: this.el, buttonEvent: evt})) {
+      this.state.delete(this.ACTIVATE_EVENT)
     }
   },
   processHitEl: function (hitEl, intersection) {
