@@ -1,6 +1,7 @@
 /* global assert, process, setup, suite, test, AFRAME */
 const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
+const elFactory = helpers.elFactory
 const coord = AFRAME.utils.coordinates.parse
 suite('grabbable', function () {
   suite('grabbable-lifecycle', function () {
@@ -16,7 +17,7 @@ suite('grabbable', function () {
     })
     test('component removes without errors', function (done) {
       var el = this.el
-      el.removeComponent('grabbable')
+      el.removeAttribute('grabbable')
       process.nextTick(function () {
         assert.notOk(el.components.grabbable)
         done()
@@ -106,23 +107,28 @@ suite('grabbable', function () {
   })
 
   suite('grabbable-function with physics', function () {
-    setup(function (done) {
-      var el = this.el = entityFactory()
-      this.hand = helpers.controllerFactory({
-        'static-body': '',
-        geometry: 'primitive: sphere'
+    setup(async function () {
+      var el = this.el = await elFactory()
+      console.log('elfactory')
+      const handPromise = new Promise(resolve => {
+        this.hand = helpers.controllerFactory({
+          'body': 'type: static; shape: sphere',
+          geometry: 'primitive: sphere'
+        })
+        if (this.hand.body) return resolve()
+        this.hand.addEventListener('body-loaded', () => resolve())
       })
-      el.setAttribute('grabbable', '')
-      el.setAttribute('geometry', 'primitive: box')
-      el.setAttribute('dynamic-body', '')
-      el.addEventListener('body-loaded', evt => {
-        this.comp = el.components.grabbable
-        if (!this.hand.body) {
-          this.hand.addEventListener('body-loaded', evt => done())
-        } else {
-          done()
-        }
+      const elPromise = new Promise(resolve => {
+        el.addEventListener('body-loaded', evt => {
+          this.comp = el.components.grabbable
+          console.log('el promise')
+          resolve()
+        })
+        el.setAttribute('grabbable', '')
+        el.setAttribute('geometry', 'primitive: box')
+        el.setAttribute('body', 'shape: box')
       })
+      return Promise.all([handPromise, elPromise])
     })
     test('constraint registered on grab', function () {
       this.comp.start({ detail: { hand: this.hand } })
@@ -198,18 +204,18 @@ suite('grabbable', function () {
       this.hand1 = helpers
         .controllerFactory({
           'super-hands': '',
-          'static-body': '',
+          body: 'type: static; shape: sphere',
           geometry: 'primitive: sphere'
         })
       this.hand2 = helpers
         .controllerFactory({
           'super-hands': '',
-          'static-body': '',
+          body: 'type: static; shape: sphere',
           geometry: 'primitive: sphere'
         })
       el.setAttribute('grabbable', '')
       el.setAttribute('geometry', 'primitive: box')
-      el.setAttribute('dynamic-body', '')
+      el.setAttribute('body', 'shape: box;')
       el.addEventListener('body-loaded', evt => {
         this.comp = el.components.grabbable
         if (!this.hand2.body) {

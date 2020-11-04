@@ -6,7 +6,7 @@
  *
  * @returns {object} An `<a-entity>` element.
  */
-module.exports.entityFactory = function (opts, usePhysics) {
+function entityFactory (opts, usePhysics) {
   var scene = document.createElement('a-scene')
   var assets = document.createElement('a-assets')
   var entity = document.createElement('a-entity')
@@ -24,8 +24,30 @@ module.exports.entityFactory = function (opts, usePhysics) {
   document.body.appendChild(scene)
   // convenience link to scene because new entities in FF don't get .sceneEl until loaded
   entity.sceneEl = scene
+  delete entity.inspect // name collision with chai
   return entity
 }
+module.exports.entityFactory = entityFactory
+/**
+ * A more robust entity factory that resolves once stuff is loaded without having to wait
+ * on fragile asynchrony.
+ *
+ * @returns {Promise}
+ */
+module.exports.elFactory = function (opts) {
+  let entity = entityFactory(opts);
+  return new Promise(resolve => {
+    if (entity.sceneEl) {
+      if (entity.sceneEl.hasLoaded) { return resolve(entity); }
+      entity.sceneEl.addEventListener('loaded', () => { resolve(entity); });
+      return;
+    }
+    entity.addEventListener('nodeready', () => {
+      if (entity.sceneEl.hasLoaded) { return resolve(entity); }
+      entity.sceneEl.addEventListener('loaded', () => { resolve(entity); });
+    });
+  });
+};
 
 /**
  * Creates and attaches a mixin element (and an `<a-assets>` element if necessary).

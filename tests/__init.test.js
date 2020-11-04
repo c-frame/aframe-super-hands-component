@@ -4,28 +4,46 @@
  * __init.test.js is run before every test case.
  */
 window.debug = true
-var AScene = require('aframe').AScene
 
 navigator.getVRDisplays = function () {
   var resolvePromise = Promise.resolve()
   var mockVRDisplay = {
-    requestPresent: resolvePromise,
+    cancelAnimationFrame: function (h) { return window.cancelAnimationFrame(1) },
+    capabilities: {},
     exitPresent: resolvePromise,
-    getPose: function () { return {orientation: null, position: null} },
-    requestAnimationFrame: function () { return 1 }
+    getPose: function () { return { orientation: null, position: null } },
+    requestAnimationFrame: function () { return 1 },
+    requestPresent: resolvePromise,
+    submitFrame: function () {}
   }
   return Promise.resolve([mockVRDisplay])
 }
+
+var AScene = require('aframe').AScene
 
 setup(function () {
   this.sinon = sinon.sandbox.create()
   // Stubs to not create a WebGL context since Travis CI runs headless.
   this.sinon.stub(AScene.prototype, 'render')
-  this.sinon.stub(AScene.prototype, 'resize')
   this.sinon.stub(AScene.prototype, 'setupRenderer')
+  // Mock renderer.
+  AScene.prototype.renderer = {
+    xr: {
+      getDevice: function () { return {requestPresent: function () {}} },
+      isPresenting: function () { return true },
+      setDevice: function () {},
+      setPoseTarget: function () {},
+      enabled: false
+    },
+    getContext: function () { return undefined },
+    setAnimationLoop: function () {},
+    setSize: function () {},
+    setPixelRatio: function () {},
+    shadowMap: {}
+  }
 })
 
-teardown(function () {
+teardown(function (done) {
   // Clean up any attached elements.
   var attachedEls = ['canvas', 'a-assets', 'a-scene']
   var els = document.querySelectorAll(attachedEls.join(','))
@@ -33,5 +51,9 @@ teardown(function () {
     els[i].parentNode.removeChild(els[i])
   }
   this.sinon.restore()
-  delete window.NAF
+
+  // Allow detachedCallbacks to clean themselves up.
+  setTimeout(function () {
+    done()
+  })
 })

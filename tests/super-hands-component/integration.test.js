@@ -107,7 +107,7 @@ suite('super-hands & reaction component integration', function () {
     assert.strictEqual(this.sh1.hoverEls.indexOf(this.target2), -1)
   })
   test('lastHover not confused by rejected dragover', function () {
-    this.target2.removeComponent('droppable')
+    this.target2.removeAttribute('droppable')
     this.sh1.onDragDropStartButton()
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onHit({ detail: { el: this.target2 } })

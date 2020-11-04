@@ -1,4 +1,5 @@
 window.debug = true
 require('aframe')
-require('aframe-physics-system')
+// required prebuilt bundle to avoid dependencies/transpilation
+require('aframe-physics-system/dist/aframe-physics-system')
 require('aframe-extras')

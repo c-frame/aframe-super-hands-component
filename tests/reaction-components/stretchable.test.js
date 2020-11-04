@@ -26,7 +26,7 @@ suite('stretchable', function () {
   })
   test('component removes without errors', function (done) {
     var el = this.el
-    el.removeComponent('stretchable')
+    el.removeAttribute('stretchable')
     process.nextTick(function () {
       assert.notOk(el.components.stretchable)
       done()

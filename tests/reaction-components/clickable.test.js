@@ -14,7 +14,7 @@ suite('clickable-lifecycle', function () {
   })
   test('component removes without errors', function (done) {
     var el = this.el
-    el.removeComponent('clickable')
+    el.removeAttribute('clickable')
     process.nextTick(function () {
       assert.notOk(el.components.grabbable)
       done()
