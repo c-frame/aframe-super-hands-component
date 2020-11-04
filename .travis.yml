@@ -1,13 +1,12 @@
 language: node_js
 addons:
   firefox: 'latest'
+  chrome: stable
 node_js:
-  - '6.9.2'
+  - '12.16.2'
 
 install:
-  - npm install
-  - ./node_modules/.bin/mozilla-download ./firefox/ --product firefox --branch mozilla-central
-  - export FIREFOX_NIGHTLY_BIN="./firefox/firefox/firefox-bin"
+  - npm ci
 
 before_script:
   - export DISPLAY=:99.0
@@ -28,10 +27,3 @@ env:
 cache:
   directories:
     - node_modules
-
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - g++-4.8
