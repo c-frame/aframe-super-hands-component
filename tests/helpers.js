@@ -35,19 +35,19 @@ module.exports.entityFactory = entityFactory
  * @returns {Promise}
  */
 module.exports.elFactory = function (opts) {
-  let entity = entityFactory(opts);
+  let entity = entityFactory(opts)
   return new Promise(resolve => {
     if (entity.sceneEl) {
-      if (entity.sceneEl.hasLoaded) { return resolve(entity); }
-      entity.sceneEl.addEventListener('loaded', () => { resolve(entity); });
-      return;
+      if (entity.sceneEl.hasLoaded) { return resolve(entity) }
+      entity.sceneEl.addEventListener('loaded', () => { resolve(entity) })
+      return
     }
     entity.addEventListener('nodeready', () => {
-      if (entity.sceneEl.hasLoaded) { return resolve(entity); }
-      entity.sceneEl.addEventListener('loaded', () => { resolve(entity); });
-    });
-  });
-};
+      if (entity.sceneEl.hasLoaded) { return resolve(entity) }
+      entity.sceneEl.addEventListener('loaded', () => { resolve(entity) })
+    })
+  })
+}
 
 /**
  * Creates and attaches a mixin element (and an `<a-assets>` element if necessary).
