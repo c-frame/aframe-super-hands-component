@@ -7,9 +7,6 @@ services:
 node_js:
   - '12.16.2'
 
-install:
-  - npm ci
-
 script:
   - $CI_ACTION
 
