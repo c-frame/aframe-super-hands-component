@@ -4,16 +4,16 @@
     <!-- Replace "../build.js" with the super-hands and
          A-Frame distributions to run : -->
     <script src="../build.js"></script>
-    <!-- <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script> -->
+    <!-- <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> -->
     <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
     <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
     <link rel="stylesheet" type="text/css" href="../assets/examples.css">
   </head>
   <body>
-    <button id="replayer-button" type="button" onclick="playDemoRecording()">
+    <!-- <button id="replayer-button" type="button" onclick="playDemoRecording()">
       Don't have a Vive, Rift, Daydream, or GearVR handy? Click here for a preview.
-    </button>
+    </button> -->
     <a-scene environment="preset: default; shadow: true" avatar-recorder
              touch-to-click-converter>
       <a-assets>
@@ -36,7 +36,7 @@
         <a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  hoverable grabbable stretchable draggable droppable
                  shadow
-                 event-set__dragdrop="_event: drag-drop; geometry.radius: 0.25; geometry.primitive: sphere"
+                 event-set__dragdrop="_event: drag-drop; geometry.primitive: sphere; geometry.radius: 0.25"
                  event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
                  event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
                  event-set__dragon="_event: dragover-start; material.wireframe: true"

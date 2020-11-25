@@ -16,7 +16,7 @@ suite('draggable', function () {
   })
   test('component removes without errors', function (done) {
     var el = this.el
-    el.removeComponent('draggable')
+    el.removeAttribute('draggable')
     process.nextTick(function () {
       assert.notOk(el.components['draggable'])
       done()

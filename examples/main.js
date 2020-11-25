@@ -1,6 +1,6 @@
 require('aframe')
 require('../index.js')
-require('aframe-motion-capture-components')
+// require('aframe-motion-capture-components')
 /* used in examples to allow a desktop playback without HMD
    defined here to keep example files clear of clutter */
 window.playDemoRecording = function (spectate) {

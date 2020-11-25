@@ -16,7 +16,7 @@ suite('super-hands lifecycle', function () {
   })
   test('component removes without errors', function (done) {
     var el = this.el
-    el.removeComponent('super-hands')
+    el.removeAttribute('super-hands')
     process.nextTick(function () {
       assert.notOk(el.components['super-hands'])
       done()

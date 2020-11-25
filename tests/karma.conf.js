@@ -1,8 +1,11 @@
+const path = require('path')
 // karma configuration
 var karmaConf = {
   basePath: '../',
   browserify: {
     debug: true,
+    // avoid errors when attempting to process pre-bundled file
+    noParse: [path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js')],
     transform: [
       ['babelify']
     ]
