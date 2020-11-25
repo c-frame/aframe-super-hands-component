@@ -1,6 +1,6 @@
 # Super Hands
 
-[![Build Status](https://travis-ci.org/wmurphyrd/aframe-super-hands-component.svg?branch=master)](https://travis-ci.org/wmurphyrd/aframe-super-hands-component)
+[![Build Status](https://travis-ci.com/wmurphyrd/aframe-super-hands-component.svg?branch=master)](https://travis-ci.com/wmurphyrd/aframe-super-hands-component)
 [![npm Dowloads](https://img.shields.io/npm/dt/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
@@ -56,9 +56,9 @@ Install and use by directly by including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
   <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v4.1.2/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/super-hands@3.0.0/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.1/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -117,6 +117,12 @@ The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/exa
 
 ## News
 
+v3.0.1
+
+* A-Frame 1.0.4 support confirmation
+  * Updated dependencies and fixed tests
+  * No notable changes
+
 v3.0.0
 
 * The 'Less is More' update. This package has scope has been narrowed to keep
@@ -155,15 +161,16 @@ v3.0.0
 
 ## Compatibility
 
-With `progressive-controls`, `super-hands` can provide interactive controls
+With the right configuration, `super-hands` can provide interactive controls
 for any device: desktop, mobile ("magic window"), cardboard viewer + button,
-Daydream, GearVR, Vive, and Rift + Touch.
+3DOF (Daydream, GearVR) and full 6DOF tracked controls (Vive, Oculus Touch, Valve Index, et c).
 
 `super-hands` dependency version compatibility:
 
 | super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
-| ^v3.0.0 | >=v0.8.2 | ^v4.1.2 | ^v3.1.2 |
+| ^v3.0.1 | ^v1.0.4 | ^v6.1.1 | ^v4.0.1 |
+| v3.0.0 | ^v0.8.2 | ^v4.1.2 | ^v3.1.2 |
 | ^v2.0.0 | v0.6.x | ^v3.11.4 | ^v2.0.0 |
 
 ## Core Component

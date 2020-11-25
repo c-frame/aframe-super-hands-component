@@ -47,7 +47,7 @@
   "devDependencies": {
     "aframe": "^1.0.4",
     "aframe-event-set-component": "^4.0.0",
-    "aframe-extras": "^4.1.2",
+    "aframe-extras": "^6.1.1",
     "aframe-machinima-testing": "^0.1.2",
     "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8a",
     "aframe-physics-system": "^4.0.1",
