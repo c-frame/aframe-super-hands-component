@@ -32,7 +32,7 @@ Add these mixins within your `<a-assets>`.
                  hoverable grabbable draggable
                  event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
                  event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
-                 dynamic-body="shape: box; sphereRadius: 0.1"
+                 dynamic-body
         ></a-mixin>
         
         <a-mixin id="physics-hands"
