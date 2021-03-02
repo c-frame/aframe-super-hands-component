@@ -109,23 +109,31 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (!el.body) { return }
     let physicsShape
     let offset
-    for (let i = 0; i < el.body.shapes.length; i++) {
-      physicsShape = el.body.shapes[i]
+
+    // CANNON.js has el.body.shapes.  Ammo has collisionShapes in the shape component.
+    const shapesList = el.body.shapes ? el.body.shapes : el.components["ammo-shape"].collisionShapes;
+
+    for (let i = 0; i < shapesList; i++) {
+      physicsShape = shapesList[i]
       if (physicsShape.halfExtents) {
-        physicsShape.halfExtents
-            .scale(deltaStretch, physicsShape.halfExtents)
-        physicsShape.updateConvexPolyhedronRepresentation()
+        physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
+        physicsShape.updateConvexPolyhedronRepresentation();
       } else if (physicsShape.radius) {
-        physicsShape.radius *= deltaStretch
-        physicsShape.updateBoundingSphereRadius()
+        physicsShape.radius *= deltaStretch;
+        physicsShape.updateBoundingSphereRadius();
       } else if (!this.shapeWarned) {
-        console.warn('Unable to stretch physics body: unsupported shape')
-        this.shapeWarned = true
+        console.warn('Unable to stretch physics body: unsupported shape');
+        this.shapeWarned = true;
       }
       // also move offset to match scale change
-      offset = el.body.shapeOffsets[i]
-      offset.scale(deltaStretch, offset)
+      offset = el.body.shapeOffsets[i];
+      offset.scale(deltaStretch, offset);
     }
-    el.body.updateBoundingRadius()
+    if (el.body.updateBoundingRadius) {
+      // This only exists in CANNON, not Ammo.js
+      // I'm not aware of any requirement to call an equivalent function
+      // in Ammo.js
+      el.body.updateBoundingRadius();
+    }
   }
 }))
