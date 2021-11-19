@@ -3,10 +3,10 @@
     <title>A-Frame Super Hands Component - 6DOF With Physics (Ammo.js Engine)</title>
     <!-- Replace "../build.js" with the super-hands and
          A-Frame distributions to run : -->
-    <script src="../build.js"></script>-->
-    <!--<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>-->
+    <!--<script src="../build.js"></script>-->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- use the local version of super-hands.js-->
-    <!--<script src="../../dist/super-hands.js"></script>-->
+    <script src="../../dist/super-hands.js"></script>
     <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
@@ -82,7 +82,7 @@
                  geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                  ammo-body="type: static; emitCollisionEvents: true" ammo-shape="type: box"></a-mixin>
         <a-mixin id="touch"
-                 physics-collider phase-shift
+                 phase-shift
                  ammo-body="type: kinematic; emitCollisionEvents: true; disableCollision: true"
                  ammo-shape="fit: manual; type:sphere; sphereRadius: 0.02"
                  super-hands="colliderEvent: collidestart;
