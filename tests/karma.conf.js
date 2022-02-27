@@ -5,7 +5,11 @@ var karmaConf = {
   browserify: {
     debug: true,
     // avoid errors when attempting to process pre-bundled file
-    noParse: [path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js')],
+    noParse: [
+      path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js'),
+      path.resolve('./node_modules/aframe/dist/aframe-master.js'),
+      path.resolve('./node_modules/aframe-extras/dist/aframe-extras.misc.js')
+    ],
     transform: [
       ['babelify']
     ]
@@ -48,33 +52,6 @@ var karmaConf = {
     'tests/**/*.js': ['browserify', 'env']
   },
   reporters: ['mocha']
-}
-
-// configuration for code coverage reporting
-if (process.env.TEST_ENV === 'ci') {
-  Object.assign(karmaConf.browserify, {
-    transform: [
-      [
-        'browserify-istanbul', {
-          instrumenterConfig: {
-            embedSource: true
-          },
-          defaultIgnore: true,
-          ignore: ['**/node_modules/**', '**/tests/**', '**/vendor/**', '**/*.css']
-        }
-      ]
-    ]
-  })
-  karmaConf.coverageReporter = {
-    dir: 'tests/coverage',
-    includeAllSources: true,
-    reporters: [
-      {'type': 'html', subdir: 'report'},
-      {'type': 'lcov', subdir: '.'}
-    ]
-  }
-  karmaConf.reporters.push('coverage')
-  karmaConf.preprocessors['src/**/*.js'] = ['coverage']
 }
 
 // Apply configuration

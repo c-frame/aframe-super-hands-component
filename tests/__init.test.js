@@ -22,25 +22,27 @@ navigator.getVRDisplays = function () {
 var AScene = require('aframe').AScene
 
 setup(function () {
-  this.sinon = sinon.sandbox.create()
+  this.sinon = sinon
   // Stubs to not create a WebGL context since Travis CI runs headless.
   this.sinon.stub(AScene.prototype, 'render')
   this.sinon.stub(AScene.prototype, 'setupRenderer')
   // Mock renderer.
   AScene.prototype.renderer = {
     xr: {
-      getDevice: function () { return {requestPresent: function () {}} },
-      isPresenting: function () { return true },
+      getDevice: function () { return {requestPresent: function () {}}; },
+      isPresenting: function () { return true; },
       setDevice: function () {},
       setPoseTarget: function () {},
+      dispose: function () {},
       enabled: false
     },
-    getContext: function () { return undefined },
+    getContext: function () { return undefined; },
     setAnimationLoop: function () {},
     setSize: function () {},
     setPixelRatio: function () {},
-    shadowMap: {}
-  }
+    render: function () {},
+    shadowMap: {enabled: false}
+  };
 })
 
 teardown(function (done) {
