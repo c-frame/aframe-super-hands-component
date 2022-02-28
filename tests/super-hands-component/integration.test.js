@@ -57,7 +57,7 @@ suite('super-hands & reaction component integration', function () {
     this.sh2.onStretchStartButton({})
     assert.ok(this.target1.is('stretched'))
     assert.includeMembers(this.target1.components.stretchable.stretchers,
-                         [this.hand1, this.hand2])
+      [this.hand1, this.hand2])
     assert.strictEqual(this.sh1.state.get(this.sh1.STRETCH_EVENT), this.target1)
     assert.strictEqual(this.sh2.state.get(this.sh2.STRETCH_EVENT), this.target1)
     this.sh1.onStretchEndButton()
@@ -149,7 +149,7 @@ suite('super-hands & reaction component integration', function () {
     assert.ok(this.target2.is('hovered'))
     this.sh1.onGrabEndButton()
     assert.notOk(this.target1.is('hovered') && this.target2.is('hovered'),
-                'two targets hovered')
+      'two targets hovered')
   })
 })
 suite('super-hands collider integration', function () {
@@ -301,12 +301,12 @@ suite('super-hands raycaster integration', function () {
           'colliderEventProperty: els;' +
           'colliderEndEvent: raycaster-intersection-cleared;' +
           'colliderEndEventProperty: clearedEls',
-      'raycaster': 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
+      raycaster: 'objects: #target1, #target2; interval: 0; near: 0.1; far: 10'
     }, true)
     this.hand1.setAttribute('position', '0 0 1')
     this.hand1.parentNode.addEventListener('loaded', () => {
       this.sh1 = this.hand1.components['super-hands']
-      this.ray1 = this.hand1.components['raycaster']
+      this.ray1 = this.hand1.components.raycaster
       done()
     })
   })
@@ -360,7 +360,7 @@ suite('super-hands & physics integration', function () {
       'vive-controls': 'hand: left',
       'super-hands': ''
     }, true)
-    var bodies = 0
+    let bodies = 0
     this.target1.addEventListener('body-loaded', () => {
       if (++bodies === 2) {
         this.sh1 = this.hand1.components['super-hands']
@@ -376,8 +376,8 @@ suite('super-hands & physics integration', function () {
     const shape2 = new window.CANNON.Box(size2)
     this.target1.body.addShape(shape2, offset2)
     this.hand2.setAttribute('position', '1 1 1')
-    stretch.start({detail: {hand: this.hand1}})
-    stretch.start({detail: {hand: this.hand2}})
+    stretch.start({ detail: { hand: this.hand1 } })
+    stretch.start({ detail: { hand: this.hand2 } })
     stretch.tick()
     this.hand2.setAttribute('position', '2 1 1')
     stretch.tick()
@@ -395,8 +395,8 @@ suite('super-hands & physics integration', function () {
     const shape2 = new window.CANNON.Box(size2)
     this.target1.body.addShape(shape2, offset2)
     this.hand2.setAttribute('position', '1 1 1')
-    stretch.start({detail: {hand: this.hand1}})
-    stretch.start({detail: {hand: this.hand2}})
+    stretch.start({ detail: { hand: this.hand1 } })
+    stretch.start({ detail: { hand: this.hand2 } })
     stretch.tick(1, 1)
     this.hand2.setAttribute('position', '1.5 1 1')
     stretch.tick(6, 5)

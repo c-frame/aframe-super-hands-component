@@ -12,7 +12,7 @@ AFRAME.registerSystem('super-hands', {
     this.superHands.push(comp)
   },
   unregisterMe: function (comp) {
-    var index = this.superHands.indexOf(comp)
+    const index = this.superHands.indexOf(comp)
     if (index !== -1) {
       this.superHands.splice(index, 1)
     }

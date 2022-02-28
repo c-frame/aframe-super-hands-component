@@ -6,10 +6,10 @@ function elementMatches (el, selector) {
 }
 AFRAME.registerComponent('droppable', {
   schema: {
-    accepts: {default: ''},
-    autoUpdate: {default: true},
-    acceptEvent: {default: ''},
-    rejectEvent: {default: ''}
+    accepts: { default: '' },
+    autoUpdate: { default: true },
+    acceptEvent: { default: '' },
+    rejectEvent: { default: '' }
   },
   multiple: true,
   init: function () {
@@ -26,7 +26,7 @@ AFRAME.registerComponent('droppable', {
 
     this.acceptableEntities = []
     this.observer = new window.MutationObserver(this.mutateAcceptsBound)
-    this.observerOpts = {childList: true, subtree: true}
+    this.observerOpts = { childList: true, subtree: true }
 
     this.el.addEventListener(this.HOVER_EVENT, this.hoverStartBound)
     this.el.addEventListener(this.UNHOVER_EVENT, this.hoverEndBound)
@@ -65,7 +65,7 @@ AFRAME.registerComponent('droppable', {
   entityAcceptable: function (entity) {
     const acceptableEntities = this.acceptableEntities
     if (acceptableEntities == null) { return true }
-    for (let item of acceptableEntities) {
+    for (const item of acceptableEntities) {
       if (item === entity) {
         return true
       }
@@ -88,12 +88,12 @@ AFRAME.registerComponent('droppable', {
     const dropped = evt.detail.dropped
     if (!this.entityAcceptable(dropped)) {
       if (this.data.rejectEvent.length) {
-        this.el.emit(this.data.rejectEvent, {el: dropped})
+        this.el.emit(this.data.rejectEvent, { el: dropped })
       }
       return
     }
     if (this.data.acceptEvent.length) {
-      this.el.emit(this.data.acceptEvent, {el: dropped})
+      this.el.emit(this.data.acceptEvent, { el: dropped })
     }
     if (evt.preventDefault) { evt.preventDefault() }
   }

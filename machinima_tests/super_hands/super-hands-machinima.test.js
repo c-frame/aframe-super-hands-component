@@ -21,7 +21,7 @@ suite('basic interactions', function () {
     'green boxes turn into spheres; red box is stretched & moved',
     'base/recordings/handsRecording.json',
     function () {
-      var endScale = this.boxRedUp.getAttribute('scale')
+      const endScale = this.boxRedUp.getAttribute('scale')
       assert.isFalse(this.startPos.equals(this.boxRedUp.getAttribute('position')), 'moved')
       assert.isTrue(endScale.x > this.startScale.x, 'grew-x')
       assert.isTrue(endScale.y > this.startScale.y, 'grew-y')
@@ -96,12 +96,12 @@ suite('basic interactions', function () {
     'base/recordings/hands-nostretch-badTwoHandedGrab.json',
     function () {
       assert.isBelow(this.boxGrnUp.getAttribute('position').z, -0.8)
-      assert.isFalse(this.boxGrnUp.components['grabbable'].grabbed)
-      assert.strictEqual(this.boxGrnUp.components['grabbable'].grabbers.length, 0)
+      assert.isFalse(this.boxGrnUp.components.grabbable.grabbed)
+      assert.strictEqual(this.boxGrnUp.components.grabbable.grabbers.length, 0)
     },
     function () {
       // disable stretching so hand can leave collision zone while grabbing
-      this.boxGrnUp.components['stretchable'].remove()
+      this.boxGrnUp.components.stretchable.remove()
     }
   )
   machinima.test(
@@ -135,7 +135,7 @@ suite('Overlapped object targeting', function () {
     function () {
       assert.isAbove(this.inner.getAttribute('position').y, 2)
       assert.isBelow(this.middle.getAttribute('position').y, 0)
-      assert.isTrue(this.outter.getAttribute('position').equals({x: 0, y: 1, z: -1}))
+      assert.isTrue(this.outter.getAttribute('position').equals({ x: 0, y: 1, z: -1 }))
     }
   )
 })
@@ -158,7 +158,7 @@ suite('Nested object targeting', function () {
     function () {
       assert.isBelow(this.inner.getAttribute('position').y, 1.5)
       assert.isBelow(this.middle.getAttribute('position').y, 0)
-      assert.isTrue(this.outter.getAttribute('position').equals({x: 0, y: 1, z: -1}))
+      assert.isTrue(this.outter.getAttribute('position').equals({ x: 0, y: 1, z: -1 }))
     }
   )
 })
@@ -184,7 +184,7 @@ suite('Physics grab', function () {
     function () {
       this.target.addEventListener('grab-end', e => {
         this.yRot = this.target.getObject3D('mesh').getWorldRotation()._y
-      }, {once: true})
+      }, { once: true })
     }
   )
 })
@@ -286,8 +286,8 @@ suite('drop-targets', function () {
     'drop-target discrimination and events',
     'base/recordings/droptarget.json',
     function () {
-      let blueDnGeo = this.boxBlueDn.getAttribute('geometry')
-      let grnDnGeo = this.boxGrnDn.getAttribute('geometry')
+      const blueDnGeo = this.boxBlueDn.getAttribute('geometry')
+      const grnDnGeo = this.boxGrnDn.getAttribute('geometry')
       assert.strictEqual(grnDnGeo.primitive, 'sphere')
       assert.strictEqual(blueDnGeo.primitive, 'tetrahedron')
     }

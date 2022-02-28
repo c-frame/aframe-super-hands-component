@@ -6,14 +6,14 @@ module.exports = (function () {
   }
   return {
     schema: {
-      startButtons: {default: []},
-      endButtons: {default: []}
+      startButtons: { default: [] },
+      endButtons: { default: [] }
     },
     startButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['startButtons'])
+      return buttonIsValid(evt, this.data.startButtons)
     },
     endButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['endButtons'])
+      return buttonIsValid(evt, this.data.endButtons)
     }
   }
 })()

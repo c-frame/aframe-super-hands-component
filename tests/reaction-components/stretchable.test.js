@@ -1,16 +1,16 @@
 /* global assert, process, setup, suite, test, AFRAME */
 
-var helpers = require('../helpers')
-var entityFactory = helpers.entityFactory
-var coord = AFRAME.utils.coordinates.parse
-var uncoord = AFRAME.utils.coordinates.stringify
+const helpers = require('../helpers')
+const entityFactory = helpers.entityFactory
+const coord = AFRAME.utils.coordinates.parse
+const uncoord = AFRAME.utils.coordinates.stringify
 function move (entity, dest) {
   entity.object3D.position.copy(coord(dest))
 }
 
 suite('stretchable', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     this.hand1 = helpers
       .controllerFactory({ 'hand-controls': 'right' }, true)
     this.hand2 = helpers
@@ -25,7 +25,7 @@ suite('stretchable', function () {
     assert.isOk(this.el.components.stretchable.data.usePhysics)
   })
   test('component removes without errors', function (done) {
-    var el = this.el
+    const el = this.el
     el.removeAttribute('stretchable')
     process.nextTick(function () {
       assert.notOk(el.components.stretchable)
@@ -37,7 +37,7 @@ suite('stretchable', function () {
     this.comp.start({ detail: { hand: this.hand2 } })
     assert.isOk(this.el.is('stretched'))
     assert.sameMembers(this.comp.stretchers, [this.hand1, this.hand2])
-    this.comp.end({detail: {hand: this.hand1}})
+    this.comp.end({ detail: { hand: this.hand1 } })
     assert.notOk(this.el.is('stretched'))
   })
   test('reject duplicate stretchers', function () {
@@ -47,9 +47,9 @@ suite('stretchable', function () {
     assert.isFalse(this.el.is('stretched'))
   })
   test('ignores cancelled events', function () {
-    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
-    const evt = {detail: {hand: {}}}
-    const evt2 = {detail: {hand: this.hand}}
+    const evtCancelled = { defaultPrevented: true, detail: { hand: this.hand } }
+    const evt = { detail: { hand: {} } }
+    const evt2 = { detail: { hand: this.hand } }
     this.comp.start(evt)
     this.comp.start(evtCancelled)
     assert.isFalse(this.el.is(this.comp.STRETCHED_STATE))
@@ -58,7 +58,7 @@ suite('stretchable', function () {
     assert.isTrue(this.el.is(this.comp.STRETCHED_STATE))
   })
   test('scale updates during stretch', function () {
-    var lastScale
+    let lastScale
     move(this.hand1, '0 0 0')
     move(this.hand2, '-1 -1 -1')
     this.comp.start({ detail: { hand: this.hand1 } })
@@ -76,8 +76,8 @@ suite('stretchable', function () {
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale))
   })
   test('scale updates are invertable', function () {
-    var lastScale
-    this.el.setAttribute('stretchable', {invert: true})
+    let lastScale
+    this.el.setAttribute('stretchable', { invert: true })
     move(this.hand1, '0 0 0')
     move(this.hand2, '-1 -1 -1')
     this.comp.start({ detail: { hand: this.hand1 } })
@@ -97,7 +97,7 @@ suite('stretchable', function () {
 
 suite('stretchable-physics', function () {
   setup(function (done) {
-    var el = this.el = entityFactory({}, true)
+    const el = this.el = entityFactory({}, true)
     this.hand1 = helpers
       .controllerFactory({ 'hand-controls': 'right' }, true)
     this.hand2 = helpers
@@ -118,11 +118,11 @@ suite('stretchable-physics', function () {
     this.comp.start({ detail: { hand: this.hand2 } })
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
-                     scale.set(0.5, 0.5, 0.5))
+      scale.set(0.5, 0.5, 0.5))
     move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.notDeepEqual(this.el.body.shapes[0].halfExtents,
-                        scale.set(0.5, 0.5, 0.5))
+      scale.set(0.5, 0.5, 0.5))
   })
   test('box bodies do not update when usePhysics = never', function () {
     const scale = new window.CANNON.Vec3()
@@ -134,26 +134,26 @@ suite('stretchable-physics', function () {
     assert.ok(this.el.is('stretched'))
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
-                     scale.set(0.5, 0.5, 0.5))
+      scale.set(0.5, 0.5, 0.5))
     move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.deepEqual(this.el.body.shapes[0].halfExtents,
-                        scale.set(0.5, 0.5, 0.5))
+      scale.set(0.5, 0.5, 0.5))
   })
 })
 suite('stretchable button mapping', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
-    this.hand = helpers.controllerFactory({'super-hands': ''})
+    const el = this.el = entityFactory()
+    this.hand = helpers.controllerFactory({ 'super-hands': '' })
     el.setAttribute('stretchable',
-        'startButtons: triggerdown; endButtons: triggerup')
+      'startButtons: triggerdown; endButtons: triggerup')
     el.addEventListener('loaded', () => {
       this.comp = el.components.stretchable
       done()
     })
   })
   test('responds to correct buttons', function () {
-    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}}
+    const dtl = { hand: this.hand, buttonEvent: { type: 'gripdown' } }
     // reject wrong button start
     assert.isOk(helpers.emitCancelable(this.el, this.comp.STRETCH_EVENT, dtl))
     assert.notStrictEqual(this.comp.stretchers[0], this.hand)

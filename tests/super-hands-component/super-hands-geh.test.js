@@ -209,7 +209,7 @@ suite('super-hands GlobalEventHandler integration', function () {
     this.sh1.onGrabEndButton()
   })
   test('click does not fire if target is lost', function () {
-    var clickSpy = this.sinon.spy()
+    const clickSpy = this.sinon.spy()
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onGrabStartButton()
     this.target1.onclick = clickSpy

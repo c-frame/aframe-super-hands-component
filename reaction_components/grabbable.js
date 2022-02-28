@@ -6,9 +6,9 @@ const buttonsCore = require('./prototypes/buttons-proto.js')
 const base = inherit({}, physicsCore, buttonsCore)
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
-    maxGrabbers: {type: 'int', default: NaN},
-    invert: {default: false},
-    suppressY: {default: false}
+    maxGrabbers: { type: 'int', default: NaN },
+    invert: { default: false },
+    suppressY: { default: false }
   },
   init: function () {
     this.GRABBED_STATE = 'grabbed'
@@ -19,10 +19,10 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.constraints = new Map()
     this.deltaPositionIsValid = false
     this.grabDistance = undefined
-    this.grabDirection = {x: 0, y: 0, z: -1}
-    this.grabOffset = {x: 0, y: 0, z: 0}
+    this.grabDirection = { x: 0, y: 0, z: -1 }
+    this.grabOffset = { x: 0, y: 0, z: 0 }
     // persistent object speeds up repeat setAttribute calls
-    this.destPosition = {x: 0, y: 0, z: 0}
+    this.destPosition = { x: 0, y: 0, z: 0 }
     this.deltaPosition = new THREE.Vector3()
     this.targetPosition = new THREE.Vector3()
     this.physicsInit()
@@ -38,19 +38,19 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.yFactor = ((this.data.invert) ? -1 : 1) * !this.data.suppressY
   },
   tick: (function () {
-    var q = new THREE.Quaternion()
-    var v = new THREE.Vector3()
+    const q = new THREE.Quaternion()
+    const v = new THREE.Vector3()
 
     return function () {
-      var entityPosition
+      let entityPosition
       if (this.grabber) {
         // reflect on z-axis to point in same direction as the laser
         this.targetPosition.copy(this.grabDirection)
         this.targetPosition
-            .applyQuaternion(this.grabber.object3D.getWorldQuaternion(q))
-            .setLength(this.grabDistance)
-            .add(this.grabber.object3D.getWorldPosition(v))
-            .add(this.grabOffset)
+          .applyQuaternion(this.grabber.object3D.getWorldQuaternion(q))
+          .setLength(this.grabDistance)
+          .add(this.grabber.object3D.getWorldPosition(v))
+          .add(this.grabOffset)
         if (this.deltaPositionIsValid) {
           // relative position changes work better with nested entities
           this.deltaPosition.sub(this.targetPosition)
@@ -114,8 +114,8 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     if (evt.preventDefault) { evt.preventDefault() }
   },
   resetGrabber: (function () {
-    var objPos = new THREE.Vector3()
-    var grabPos = new THREE.Vector3()
+    const objPos = new THREE.Vector3()
+    const grabPos = new THREE.Vector3()
     return function () {
       let raycaster
       if (!this.grabber) {
@@ -132,7 +132,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
   })(),
   lostGrabber: function (evt) {
-    let i = this.grabbers.indexOf(evt.relatedTarget)
+    const i = this.grabbers.indexOf(evt.relatedTarget)
     // if a queued, non-physics grabber leaves the collision zone, forget it
     if (i !== -1 && evt.relatedTarget !== this.grabber &&
         !this.physicsIsConstrained(evt.relatedTarget)) {

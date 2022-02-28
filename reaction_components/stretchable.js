@@ -5,9 +5,9 @@ const buttonsCore = require('./prototypes/buttons-proto.js')
 const base = inherit({}, buttonsCore)
 AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
-    usePhysics: {default: 'ifavailable'},
-    invert: {default: false},
-    physicsUpdateRate: {default: 100}
+    usePhysics: { default: 'ifavailable' },
+    invert: { default: false },
+    physicsUpdateRate: { default: 100 }
   },
   init: function () {
     this.STRETCHED_STATE = 'stretched'
@@ -42,10 +42,10 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     let deltaStretch = 1
     if (this.previousStretch !== null && currentStretch !== 0) {
       deltaStretch = Math.pow(
-          currentStretch / this.previousStretch,
-          (this.data.invert)
-            ? -1
-            : 1
+        currentStretch / this.previousStretch,
+        (this.data.invert)
+          ? -1
+          : 1
       )
     }
     this.previousStretch = currentStretch
@@ -77,7 +77,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (evt.preventDefault) { evt.preventDefault() } // gesture accepted
   },
   end: function (evt) {
-    var stretcherIndex = this.stretchers.indexOf(evt.detail.hand)
+    const stretcherIndex = this.stretchers.indexOf(evt.detail.hand)
     if (evt.defaultPrevented || !this.endButtonOk(evt)) { return }
     if (stretcherIndex !== -1) {
       this.stretchers.splice(stretcherIndex, 1)
@@ -94,15 +94,15 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     let deltaStretch = 1
     if (this.previousPhysicsStretch !== null && currentStretch > 0) {
       deltaStretch = Math.pow(
-          currentStretch / this.previousPhysicsStretch,
-          (this.data.invert)
-            ? -1
-            : 1
+        currentStretch / this.previousPhysicsStretch,
+        (this.data.invert)
+          ? -1
+          : 1
       )
     }
     this.previousPhysicsStretch = currentStretch
     if (deltaStretch === 1) { return }
-    for (let c of this.el.childNodes) { this.stretchBody(c, deltaStretch) }
+    for (const c of this.el.childNodes) { this.stretchBody(c, deltaStretch) }
     this.stretchBody(this.el, deltaStretch)
   },
   stretchBody: function (el, deltaStretch) {
@@ -113,7 +113,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       physicsShape = el.body.shapes[i]
       if (physicsShape.halfExtents) {
         physicsShape.halfExtents
-            .scale(deltaStretch, physicsShape.halfExtents)
+          .scale(deltaStretch, physicsShape.halfExtents)
         physicsShape.updateConvexPolyhedronRepresentation()
       } else if (physicsShape.radius) {
         physicsShape.radius *= deltaStretch

@@ -1,6 +1,6 @@
 const path = require('path')
 // karma configuration
-var karmaConf = {
+const karmaConf = {
   basePath: '../',
   browserify: {
     debug: true,
@@ -18,7 +18,7 @@ var karmaConf = {
   // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
-    mocha: {'ui': 'tdd'}
+    mocha: { ui: 'tdd' }
   },
   customLaunchers: {
     Chromium_WebVR: {
@@ -37,11 +37,11 @@ var karmaConf = {
   ],
   files: [
     // dependencies
-    {pattern: 'tests/testDependencies.js', included: true},
+    { pattern: 'tests/testDependencies.js', included: true },
     // module
-    {pattern: 'index.js', included: true},
+    { pattern: 'index.js', included: true },
     // Define test files.
-    {pattern: 'tests/**/*.test.js'}
+    { pattern: 'tests/**/*.test.js' }
     // Serve test assets.
     // {pattern: 'tests/assets/**/*', included: false, served: true}
   ],
