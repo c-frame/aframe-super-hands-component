@@ -120,12 +120,12 @@ super-hands="colliderEvent: raycaster-intersection;
              colliderEndEventProperty: clearedEls"</pre>
     <p>This scene also shows the fallback movement that occurs when physics
       is not available.</p>
-  h2>Quick guide to adding making something grabbable with physics on your site</h2>
+  <h2>Quick guide to adding making something grabbable with physics on your site</h2>
   <div id="dynamic-guide-here"></div>
   <script>
   (async function() {
     var converter = new showdown.Converter();
-    var response = await fetch('https://gitcdn.xyz/repo/wmurphyrd/aframe-super-hands-component/880d2867b98cfaf293233c703c1160a8f7fe0be0/getting-started.md');
+    var response = await fetch('https://raw.githubusercontent.com/wmurphyrd/aframe-super-hands-component/master/getting-started.md');
     var md = await response.text()
     var html = converter.makeHtml(md);
     document.querySelector('#dynamic-guide-here').innerHTML = html;
