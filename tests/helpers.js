@@ -104,9 +104,8 @@ module.exports.controllerFactory = function (comps, controllerOverride, scene) {
 
 module.exports.emitCancelable = function (target, name, detail) {
   const data = { bubbles: true, cancelable: true, detail: detail || {} }
-  let evt
   data.detail.target = data.detail.target || target
-  evt = new window.CustomEvent(name, data)
+  const evt = new window.CustomEvent(name, data)
   return target.dispatchEvent(evt)
 }
 

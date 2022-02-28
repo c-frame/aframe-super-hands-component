@@ -117,11 +117,10 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     const objPos = new THREE.Vector3()
     const grabPos = new THREE.Vector3()
     return function () {
-      let raycaster
       if (!this.grabber) {
         return false
       }
-      raycaster = this.grabber.getAttribute('raycaster')
+      const raycaster = this.grabber.getAttribute('raycaster')
       this.deltaPositionIsValid = false
       this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos))
       if (raycaster) {

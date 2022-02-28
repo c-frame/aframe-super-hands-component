@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test, sinon, CANNON */
+/* global assert, setup, suite, test, sinon, CANNON */
 
 const machinima = require('aframe-machinima-testing')
 

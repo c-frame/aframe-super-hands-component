@@ -58,7 +58,6 @@ suite('stretchable', function () {
     assert.isTrue(this.el.is(this.comp.STRETCHED_STATE))
   })
   test('scale updates during stretch', function () {
-    let lastScale
     move(this.hand1, '0 0 0')
     move(this.hand2, '-1 -1 -1')
     this.comp.start({ detail: { hand: this.hand1 } })
@@ -70,13 +69,12 @@ suite('stretchable', function () {
     assert.notStrictEqual(uncoord(this.el.getAttribute('scale')), '1 1 1')
     assert.isAbove(this.el.getAttribute('scale').x, 1)
     move(this.hand1, '2 2 2')
-    lastScale = this.el.getAttribute('scale')
+    const lastScale = this.el.getAttribute('scale')
     this.comp.end({ detail: { hand: this.hand1 } })
     this.comp.tick()
     assert.strictEqual(uncoord(this.el.getAttribute('scale')), uncoord(lastScale))
   })
   test('scale updates are invertable', function () {
-    let lastScale
     this.el.setAttribute('stretchable', { invert: true })
     move(this.hand1, '0 0 0')
     move(this.hand2, '-1 -1 -1')
@@ -87,7 +85,7 @@ suite('stretchable', function () {
     move(this.hand1, '1 1 1')
     this.comp.tick()
     assert.isBelow(this.el.getAttribute('scale').x, 1)
-    lastScale = this.el.getAttribute('scale')
+    const lastScale = this.el.getAttribute('scale')
     move(this.hand1, '2 2 2')
     this.comp.end({ detail: { hand: this.hand1 } })
     this.comp.tick()

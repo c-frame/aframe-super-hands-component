@@ -1,4 +1,4 @@
-/* global assert, process, setup, suite, test */
+/* global assert, setup, suite, test */
 const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
 

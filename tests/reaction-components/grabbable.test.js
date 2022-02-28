@@ -143,19 +143,17 @@ suite('grabbable', function () {
       assert.strictEqual(this.comp.constraints.size, 0)
     })
     test('constraint removed on release', function () {
-      let constraint
       this.comp.start({ detail: { hand: this.hand } })
       assert.isOk(this.comp.constraints.has(this.hand))
-      constraint = this.comp.constraints.get(this.hand)
+      const constraint = this.comp.constraints.get(this.hand)
       this.comp.end({ detail: { hand: this.hand } })
       assert.notOk(this.comp.constraints.has(this.hand))
       assert.equal(this.el.body.world.constraints.indexOf(constraint), -1)
     })
     test('changing usePhysics to never during grab removes constraint', function () {
-      let constraint
       this.comp.start({ detail: { hand: this.hand } })
       assert.isOk(this.comp.constraints.has(this.hand))
-      constraint = this.comp.constraints.get(this.hand)
+      const constraint = this.comp.constraints.get(this.hand)
       this.el.setAttribute('grabbable', 'usePhysics', 'never')
       assert.notOk(this.comp.constraints.has(this.hand))
       assert.strictEqual(this.el.body.world.constraints.indexOf(constraint), -1)
