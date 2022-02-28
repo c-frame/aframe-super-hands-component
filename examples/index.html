@@ -58,6 +58,7 @@
         clear: both;
       }
      </style>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
   </head>
   <body>
     <h1>A-Frame Super Hands Component</h1>
@@ -119,6 +120,17 @@ super-hands="colliderEvent: raycaster-intersection;
              colliderEndEventProperty: clearedEls"</pre>
     <p>This scene also shows the fallback movement that occurs when physics
       is not available.</p>
+  <h2>Quick guide to adding making something grabbable with physics on your site</h2>
+  <div id="dynamic-guide-here"></div>
+  <script>
+  (async function() {
+    var converter = new showdown.Converter();
+    var response = await fetch('https://raw.githubusercontent.com/wmurphyrd/aframe-super-hands-component/master/getting-started.md');
+    var md = await response.text()
+    var html = converter.makeHtml(md);
+    document.querySelector('#dynamic-guide-here').innerHTML = html;
+  })()
+  </script>
   <!--
     <a id="sticky" class="example" href="sticky/">Sticky Grab via
       Custom Button Mapping<br />
@@ -141,4 +153,5 @@ super-hands="colliderEvent: raycaster-intersection;
     <style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}
     </style>
   </body>
+  
 </html>
