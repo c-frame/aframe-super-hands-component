@@ -58,8 +58,7 @@ Install and use by directly by including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
-  <script src="https://rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/super-hands.js"></script>
-  <script src="https://unpkg.com/super-hands@^3.0.2/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -117,7 +116,7 @@ The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/exa
 
 ## News
 
-v3.0.2
+v3.0.3
 * A-Frame 1.3.0 support confirmation
   * Updated dependencies and fixed tests and examples
   * No API changes
@@ -174,8 +173,8 @@ for any device: desktop, mobile ("magic window"), cardboard viewer + button,
 
 | super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
 | --- | --- | --- | --- |
-| ^v3.0.2 | ^v1.3.0 | ^v6.1.1 | github:n5ro/aframe-physics-system#59100ac8 (last npm version cannot be installed) |
-| ^v3.0.1 | ^v1.0.4 | ^v6.1.1 | ^v4.0.1 |
+| ^v3.0.3 | ^v1.3.0 | ^v6.1.1 | github:n5ro/aframe-physics-system#59100ac8 (last npm version cannot be installed) |
+| ^v3.0.2 | ^v1.0.4 | ^v6.1.1 | ^v4.0.1 |
 | v3.0.0 | ^v0.8.2 | ^v4.1.2 | ^v3.1.2 |
 
 ## Core Component
