@@ -4,21 +4,21 @@ const entityFactory = helpers.entityFactory
 
 suite('draggable', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     el.setAttribute('draggable', '')
     el.addEventListener('loaded', evt => {
-      this.comp = el.components['draggable']
+      this.comp = el.components.draggable
       done()
     })
   })
   test('component attaches without errors', function () {
-    assert.isOk(this.el.components['draggable'])
+    assert.isOk(this.el.components.draggable)
   })
   test('component removes without errors', function (done) {
-    var el = this.el
+    const el = this.el
     el.removeAttribute('draggable')
     process.nextTick(function () {
-      assert.notOk(el.components['draggable'])
+      assert.notOk(el.components.draggable)
       done()
     })
   })
@@ -29,8 +29,8 @@ suite('draggable', function () {
     assert.isFalse(this.el.is('dragged'))
   })
   test('ignores cancelled events', function () {
-    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
-    const evt = {detail: {hand: this.hand}}
+    const evtCancelled = { defaultPrevented: true, detail: { hand: this.hand } }
+    const evt = { detail: { hand: this.hand } }
     this.comp.dragStart(evtCancelled)
     assert.isFalse(this.el.is(this.comp.DRAGGED_STATE))
     this.comp.dragStart(evt)
@@ -40,17 +40,17 @@ suite('draggable', function () {
 })
 suite('draggable button mapping', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
-    this.hand = helpers.controllerFactory({'super-hands': ''})
+    const el = this.el = entityFactory()
+    this.hand = helpers.controllerFactory({ 'super-hands': '' })
     el.setAttribute('draggable',
-        'startButtons: triggerdown; endButtons: triggerup')
+      'startButtons: triggerdown; endButtons: triggerup')
     el.addEventListener('loaded', () => {
-      this.comp = el.components['draggable']
+      this.comp = el.components.draggable
       done()
     })
   })
   test('responds to correct buttons', function () {
-    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}}
+    const dtl = { hand: this.hand, buttonEvent: { type: 'gripdown' } }
     // reject wrong button start
     assert.isOk(helpers.emitCancelable(this.el, this.comp.DRAG_EVENT, dtl))
     assert.isNotOk(this.el.is(this.comp.DRAGGED_STATE))

@@ -1,5 +1,5 @@
 // karma configuration
-var karmaConf = {
+const karmaConf = {
   browserify: {
     debug: true,
     transform: [
@@ -11,7 +11,7 @@ var karmaConf = {
   browserNoActivityTimeout: 600000,
   client: {
     captureConsole: false,
-    mocha: {'ui': 'tdd'}
+    mocha: { ui: 'tdd' }
   },
   customLaunchers: {
     Firefox_NoVR: {
@@ -23,13 +23,13 @@ var karmaConf = {
   },
   files: [
     // module and dependencies
-    {pattern: 'main.js', included: true},
+    { pattern: 'main.js', included: true },
     // test files.
-    {pattern: './**/*.test.js'},
+    { pattern: './**/*.test.js' },
     // HTML machinima scenes (pre-processed by html2js)
-    {pattern: 'scenes/*.html'},
+    { pattern: 'scenes/*.html' },
     // machinima recording files (served at base/recordings/)
-    {pattern: 'recordings/*.json', included: false, served: true}
+    { pattern: 'recordings/*.json', included: false, served: true }
   ],
   frameworks: ['mocha', 'sinon-chai', 'chai-shallow-deep-equal', 'browserify'],
   preprocessors: {

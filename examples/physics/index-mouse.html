@@ -4,12 +4,12 @@
     <!-- Replace "../build.js" with the super-hands and
          A-Frame distributions to run : -->
     <script src="../build.js"></script>
-    <!-- <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> -->
+    <!-- <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script> -->
     <!-- <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
     <!-- <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script> -->
-    <script src="https://rawgit.com/feiss/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
     <script>
       //color randomizer
       AFRAME.registerComponent('color-randomizer', {
@@ -52,7 +52,7 @@
                  hoverable grabbable stretchable draggable droppable
                  event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
                  event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
-                 body="shape: box" shadow></a-mixin>
+                 body="shape: none" shape="shape: box; halfExtents: 0.165 0.165 0.165" shadow></a-mixin>
         </a-mixin>
       </a-assets>
       <a-entity camera look-controls wasd-controls position="0 1 1"
@@ -65,7 +65,8 @@
                              colliderEndEventProperty: clearedEls;">
       </a-entity>
       <a-entity class="transformer" position = "0 1.6 -1"
-                color-randomizer droppable body="type: static; shape: box"
+                color-randomizer droppable body="type: static; shape: none"
+                shape="shape: box; halfExtents: 0.25 0.25 0.25"
                 geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
                 event-set__dragon="_event: dragover-start; material.color: orange"
                 event-set__dragoff="_event: dragover-end; material.color: purple"
@@ -83,7 +84,7 @@
       <a-entity class="cube" mixin="cube" position="1 0.265 -1" material="color: green"></a-entity>
       <a-entity class="cube" mixin="cube" position="1 0.265 -0.5" material="color: green"></a-entity>
       <!-- ground collider keeps objets from falling -->
-      <a-box body="type: static; shape: box" width=100 height=0.001 depth=100 visible="false"></a-box>
+      <a-box body="type: static; shape: none" shape="shape: box; halfExtents: 50 0.0005 50" width=100 height=0.001 depth=100 visible="false"></a-box>
     </a-scene>
 
     <!-- GitHub Corner. -->

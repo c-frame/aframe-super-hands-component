@@ -5,7 +5,7 @@ const entityFactory = helpers.entityFactory
 
 suite('super-hands lifecycle', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     el.setAttribute('super-hands', '')
     el.addEventListener('loaded', function () {
       done()
@@ -15,7 +15,7 @@ suite('super-hands lifecycle', function () {
     assert.isOk(this.el.components['super-hands'].data)
   })
   test('component removes without errors', function (done) {
-    var el = this.el
+    const el = this.el
     el.removeAttribute('super-hands')
     process.nextTick(function () {
       assert.notOk(el.components['super-hands'])
@@ -43,14 +43,14 @@ suite('super-hands hit processing & event emission', function () {
     })
   })
   test('onHit finds the target entity in event details', function () {
-    this.hand1.emit('hit', {el: this.target1})
+    this.hand1.emit('hit', { el: this.target1 })
     assert.includeMembers(this.sh1.hoverEls, [this.target1])
     // change to cursor config
     this.hand1.setAttribute('super-hands', {
       colliderEvent: 'mouseenter',
       colliderEventProperty: 'intersectedEl'
     })
-    this.hand1.emit('mouseenter', {intersectedEl: this.target2})
+    this.hand1.emit('mouseenter', { intersectedEl: this.target2 })
     assert.includeMembers(this.sh1.hoverEls, [this.target2])
   })
   test('hover event', function (done) {
@@ -92,8 +92,8 @@ suite('super-hands hit processing & event emission', function () {
     assert.equal(this.sh1.hoverEls.length, 0)
   })
   test('finding targets in the stack', function () {
-    this.sh1.onHit({detail: {el: this.target2}})
-    this.sh1.onHit({detail: {el: this.target1}})
+    this.sh1.onHit({ detail: { el: this.target2 } })
+    this.sh1.onHit({ detail: { el: this.target1 } })
     this.target2.addEventListener('grab-start', e => e.preventDefault())
     this.target2.addEventListener('stretch-start', e => e.preventDefault())
     this.sh1.onGrabStartButton()
@@ -146,7 +146,7 @@ suite('super-hands hit processing & event emission', function () {
   })
   test('stretch event', function () {
     const stretchSpy = this.sinon.spy(this.sh2, 'emitCancelable')
-        .withArgs(this.target1, 'stretch-start')
+      .withArgs(this.target1, 'stretch-start')
     const unStretchSpy = this.sinon.spy()
     this.target1.addEventListener('stretch-start', e => e.preventDefault())
     this.target1.addEventListener('stretch-end', e => e.preventDefault())
@@ -193,7 +193,7 @@ suite('super-hands hit processing & event emission', function () {
     assert.notOk(this.sh1.state.get(this.sh1.DRAG_EVENT))
   })
   test('undrag event -- no drop target', function () {
-    var dragEndSpy = this.sinon.spy()
+    const dragEndSpy = this.sinon.spy()
     this.target1
       .addEventListener('drag-start', evt => evt.preventDefault())
     this.target1.addEventListener('drag-end', evt => evt.preventDefault())
@@ -201,9 +201,11 @@ suite('super-hands hit processing & event emission', function () {
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onDragDropStartButton()
     this.sh1.onDragDropEndButton({})
-    assert.isTrue(dragEndSpy.calledWithMatch({ detail: {
-      hand: this.hand1
-    }}))
+    assert.isTrue(dragEndSpy.calledWithMatch({
+      detail: {
+        hand: this.hand1
+      }
+    }))
     assert.isNotOk(this.sh1.state.get(this.sh1.DRAG_EVENT))
   })
   test('drag events', function () {
@@ -240,14 +242,14 @@ suite('super-hands hit processing & event emission', function () {
     assert.isTrue(dragDropSpy2.called, 'drag-drop emitted form hovered')
   })
   test('dragover rejected', function () {
-    var dragoverSpy = this.sinon.spy(this.sh1, 'emitCancelable')
+    const dragoverSpy = this.sinon.spy(this.sh1, 'emitCancelable')
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onHit({ detail: { el: this.target2 } })
     this.sh1.onDragDropStartButton()
     assert.isFalse(dragoverSpy.calledWith(this.target1, 'dragover-start'))
   })
   test('drag-drop rejected', function () {
-    var dragoverSpy = this.sinon.spy(this.sh1, 'emitCancelable')
+    const dragoverSpy = this.sinon.spy(this.sh1, 'emitCancelable')
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onHit({ detail: { el: this.target2 } })
     this.sh1.onDragDropStartButton()
@@ -313,14 +315,14 @@ suite('super-hands hit processing & event emission', function () {
   })
   test('collision after button push doesnt trigger', function () {
     this.sh1.onGrabStartButton()
-    this.sh1.onHit({detail: {el: this.target1}})
+    this.sh1.onHit({ detail: { el: this.target1 } })
     this.target1.addEventListener('grab-start', evt => {
       evt.preventDefault()
     })
     assert.equal(this.sh1.state.get(this.sh1.GRAB_EVENT), undefined)
   })
   test('button events pass through', function () {
-    let testSpy = this.sinon.spy(assert, 'equal')
+    const testSpy = this.sinon.spy(assert, 'equal')
     this.hand1.setAttribute('super-hands', {
       grabStartButtons: ['triggerdown'],
       grabEndButtons: ['triggerup'],
@@ -343,19 +345,19 @@ suite('super-hands hit processing & event emission', function () {
     })
     this.target1.addEventListener('grab-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'triggerup', 'grab end')
-    }, {once: true}) // avoid running this test during cleanup
+    }, { once: true }) // avoid running this test during cleanup
     this.target1.addEventListener('stretch-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'trackpadup', 'stretch end')
-    }, {once: true})
+    }, { once: true })
     this.target1.addEventListener('drag-end', e => {
       assert.equal(e.detail.buttonEvent.type, 'gripup', 'drag end')
-    }, {once: true})
+    }, { once: true })
     this.target2.addEventListener('drag-drop', e => {
       assert.equal(e.detail.buttonEvent.type, 'gripup', 'dragdrop')
       e.preventDefault()
     })
-    this.sh1.onHit({detail: {el: this.target1}})
-    this.sh1.onHit({detail: {el: this.target2}})
+    this.sh1.onHit({ detail: { el: this.target1 } })
+    this.sh1.onHit({ detail: { el: this.target2 } })
     this.hand1.emit('triggerdown', {})
     this.hand1.emit('trackpaddown', {})
     this.hand1.emit('gripdown', {})
@@ -369,7 +371,7 @@ suite('super-hands hit processing & event emission', function () {
     this.target1.addEventListener('grab-start', e => e.preventDefault())
     this.target1.addEventListener('stretch-start', e => e.preventDefault())
     this.target1.addEventListener('drag-start', e => e.preventDefault())
-    this.sh1.onHit({detail: {el: this.target1}})
+    this.sh1.onHit({ detail: { el: this.target1 } })
     assert.notStrictEqual(this.sh1.state.get('grab-start'), this.target1)
     assert.notStrictEqual(this.sh1.state.get('drag-start'), this.target1)
     assert.notStrictEqual(this.sh1.state.get('stretch-start'), this.target1)
@@ -383,7 +385,7 @@ suite('super-hands hit processing & event emission', function () {
     assert.strictEqual(this.sh1.state.get('stretch-start'), this.target1)
   })
   test('removal cleanup: hover', function (done) {
-    var hoverEndSpy = this.sinon.spy()
+    const hoverEndSpy = this.sinon.spy()
     this.target1.addEventListener('hover-end', hoverEndSpy)
     this.target1.addEventListener('hover-start', e => e.preventDefault())
     this.sh1.onHit({ detail: { el: this.target1 } })
@@ -397,7 +399,7 @@ suite('super-hands hit processing & event emission', function () {
     })
   })
   test('removal cleanup: grab', function (done) {
-    var grabEndSpy = this.sinon.spy()
+    const grabEndSpy = this.sinon.spy()
     this.target1.addEventListener('grab-end', grabEndSpy)
     this.target1.addEventListener('grab-start', e => e.preventDefault())
     this.sh1.onHit({ detail: { el: this.target1 } })
@@ -431,7 +433,7 @@ suite('custom button mapping', function () {
     this.target1.addEventListener('grab-start', grabSpy)
     this.target1.addEventListener('stretch-start', stretchSpy)
     this.target1.addEventListener('drag-start', dragSpy)
-    this.sh1.onHit({detail: {el: this.target1}})
+    this.sh1.onHit({ detail: { el: this.target1 } })
     assert.isFalse(grabSpy.called)
     assert.isFalse(stretchSpy.called)
     assert.isFalse(dragSpy.called)
@@ -451,7 +453,7 @@ suite('custom button mapping', function () {
       'super-hands',
       'grabStartButtons: trackpaddown; grabEndButtons: trackpadup'
     )
-    this.sh1.onHit({detail: {el: this.target1}})
+    this.sh1.onHit({ detail: { el: this.target1 } })
     this.hand1.emit('triggerdown', {})
     assert.isFalse(grabSpy.called)
     assert.isTrue(stretchSpy.called)
@@ -476,12 +478,12 @@ suite('state tracking', function () {
     })
   })
   test('hover els collected', function () {
-    var targets = [this.target1, this.target2, this.target3]
+    const targets = [this.target1, this.target2, this.target3]
     this.sh1.onHit({ detail: { el: this.target1 } })
     this.sh1.onHit({ detail: { el: this.target2 } })
     this.sh1.onHit({ detail: { el: this.target3 } })
     assert.sameMembers(this.sh1.hoverEls, targets)
-    for (var i = 0; i < targets.length; i++) {
+    for (let i = 0; i < targets.length; i++) {
       assert.strictEqual(this.sh1.hoverEls[i], targets[i], 'member ' + i)
     }
   })
@@ -496,7 +498,7 @@ suite('state tracking', function () {
     assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target3)
   })
   test('hover els nearest-first for actions', function () {
-    this.hand1.setAttribute('super-hands', {colliderEventProperty: 'els'})
+    this.hand1.setAttribute('super-hands', { colliderEventProperty: 'els' })
     this.target1.addEventListener('hover-start', e => e.preventDefault())
     this.target2.addEventListener('hover-start', e => e.preventDefault())
     this.target3.addEventListener('hover-start', e => e.preventDefault())
@@ -510,10 +512,10 @@ suite('state tracking', function () {
       }
     })
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
-    this.sh1.onHit({detail: {els: [this.target3], intersections: [{distance: 3}]}})
+    this.sh1.onHit({ detail: { els: [this.target3], intersections: [{ distance: 3 }] } })
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target1')
-    this.sh1.unWatch({detail: {el: this.target1}})
-    this.sh1.unHover({detail: {el: this.target1}})
+    this.sh1.unWatch({ detail: { el: this.target1 } })
+    this.sh1.unHover({ detail: { el: this.target1 } })
     assert.strictEqual(this.sh1.state.get(this.sh1.HOVER_EVENT).id, 'target2')
   })
   test('hover targeting updates as distances change', function () {
@@ -553,18 +555,18 @@ suite('state tracking', function () {
     this.sh1.onHit({ detail: { el: this.target3 } })
     this.sh1.onGrabStartButton()
     this.sh1.onGrabEndButton()
-    var targets = [this.target1, this.target3, this.target2]
+    const targets = [this.target1, this.target3, this.target2]
     assert.sameMembers(this.sh1.hoverEls, targets)
-    for (var i = 0; i < targets.length; i++) {
+    for (let i = 0; i < targets.length; i++) {
       assert.strictEqual(this.sh1.hoverEls[i], targets[i], 'member ' + i)
     }
     this.sh1.onGrabStartButton()
     assert.strictEqual(this.sh1.state.get(this.sh1.GRAB_EVENT), this.target2)
   })
   test('hover switches to new target', function () {
-    var hoverSpy1 = this.sinon.spy(e => e.preventDefault())
-    var hoverEndSpy1 = this.sinon.spy()
-    var hoverSpy2 = this.sinon.spy(e => e.preventDefault())
+    const hoverSpy1 = this.sinon.spy(e => e.preventDefault())
+    const hoverEndSpy1 = this.sinon.spy()
+    const hoverSpy2 = this.sinon.spy(e => e.preventDefault())
     this.target1.addEventListener('hover-start', hoverSpy1)
     this.target1.addEventListener('hover-end', hoverEndSpy1)
     this.target2.addEventListener('hover-start', hoverSpy2)
@@ -583,11 +585,11 @@ suite('state tracking', function () {
       colliderEndEvent: 'collisions',
       colliderEndEventProperty: 'clearedEls'
     })
-    this.hand1.emit('collisions', {els: [this.target1, this.target2, this.target3]})
+    this.hand1.emit('collisions', { els: [this.target1, this.target2, this.target3] })
     assert.sameMembers(this.sh1.hoverEls, [this.target1, this.target2, this.target3])
-    this.hand1.emit('collisions', {clearedEls: [this.target1, this.target3]})
+    this.hand1.emit('collisions', { clearedEls: [this.target1, this.target3] })
     assert.sameMembers(this.sh1.hoverEls, [this.target2])
-    this.hand1.emit('collisions', {els: [this.target1], clearedEls: [this.target2]})
+    this.hand1.emit('collisions', { els: [this.target1], clearedEls: [this.target2] })
     assert.sameMembers(this.sh1.hoverEls, [this.target1])
   })
 })

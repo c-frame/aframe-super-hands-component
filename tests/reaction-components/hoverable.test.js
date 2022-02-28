@@ -5,7 +5,7 @@ const entityFactory = helpers.entityFactory
 
 suite('hoverable', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     this.hand = helpers.controllerFactory()
     el.setAttribute('hoverable', '')
     el.addEventListener('loaded', evt => {
@@ -17,7 +17,7 @@ suite('hoverable', function () {
     assert.isOk(this.el.components.hoverable)
   })
   test('component removes without errors', function (done) {
-    var el = this.el
+    const el = this.el
     el.removeAttribute('hoverable')
     process.nextTick(function () {
       assert.notOk(el.components.hoverable)
@@ -31,8 +31,8 @@ suite('hoverable', function () {
     assert.notOk(this.el.is('hovered'))
   })
   test('ignores cancelled events', function () {
-    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
-    const evt = {detail: {hand: this.hand}}
+    const evtCancelled = { defaultPrevented: true, detail: { hand: this.hand } }
+    const evt = { detail: { hand: this.hand } }
     this.comp.start(evtCancelled)
     assert.isFalse(this.el.is(this.comp.HOVERED_STATE))
     this.comp.start(evt)
@@ -40,7 +40,7 @@ suite('hoverable', function () {
     assert.isTrue(this.el.is(this.comp.HOVERED_STATE))
   })
   test('state consistent through hoverer overlap', function () {
-    var h2 = helpers
+    const h2 = helpers
       .controllerFactory({ 'vive-controls': 'hand: left' }, true)
     this.comp.start({ detail: { hand: this.hand } })
     this.comp.start({ detail: { hand: h2 } })
