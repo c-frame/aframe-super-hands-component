@@ -1,4 +1,6 @@
 require('aframe')
+// fill in for outdated physics system dependencies
+require('super-three/examples/js/deprecated/Geometry.js')
 require('../index.js')
 // require('aframe-motion-capture-components')
 /* used in examples to allow a desktop playback without HMD
