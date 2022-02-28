@@ -381,7 +381,7 @@ AFRAME.registerComponent('super-hands', {
 
   /* search collided entities for target to hover/dragover */
   hover: function () {
-    var hvrevt, hoverEl; // end previous hover
+    let hvrevt, hoverEl; // end previous hover
 
     if (this.state.has(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT), true);
@@ -476,7 +476,7 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   _unWatch: function (target) {
-    var hoverIndex = this.hoverEls.indexOf(target);
+    const hoverIndex = this.hoverEls.indexOf(target);
 
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
@@ -545,19 +545,18 @@ AFRAME.registerComponent('super-hands', {
     });
   },
   emitCancelable: function (target, name, detail) {
-    var data, evt;
     detail = detail || {};
-    data = {
+    const data = {
       bubbles: true,
       cancelable: true,
       detail: detail
     };
     data.detail.target = data.detail.target || target;
-    evt = new window.CustomEvent(name, data);
+    const evt = new window.CustomEvent(name, data);
     return target.dispatchEvent(evt);
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
-    var mEvt = new window.MouseEvent(name, {
+    const mEvt = new window.MouseEvent(name, {
       relatedTarget: relatedTarget
     });
     target.dispatchEvent(mEvt);
@@ -581,8 +580,8 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   findTarget: function (evType, detail, filterUsed) {
-    var elIndex;
-    var eligibleEls = this.hoverEls;
+    let elIndex;
+    let eligibleEls = this.hoverEls;
 
     if (filterUsed) {
       eligibleEls = eligibleEls.filter(el => el !== this.state.get(this.GRAB_EVENT) && el !== this.state.get(this.DRAG_EVENT) && el !== this.state.get(this.STRETCH_EVENT));
@@ -599,7 +598,7 @@ AFRAME.registerComponent('super-hands', {
   // Helper to ensure dropping and regrabbing finds the same target for
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
-    var hoverIndex = this.hoverEls.indexOf(el);
+    const hoverIndex = this.hoverEls.indexOf(el);
 
     if (hoverIndex !== -1 && this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1);
@@ -887,7 +886,7 @@ AFRAME.registerComponent('droppable', {
       return true;
     }
 
-    for (let item of acceptableEntities) {
+    for (const item of acceptableEntities) {
       if (item === entity) {
         return true;
       }
@@ -1006,10 +1005,10 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
   },
   tick: function () {
-    var q = new THREE.Quaternion();
-    var v = new THREE.Vector3();
+    const q = new THREE.Quaternion();
+    const v = new THREE.Vector3();
     return function () {
-      var entityPosition;
+      let entityPosition;
 
       if (this.grabber) {
         // reflect on z-axis to point in same direction as the laser
@@ -1091,16 +1090,14 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     }
   },
   resetGrabber: function () {
-    var objPos = new THREE.Vector3();
-    var grabPos = new THREE.Vector3();
+    const objPos = new THREE.Vector3();
+    const grabPos = new THREE.Vector3();
     return function () {
-      let raycaster;
-
       if (!this.grabber) {
         return false;
       }
 
-      raycaster = this.grabber.getAttribute('raycaster');
+      const raycaster = this.grabber.getAttribute('raycaster');
       this.deltaPositionIsValid = false;
       this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos));
 
@@ -1113,7 +1110,7 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     };
   }(),
   lostGrabber: function (evt) {
-    let i = this.grabbers.indexOf(evt.relatedTarget); // if a queued, non-physics grabber leaves the collision zone, forget it
+    const i = this.grabbers.indexOf(evt.relatedTarget); // if a queued, non-physics grabber leaves the collision zone, forget it
 
     if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
       this.grabbers.splice(i, 1);
@@ -1160,7 +1157,7 @@ AFRAME.registerComponent('hoverable', {
       return;
     }
 
-    var handIndex = this.hoverers.indexOf(evt.detail.hand);
+    const handIndex = this.hoverers.indexOf(evt.detail.hand);
 
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
@@ -1191,10 +1188,10 @@ module.exports = function () {
       }
     },
     startButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['startButtons']);
+      return buttonIsValid(evt, this.data.startButtons);
     },
     endButtonOk: function (evt) {
-      return buttonIsValid(evt, this.data['endButtons']);
+      return buttonIsValid(evt, this.data.endButtons);
     }
   };
 }();
@@ -1239,7 +1236,7 @@ module.exports = {
     return false;
   },
   physicsEnd: function (evt) {
-    let constraintId = this.constraints.get(evt.detail.hand);
+    const constraintId = this.constraints.get(evt.detail.hand);
 
     if (constraintId) {
       this.el.removeAttribute('constraint__' + constraintId);
@@ -1248,7 +1245,7 @@ module.exports = {
   },
   physicsClear: function () {
     if (this.el.body) {
-      for (let c of this.constraints.values()) {
+      for (const c of this.constraints.values()) {
         this.el.body.world.removeConstraint(c);
       }
     }
@@ -1356,7 +1353,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
 
   },
   end: function (evt) {
-    var stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
+    const stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
 
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
@@ -1393,7 +1390,7 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       return;
     }
 
-    for (let c of this.el.childNodes) {
+    for (const c of this.el.childNodes) {
       this.stretchBody(c, deltaStretch);
     }
 
@@ -1448,7 +1445,7 @@ AFRAME.registerSystem('super-hands', {
     this.superHands.push(comp);
   },
   unregisterMe: function (comp) {
-    var index = this.superHands.indexOf(comp);
+    const index = this.superHands.indexOf(comp);
 
     if (index !== -1) {
       this.superHands.splice(index, 1);
