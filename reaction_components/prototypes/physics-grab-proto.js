@@ -2,7 +2,7 @@
 module.exports = {
   schema: {
     usePhysics: { default: 'ifavailable' },
-    constraintComponentName: {default: 'constraint'}
+    constraintComponentName: { default: 'constraint' }
   },
   physicsInit: function () {
     this.constraints = new Map()
