@@ -27,7 +27,7 @@ AFRAME.registerComponent('hoverable', {
   },
   end: function (evt) {
     if (evt.defaultPrevented) { return }
-    var handIndex = this.hoverers.indexOf(evt.detail.hand)
+    const handIndex = this.hoverers.indexOf(evt.detail.hand)
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1)
     }

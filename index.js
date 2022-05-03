@@ -18,10 +18,10 @@ require('./reaction_components/clickable.js')
  */
 AFRAME.registerComponent('super-hands', {
   schema: {
-    colliderEvent: {default: 'hit'},
-    colliderEventProperty: {default: 'el'},
-    colliderEndEvent: {default: 'hitend'},
-    colliderEndEventProperty: {default: 'el'},
+    colliderEvent: { default: 'hit' },
+    colliderEventProperty: { default: 'el' },
+    colliderEndEvent: { default: 'hitend' },
+    colliderEndEventProperty: { default: 'el' },
     grabStartButtons: {
       default: ['gripdown', 'trackpaddown', 'triggerdown', 'gripclose',
         'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
@@ -183,7 +183,7 @@ AFRAME.registerComponent('super-hands', {
   onGrabEndButton: function (evt) {
     const clickables = this.hoverEls.filter(h => this.gehClicking.has(h))
     const grabbed = this.state.get(this.GRAB_EVENT)
-    const endEvt = {hand: this.el, buttonEvent: evt}
+    const endEvt = { hand: this.el, buttonEvent: evt }
     this.dispatchMouseEventAll('mouseup', this.el)
     for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el)
@@ -213,7 +213,7 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchEndButton: function (evt) {
     const stretched = this.state.get(this.STRETCH_EVENT)
-    const endEvt = {hand: this.el, buttonEvent: evt}
+    const endEvt = { hand: this.el, buttonEvent: evt }
     // check if end event accepted
     if (stretched &&
         !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
@@ -236,7 +236,7 @@ AFRAME.registerComponent('super-hands', {
        of a grab */
       if (this.state.get(this.GRAB_EVENT) &&
           !this.emitCancelable(this.state.get(this.GRAB_EVENT), this.DRAG_EVENT,
-              {hand: this.el, buttonEvent: evt})) {
+            { hand: this.el, buttonEvent: evt })) {
         dragged = this.state.get(this.GRAB_EVENT)
       } else {
         dragged = this.findTarget(this.DRAG_EVENT, {
@@ -267,7 +267,7 @@ AFRAME.registerComponent('super-hands', {
         on: null,
         buttonEvent: evt
       }
-      const endEvt = {hand: this.el, buttonEvent: evt}
+      const endEvt = { hand: this.el, buttonEvent: evt }
       const dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true)
       if (dropTarget) {
         ddEvt.on = dropTarget
@@ -326,7 +326,7 @@ AFRAME.registerComponent('super-hands', {
   },
   /* search collided entities for target to hover/dragover */
   hover: function () {
-    var hvrevt, hoverEl
+    let hvrevt, hoverEl
     // end previous hover
     if (this.state.has(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT), true)
@@ -408,7 +408,7 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   _unWatch: function (target) {
-    var hoverIndex = this.hoverEls.indexOf(target)
+    const hoverIndex = this.hoverEls.indexOf(target)
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1)
       this.hoverElsIntersections.splice(hoverIndex, 1)
@@ -475,15 +475,14 @@ AFRAME.registerComponent('super-hands', {
     })
   },
   emitCancelable: function (target, name, detail) {
-    var data, evt
     detail = detail || {}
-    data = { bubbles: true, cancelable: true, detail: detail }
+    const data = { bubbles: true, cancelable: true, detail: detail }
     data.detail.target = data.detail.target || target
-    evt = new window.CustomEvent(name, data)
+    const evt = new window.CustomEvent(name, data)
     return target.dispatchEvent(evt)
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
-    var mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget })
+    const mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget })
     target.dispatchEvent(mEvt)
   },
   dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
@@ -507,8 +506,8 @@ AFRAME.registerComponent('super-hands', {
     }
   },
   findTarget: function (evType, detail, filterUsed) {
-    var elIndex
-    var eligibleEls = this.hoverEls
+    let elIndex
+    let eligibleEls = this.hoverEls
     if (filterUsed) {
       eligibleEls = eligibleEls
         .filter(el => el !== this.state.get(this.GRAB_EVENT) &&
@@ -525,7 +524,7 @@ AFRAME.registerComponent('super-hands', {
   // Helper to ensure dropping and regrabbing finds the same target for
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
-    var hoverIndex = this.hoverEls.indexOf(el)
+    const hoverIndex = this.hoverEls.indexOf(el)
     if (hoverIndex !== -1 &&
         this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1)

@@ -7,9 +7,9 @@
  * @returns {object} An `<a-entity>` element.
  */
 module.exports.entityFactory = function (opts, usePhysics) {
-  var scene = document.createElement('a-scene')
-  var assets = document.createElement('a-assets')
-  var entity = document.createElement('a-entity')
+  const scene = document.createElement('a-scene')
+  const assets = document.createElement('a-assets')
+  const entity = document.createElement('a-entity')
   scene.appendChild(assets)
   scene.appendChild(entity)
   if (usePhysics) { scene.setAttribute('physics', '') }
@@ -36,13 +36,13 @@ module.exports.entityFactory = function (opts, usePhysics) {
  * @returns {object} An attached `<a-mixin>` element.
  */
 module.exports.mixinFactory = function (id, obj, scene) {
-  var mixinEl = document.createElement('a-mixin')
+  const mixinEl = document.createElement('a-mixin')
   mixinEl.setAttribute('id', id)
   Object.keys(obj).forEach(function (componentName) {
     mixinEl.setAttribute(componentName, obj[componentName])
   })
 
-  var assetsEl = scene ? scene.querySelector('a-assets') : document.querySelector('a-assets')
+  const assetsEl = scene ? scene.querySelector('a-assets') : document.querySelector('a-assets')
   assetsEl.appendChild(mixinEl)
 
   return mixinEl
@@ -67,7 +67,7 @@ module.exports.getSkipCISuite = function () {
  * @returns {bool} controllerOverride - Set true if comps already contains a controller component and does not need the default added.
  */
 module.exports.controllerFactory = function (comps, controllerOverride, scene) {
-  var contrEl = document.createElement('a-entity')
+  const contrEl = document.createElement('a-entity')
   comps = comps || {}
   if (!controllerOverride) {
     comps['vive-controls'] = 'hand: right'

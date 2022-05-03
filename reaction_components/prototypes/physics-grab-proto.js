@@ -1,7 +1,7 @@
 // base code used by grabbable for physics interactions
 module.exports = {
   schema: {
-    usePhysics: {default: 'ifavailable'},
+    usePhysics: { default: 'ifavailable' },
     constraintComponentName: {default: 'constraint'}
   },
   physicsInit: function () {
@@ -31,7 +31,7 @@ module.exports = {
     return false
   },
   physicsEnd: function (evt) {
-    let constraintId = this.constraints.get(evt.detail.hand)
+    const constraintId = this.constraints.get(evt.detail.hand)
     if (constraintId) {
       this.el.removeAttribute(this.data.constraintComponentName + '__' + constraintId)
       this.constraints.delete(evt.detail.hand)
@@ -39,7 +39,7 @@ module.exports = {
   },
   physicsClear: function () {
     if (this.el.body) {
-      for (let c of this.constraints.values()) {
+      for (const c of this.constraints.values()) {
         this.el.body.world.removeConstraint(c)
       }
     }

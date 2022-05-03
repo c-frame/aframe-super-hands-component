@@ -1,11 +1,15 @@
 const path = require('path')
 // karma configuration
-var karmaConf = {
+const karmaConf = {
   basePath: '../',
   browserify: {
     debug: true,
     // avoid errors when attempting to process pre-bundled file
-    noParse: [path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js')],
+    noParse: [
+      path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js'),
+      path.resolve('./node_modules/aframe/dist/aframe-master.js'),
+      path.resolve('./node_modules/aframe-extras/dist/aframe-extras.misc.js')
+    ],
     transform: [
       ['babelify']
     ]
@@ -14,7 +18,7 @@ var karmaConf = {
   // browsers: ['FirefoxNightly', 'Chromium_WebVR'],
   client: {
     captureConsole: true,
-    mocha: {'ui': 'tdd'}
+    mocha: { ui: 'tdd' }
   },
   customLaunchers: {
     Chromium_WebVR: {
@@ -33,11 +37,11 @@ var karmaConf = {
   ],
   files: [
     // dependencies
-    {pattern: 'tests/testDependencies.js', included: true},
+    { pattern: 'tests/testDependencies.js', included: true },
     // module
-    {pattern: 'index.js', included: true},
+    { pattern: 'index.js', included: true },
     // Define test files.
-    {pattern: 'tests/**/*.test.js'}
+    { pattern: 'tests/**/*.test.js' }
     // Serve test assets.
     // {pattern: 'tests/assets/**/*', included: false, served: true}
   ],
@@ -48,33 +52,6 @@ var karmaConf = {
     'tests/**/*.js': ['browserify', 'env']
   },
   reporters: ['mocha']
-}
-
-// configuration for code coverage reporting
-if (process.env.TEST_ENV === 'ci') {
-  Object.assign(karmaConf.browserify, {
-    transform: [
-      [
-        'browserify-istanbul', {
-          instrumenterConfig: {
-            embedSource: true
-          },
-          defaultIgnore: true,
-          ignore: ['**/node_modules/**', '**/tests/**', '**/vendor/**', '**/*.css']
-        }
-      ]
-    ]
-  })
-  karmaConf.coverageReporter = {
-    dir: 'tests/coverage',
-    includeAllSources: true,
-    reporters: [
-      {'type': 'html', subdir: 'report'},
-      {'type': 'lcov', subdir: '.'}
-    ]
-  }
-  karmaConf.reporters.push('coverage')
-  karmaConf.preprocessors['src/**/*.js'] = ['coverage']
 }
 
 // Apply configuration

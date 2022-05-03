@@ -6,7 +6,7 @@ const coord = AFRAME.utils.coordinates.parse
 suite('grabbable', function () {
   suite('grabbable-lifecycle', function () {
     setup(function (done) {
-      var el = this.el = entityFactory()
+      const el = this.el = entityFactory()
       el.setAttribute('grabbable', '')
       el.addEventListener('loaded', function () {
         done()
@@ -16,7 +16,7 @@ suite('grabbable', function () {
       assert.isOk(this.el.components.grabbable.data.usePhysics)
     })
     test('component removes without errors', function (done) {
-      var el = this.el
+      const el = this.el
       el.removeAttribute('grabbable')
       process.nextTick(function () {
         assert.notOk(el.components.grabbable)
@@ -27,7 +27,7 @@ suite('grabbable', function () {
 
   suite('grabbable-function without physics', function () {
     setup(function (done) {
-      var el = this.el = entityFactory()
+      const el = this.el = entityFactory()
       el.setAttribute('grabbable', '')
       this.hand = helpers.controllerFactory()
       el.parentNode.addEventListener('loaded', function () {
@@ -41,7 +41,7 @@ suite('grabbable', function () {
       assert.isNotOk(myGrabbable.grabbed)
       assert.notStrictEqual(myGrabbable.grabber, this.hand)
       assert.isNotOk(this.el.is(myGrabbable.GRABBED_STATE))
-      myGrabbable.start({detail: {hand: this.hand}})
+      myGrabbable.start({ detail: { hand: this.hand } })
       assert.isOk(myGrabbable.grabbed)
       assert.isOk(myGrabbable.grabber)
       assert.strictEqual(myGrabbable.grabber, hand)
@@ -49,8 +49,8 @@ suite('grabbable', function () {
     })
     test('ignores cancelled events', function () {
       this.comp = this.el.components.grabbable
-      const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
-      const evt = {detail: {hand: this.hand}}
+      const evtCancelled = { defaultPrevented: true, detail: { hand: this.hand } }
+      const evt = { detail: { hand: this.hand } }
       this.comp.start(evtCancelled)
       assert.isFalse(this.el.is(this.comp.GRABBED_STATE))
       this.comp.start(evt)
@@ -60,7 +60,7 @@ suite('grabbable', function () {
     test('position updates during grab', function () {
       const myGrabbable = this.el.components.grabbable
       assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
-      myGrabbable.start({detail: {hand: this.hand}})
+      myGrabbable.start({ detail: { hand: this.hand } })
       /* with render loop stubbed out, need to force ticks */
       myGrabbable.tick()
       this.hand.setAttribute('position', '1 1 1')
@@ -77,7 +77,7 @@ suite('grabbable', function () {
           .onFirstCall().returns(coord('0 0 0'))
           .onSecondCall().returns(coord('1 1 1'))
         myGrabbable.data.usePhysics = 'only'
-        myGrabbable.start({detail: {hand: this.hand}})
+        myGrabbable.start({ detail: { hand: this.hand } })
         myGrabbable.tick()
         assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       })
@@ -88,9 +88,9 @@ suite('grabbable', function () {
       posStub.withArgs('position')
         .onFirstCall().returns(coord('0 0 0'))
         .onSecondCall().returns(coord('1 1 1'))
-      myGrabbable.start({detail: {hand: this.hand}})
+      myGrabbable.start({ detail: { hand: this.hand } })
       myGrabbable.tick()
-      myGrabbable.end({detail: {hand: this.hand}})
+      myGrabbable.end({ detail: { hand: this.hand } })
       myGrabbable.tick()
       assert.isTrue(this.el.getAttribute('position').equals(coord('0 0 0')))
       assert.notOk(this.el.is(myGrabbable.GRABBED_STATE))
@@ -100,19 +100,19 @@ suite('grabbable', function () {
     test('grabbing from a second hand does not change grabber', function () {
       const myGrabbable = this.el.components.grabbable
       const secondHand = {}
-      myGrabbable.start({detail: {hand: this.hand}})
-      myGrabbable.start({detail: {hand: secondHand}})
+      myGrabbable.start({ detail: { hand: this.hand } })
+      myGrabbable.start({ detail: { hand: secondHand } })
       assert.strictEqual(myGrabbable.grabber, this.hand)
     })
   })
 
   suite('grabbable-function with physics', function () {
     setup(async function () {
-      var el = this.el = await elFactory()
+      const el = this.el = await elFactory()
       console.log('elfactory')
       const handPromise = new Promise(resolve => {
         this.hand = helpers.controllerFactory({
-          'body': 'type: static; shape: sphere',
+          body: 'type: static; shape: sphere',
           geometry: 'primitive: sphere'
         })
         if (this.hand.body) return resolve()
@@ -133,7 +133,7 @@ suite('grabbable', function () {
     test('constraint registered on grab', function () {
       this.comp.start({ detail: { hand: this.hand } })
       const cId = this.comp.constraints.get(this.hand)
-      let c = this.el.components['constraint__' + cId]
+      const c = this.el.components['constraint__' + cId]
       assert.isOk(c)
       assert.strictEqual(c.data.target, this.hand)
     })
@@ -143,19 +143,17 @@ suite('grabbable', function () {
       assert.strictEqual(this.comp.constraints.size, 0)
     })
     test('constraint removed on release', function () {
-      var constraint
       this.comp.start({ detail: { hand: this.hand } })
       assert.isOk(this.comp.constraints.has(this.hand))
-      constraint = this.comp.constraints.get(this.hand)
+      const constraint = this.comp.constraints.get(this.hand)
       this.comp.end({ detail: { hand: this.hand } })
       assert.notOk(this.comp.constraints.has(this.hand))
       assert.equal(this.el.body.world.constraints.indexOf(constraint), -1)
     })
     test('changing usePhysics to never during grab removes constraint', function () {
-      var constraint
       this.comp.start({ detail: { hand: this.hand } })
       assert.isOk(this.comp.constraints.has(this.hand))
-      constraint = this.comp.constraints.get(this.hand)
+      const constraint = this.comp.constraints.get(this.hand)
       this.el.setAttribute('grabbable', 'usePhysics', 'never')
       assert.notOk(this.comp.constraints.has(this.hand))
       assert.strictEqual(this.el.body.world.constraints.indexOf(constraint), -1)
@@ -165,11 +163,11 @@ suite('grabbable', function () {
 
   suite('two-handed grab w/o physics', function () {
     setup(function (done) {
-      var el = this.el = entityFactory()
+      const el = this.el = entityFactory()
       this.hand1 = helpers
-        .controllerFactory({'super-hands': ''})
+        .controllerFactory({ 'super-hands': '' })
       this.hand2 = helpers
-        .controllerFactory({'super-hands': ''})
+        .controllerFactory({ 'super-hands': '' })
       el.setAttribute('grabbable', '')
       el.sceneEl.addEventListener('loaded', evt => {
         this.comp = el.components.grabbable
@@ -200,7 +198,7 @@ suite('grabbable', function () {
 
   suite('two-handed grab with physics', function () {
     setup(function (done) {
-      var el = this.el = entityFactory()
+      const el = this.el = entityFactory()
       this.hand1 = helpers
         .controllerFactory({
           'super-hands': '',
@@ -247,17 +245,17 @@ suite('grabbable', function () {
 
   suite('grabbable button mapping', function () {
     setup(function (done) {
-      var el = this.el = entityFactory()
-      this.hand = helpers.controllerFactory({'super-hands': ''})
+      const el = this.el = entityFactory()
+      this.hand = helpers.controllerFactory({ 'super-hands': '' })
       el.setAttribute('grabbable',
-          'startButtons: triggerdown; endButtons: triggerup')
+        'startButtons: triggerdown; endButtons: triggerup')
       el.addEventListener('loaded', () => {
         this.comp = el.components.grabbable
         done()
       })
     })
     test('responds to correct buttons', function () {
-      const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}}
+      const dtl = { hand: this.hand, buttonEvent: { type: 'gripdown' } }
       // reject wrong button start
       assert.isOk(helpers.emitCancelable(this.el, this.comp.GRAB_EVENT, dtl))
       assert.notStrictEqual(this.comp.grabber, this.hand)

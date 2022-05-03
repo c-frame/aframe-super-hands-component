@@ -3,7 +3,7 @@ const helpers = require('../helpers')
 const entityFactory = helpers.entityFactory
 suite('clickable-lifecycle', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     el.setAttribute('clickable', '')
     el.addEventListener('loaded', function () {
       done()
@@ -13,7 +13,7 @@ suite('clickable-lifecycle', function () {
     assert.isOk(this.el.components.clickable)
   })
   test('component removes without errors', function (done) {
-    var el = this.el
+    const el = this.el
     el.removeAttribute('clickable')
     process.nextTick(function () {
       assert.notOk(el.components.grabbable)
@@ -23,7 +23,7 @@ suite('clickable-lifecycle', function () {
 })
 suite('clickable function', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
+    const el = this.el = entityFactory()
     el.setAttribute('clickable', '')
     this.hand = helpers.controllerFactory()
     this.hand2 = helpers.controllerFactory({ 'vive-controls': 'hand: left' }, true)
@@ -43,7 +43,7 @@ suite('clickable function', function () {
     assert.equal(this.clicker.clickers.length, 0)
   })
   test('handles multiple clickers', function () {
-    var hand2 = {}
+    const hand2 = {}
     this.clicker.start({ detail: { hand: this.hand } })
     this.clicker.start({ detail: { hand: hand2 } })
     assert.sameMembers(this.clicker.clickers, [this.hand, hand2])
@@ -56,8 +56,8 @@ suite('clickable function', function () {
     assert.isFalse(this.el.is(this.clicker.CLICKED_STATE))
   })
   test('ignores cancelled events', function () {
-    const evtCancelled = {defaultPrevented: true, detail: {hand: this.hand}}
-    const evt = {detail: {hand: this.hand}}
+    const evtCancelled = { defaultPrevented: true, detail: { hand: this.hand } }
+    const evt = { detail: { hand: this.hand } }
     this.clicker.start(evtCancelled)
     assert.isFalse(this.el.is(this.clicker.CLICKED_STATE))
     this.clicker.start(evt)
@@ -67,17 +67,17 @@ suite('clickable function', function () {
 })
 suite('clickable button mapping', function () {
   setup(function (done) {
-    var el = this.el = entityFactory()
-    this.hand = helpers.controllerFactory({'super-hands': ''})
+    const el = this.el = entityFactory()
+    this.hand = helpers.controllerFactory({ 'super-hands': '' })
     el.setAttribute('clickable',
-        'startButtons: triggerdown; endButtons: triggerup')
+      'startButtons: triggerdown; endButtons: triggerup')
     el.addEventListener('loaded', () => {
       this.comp = el.components.clickable
       done()
     })
   })
   test('responds to correct buttons', function () {
-    const dtl = {hand: this.hand, buttonEvent: {type: 'gripdown'}}
+    const dtl = { hand: this.hand, buttonEvent: { type: 'gripdown' } }
     // reject wrong button start
     assert.isOk(helpers.emitCancelable(this.el, this.comp.CLICK_EVENT, dtl))
     assert.notStrictEqual(this.comp.clickers[0], this.hand)
