@@ -1,5 +1,21 @@
 ## News
 
+v3.0.4
+* A-Frame 1.4.0 support confirmation
+  * Updated dependencies and fixed tests and examples
+  * No API changes
+
+v3.0.3
+* A-Frame 1.3.0 support confirmation
+  * Updated dependencies and fixed tests and examples
+  * No API changes
+
+v3.0.1
+
+* A-Frame 1.0.4 support confirmation
+  * Updated dependencies and fixed tests
+  * No notable changes
+
 v3.0.0
 
 * The 'Less is More' update. This package has scope has been narrowed to keep
