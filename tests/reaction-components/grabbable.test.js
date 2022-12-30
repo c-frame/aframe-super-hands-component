@@ -109,11 +109,10 @@ suite('grabbable', function () {
   suite('grabbable-function with physics', function () {
     setup(async function () {
       const el = this.el = await elFactory()
-      console.log('elfactory')
       const handPromise = new Promise(resolve => {
         this.hand = helpers.controllerFactory({
-          body: 'type: static; shape: sphere',
-          geometry: 'primitive: sphere'
+          body: 'type: static; shape: sphere; sphereRadius: 0.001',
+          geometry: 'primitive: sphere; radius: 0.001'
         })
         if (this.hand.body) return resolve()
         this.hand.addEventListener('body-loaded', () => resolve())
@@ -121,7 +120,6 @@ suite('grabbable', function () {
       const elPromise = new Promise(resolve => {
         el.addEventListener('body-loaded', evt => {
           this.comp = el.components.grabbable
-          console.log('el promise')
           resolve()
         })
         el.setAttribute('grabbable', '')

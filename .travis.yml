@@ -5,8 +5,8 @@ addons:
 services:
   - xvfb
 node_js:
-  - '12.16.2'
-
+  - '14.21.1'
+install: travis_wait 20 npm ci
 script:
   - $CI_ACTION
 

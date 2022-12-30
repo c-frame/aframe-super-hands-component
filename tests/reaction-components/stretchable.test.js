@@ -12,9 +12,9 @@ suite('stretchable', function () {
   setup(function (done) {
     const el = this.el = entityFactory()
     this.hand1 = helpers
-      .controllerFactory({ 'hand-controls': 'right' }, true)
+      .controllerFactory({ 'vive-controls': 'right' }, true)
     this.hand2 = helpers
-      .controllerFactory({ 'hand-controls': 'left' }, true)
+      .controllerFactory({ 'vive-controls': 'left' }, true)
     el.setAttribute('stretchable', '')
     el.sceneEl.addEventListener('loaded', evt => {
       this.comp = el.components.stretchable
@@ -97,9 +97,9 @@ suite('stretchable-physics', function () {
   setup(function (done) {
     const el = this.el = entityFactory({}, true)
     this.hand1 = helpers
-      .controllerFactory({ 'hand-controls': 'right' }, true)
+      .controllerFactory({ 'vive-controls': 'right' }, true)
     this.hand2 = helpers
-      .controllerFactory({ 'hand-controls': 'left' }, true)
+      .controllerFactory({ 'vive-controls': 'left' }, true)
     el.setAttribute('stretchable', '')
     el.setAttribute('geometry', 'primitive: box')
     el.setAttribute('dynamic-body', '')

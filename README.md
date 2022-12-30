@@ -56,7 +56,7 @@ Install and use by directly by including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
   <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
 </head>
@@ -116,41 +116,10 @@ The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/exa
 
 ## News
 
-v3.0.3
-* A-Frame 1.3.0 support confirmation
+v3.0.4
+* A-Frame 1.4.0 support confirmation
   * Updated dependencies and fixed tests and examples
   * No API changes
-
-v3.0.1
-
-* A-Frame 1.0.4 support confirmation
-  * Updated dependencies and fixed tests
-  * No notable changes
-
-v3.0.0
-
-* The 'Less is More' update. This package has scope has been narrowed to keep
-  it maintainable, increase the frequency of updates, and allow for focus on
-  implementing new gestures instead of peripheral components.
-  * `progressive-controls` and `a-locomotor` removed from this repo.
-    I understand `progressive-controls` was fairly popular, but is has a
-    [compatibility issue](https://github.com/aframevr/aframe/issues/3610)
-    with the latest A-Frame which was holding up releases for the entire
-    package.
-    I intend to refactor it and release it in another library, but you can
-    still use the last version by including
-    [its source file](https://github.com/wmurphyrd/aframe-super-hands-component/blob/dc1a601b7fa9d606a05ec2d3500f8f141c65c20c/misc_components/progressive-controls.js) in your project.
-* Smarter raycasting support: chooses nearest intersected entity first,
-  reordering stack as distances change (\* if the raycaster in use updates
-  intersection objects' distances)
-* Improved nested entity handling: only one component can react to each
-  gesture event.
-* Improved stretching of complex physics bodies: all shapes, child entity
-  shapes, and offsets are updated
-* Added support for `'worker'` and other `aframe-physics-system` drivers
-  in `grabbable`
-* v2.x deprecations removed: `drag-droppable` component and
-  `super-hands.colliderState` property.
 
 [Previous news](news.md)
 
@@ -171,9 +140,10 @@ for any device: desktop, mobile ("magic window"), cardboard viewer + button,
 
 `super-hands` dependency version compatibility:
 
-| super-hands Version | A-Frame Version | aframe-extras Version | aframe-physics-system Version |
+| super-hands Version | A-Frame Version | aframe-extras Version | @c-frame/aframe-physics-system Version |
 | --- | --- | --- | --- |
-| ^v3.0.3 | ^v1.3.0 | ^v6.1.1 | github:n5ro/aframe-physics-system#59100ac8 (last npm version cannot be installed) |
+| ^v3.0.4 | ^v1.4.0 | ^v6.1.1 | ^v4.1.0 |
+| ^v3.0.3 | ^v1.3.0 | ^v6.1.1 | ^v4.1.0 |
 | ^v3.0.2 | ^v1.0.4 | ^v6.1.1 | ^v4.0.1 |
 | v3.0.0 | ^v0.8.2 | ^v4.1.2 | ^v3.1.2 |
 
