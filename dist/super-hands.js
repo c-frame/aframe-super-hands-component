@@ -2,30 +2,22 @@
 "use strict";
 
 /* global AFRAME */
+
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
-
 require('./systems/super-hands-system.js');
-
 require('./reaction_components/hoverable.js');
-
 require('./reaction_components/grabbable.js');
-
 require('./reaction_components/stretchable.js');
-
 require('./reaction_components/drag-droppable.js');
-
 require('./reaction_components/draggable.js');
-
 require('./reaction_components/droppable.js');
-
 require('./reaction_components/clickable.js');
+
 /**
  * Super Hands component for A-Frame.
  */
-
-
 AFRAME.registerComponent('super-hands', {
   schema: {
     colliderEvent: {
@@ -62,12 +54,10 @@ AFRAME.registerComponent('super-hands', {
       default: 0
     }
   },
-
   /**
    * Set if component needs multiple instancing.
    */
   multiple: false,
-
   /**
    * Called once when component is attached. Generally for initial setup.
    */
@@ -83,13 +73,16 @@ AFRAME.registerComponent('super-hands', {
     this.UNDRAG_EVENT = 'drag-end';
     this.DRAGOVER_EVENT = 'dragover-start';
     this.UNDRAGOVER_EVENT = 'dragover-end';
-    this.DRAGDROP_EVENT = 'drag-drop'; // links to other systems/components
+    this.DRAGDROP_EVENT = 'drag-drop';
 
-    this.otherSuperHand = null; // state tracking - global event handlers (GEH)
+    // links to other systems/components
+    this.otherSuperHand = null;
 
+    // state tracking - global event handlers (GEH)
     this.gehDragged = new Set();
-    this.gehClicking = new Set(); // state tracking - reaction components
+    this.gehClicking = new Set();
 
+    // state tracking - reaction components
     this.hoverEls = [];
     this.hoverElsIntersections = [];
     this.prevCheckTime = null;
@@ -106,7 +99,6 @@ AFRAME.registerComponent('super-hands', {
     this.onDragDropEndButton = this.onDragDropEndButton.bind(this);
     this.system.registerMe(this);
   },
-
   /**
    * Called when component is attached and when component data changes.
    * Generally modifies the entity based on the data.
@@ -115,7 +107,6 @@ AFRAME.registerComponent('super-hands', {
     this.unRegisterListeners(oldData);
     this.registerListeners();
   },
-
   /**
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
@@ -124,11 +115,9 @@ AFRAME.registerComponent('super-hands', {
     this.system.unregisterMe(this);
     this.unRegisterListeners();
     this.hoverEls.length = 0;
-
     if (this.state.get(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT));
     }
-
     this.onGrabEndButton();
     this.onStretchEndButton();
     this.onDragDropEndButton();
@@ -138,37 +127,29 @@ AFRAME.registerComponent('super-hands', {
     function sorter(a, b) {
       const aDist = a.distance == null ? -1 : a.distance;
       const bDist = b.distance == null ? -1 : b.distance;
-
       if (aDist < bDist) {
         return 1;
       }
-
       if (bDist < aDist) {
         return -1;
       }
-
       return 0;
     }
-
     return function (time) {
       const data = this.data;
       const prevCheckTime = this.prevCheckTime;
-
       if (prevCheckTime && time - prevCheckTime < data.interval) {
         return;
       }
-
       this.prevCheckTime = time;
       let orderChanged = false;
       this.hoverElsIntersections.sort(sorter);
-
       for (let i = 0; i < this.hoverElsIntersections.length; i++) {
         if (this.hoverEls[i] !== this.hoverElsIntersections[i].object.el) {
           orderChanged = true;
           this.hoverEls[i] = this.hoverElsIntersections[i].object.el;
         }
       }
-
       if (orderChanged) {
         this.hover();
       }
@@ -178,16 +159,13 @@ AFRAME.registerComponent('super-hands', {
     let carried = this.state.get(this.GRAB_EVENT);
     this.dispatchMouseEventAll('mousedown', this.el);
     this.gehClicking = new Set(this.hoverEls);
-
     if (!carried) {
       carried = this.findTarget(this.GRAB_EVENT, {
         hand: this.el,
         buttonEvent: evt
       });
-
       if (carried) {
         this.state.set(this.GRAB_EVENT, carried);
-
         this._unHover(carried);
       }
     }
@@ -200,13 +178,11 @@ AFRAME.registerComponent('super-hands', {
       buttonEvent: evt
     };
     this.dispatchMouseEventAll('mouseup', this.el);
-
     for (let i = 0; i < clickables.length; i++) {
       this.dispatchMouseEvent(clickables[i], 'click', this.el);
     }
-
-    this.gehClicking.clear(); // check if grabbed entity accepts ungrab event
-
+    this.gehClicking.clear();
+    // check if grabbed entity accepts ungrab event
     if (grabbed && !this.emitCancelable(grabbed, this.UNGRAB_EVENT, endEvt)) {
       /* push to top of stack so a drop followed by re-grab gets the same
          target */
@@ -217,16 +193,13 @@ AFRAME.registerComponent('super-hands', {
   },
   onStretchStartButton: function (evt) {
     let stretched = this.state.get(this.STRETCH_EVENT);
-
     if (!stretched) {
       stretched = this.findTarget(this.STRETCH_EVENT, {
         hand: this.el,
         buttonEvent: evt
       });
-
       if (stretched) {
         this.state.set(this.STRETCH_EVENT, stretched);
-
         this._unHover(stretched);
       }
     }
@@ -236,8 +209,8 @@ AFRAME.registerComponent('super-hands', {
     const endEvt = {
       hand: this.el,
       buttonEvent: evt
-    }; // check if end event accepted
-
+    };
+    // check if end event accepted
     if (stretched && !this.emitCancelable(stretched, this.UNSTRETCH_EVENT, endEvt)) {
       this.promoteHoveredEl(stretched);
       this.state.delete(this.STRETCH_EVENT);
@@ -247,12 +220,10 @@ AFRAME.registerComponent('super-hands', {
   onDragDropStartButton: function (evt) {
     let dragged = this.state.get(this.DRAG_EVENT);
     this.dragging = true;
-
     if (this.hoverEls.length) {
       this.gehDragged = new Set(this.hoverEls);
       this.dispatchMouseEventAll('dragstart', this.el);
     }
-
     if (!dragged) {
       /* prefer carried so that a drag started after a grab will work
        with carried element rather than a currently intersected drop target.
@@ -269,10 +240,8 @@ AFRAME.registerComponent('super-hands', {
           buttonEvent: evt
         });
       }
-
       if (dragged) {
         this.state.set(this.DRAG_EVENT, dragged);
-
         this._unHover(dragged);
       }
     }
@@ -280,15 +249,13 @@ AFRAME.registerComponent('super-hands', {
   onDragDropEndButton: function (evt) {
     const carried = this.state.get(this.DRAG_EVENT);
     this.dragging = false; // keep _unHover() from activating another droptarget
-
     this.gehDragged.forEach(carried => {
-      this.dispatchMouseEvent(carried, 'dragend', this.el); // fire event both ways for all intersected targets
-
+      this.dispatchMouseEvent(carried, 'dragend', this.el);
+      // fire event both ways for all intersected targets
       this.dispatchMouseEventAll('drop', carried, true, true);
       this.dispatchMouseEventAll('dragleave', carried, true, true);
     });
     this.gehDragged.clear();
-
     if (carried) {
       const ddEvt = {
         hand: this.el,
@@ -301,15 +268,12 @@ AFRAME.registerComponent('super-hands', {
         buttonEvent: evt
       };
       const dropTarget = this.findTarget(this.DRAGDROP_EVENT, ddEvt, true);
-
       if (dropTarget) {
         ddEvt.on = dropTarget;
         this.emitCancelable(carried, this.DRAGDROP_EVENT, ddEvt);
-
         this._unHover(dropTarget);
-      } // check if end event accepted
-
-
+      }
+      // check if end event accepted
       if (!this.emitCancelable(carried, this.UNDRAG_EVENT, endEvt)) {
         this.promoteHoveredEl(carried);
         this.state.delete(this.DRAG_EVENT);
@@ -323,17 +287,14 @@ AFRAME.registerComponent('super-hands', {
     const hoverEls = this.hoverEls;
     const hitElIndex = this.hoverEls.indexOf(hitEl);
     let hoverNeedsUpdate = false;
-
     if (hitElIndex === -1) {
-      hoverNeedsUpdate = true; // insert in order of distance when available
-
+      hoverNeedsUpdate = true;
+      // insert in order of distance when available
       if (dist != null) {
         let i = 0;
-
         while (i < sects.length && dist < sects[i].distance) {
           i++;
         }
-
         hoverEls.splice(i, 0, hitEl);
         sects.splice(i, 0, intersection);
       } else {
@@ -344,9 +305,7 @@ AFRAME.registerComponent('super-hands', {
           }
         });
       }
-
       this.dispatchMouseEvent(hitEl, 'mouseover', this.el);
-
       if (this.dragging && this.gehDragged.size) {
         // events on targets and on dragged
         this.gehDragged.forEach(dragged => {
@@ -354,17 +313,14 @@ AFRAME.registerComponent('super-hands', {
         });
       }
     }
-
     return hoverNeedsUpdate;
   },
   onHit: function (evt) {
     const hitEl = evt.detail[this.data.colliderEventProperty];
     let hoverNeedsUpdate = 0;
-
     if (!hitEl) {
       return;
     }
-
     if (Array.isArray(hitEl)) {
       for (let i = 0, sect; i < hitEl.length; i++) {
         sect = evt.detail.intersections && evt.detail.intersections[i];
@@ -373,24 +329,20 @@ AFRAME.registerComponent('super-hands', {
     } else {
       hoverNeedsUpdate += this.processHitEl(hitEl, null);
     }
-
     if (hoverNeedsUpdate) {
       this.hover();
     }
   },
-
   /* search collided entities for target to hover/dragover */
   hover: function () {
-    let hvrevt, hoverEl; // end previous hover
-
+    let hvrevt, hoverEl;
+    // end previous hover
     if (this.state.has(this.HOVER_EVENT)) {
       this._unHover(this.state.get(this.HOVER_EVENT), true);
     }
-
     if (this.state.has(this.DRAGOVER_EVENT)) {
       this._unHover(this.state.get(this.DRAGOVER_EVENT), true);
     }
-
     if (this.dragging && this.state.get(this.DRAG_EVENT)) {
       hvrevt = {
         hand: this.el,
@@ -398,29 +350,24 @@ AFRAME.registerComponent('super-hands', {
         carried: this.state.get(this.DRAG_EVENT)
       };
       hoverEl = this.findTarget(this.DRAGOVER_EVENT, hvrevt, true);
-
       if (hoverEl) {
         this.emitCancelable(this.state.get(this.DRAG_EVENT), this.DRAGOVER_EVENT, hvrevt);
         this.state.set(this.DRAGOVER_EVENT, hoverEl);
       }
-    } // fallback to hover if not dragging or dragover wasn't successful
-
-
+    }
+    // fallback to hover if not dragging or dragover wasn't successful
     if (!this.state.has(this.DRAGOVER_EVENT)) {
       hoverEl = this.findTarget(this.HOVER_EVENT, {
         hand: this.el
       }, true);
-
       if (hoverEl) {
         this.state.set(this.HOVER_EVENT, hoverEl);
       }
     }
   },
-
   /* called when controller moves out of collision range of entity */
   unHover: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty];
-
     if (clearedEls) {
       if (Array.isArray(clearedEls)) {
         clearedEls.forEach(el => this._unHover(el));
@@ -429,12 +376,10 @@ AFRAME.registerComponent('super-hands', {
       }
     }
   },
-
   /* inner unHover steps needed regardless of cause of unHover */
   _unHover: function (el, skipNextHover) {
     let unHovered = false;
     let evt;
-
     if (el === this.state.get(this.DRAGOVER_EVENT)) {
       this.state.delete(this.DRAGOVER_EVENT);
       unHovered = true;
@@ -444,28 +389,24 @@ AFRAME.registerComponent('super-hands', {
         carried: this.state.get(this.DRAG_EVENT)
       };
       this.emitCancelable(el, this.UNDRAGOVER_EVENT, evt);
-
       if (this.state.has(this.DRAG_EVENT)) {
         this.emitCancelable(this.state.get(this.DRAG_EVENT), this.UNDRAGOVER_EVENT, evt);
       }
     }
-
     if (el === this.state.get(this.HOVER_EVENT)) {
       this.state.delete(this.HOVER_EVENT);
       unHovered = true;
       this.emitCancelable(el, this.UNHOVER_EVENT, {
         hand: this.el
       });
-    } // activate next target, if present
-
-
+    }
+    // activate next target, if present
     if (unHovered && !skipNextHover) {
       this.hover();
     }
   },
   unWatch: function (evt) {
     const clearedEls = evt.detail[this.data.colliderEndEventProperty];
-
     if (clearedEls) {
       if (Array.isArray(clearedEls)) {
         clearedEls.forEach(el => this._unWatch(el));
@@ -477,12 +418,10 @@ AFRAME.registerComponent('super-hands', {
   },
   _unWatch: function (target) {
     const hoverIndex = this.hoverEls.indexOf(target);
-
     if (hoverIndex !== -1) {
       this.hoverEls.splice(hoverIndex, 1);
       this.hoverElsIntersections.splice(hoverIndex, 1);
     }
-
     this.gehDragged.forEach(dragged => {
       this.dispatchMouseEvent(target, 'dragleave', dragged);
       this.dispatchMouseEvent(dragged, 'dragleave', target);
@@ -492,9 +431,10 @@ AFRAME.registerComponent('super-hands', {
   registerListeners: function () {
     this.el.addEventListener(this.data.colliderEvent, this.onHit);
     this.el.addEventListener(this.data.colliderEndEvent, this.unWatch);
-    this.el.addEventListener(this.data.colliderEndEvent, this.unHover); // binding order to keep grabEnd from triggering dragover
-    // again before dragDropEnd can delete its carried state
+    this.el.addEventListener(this.data.colliderEndEvent, this.unHover);
 
+    // binding order to keep grabEnd from triggering dragover
+    // again before dragDropEnd can delete its carried state
     this.data.grabStartButtons.forEach(b => {
       this.el.addEventListener(b, this.onGrabStartButton);
     });
@@ -516,12 +456,10 @@ AFRAME.registerComponent('super-hands', {
   },
   unRegisterListeners: function (data) {
     data = data || this.data;
-
     if (Object.keys(data).length === 0) {
       // Empty object passed on initalization
       return;
     }
-
     this.el.removeEventListener(data.colliderEvent, this.onHit);
     this.el.removeEventListener(data.colliderEndEvent, this.unHover);
     this.el.removeEventListener(data.colliderEndEvent, this.unWatch);
@@ -549,7 +487,7 @@ AFRAME.registerComponent('super-hands', {
     const data = {
       bubbles: true,
       cancelable: true,
-      detail: detail
+      detail
     };
     data.detail.target = data.detail.target || target;
     const evt = new window.CustomEvent(name, data);
@@ -557,17 +495,15 @@ AFRAME.registerComponent('super-hands', {
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
     const mEvt = new window.MouseEvent(name, {
-      relatedTarget: relatedTarget
+      relatedTarget
     });
     target.dispatchEvent(mEvt);
   },
   dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {
     let els = this.hoverEls;
-
     if (filterUsed) {
       els = els.filter(el => el !== this.state.get(this.GRAB_EVENT) && el !== this.state.get(this.DRAG_EVENT) && el !== this.state.get(this.STRETCH_EVENT) && !this.gehDragged.has(el));
     }
-
     if (alsoReverse) {
       for (let i = 0; i < els.length; i++) {
         this.dispatchMouseEvent(els[i], name, relatedTarget);
@@ -582,24 +518,20 @@ AFRAME.registerComponent('super-hands', {
   findTarget: function (evType, detail, filterUsed) {
     let elIndex;
     let eligibleEls = this.hoverEls;
-
     if (filterUsed) {
       eligibleEls = eligibleEls.filter(el => el !== this.state.get(this.GRAB_EVENT) && el !== this.state.get(this.DRAG_EVENT) && el !== this.state.get(this.STRETCH_EVENT));
     }
-
     for (elIndex = eligibleEls.length - 1; elIndex >= 0; elIndex--) {
       if (!this.emitCancelable(eligibleEls[elIndex], evType, detail)) {
         return eligibleEls[elIndex];
       }
     }
-
     return null;
   },
   // Helper to ensure dropping and regrabbing finds the same target for
   // for order-sorted hoverEls (grabbing; no-op for distance-sorted (pointing)
   promoteHoveredEl: function (el) {
     const hoverIndex = this.hoverEls.indexOf(el);
-
     if (hoverIndex !== -1 && this.hoverElsIntersections[hoverIndex].distance == null) {
       this.hoverEls.splice(hoverIndex, 1);
       const sect = this.hoverElsIntersections.splice(hoverIndex, 1);
@@ -614,7 +546,6 @@ AFRAME.registerComponent('super-hands', {
 
 /* global AFRAME */
 const buttonCore = require('./prototypes/buttons-proto.js');
-
 AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   schema: {
     onclick: {
@@ -639,12 +570,9 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
     if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
     }
-
     this.el.addState(this.CLICKED_STATE);
-
     if (this.clickers.indexOf(evt.detail.hand) === -1) {
       this.clickers.push(evt.detail.hand);
-
       if (evt.preventDefault) {
         evt.preventDefault();
       }
@@ -652,19 +580,15 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
   },
   end: function (evt) {
     const handIndex = this.clickers.indexOf(evt.detail.hand);
-
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
-
     if (handIndex !== -1) {
       this.clickers.splice(handIndex, 1);
     }
-
     if (this.clickers.length < 1) {
       this.el.removeState(this.CLICKED_STATE);
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -676,9 +600,7 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
 
 /* global AFRAME */
 const inherit = AFRAME.utils.extendDeep;
-
 const buttonCore = require('./prototypes/buttons-proto.js');
-
 AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   init: function () {
     console.warn('Warning: drag-droppable is deprecated. Use draggable and droppable components instead');
@@ -709,7 +631,6 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
   },
   hoverStart: function (evt) {
     this.el.addState(this.HOVERED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -718,9 +639,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
     if (!this.startButtonOk(evt)) {
       return;
     }
-
     this.el.addState(this.DRAGGED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -732,9 +651,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
     if (!this.endButtonOk(evt)) {
       return;
     }
-
     this.el.removeState(this.DRAGGED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -743,7 +660,6 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
     if (!this.endButtonOk(evt)) {
       return;
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -755,9 +671,7 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
 
 /* global AFRAME */
 const inherit = AFRAME.utils.extendDeep;
-
 const buttonCore = require('./prototypes/buttons-proto.js');
-
 AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
   init: function () {
     this.DRAGGED_STATE = 'dragged';
@@ -776,9 +690,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
     if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
     }
-
     this.el.addState(this.DRAGGED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -787,9 +699,7 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
-
     this.el.removeState(this.DRAGGED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -804,16 +714,13 @@ function elementMatches(el, selector) {
   if (el.matches) {
     return el.matches(selector);
   }
-
   if (el.msMatchesSelector) {
     return el.msMatchesSelector(selector);
   }
-
   if (el.webkitMatchesSelector) {
     return el.webkitMatchesSelector(selector);
   }
 }
-
 AFRAME.registerComponent('droppable', {
   schema: {
     accepts: {
@@ -834,8 +741,9 @@ AFRAME.registerComponent('droppable', {
     this.HOVERED_STATE = 'dragover';
     this.HOVER_EVENT = 'dragover-start';
     this.UNHOVER_EVENT = 'dragover-end';
-    this.DRAGDROP_EVENT = 'drag-drop'; // better for Sinon spying if original method not overwritten
+    this.DRAGDROP_EVENT = 'drag-drop';
 
+    // better for Sinon spying if original method not overwritten
     this.hoverStartBound = this.hoverStart.bind(this);
     this.hoverEndBound = this.hoverEnd.bind(this);
     this.dragDropBound = this.dragDrop.bind(this);
@@ -856,7 +764,6 @@ AFRAME.registerComponent('droppable', {
     } else {
       this.acceptableEntities = null;
     }
-
     if (this.data.autoUpdate && this.acceptableEntities != null) {
       this.observer.observe(this.el.sceneEl, this.observerOpts);
     } else {
@@ -881,26 +788,21 @@ AFRAME.registerComponent('droppable', {
   },
   entityAcceptable: function (entity) {
     const acceptableEntities = this.acceptableEntities;
-
     if (acceptableEntities == null) {
       return true;
     }
-
     for (const item of acceptableEntities) {
       if (item === entity) {
         return true;
       }
     }
-
     return false;
   },
   hoverStart: function (evt) {
     if (evt.defaultPrevented || !this.entityAcceptable(evt.detail.carried)) {
       return;
     }
-
     this.el.addState(this.HOVERED_STATE);
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -909,32 +811,26 @@ AFRAME.registerComponent('droppable', {
     if (evt.defaultPrevented) {
       return;
     }
-
     this.el.removeState(this.HOVERED_STATE);
   },
   dragDrop: function (evt) {
     if (evt.defaultPrevented) {
       return;
     }
-
     const dropped = evt.detail.dropped;
-
     if (!this.entityAcceptable(dropped)) {
       if (this.data.rejectEvent.length) {
         this.el.emit(this.data.rejectEvent, {
           el: dropped
         });
       }
-
       return;
     }
-
     if (this.data.acceptEvent.length) {
       this.el.emit(this.data.acceptEvent, {
         el: dropped
       });
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -946,12 +842,9 @@ AFRAME.registerComponent('droppable', {
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-
 const physicsCore = require('./prototypes/physics-grab-proto.js');
-
-const buttonsCore = require('./prototypes/buttons-proto.js'); // new object with all core modules
-
-
+const buttonsCore = require('./prototypes/buttons-proto.js');
+// new object with all core modules
 const base = inherit({}, physicsCore, buttonsCore);
 AFRAME.registerComponent('grabbable', inherit(base, {
   schema: {
@@ -984,8 +877,8 @@ AFRAME.registerComponent('grabbable', inherit(base, {
       x: 0,
       y: 0,
       z: 0
-    }; // persistent object speeds up repeat setAttribute calls
-
+    };
+    // persistent object speeds up repeat setAttribute calls
     this.destPosition = {
       x: 0,
       y: 0,
@@ -1009,12 +902,10 @@ AFRAME.registerComponent('grabbable', inherit(base, {
     const v = new THREE.Vector3();
     return function () {
       let entityPosition;
-
       if (this.grabber) {
         // reflect on z-axis to point in same direction as the laser
         this.targetPosition.copy(this.grabDirection);
         this.targetPosition.applyQuaternion(this.grabber.object3D.getWorldQuaternion(q)).setLength(this.grabDistance).add(this.grabber.object3D.getWorldPosition(v)).add(this.grabOffset);
-
         if (this.deltaPositionIsValid) {
           // relative position changes work better with nested entities
           this.deltaPosition.sub(this.targetPosition);
@@ -1026,7 +917,6 @@ AFRAME.registerComponent('grabbable', inherit(base, {
         } else {
           this.deltaPositionIsValid = true;
         }
-
         this.deltaPosition.copy(this.targetPosition);
       }
     };
@@ -1039,52 +929,42 @@ AFRAME.registerComponent('grabbable', inherit(base, {
   start: function (evt) {
     if (evt.defaultPrevented || !this.startButtonOk(evt)) {
       return;
-    } // room for more grabbers?
-
-
+    }
+    // room for more grabbers?
     const grabAvailable = !Number.isFinite(this.data.maxGrabbers) || this.grabbers.length < this.data.maxGrabbers;
-
     if (this.grabbers.indexOf(evt.detail.hand) === -1 && grabAvailable) {
       if (!evt.detail.hand.object3D) {
         console.warn('grabbable entities must have an object3D');
         return;
       }
-
-      this.grabbers.push(evt.detail.hand); // initiate physics if available, otherwise manual
-
+      this.grabbers.push(evt.detail.hand);
+      // initiate physics if available, otherwise manual
       if (!this.physicsStart(evt) && !this.grabber) {
         this.grabber = evt.detail.hand;
         this.resetGrabber();
-      } // notify super-hands that the gesture was accepted
-
-
+      }
+      // notify super-hands that the gesture was accepted
       if (evt.preventDefault) {
         evt.preventDefault();
       }
-
       this.grabbed = true;
       this.el.addState(this.GRABBED_STATE);
     }
   },
   end: function (evt) {
     const handIndex = this.grabbers.indexOf(evt.detail.hand);
-
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
-
     if (handIndex !== -1) {
       this.grabbers.splice(handIndex, 1);
       this.grabber = this.grabbers[0];
     }
-
     this.physicsEnd(evt);
-
     if (!this.resetGrabber()) {
       this.grabbed = false;
       this.el.removeState(this.GRABBED_STATE);
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -1096,22 +976,19 @@ AFRAME.registerComponent('grabbable', inherit(base, {
       if (!this.grabber) {
         return false;
       }
-
       const raycaster = this.grabber.getAttribute('raycaster');
       this.deltaPositionIsValid = false;
       this.grabDistance = this.el.object3D.getWorldPosition(objPos).distanceTo(this.grabber.object3D.getWorldPosition(grabPos));
-
       if (raycaster) {
         this.grabDirection = raycaster.direction;
         this.grabOffset = raycaster.origin;
       }
-
       return true;
     };
   }(),
   lostGrabber: function (evt) {
-    const i = this.grabbers.indexOf(evt.relatedTarget); // if a queued, non-physics grabber leaves the collision zone, forget it
-
+    const i = this.grabbers.indexOf(evt.relatedTarget);
+    // if a queued, non-physics grabber leaves the collision zone, forget it
     if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
       this.grabbers.splice(i, 1);
     }
@@ -1141,13 +1018,10 @@ AFRAME.registerComponent('hoverable', {
     if (evt.defaultPrevented) {
       return;
     }
-
     this.el.addState(this.HOVERED_STATE);
-
     if (this.hoverers.indexOf(evt.detail.hand) === -1) {
       this.hoverers.push(evt.detail.hand);
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -1156,13 +1030,10 @@ AFRAME.registerComponent('hoverable', {
     if (evt.defaultPrevented) {
       return;
     }
-
     const handIndex = this.hoverers.indexOf(evt.detail.hand);
-
     if (handIndex !== -1) {
       this.hoverers.splice(handIndex, 1);
     }
-
     if (this.hoverers.length < 1) {
       this.el.removeState(this.HOVERED_STATE);
     }
@@ -1177,7 +1048,6 @@ module.exports = function () {
   function buttonIsValid(evt, buttonList) {
     return buttonList.length === 0 || buttonList.indexOf(evt.detail.buttonEvent.type) !== -1;
   }
-
   return {
     schema: {
       startButtons: {
@@ -1226,18 +1096,15 @@ module.exports = {
       });
       this.constraints.set(evt.detail.hand, newConId);
       return true;
-    } // Prevent manual grab by returning true
-
-
+    }
+    // Prevent manual grab by returning true
     if (this.data.usePhysics === 'only') {
       return true;
     }
-
     return false;
   },
   physicsEnd: function (evt) {
     const constraintId = this.constraints.get(evt.detail.hand);
-
     if (constraintId) {
       this.el.removeAttribute('constraint__' + constraintId);
       this.constraints.delete(evt.detail.hand);
@@ -1249,17 +1116,14 @@ module.exports = {
         this.el.body.world.removeConstraint(c);
       }
     }
-
     this.constraints.clear();
   },
   physicsIsConstrained: function (el) {
     return this.constraints.has(el);
   },
-
   physicsIsGrabbing() {
     return this.constraints.size > 0;
   }
-
 };
 
 },{}],10:[function(require,module,exports){
@@ -1267,10 +1131,8 @@ module.exports = {
 
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
-
-const buttonsCore = require('./prototypes/buttons-proto.js'); // new object with all core modules
-
-
+const buttonsCore = require('./prototypes/buttons-proto.js');
+// new object with all core modules
 const base = inherit({}, buttonsCore);
 AFRAME.registerComponent('stretchable', inherit(base, {
   schema: {
@@ -1305,27 +1167,22 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (!this.stretched) {
       return;
     }
-
     this.scale.copy(this.el.getAttribute('scale'));
     this.stretchers[0].object3D.getWorldPosition(this.handPos);
     this.stretchers[1].object3D.getWorldPosition(this.otherHandPos);
     const currentStretch = this.handPos.distanceTo(this.otherHandPos);
     let deltaStretch = 1;
-
     if (this.previousStretch !== null && currentStretch !== 0) {
       deltaStretch = Math.pow(currentStretch / this.previousStretch, this.data.invert ? -1 : 1);
     }
-
     this.previousStretch = currentStretch;
-
     if (this.previousPhysicsStretch == null) {
       // establish correct baseline even if throttled function isn't called
       this.previousPhysicsStretch = currentStretch;
     }
-
     this.scale.multiplyScalar(deltaStretch);
-    this.el.setAttribute('scale', this.scale); // scale update for all nested physics bodies (throttled)
-
+    this.el.setAttribute('scale', this.scale);
+    // scale update for all nested physics bodies (throttled)
     this.updateBodies(time, timeDelta);
   },
   remove: function () {
@@ -1336,37 +1193,30 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (this.stretched || this.stretchers.includes(evt.detail.hand) || !this.startButtonOk(evt) || evt.defaultPrevented) {
       return;
     } // already stretched or already captured this hand or wrong button
-
-
     this.stretchers.push(evt.detail.hand);
-
     if (this.stretchers.length === 2) {
       this.stretched = true;
       this.previousStretch = null;
       this.previousPhysicsStretch = null;
       this.el.addState(this.STRETCHED_STATE);
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     } // gesture accepted
-
   },
+
   end: function (evt) {
     const stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
-
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
       return;
     }
-
     if (stretcherIndex !== -1) {
       this.stretchers.splice(stretcherIndex, 1);
       this.stretched = false;
-      this.el.removeState(this.STRETCHED_STATE); // override throttle to push last stretch to physics bodies
-
+      this.el.removeState(this.STRETCHED_STATE);
+      // override throttle to push last stretch to physics bodies
       this._updateBodies();
     }
-
     if (evt.preventDefault) {
       evt.preventDefault();
     }
@@ -1375,38 +1225,28 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (!this.el.body || this.data.usePhysics === 'never') {
       return;
     }
-
     const currentStretch = this.previousStretch; // last visible geometry stretch
-
     let deltaStretch = 1;
-
     if (this.previousPhysicsStretch !== null && currentStretch > 0) {
       deltaStretch = Math.pow(currentStretch / this.previousPhysicsStretch, this.data.invert ? -1 : 1);
     }
-
     this.previousPhysicsStretch = currentStretch;
-
     if (deltaStretch === 1) {
       return;
     }
-
     for (const c of this.el.childNodes) {
       this.stretchBody(c, deltaStretch);
     }
-
     this.stretchBody(this.el, deltaStretch);
   },
   stretchBody: function (el, deltaStretch) {
     if (!el.body) {
       return;
     }
-
     let physicsShape;
     let offset;
-
     for (let i = 0; i < el.body.shapes.length; i++) {
       physicsShape = el.body.shapes[i];
-
       if (physicsShape.halfExtents) {
         physicsShape.halfExtents.scale(deltaStretch, physicsShape.halfExtents);
         physicsShape.updateConvexPolyhedronRepresentation();
@@ -1416,13 +1256,11 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       } else if (!this.shapeWarned) {
         console.warn('Unable to stretch physics body: unsupported shape');
         this.shapeWarned = true;
-      } // also move offset to match scale change
-
-
+      }
+      // also move offset to match scale change
       offset = el.body.shapeOffsets[i];
       offset.scale(deltaStretch, offset);
     }
-
     el.body.updateBoundingRadius();
   }
 }));
@@ -1441,16 +1279,13 @@ AFRAME.registerSystem('super-hands', {
       this.superHands[0].otherSuperHand = comp;
       comp.otherSuperHand = this.superHands[0];
     }
-
     this.superHands.push(comp);
   },
   unregisterMe: function (comp) {
     const index = this.superHands.indexOf(comp);
-
     if (index !== -1) {
       this.superHands.splice(index, 1);
     }
-
     this.superHands.forEach(x => {
       if (x.otherSuperHand === comp) {
         x.otherSuperHand = null;
