@@ -43,7 +43,7 @@
   },
   "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
   "devDependencies": {
-    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-env": "^7.20.2",
     "@c-frame/aframe-physics-system": "^4.1.0",
     "aframe": "^1.4.0",
     "aframe-event-set-component": "^5.0.0",
@@ -51,19 +51,19 @@
     "aframe-machinima-testing": "^0.1.2",
     "aframe-motion-capture-components": "github:wmurphyrd/aframe-motion-capture-components#v0.2.8a",
     "babel-preset-env": "^1.6.0",
-    "babel-preset-minify": "^0.5.1",
+    "babel-preset-minify": "^0.5.2",
     "babelify": "^10.0.0",
     "browserify": "^17.0.0",
     "browserify-css": "^0.15.0",
-    "budo": "^11.6.4",
-    "chai": "^4.3.6",
+    "budo": "^11.8.4",
+    "chai": "^4.3.7",
     "chai-shallow-deep-equal": "^1.4.0",
     "cross-env": "^7.0.3",
     "envify": "^4.1.0",
-    "karma": "^6.3.16",
+    "karma": "^6.4.1",
     "karma-browserify": "^8.1.0",
     "karma-chai-shallow-deep-equal": "0.0.4",
-    "karma-chrome-launcher": "^3.1.0",
+    "karma-chrome-launcher": "^3.1.1",
     "karma-coverage": "^2.2.0",
     "karma-env-preprocessor": "^0.1.1",
     "karma-firefox-launcher": "^2.1.2",
@@ -71,11 +71,11 @@
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.1.0",
     "karma-sinon-chai": "^2.0.2",
-    "mocha": "^9.2.1",
-    "sinon": "^13.0.1",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.1",
     "sinon-chai": "^3.7.0",
     "snazzy": "^9.0.0",
-    "standard": "^16.0.4"
+    "standard": "^17.0.0"
   },
   "standard": {
     "ignore": [
@@ -84,6 +84,6 @@
     ]
   },
   "dependencies": {
-    "@babel/core": "^7.17.5"
+    "@babel/core": "^7.20.7"
   }
 }

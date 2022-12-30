@@ -104,8 +104,8 @@ suite('droppable', function () {
       this.el.addEventListener(acceptEvent, acceptSpy)
       this.el.setAttribute('droppable', {
         accepts: '.carried2, #carried1',
-        acceptEvent: acceptEvent,
-        rejectEvent: rejectEvent
+        acceptEvent,
+        rejectEvent
       })
       helpers.emitCancelable(this.el, 'drag-drop', detail)
       assert.isTrue(acceptSpy.calledWithMatch({
@@ -124,8 +124,8 @@ suite('droppable', function () {
       this.el.addEventListener(acceptEvent, acceptSpy)
       this.el.setAttribute('droppable', {
         accepts: '#carried1',
-        acceptEvent: acceptEvent,
-        rejectEvent: rejectEvent
+        acceptEvent,
+        rejectEvent
       })
       helpers.emitCancelable(this.el, 'drag-drop', detail)
       assert.isTrue(rejectSpy.calledWithMatch({
