@@ -1,6 +1,6 @@
 # Super Hands
 
-[![Build Status](https://travis-ci.com/wmurphyrd/aframe-super-hands-component.svg?branch=master)](https://travis-ci.com/wmurphyrd/aframe-super-hands-component)
+[![Build Status](https://travis-ci.com/c-frame/aframe-super-hands-component.svg?branch=master)](https://travis-ci.com/c-frame/aframe-super-hands-component)
 [![npm Dowloads](https://img.shields.io/npm/dt/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
@@ -107,12 +107,12 @@ require('super-hands');
 
 ## Examples
 
-The [examples page](https://wmurphyrd.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
+The [examples page](https://c-frame.github.io/aframe-super-hands-component/examples/) showcases a variety of configurations and use cases for `super-hands`.
 
 | Example Scene | Description | Target VR Devices |
 | --- | --- | --- |
-| [Hand controllers with physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior in roomscale VR | Vive, Rift, Windows MR |
-| [Gaze and laser pointer controls without physics](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift, Windows MR |
+| [Hand controllers with physics](https://c-frame.github.io/aframe-super-hands-component/examples/#physics) | Grab, stretch, and drag-drop cubes with simulated physical behavior in roomscale VR | Vive, Rift, Windows MR |
+| [Gaze and laser pointer controls without physics](https://c-frame.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift, Windows MR |
 
 ## News
 
@@ -226,7 +226,7 @@ In addition to the A-Frame style gesture events,
 interactions to be emitted by the target entities. This allows the use of these
 common Global Event Handler properties on entities to add reaction directly
 in the HTML. View the
-[related example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#events)
+[related example](https://c-frame.github.io/aframe-super-hands-component/examples/#events)
 to see this in use.
 
 | entity HTML attribute | conditions | event.relatedTarget |

@@ -28,7 +28,7 @@ v3.0.0
     package.
     I intend to refactor it and release it in another library, but you can
     still use the last version by including
-    [its source file](https://github.com/wmurphyrd/aframe-super-hands-component/blob/dc1a601b7fa9d606a05ec2d3500f8f141c65c20c/misc_components/progressive-controls.js) in your project.
+    [its source file](https://github.com/c-frame/aframe-super-hands-component/blob/dc1a601b7fa9d606a05ec2d3500f8f141c65c20c/misc_components/progressive-controls.js) in your project.
 * Smarter raycasting support: chooses nearest intersected entity first,
   reordering stack as distances change (\* if the raycaster in use updates
   intersection objects' distances)
@@ -87,7 +87,7 @@ v2.0.0
 * Button mapping for reaction components: each reaction component now has
   `startButtons` and `endButtons` schema properties to specify acceptable
   buttons. This allows different entities to react to different buttons.
-  [For example](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#sticky)
+  [For example](https://c-frame.github.io/aframe-super-hands-component/examples/#sticky)
   `a-locomotor`'s `grabbable` can be set to respond to different
   buttons than other `grabbable` entities so that
   grabbing entities and locomotion are separate gestures for the user.
@@ -103,7 +103,7 @@ v1.1.0
 * Compatibility with desktop mouse control via A-Frame `cursor` component
   * Added new schema property `colliderEventProperty` to configure
     where in the `event.details` to look for the collision target
-  * Requires some configuration of schema properties, see new example: [Mouse Controls](https://wmurphyrd.github.io/aframe-super-hands-component/examples/#mouse)
+  * Requires some configuration of schema properties, see new example: [Mouse Controls](https://c-frame.github.io/aframe-super-hands-component/examples/#mouse)
 * Select examples now have `avatar-replayer` to preview actions without needing
   VR equipment
 

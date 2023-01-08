@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wmurphyrd/aframe-super-hands-component.git"
+    "url": "git+https://github.com/c-frame/aframe-super-hands-component.git"
   },
   "keywords": [
     "aframe",
@@ -39,9 +39,9 @@
   "author": "William Murphy william@datatitian.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wmurphyrd/aframe-super-hands-component/issues"
+    "url": "https://github.com/c-frame/aframe-super-hands-component/issues"
   },
-  "homepage": "https://github.com/wmurphyrd/aframe-super-hands-component#readme",
+  "homepage": "https://github.com/c-frame/aframe-super-hands-component#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
     "@c-frame/aframe-physics-system": "^4.1.0",
