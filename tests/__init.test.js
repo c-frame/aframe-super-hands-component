@@ -14,35 +14,55 @@ navigator.getVRDisplays = function () {
     getPose: function () { return { orientation: null, position: null } },
     requestAnimationFrame: function () { return 1 },
     requestPresent: resolvePromise,
-    submitFrame: function () {}
+    submitFrame: function () { }
   }
   return Promise.resolve([mockVRDisplay])
 }
 
 const AScene = require('aframe').AScene
+// Make sure WebGL context is not created since Travix CT runs headless.
+// Stubs below failed once in a while due to asynchronous tesst setup / teardown.
+AScene.prototype.setupRenderer = function () { }
 
 setup(function () {
-  this.sinon = sinon
+  this.sinon = sinon.createSandbox()
   // Stubs to not create a WebGL context since Travis CI runs headless.
   this.sinon.stub(AScene.prototype, 'render')
   this.sinon.stub(AScene.prototype, 'setupRenderer')
   // Mock renderer.
   AScene.prototype.renderer = {
     xr: {
-      getDevice: function () { return { requestPresent: function () {} } },
+      getDevice: function () { return { requestPresent: function () { } } },
       isPresenting: function () { return true },
-      setDevice: function () {},
-      setPoseTarget: function () {},
-      dispose: function () {},
+      setDevice: function () { },
+      setFoveation: function () { },
+      setPoseTarget: function () { },
+      dispose: function () { },
       enabled: false
     },
+    dispose: function () { },
     getContext: function () { return undefined },
-    setAnimationLoop: function () {},
-    setSize: function () {},
-    setPixelRatio: function () {},
-    render: function () {},
+    setAnimationLoop: function () { },
+    setSize: function () { },
+    setPixelRatio: function () { },
+    render: function () { },
     shadowMap: { enabled: false }
   }
+})
+
+// Ensure that uncaught exceptions between tests result in the tests failing.
+// This works around an issue with mocha / karma-mocha, see
+// https://github.com/karma-runner/karma-mocha/issues/227
+let pendingError = null
+let pendingErrorNotice = null
+
+window.addEventListener('error', event => {
+  pendingError = event.error
+  pendingErrorNotice = 'An uncaught exception was thrown between tests'
+})
+window.addEventListener('unhandledrejection', event => {
+  pendingError = event.reason
+  pendingErrorNotice = 'An uncaught promise rejection occurred between tests'
 })
 
 teardown(function (done) {
@@ -58,4 +78,9 @@ teardown(function (done) {
   setTimeout(function () {
     done()
   })
+
+  if (pendingError) {
+    console.error(pendingErrorNotice)
+    throw pendingError
+  }
 })

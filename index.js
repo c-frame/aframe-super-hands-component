@@ -476,13 +476,13 @@ AFRAME.registerComponent('super-hands', {
   },
   emitCancelable: function (target, name, detail) {
     detail = detail || {}
-    const data = { bubbles: true, cancelable: true, detail: detail }
+    const data = { bubbles: true, cancelable: true, detail }
     data.detail.target = data.detail.target || target
     const evt = new window.CustomEvent(name, data)
     return target.dispatchEvent(evt)
   },
   dispatchMouseEvent: function (target, name, relatedTarget) {
-    const mEvt = new window.MouseEvent(name, { relatedTarget: relatedTarget })
+    const mEvt = new window.MouseEvent(name, { relatedTarget })
     target.dispatchEvent(mEvt)
   },
   dispatchMouseEventAll: function (name, relatedTarget, filterUsed, alsoReverse) {

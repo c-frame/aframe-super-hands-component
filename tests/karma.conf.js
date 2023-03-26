@@ -6,7 +6,7 @@ const karmaConf = {
     debug: true,
     // avoid errors when attempting to process pre-bundled file
     noParse: [
-      path.resolve('./node_modules/aframe-physics-system/dist/aframe-physics-system.js'),
+      path.resolve('./node_modules/@c-frame/aframe-physics-system/dist/aframe-physics-system.js'),
       path.resolve('./node_modules/aframe/dist/aframe-master.js'),
       path.resolve('./node_modules/aframe-extras/dist/aframe-extras.misc.js')
     ],
