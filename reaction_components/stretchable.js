@@ -109,8 +109,12 @@ AFRAME.registerComponent('stretchable', inherit(base, {
     if (!el.body) { return }
     let physicsShape
     let offset
-    for (let i = 0; i < el.body.shapes.length; i++) {
-      physicsShape = el.body.shapes[i]
+
+    // CANNON.js has el.body.shapes.  Ammo has collisionShapes in the shape component.
+    const shapesList = el.body.shapes ? el.body.shapes : el.components['ammo-shape'].collisionShapes
+
+    for (let i = 0; i < shapesList.length; i++) {
+      physicsShape = shapesList[i]
       if (physicsShape.halfExtents) {
         physicsShape.halfExtents
           .scale(deltaStretch, physicsShape.halfExtents)
@@ -126,6 +130,11 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       offset = el.body.shapeOffsets[i]
       offset.scale(deltaStretch, offset)
     }
-    el.body.updateBoundingRadius()
+    if (el.body.updateBoundingRadius) {
+      // This only exists in CANNON, not Ammo.js
+      // I'm not aware of any requirement to call an equivalent function
+      // in Ammo.js
+      el.body.updateBoundingRadius()
+    }
   }
 }))

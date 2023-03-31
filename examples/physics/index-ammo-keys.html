@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <title>A-Frame Super Hands Component - 6DOF With Physics (Ammo.js Engine)</title>
+    <!-- Replace "../build.js" with the super-hands and
+         A-Frame distributions to run : -->
+    <!--<script src="../build.js"></script>-->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="../../dist/super-hands.js"></script>
+    <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <!--version of a-frame-environment-component previously specified is incompatible with A-Frame 1.2.0
+        due to three.js changes-->
+    <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/key-bindings@v0.3-alpha/key-bindings.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/6dof-object-control@v0.5-alpha/src/keyboard-hand-controls.min.js"></script>
+    <script>
+      //color randomizer
+      // updated to act based on collisions rather than an object being dropped
+      // due to current limitation with aframe-physics-system when using the
+      // Ammo.js physics engine.
+      AFRAME.registerComponent('color-randomizer', {
+        play: function () {
+          this.el.addEventListener('collidestart', function (evt) {
+            evt.detail.targetEl.setAttribute('material', 'color',
+              '#'+(Math.random()*0xFFFFFF<<0).toString(16))
+            // color randomizer credit: http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript#comment6801353_5365036
+          })
+        }
+      })
+      // turn controller's physics presence on only while button held down
+      AFRAME.registerComponent('phase-shift', {
+        init: function () {
+          var el = this.el
+          el.addEventListener('gripdown', function () {
+            el.setAttribute('ammo-body', {disableCollision: false})
+          })
+          el.addEventListener('gripup', function () {
+            el.setAttribute('ammo-body', {disableCollision: true})
+          })
+        }
+      })
+    </script>
+    <link rel="stylesheet" type="text/css" href="../assets/examples.css">
+  </head>
+  <body>
+    <!-- <button id="replayer-button" type="button" onclick="playDemoRecording()">
+      Don't have roomscale VR handy? Click here for a preview.
+    </button> -->
+    <a-scene environment="preset: tron; shadow: true" physics="driver: ammo; debug: true; debugDrawMode: 1">
+      <a-assets>
+        <img id="portals-preview" src="../assets/hand-controls.jpg"></img>
+        <img id="colortransform" src="./colortransform-ammo.png" />
+        <a-mixin id="cube" geometry="primitive: box; width: 0.33; height: 0.33; depth: 0.33"
+                 hoverable
+                 grabbable="constraintComponentName: ammo-constraint;"
+                 stretchable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 ammo-body="type: dynamic" ammo-shape="type: box"
+                 shadow></a-mixin>
+        <!--In the original example, shapes could be dropped through this.
+            This required a shape which could trigger collisions, but would not
+            prevent shapes passing through.
+            With CANNON physics, that was achieved by setting collisionForces: false
+            As of today, there is no equivalent function in the Ammo physics engine.
+            It looks as though the underlying physics engine could support this
+            if a shape was instantiated, without a body.  But the current implementation
+            of aframe-physics-system with Ammo.js assumes there is always a body.-->
+
+        <a-mixin id="transformer" color-randomizer droppable
+                 event-set__dragon="_event: dragover-start; material.wireframe: true"
+                 event-set__dragoff="_event: dragover-end; material.wireframe: false"
+                 geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+                 ammo-body="type: static; emitCollisionEvents: true" ammo-shape="type: box"></a-mixin>
+        <a-mixin id="touch"
+                 physics-collider phase-shift
+                 ammo-body="type: kinematic; emitCollisionEvents: true; disableCollision: true"
+                 ammo-shape="fit: manual; type:sphere; sphereRadius: 0.02"
+                 super-hands="colliderEvent: collidestart;
+                              colliderEventProperty: targetEl;
+                              colliderEndEvent: collideend;
+                              colliderEndEventProperty: targetEl">
+        </a-mixin>
+      </a-assets>
+      <a-entity>
+        <a-text value="Press Left Shift or Right Shift to choose a controller.\n
+                       Press C or V to select Thumbstick x or y,\n
+                       then -/= to move in that direction.\n
+                       Also, use 4/5/6 to re-orient controller\n
+                       to test effect of thumbstick moves\n
+                       at different orientations."
+                       position="-7 1 -5" color="grey"></a-text>
+
+        <a-camera position="0 1.6 0">
+          <a-text id="log-panel1" wrapCount=80 width="1" value="L Hand Keyboard Sim Data" position="-1.5 .75 -1.5" color="grey"></a-text>
+          <a-text id="log-panel2" wrapCount=80 width="1" value="R Hand Keyboard Data" position="0.75 0.75 -1.5" color="grey"></a-text>
+        </a-camera>
+        <a-entity id="lhand" mixin="touch"
+                  hand-controls="hand: left"
+                  keyboard-hand-controls="logger:#log-panel1"
+                  key-bindings="bindings:ShiftLeft=enable,ShiftRight=disable"
+                  position="-0.3 0.3 -0.5">
+        </a-entity>
+        <a-entity id="rhand" mixin="touch"
+                  hand-controls="hand: right"
+                  keyboard-hand-controls="logger:#log-panel2"
+                  key-bindings="bindings:ShiftRight=enable,ShiftLeft=disable"
+                  position="0.3 0.3 -0.5">
+        </a-entity>
+      </a-entity>
+      <a-entity id= "red-cube-back" class="cube" mixin="cube" position="0 0.265 -1" material="color: red"></a-entity>
+      <a-entity id= "red-cube-front" class="cube" mixin="cube" position="0 0.265 -0.5" material="color: red"></a-entity>
+      <a-entity id= "blue-cube-back" class="cube" mixin="cube" position="-1 0.265 -1" material="color: blue"></a-entity>
+      <a-entity id= "blue-cube-front" class="cube" mixin="cube" position="-1 0.265 -0.5" material="color: blue"></a-entity>
+      <a-entity id= "green-cube-back" class="cube" mixin="cube" position="1 0.265 -1" material="color: green"></a-entity>
+      <a-entity id= "green-cube-front" class="cube" mixin="cube" position="1 0.265 -0.5" material="color: green"></a-entity>
+      <a-entity class="transformer" mixin="transformer" position = "0 1.6 -1"
+                material="src:#colortransform" shadow></a-entity>
+      <!-- ground collider keeps objets from falling -->
+      <a-box id= "ground" ammo-body="type: static" ammo-shape="type: box" width="100" height="0.01" depth="100" visible="false"></a-box>
+      <a-link href="../mouse" title="Basic Example"
+              ammo-body="type: static" ammo-shape="fit: manual; type: sphere; sphereRadius: 0.25"
+              image="#portals-preview"
+              onmouseover="this.setAttribute('link', {highlighted: true})"
+              onmouseout="this.setAttribute('link', {highlighted: false})"
+              position = "0 1.6 0.7" rotation="0 0 0" scale="0.25 0.25 0.25">
+      </a-link>
+    </a-scene>
+
+    <!-- GitHub Corner. -->
+    <a href="https://github.com/wmurphyrd/aframe-super-hands-component" class="github-corner">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#222; color:#fff; position: absolute; top: 0; border: 0; right: 0;">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+      </svg>
+    </a>
+    <style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  </body>
+</html>
