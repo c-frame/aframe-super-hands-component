@@ -52,11 +52,16 @@ extended with your own custom reaction components.
 #### Browser
 
 Install and use by directly by including the [browser files](dist):
+//Special Note on the Installation: Aframe 1.5.0 Introduced a new Grabbable component that conflicts with Superhands, we found a temporary solution which is to delete the grabbable component. In theory you could also try making a 'my-super-hands' component that modifies the superhands stack and replaces the word grabbable with something else like graspable.
 
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script> 
+  <script>
+  delete AFRAME.components["grabbable"];
+  </script>
+  <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
   <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
 </head>
