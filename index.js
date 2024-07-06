@@ -288,7 +288,7 @@ AFRAME.registerComponent('super-hands', {
     const hoverEls = this.hoverEls
     const hitElIndex = this.hoverEls.indexOf(hitEl)
     let hoverNeedsUpdate = false
-    if (intersection.instanceId !== undefined)
+    if (dist && intersection.instanceId !== undefined)
       hitEl.object3D.userData = { instanceId: intersection.instanceId };
     if (hitElIndex === -1) {
       hoverNeedsUpdate = true
