@@ -169,11 +169,16 @@ AFRAME.registerComponent('super-hands', {
     let carried = this.state.get(this.GRAB_EVENT)
     this.dispatchMouseEventAll('mousedown', this.el)
     this.gehClicking = new Set(this.hoverEls)
+    const detail = {
+      hand: this.el,
+      buttonEvent: evt
+    }
     if (!carried) {
-      carried = this.findTarget(this.GRAB_EVENT, {
-        hand: this.el,
-        buttonEvent: evt
-      })
+      if (evt.detail && evt.detail.targetEntity && !this.emitCancelable(evt.detail.targetEntity, this.GRAB_EVENT, detail)) {
+        carried = evt.detail.targetEntity
+      } else {
+        carried = this.findTarget(this.GRAB_EVENT, detail)
+      }
       if (carried) {
         this.state.set(this.GRAB_EVENT, carried)
         this._unHover(carried)
