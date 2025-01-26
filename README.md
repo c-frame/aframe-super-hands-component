@@ -1,6 +1,5 @@
 # Super Hands
 
-[![Build Status](https://travis-ci.com/c-frame/aframe-super-hands-component.svg?branch=master)](https://travis-ci.com/c-frame/aframe-super-hands-component)
 [![npm Dowloads](https://img.shields.io/npm/dt/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![npm Version](http://img.shields.io/npm/v/super-hands.svg?style=flat-square)](https://www.npmjs.com/package/super-hands)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
