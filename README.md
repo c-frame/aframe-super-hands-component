@@ -75,6 +75,35 @@ Install and use by directly by including the [browser files](dist):
 </body>
 ```
 
+To use with A-Frame 1.5.0 and onward: 
+
+```html
+<head>
+  <title>Most Basic Super-Hands Example</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script>
+    delete AFRAME.components["grabbable"];
+  </script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
+</head>
+
+<body>
+  <a-scene>
+    <a-assets></a-assets>
+    <a-entity>
+      <a-camera></a-camera>
+      <a-entity sphere-collider="objects: a-box" super-hands hand-controls="hand: left"></a-entity>
+      <a-entity sphere-collider="objects: a-box" super-hands hand-controls="hand: right"></a-entity>
+    </a-entity>
+    <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable grabbable stretchable draggable droppable color="blue" position="0 0 -1"></a-box>
+  </a-scene>
+</body>
+```
+
+Note: This is a workaround solution to resolve the conflict between A-Frame grabbable component (introduced in A-Frame 1.5.0) and Superhands grabbable component.
+
 #### npm
 
 Install via npm:
