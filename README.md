@@ -55,9 +55,9 @@ Install and use by directly by including the [browser files](dist):
 ```html
 <head>
   <title>Most Basic Super-Hands Example</title>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
-  <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.4/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -74,7 +74,7 @@ Install and use by directly by including the [browser files](dist):
 </body>
 ```
 
-To use with A-Frame 1.5.0 and onward: 
+To use with A-Frame 1.5.0 and onward:
 
 ```html
 <head>
@@ -83,8 +83,8 @@ To use with A-Frame 1.5.0 and onward:
   <script>
     delete AFRAME.components["grabbable"];
   </script>
-  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
-  <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.x/dist/aframe-extras.min.js"></script></script>
+  <script src="https://unpkg.com/super-hands@^3.0.4/dist/super-hands.min.js"></script>
 </head>
 
 <body>
