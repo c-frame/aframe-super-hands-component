@@ -1,6 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 
 if (typeof AFRAME === 'undefined') {
@@ -287,6 +285,9 @@ AFRAME.registerComponent('super-hands', {
     const hoverEls = this.hoverEls;
     const hitElIndex = this.hoverEls.indexOf(hitEl);
     let hoverNeedsUpdate = false;
+    if (dist && intersection.instanceId !== undefined) hitEl.object3D.userData = {
+      instanceId: intersection.instanceId
+    };
     if (hitElIndex === -1) {
       hoverNeedsUpdate = true;
       // insert in order of distance when available
@@ -542,8 +543,6 @@ AFRAME.registerComponent('super-hands', {
 });
 
 },{"./reaction_components/clickable.js":2,"./reaction_components/drag-droppable.js":3,"./reaction_components/draggable.js":4,"./reaction_components/droppable.js":5,"./reaction_components/grabbable.js":6,"./reaction_components/hoverable.js":7,"./reaction_components/stretchable.js":10,"./systems/super-hands-system.js":11}],2:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 const buttonCore = require('./prototypes/buttons-proto.js');
 AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
@@ -596,8 +595,6 @@ AFRAME.registerComponent('clickable', AFRAME.utils.extendDeep({}, buttonCore, {
 }));
 
 },{"./prototypes/buttons-proto.js":8}],3:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 const inherit = AFRAME.utils.extendDeep;
 const buttonCore = require('./prototypes/buttons-proto.js');
@@ -667,8 +664,6 @@ AFRAME.registerComponent('drag-droppable', inherit({}, buttonCore, {
 }));
 
 },{"./prototypes/buttons-proto.js":8}],4:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 const inherit = AFRAME.utils.extendDeep;
 const buttonCore = require('./prototypes/buttons-proto.js');
@@ -707,8 +702,6 @@ AFRAME.registerComponent('draggable', inherit({}, buttonCore, {
 }));
 
 },{"./prototypes/buttons-proto.js":8}],5:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 function elementMatches(el, selector) {
   if (el.matches) {
@@ -838,8 +831,6 @@ AFRAME.registerComponent('droppable', {
 });
 
 },{}],6:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const physicsCore = require('./prototypes/physics-grab-proto.js');
@@ -996,8 +987,6 @@ AFRAME.registerComponent('grabbable', inherit(base, {
 }));
 
 },{"./prototypes/buttons-proto.js":8,"./prototypes/physics-grab-proto.js":9}],7:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 AFRAME.registerComponent('hoverable', {
   init: function () {
@@ -1041,8 +1030,6 @@ AFRAME.registerComponent('hoverable', {
 });
 
 },{}],8:[function(require,module,exports){
-"use strict";
-
 // common code used in customizing reaction components by button
 module.exports = function () {
   function buttonIsValid(evt, buttonList) {
@@ -1067,8 +1054,6 @@ module.exports = function () {
 }();
 
 },{}],9:[function(require,module,exports){
-"use strict";
-
 // base code used by grabbable for physics interactions
 module.exports = {
   schema: {
@@ -1127,8 +1112,6 @@ module.exports = {
 };
 
 },{}],10:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME, THREE */
 const inherit = AFRAME.utils.extendDeep;
 const buttonsCore = require('./prototypes/buttons-proto.js');
@@ -1204,7 +1187,6 @@ AFRAME.registerComponent('stretchable', inherit(base, {
       evt.preventDefault();
     } // gesture accepted
   },
-
   end: function (evt) {
     const stretcherIndex = this.stretchers.indexOf(evt.detail.hand);
     if (evt.defaultPrevented || !this.endButtonOk(evt)) {
@@ -1266,8 +1248,6 @@ AFRAME.registerComponent('stretchable', inherit(base, {
 }));
 
 },{"./prototypes/buttons-proto.js":8}],11:[function(require,module,exports){
-"use strict";
-
 /* global AFRAME */
 AFRAME.registerSystem('super-hands', {
   init: function () {
