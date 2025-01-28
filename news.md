@@ -1,5 +1,9 @@
 ## News
 
+v3.0.5
+* Add instanceId to Object3D.userData if available
+* Add instruction to use superhands with aframe 1.5.0 and onward
+
 v3.0.4
 * A-Frame 1.4.0 support confirmation
   * Updated dependencies and fixed tests and examples
