@@ -57,7 +57,7 @@ Install and use by directly by including the [browser files](dist):
   <title>Most Basic Super-Hands Example</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.misc.min.js"></script>
-  <script src="https://unpkg.com/super-hands@^3.0.5/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.6/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -84,7 +84,7 @@ To use with A-Frame 1.5.0 and onward:
     delete AFRAME.components["grabbable"];
   </script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.x/dist/aframe-extras.min.js"></script></script>
-  <script src="https://unpkg.com/super-hands@^3.0.5/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/super-hands@^3.0.6/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -143,6 +143,9 @@ The [examples page](https://c-frame.github.io/aframe-super-hands-component/examp
 | [Gaze and laser pointer controls without physics](https://c-frame.github.io/aframe-super-hands-component/examples/#mouse) | Showcase fallback controls used for simpler VR devices and fallback interactivity without physics simulation | Desktop, mobile, cardboard, Gear VR, Daydream, Vive, Rift, Windows MR |
 
 ## News
+
+v3.0.6
+* Support for Ammo.js physics
 
 v3.0.5
 * Add instanceId to Object3D.userData if available
